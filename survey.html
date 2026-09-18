@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>সার্ভে চলছে...</title>
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- ═══════════ Popunder / Auto Ads ═══════════ -->
+<script src="https://pl29210461.profitableratecpmnetwork.com/64/dd/cc/64ddccac44c4f949da48ae23ee7766be.js"></script>
+<script src="https://pl29210549.profitableratecpmnetwork.com/47/e4/9f/47e49fe632ef4f91d0dbb970db07dfef.js"></script>
 </head>
 <body class="bg-gradient-to-br from-purple-600 to-blue-700 min-h-screen flex items-center justify-center p-4">
 
@@ -15,6 +19,7 @@
     <p id="taskTitle" class="text-sm opacity-90 mt-1"></p>
   </div>
 
+  <!-- ═══════════ ধাপ ১: আসল সার্ভে ═══════════ -->
   <div class="p-5 border-b">
     <p class="text-xs text-gray-500 mb-2">ধাপ ১: সার্ভে সম্পন্ন করুন</p>
     <button id="openRealSurveyBtn"
@@ -24,16 +29,27 @@
     <p class="text-xs text-gray-400 mt-2 text-center">সার্ভে শেষ করে এই পেজে ফিরে আসুন</p>
   </div>
 
+  <!-- ═══════════ ধাপ ২: বিজ্ঞাপন ═══════════ -->
   <div class="p-5 bg-gray-50 border-b">
     <p class="text-xs text-gray-500 mb-2">ধাপ ২: বিজ্ঞাপন দেখুন</p>
-    <div id="adBox" class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl p-6 text-center border-2 border-dashed border-yellow-400">
-      <div class="text-4xl mb-2">📢</div>
-      <p class="text-sm font-medium text-gray-700">বিজ্ঞাপন</p>
-      <p class="text-xs text-gray-500 mt-1">এখানে আপনার অ্যাড বসবে</p>
+
+    <!-- Native Ad (Adsterra/ProfitCPM) -->
+    <div id="adBox" class="bg-white rounded-xl p-2 border-2 border-dashed border-yellow-400 flex justify-center items-center" style="min-height: 260px;">
+      <script async="async" data-cfasync="false" src="https://pl31395162.profitableratecpmnetwork.com/d48754e3b711acfd2fe8123c6022f767/invoke.js"></script>
+      <div id="container-d48754e3b711acfd2fe8123c6022f767"></div>
     </div>
+
+    <!-- Direct Link Ad Banner -->
+    <a href="https://www.profitableratecpmnetwork.com/g1x06s932?key=39199b33771ac56684889619f7018043"
+       target="_blank"
+       class="block mt-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-3 rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition">
+      🎁 বিশেষ অফার দেখুন
+    </a>
+
     <p class="text-xs text-red-500 mt-2 text-center">⚠️ এই পেজ মাঝপথে বন্ধ করলে রিওয়ার্ড পাবেন না!</p>
   </div>
 
+  <!-- ═══════════ ধাপ ৩: টাইমার ═══════════ -->
   <div class="p-6 text-center">
     <p class="text-sm text-gray-600 mb-3">ধাপ ৩: টাইমার শেষ হওয়া পর্যন্ত অপেক্ষা করুন</p>
     <div class="relative inline-block">
@@ -75,7 +91,7 @@ try {
 
 if (!pending) {
   alert('⚠️ সার্ভে ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।');
-  location.href = 'user.html';
+  location.href = 'index.html';
 }
 
 document.getElementById('taskTitle').textContent = pending.taskTitle || '';
@@ -125,7 +141,7 @@ function onComplete() {
   document.getElementById('mainCard').classList.add('hidden');
   document.getElementById('successCard').classList.remove('hidden');
   setTimeout(() => {
-    location.href = 'user.html';
+    location.href = 'index.html';
   }, 1500);
 }
 
@@ -134,7 +150,7 @@ function cancelSurvey() {
   completed = true;
   localStorage.removeItem('pending_survey');
   localStorage.removeItem('survey_done_task');
-  location.href = 'user.html';
+  location.href = 'index.html';
 }
 </script>
 </body>
