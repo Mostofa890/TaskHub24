@@ -115,7 +115,8 @@
       <input type="hidden" id="modalTaskId"/>
       <textarea id="submitContent" rows="3" placeholder="আপনার উত্তর / বর্ণনা লিখুন"
         class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
-      <input type="file" id="submitFile" class="w-full border rounded-lg p-2 text-sm"/>
+      <input type="file" id="submitFile" accept="image/*" class="w-full border rounded-lg p-2 text-sm"/>
+      <p class="text-xs text-gray-400">📷 শুধু ছবি (JPG/PNG/GIF/WEBP)</p>
       <div class="flex gap-2">
         <button type="button" onclick="closeModal()" class="flex-1 bg-gray-200 py-2 rounded-lg font-medium">বাতিল</button>
         <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium">জমা দিন</button>
@@ -134,9 +135,6 @@ import {
 import {
   getDatabase, ref, set, get, push, update, onValue
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-import {
-  getStorage, ref as sRef, uploadBytes, getDownloadURL
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // ═══ Firebase Config ═══
 const firebaseConfig = {
@@ -152,7 +150,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig, "userApp");
 const auth = getAuth(app);
 const db = getDatabase(app);
-const storage = getStorage(app);
 
 // ═══ UI Refs ═══
 const $ = id => document.getElementById(id);
@@ -164,9 +161,25 @@ let tgUser = null;
 // ═══ Telegram Init ═══
 const tg = window.Telegram?.WebApp;
 
+// ═══ ImgBB Upload (Firebase Storage এর বদলে) ═══
+const IMGBB_API_KEY = 'bc5a5bca9a50833046600a2cc94de6c6';
+
+async function uploadToImgBB(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error?.message || 'ImgBB আপলোড ব্যর্থ');
+  return data.data.url; // সরাসরি ইমেজ URL
+}
+
 function initTelegram() {
   if (!tg || !tg.initDataUnsafe?.user) {
-    // Telegram এর বাইরে খোলা হয়েছে
     $('loadingScreen').classList.add('hidden');
     $('errorScreen').classList.remove('hidden');
     return false;
@@ -187,7 +200,6 @@ async function startApp() {
   if (!initTelegram()) return;
 
   try {
-    // Firebase Anonymous Auth (Firebase Rules এর জন্য)
     await signInAnonymously(auth);
   } catch (err) {
     alert('Firebase Anonymous Auth চালু করুন।\n' + err.message);
@@ -198,14 +210,12 @@ async function startApp() {
 onAuthStateChanged(auth, async (fbUser) => {
   if (!fbUser || !tgUser) return;
 
-  // Telegram ID দিয়ে ডেটাবেসে ইউজার key
   const uid = 'tg_' + tgUser.id;
 
   const userRef = ref(db, 'users/' + uid);
   const snap = await get(userRef);
 
   if (!snap.exists()) {
-    // নতুন ইউজার
     await set(userRef, {
       telegramId: tgUser.id,
       username: tgUser.username || '',
@@ -219,7 +229,6 @@ onAuthStateChanged(auth, async (fbUser) => {
       createdAt: Date.now()
     });
   } else {
-    // আপডেট প্রোফাইল (নাম/ফটো পরিবর্তন হলে)
     await update(userRef, {
       username: tgUser.username || '',
       firstName: tgUser.first_name || '',
@@ -229,7 +238,6 @@ onAuthStateChanged(auth, async (fbUser) => {
     });
   }
 
-  // UI update
   $('userName').textContent = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'User';
   $('userHandle').textContent = tgUser.username ? '@' + tgUser.username : ('ID: ' + tgUser.id);
   if (tgUser.photo_url) {
@@ -239,7 +247,6 @@ onAuthStateChanged(auth, async (fbUser) => {
 
   currentUser = { uid, ...tgUser };
 
-  // Live profile listener
   onValue(userRef, s => {
     currentProfile = s.val() || {};
     if (currentProfile.status === 'blocked') {
@@ -332,7 +339,7 @@ window.closeModal = () => {
   submittingTask = null;
 };
 
-// ═══ Submit ═══
+// ═══ Submit (ImgBB Upload) ═══
 $('submitForm').onsubmit = async e => {
   e.preventDefault();
   if (!submittingTask) return;
@@ -343,9 +350,9 @@ $('submitForm').onsubmit = async e => {
     let fileUrl = null;
     const file = $('submitFile').files[0];
     if (file) {
-      const storageRef = sRef(storage, `submissions/${currentUser.uid}/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      fileUrl = await getDownloadURL(storageRef);
+      $('submitMsg').textContent = '📤 ইমেজ আপলোড হচ্ছে...';
+      fileUrl = await uploadToImgBB(file);
+      $('submitMsg').textContent = '✅ ইমেজ আপলোড সম্পন্ন, ডেটা সেভ হচ্ছে...';
     }
 
     const subRef = push(ref(db, 'submissions'));
@@ -407,6 +414,7 @@ function loadSubmissions() {
         <div class="flex-1 min-w-0">
           <p class="font-medium text-sm truncate">${esc(s.taskTitle)}</p>
           <p class="text-xs text-gray-400">${new Date(s.createdAt).toLocaleString('bn-BD')}</p>
+          ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" class="text-blue-600 underline text-xs">📎 ছবি দেখুন</a>` : ''}
         </div>
         <div class="text-right ml-2">
           <span class="${badge} px-2 py-1 rounded-full text-xs">${s.status}</span>
