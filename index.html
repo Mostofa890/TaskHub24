@@ -126,7 +126,7 @@
         <label class="block text-xs font-medium text-gray-700 mb-1">🎤 ভয়েস / অডিও আপলোড</label>
         <input type="file" id="submitVoice" accept="audio/*"
           class="w-full border rounded-lg p-2 text-sm"/>
-        <p class="text-xs text-gray-400 mt-1">MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫১২ MB)</p>
+        <p class="text-xs text-gray-400 mt-1">MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</p>
       </div>
 
       <div id="surveyDiv" class="hidden">
@@ -191,7 +191,9 @@ let completedTaskIds = new Set();
 
 const tg = window.Telegram?.WebApp;
 
-// ═══ ImgBB (Image Upload) ═══
+// ═══════════════════════════════════════════
+//   IMAGE UPLOAD (ImgBB)
+// ═══════════════════════════════════════════
 const IMGBB_API_KEY = 'bc5a5bca9a50833046600a2cc94de6c6';
 async function uploadToImgBB(file) {
   const fd = new FormData();
@@ -204,22 +206,103 @@ async function uploadToImgBB(file) {
   return data.data.url;
 }
 
-// ═══ 0x0.st (Voice/Audio Upload — সহজ, সাইনআপ নেই) ═══
+// ═══════════════════════════════════════════
+//   AUDIO UPLOAD (Multi-Service Fallback)
+// ═══════════════════════════════════════════
+async function uploadAudio(file) {
+  const services = [
+    { name: 'Bashupload', fn: uploadToBashupload },
+    { name: 'Temp.sh',    fn: uploadToTempSh },
+    { name: 'Litterbox',  fn: uploadToLitterbox },
+    { name: 'Uguu.se',    fn: uploadToUguu },
+    { name: '0x0.st',     fn: uploadToZeroXZero }
+  ];
+
+  let lastError = 'সব সার্ভিস ব্যর্থ';
+
+  for (const svc of services) {
+    try {
+      console.log(`📤 ${svc.name} এ আপলোড চেষ্টা...`);
+      $('submitMsg').textContent = `📤 ${svc.name} এ আপলোড হচ্ছে...`;
+      const url = await svc.fn(file);
+      console.log(`✅ ${svc.name} সফল:`, url);
+      return url;
+    } catch (err) {
+      console.warn(`❌ ${svc.name} ব্যর্থ:`, err.message);
+      lastError = `${svc.name}: ${err.message}`;
+    }
+  }
+
+  throw new Error('সব সার্ভার ব্যর্থ। আবার চেষ্টা করুন।');
+}
+
+// ১. Bashupload (৫০ GB পর্যন্ত, স্থায়ী)
+async function uploadToBashupload(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('https://bashupload.com/', {
+    method: 'POST',
+    body: fd
+  });
+  const text = await res.text();
+  const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
+  if (!match) throw new Error('URL পাওয়া যায়নি');
+  return match[0] + '?download=1';
+}
+
+// ২. Temp.sh (৪ GB, ৩ দিন)
+async function uploadToTempSh(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('https://temp.sh/upload', {
+    method: 'POST',
+    body: fd
+  });
+  const text = (await res.text()).trim();
+  if (!text.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
+  return text;
+}
+
+// ৩. Litterbox (১ GB, ৭২ ঘন্টা)
+async function uploadToLitterbox(file) {
+  const fd = new FormData();
+  fd.append('reqtype', 'fileupload');
+  fd.append('time', '72h');
+  fd.append('fileToUpload', file);
+  const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
+    method: 'POST',
+    body: fd
+  });
+  const url = (await res.text()).trim();
+  if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
+  return url;
+}
+
+// ৪. Uguu.se (১২৮ MB, ৪৮ ঘন্টা)
+async function uploadToUguu(file) {
+  const fd = new FormData();
+  fd.append('files[]', file);
+  const res = await fetch('https://uguu.se/upload?output=text', {
+    method: 'POST',
+    body: fd
+  });
+  const url = (await res.text()).trim();
+  if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
+  return url;
+}
+
+// ৫. 0x0.st (৫১২ MB, ১ বছর)
 async function uploadToZeroXZero(file) {
   const fd = new FormData();
   fd.append('file', file);
-  // চাইলে expires সেট করুন (ঘণ্টায়): 720 = 30 দিন, 8760 = 1 বছর
   fd.append('expires', '8760');
-
   const res = await fetch('https://0x0.st', {
     method: 'POST',
     body: fd
   });
-
-  if (!res.ok) throw new Error('আপলোড ব্যর্থ (' + res.status + ')');
-
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   const url = (await res.text()).trim();
-  if (!url.startsWith('http')) throw new Error('সঠিক URL পাওয়া যায়নি');
+  if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
   return url;
 }
 
@@ -538,24 +621,32 @@ $('submitForm').onsubmit = async e => {
     let fileUrl = null;
     const content = $('submitContent').value.trim();
 
+    // ----- IMAGE -----
     if (type === 'image') {
       const file = $('submitImage').files[0];
       if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'ছবি সিলেক্ট করুন'; return; }
+      if (file.size > 30 * 1024 * 1024) {
+        $('submitMsg').className = 'text-sm text-red-500';
+        $('submitMsg').textContent = '⚠️ ছবি ৩০ MB এর কম হতে হবে';
+        return;
+      }
       $('submitMsg').textContent = '📤 ছবি আপলোড হচ্ছে...';
       fileUrl = await uploadToImgBB(file);
     }
+
+    // ----- VOICE -----
     else if (type === 'voice' || type === 'audio') {
       const file = $('submitVoice').files[0];
       if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'অডিও সিলেক্ট করুন'; return; }
-      // ফাইল সাইজ চেক (৫০০ MB limit for 0x0.st)
       if (file.size > 500 * 1024 * 1024) {
         $('submitMsg').className = 'text-sm text-red-500';
-        $('submitMsg').textContent = '⚠️ ফাইল অনেক বড় (৫০০ MB এর কম হতে হবে)';
+        $('submitMsg').textContent = '⚠️ ফাইল ৫০০ MB এর কম হতে হবে';
         return;
       }
-      $('submitMsg').textContent = '📤 অডিও আপলোড হচ্ছে... (একটু সময় লাগবে)';
-      fileUrl = await uploadToZeroXZero(file);
+      fileUrl = await uploadAudio(file);
     }
+
+    // ----- TEXT -----
     else if (type === 'text') {
       if (!content) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'টেক্সট লিখুন'; return; }
     }
