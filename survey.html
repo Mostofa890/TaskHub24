@@ -59,7 +59,7 @@
           stroke-linecap="round"/>
       </svg>
       <div class="absolute inset-0 flex items-center justify-center">
-        <p id="timerText" class="text-3xl font-bold text-purple-700">01:00</p>
+        <p id="timerText" class="text-3xl font-bold text-purple-700">--:--</p>
       </div>
     </div>
     <p class="text-xs text-gray-500 mt-3">
@@ -83,6 +83,9 @@
 </div>
 
 <script>
+// ═══════════════════════════════════════════
+//   Load pending survey data
+// ═══════════════════════════════════════════
 let pending = null;
 try {
   const raw = localStorage.getItem('pending_survey');
@@ -104,6 +107,25 @@ document.getElementById('openRealSurveyBtn').onclick = () => {
   }
 };
 
+// ═══════════════════════════════════════════
+//   Timer Setup (অ্যাডমিন প্যানেল থেকে সেট করা সময় অনুযায়ী)
+// ═══════════════════════════════════════════
+const timerSeconds = parseInt(pending.timer) || 60; // ডিফল্ট ৬০ সেকেন্ড
+let seconds = timerSeconds;
+const total = timerSeconds;
+
+// ═══ Initial Display ═══
+const initM = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+const initS = String(timerSeconds % 60).padStart(2, '0');
+document.getElementById('timerText').textContent = `${initM}:${initS}`;
+
+// ═══ Progress Circle ═══
+const circumference = 2 * Math.PI * 56;
+const circle = document.getElementById('progressCircle');
+circle.style.strokeDasharray = circumference;
+circle.style.strokeDashoffset = 0;
+
+// ═══ Prevent leaving early ═══
 let completed = false;
 window.addEventListener('beforeunload', (e) => {
   if (!completed) {
@@ -113,13 +135,7 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-let seconds = 60;
-const total = 60;
-const circumference = 2 * Math.PI * 56;
-const circle = document.getElementById('progressCircle');
-circle.style.strokeDasharray = circumference;
-circle.style.strokeDashoffset = 0;
-
+// ═══ Timer Countdown ═══
 const timerInterval = setInterval(() => {
   seconds--;
   const m = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -135,6 +151,7 @@ const timerInterval = setInterval(() => {
   }
 }, 1000);
 
+// ═══ On Complete ═══
 function onComplete() {
   completed = true;
   localStorage.setItem('survey_done_task', String(pending.taskId));
@@ -145,6 +162,7 @@ function onComplete() {
   }, 1500);
 }
 
+// ═══ Cancel ═══
 function cancelSurvey() {
   if (!confirm('বাতিল করলে রিওয়ার্ড পাবেন না। বাতিল করবেন?')) return;
   completed = true;
