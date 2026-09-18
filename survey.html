@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>সার্ভে চলছে...</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-purple-600 to-blue-700 min-h-screen flex items-center justify-center p-4">
+
+<div id="mainCard" class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
+
+  <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-5 text-center">
+    <h1 class="text-xl font-bold">📊 সার্ভে চলছে</h1>
+    <p id="taskTitle" class="text-sm opacity-90 mt-1"></p>
+  </div>
+
+  <div class="p-5 border-b">
+    <p class="text-xs text-gray-500 mb-2">ধাপ ১: সার্ভে সম্পন্ন করুন</p>
+    <button id="openRealSurveyBtn"
+      class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium">
+      🔗 আসল সার্ভে খুলুন
+    </button>
+    <p class="text-xs text-gray-400 mt-2 text-center">সার্ভে শেষ করে এই পেজে ফিরে আসুন</p>
+  </div>
+
+  <div class="p-5 bg-gray-50 border-b">
+    <p class="text-xs text-gray-500 mb-2">ধাপ ২: বিজ্ঞাপন দেখুন</p>
+    <div id="adBox" class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-xl p-6 text-center border-2 border-dashed border-yellow-400">
+      <div class="text-4xl mb-2">📢</div>
+      <p class="text-sm font-medium text-gray-700">বিজ্ঞাপন</p>
+      <p class="text-xs text-gray-500 mt-1">এখানে আপনার অ্যাড বসবে</p>
+    </div>
+    <p class="text-xs text-red-500 mt-2 text-center">⚠️ এই পেজ মাঝপথে বন্ধ করলে রিওয়ার্ড পাবেন না!</p>
+  </div>
+
+  <div class="p-6 text-center">
+    <p class="text-sm text-gray-600 mb-3">ধাপ ৩: টাইমার শেষ হওয়া পর্যন্ত অপেক্ষা করুন</p>
+    <div class="relative inline-block">
+      <svg class="w-32 h-32 transform -rotate-90">
+        <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+        <circle id="progressCircle" cx="64" cy="64" r="56" stroke="#8b5cf6" stroke-width="8" fill="none"
+          stroke-linecap="round"/>
+      </svg>
+      <div class="absolute inset-0 flex items-center justify-center">
+        <p id="timerText" class="text-3xl font-bold text-purple-700">01:00</p>
+      </div>
+    </div>
+    <p class="text-xs text-gray-500 mt-3">
+      টাইমার শেষ হলে পেজ অটো বন্ধ হবে এবং ৫ সেকেন্ড পর রিওয়ার্ড যোগ হবে
+    </p>
+  </div>
+
+  <div class="p-4 border-t">
+    <button onclick="cancelSurvey()"
+      class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg text-sm">
+      ❌ বাতিল করুন
+    </button>
+  </div>
+</div>
+
+<div id="successCard" class="hidden w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 text-center">
+  <div class="text-6xl mb-4">✅</div>
+  <h2 class="text-2xl font-bold text-green-600 mb-2">সার্ভে সম্পন্ন!</h2>
+  <p class="text-gray-600 mb-4">রিওয়ার্ড যোগ হচ্ছে... অপেক্ষা করুন</p>
+  <div class="animate-spin rounded-full h-10 w-10 border-4 border-green-500 border-t-transparent mx-auto"></div>
+</div>
+
+<script>
+let pending = null;
+try {
+  const raw = localStorage.getItem('pending_survey');
+  if (raw) pending = JSON.parse(raw);
+} catch (e) {}
+
+if (!pending) {
+  alert('⚠️ সার্ভে ডেটা পাওয়া যায়নি। আবার চেষ্টা করুন।');
+  location.href = 'user.html';
+}
+
+document.getElementById('taskTitle').textContent = pending.taskTitle || '';
+
+document.getElementById('openRealSurveyBtn').onclick = () => {
+  if (pending.url) {
+    window.open(pending.url, '_blank');
+  } else {
+    alert('সার্ভে লিংক পাওয়া যায়নি');
+  }
+};
+
+let completed = false;
+window.addEventListener('beforeunload', (e) => {
+  if (!completed) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
+
+let seconds = 60;
+const total = 60;
+const circumference = 2 * Math.PI * 56;
+const circle = document.getElementById('progressCircle');
+circle.style.strokeDasharray = circumference;
+circle.style.strokeDashoffset = 0;
+
+const timerInterval = setInterval(() => {
+  seconds--;
+  const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+  const s = String(seconds % 60).padStart(2, '0');
+  document.getElementById('timerText').textContent = `${m}:${s}`;
+
+  const progress = (total - seconds) / total;
+  circle.style.strokeDashoffset = circumference * progress;
+
+  if (seconds <= 0) {
+    clearInterval(timerInterval);
+    onComplete();
+  }
+}, 1000);
+
+function onComplete() {
+  completed = true;
+  localStorage.setItem('survey_done_task', String(pending.taskId));
+  document.getElementById('mainCard').classList.add('hidden');
+  document.getElementById('successCard').classList.remove('hidden');
+  setTimeout(() => {
+    location.href = 'user.html';
+  }, 1500);
+}
+
+function cancelSurvey() {
+  if (!confirm('বাতিল করলে রিওয়ার্ড পাবেন না। বাতিল করবেন?')) return;
+  completed = true;
+  localStorage.removeItem('pending_survey');
+  localStorage.removeItem('survey_done_task');
+  location.href = 'user.html';
+}
+</script>
+</body>
+</html>
