@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Bangla Task</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- ═══════════════ LOADING SCREEN ═══════════════ -->
+<div id="loadingScreen" class="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-4">
+  <div class="text-center text-white">
+    <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
+    <p class="text-lg">লোড হচ্ছে...</p>
+  </div>
+</div>
+
+<!-- ═══════════════ ERROR SCREEN ═══════════════ -->
+<div id="errorScreen" class="hidden min-h-screen bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl p-8 max-w-md text-center">
+    <div class="text-5xl mb-4">⚠️</div>
+    <h2 class="text-xl font-bold mb-2">Telegram থেকে খুলুন</h2>
+    <p class="text-gray-600 text-sm">এই অ্যাপটি শুধু Telegram বটের ভেতর থেকে খোলা যাবে। অনুগ্রহ করে আমাদের বটে গিয়ে "Open App" বাটনে ক্লিক করুন।</p>
+  </div>
+</div>
+
+<!-- ═══════════════ USER PANEL ═══════════════ -->
+<div id="panel" class="hidden pb-20">
+  <!-- Header -->
+  <header class="bg-white shadow sticky top-0 z-20">
+    <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img id="userAvatar" src="" class="w-10 h-10 rounded-full bg-gray-300 hidden" alt=""/>
+        <div>
+          <p id="userName" class="font-semibold text-gray-800 text-sm leading-tight"></p>
+          <p id="userHandle" class="text-xs text-gray-400"></p>
+        </div>
+      </div>
+      <div class="text-right">
+        <p class="text-xs text-gray-500">ব্যালেন্স</p>
+        <p class="font-bold text-green-600">৳ <span id="hdrBalance">0</span></p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <div class="max-w-2xl mx-auto px-4 pt-3">
+    <div class="flex gap-1 bg-white rounded-lg p-1 shadow">
+      <button data-tab="tasks" class="tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap bg-blue-600 text-white">📋 টাস্ক</button>
+      <button data-tab="mysub" class="tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap text-gray-600">📤 জমা</button>
+      <button data-tab="wallet" class="tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap text-gray-600">💰 ওয়ালেট</button>
+    </div>
+  </div>
+
+  <main class="max-w-2xl mx-auto p-4">
+
+    <!-- TASKS -->
+    <section id="tab-tasks" class="tabPane">
+      <h2 class="text-base font-semibold mb-3">উপলব্ধ টাস্ক</h2>
+      <div id="taskList" class="grid gap-3"></div>
+    </section>
+
+    <!-- MY SUBMISSIONS -->
+    <section id="tab-mysub" class="tabPane hidden">
+      <h2 class="text-base font-semibold mb-3">আমার জমা দেওয়া কাজ</h2>
+      <div id="subList" class="space-y-2"></div>
+    </section>
+
+    <!-- WALLET -->
+    <section id="tab-wallet" class="tabPane hidden">
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <p class="text-xs text-gray-500">ওয়ালেট ব্যালেন্স</p>
+          <p class="text-2xl font-bold text-green-600">৳ <span id="wBalance">0</span></p>
+        </div>
+        <div class="bg-white p-4 rounded-xl shadow">
+          <p class="text-xs text-gray-500">মোট আয়</p>
+          <p class="text-2xl font-bold text-blue-600">৳ <span id="wEarned">0</span></p>
+        </div>
+      </div>
+
+      <div class="bg-white p-4 rounded-xl shadow mb-4">
+        <h3 class="font-semibold mb-3 text-sm">উইথড্র রিকোয়েস্ট (সর্বনিম্ন ৳১০০)</h3>
+        <div class="space-y-2">
+          <input id="wdAmount" type="number" placeholder="টাকার পরিমাণ" class="w-full px-3 py-2 border rounded-lg text-sm"/>
+          <select id="wdMethod" class="w-full px-3 py-2 border rounded-lg text-sm">
+            <option value="bkash">বিকাশ</option>
+            <option value="nagad">নগদ</option>
+            <option value="rocket">রকেট</option>
+          </select>
+          <input id="wdAccount" placeholder="অ্যাকাউন্ট নাম্বার" class="w-full px-3 py-2 border rounded-lg text-sm"/>
+          <button onclick="submitWithdraw()" class="w-full bg-green-600 hover:bg-green-700 text-white rounded-lg py-2 font-medium">
+            রিকোয়েস্ট পাঠান
+          </button>
+        </div>
+        <p id="wdMsg" class="text-sm mt-2"></p>
+      </div>
+
+      <h3 class="font-semibold mb-2 text-sm">উইথড্র হিস্ট্রি</h3>
+      <div id="wdList" class="space-y-2"></div>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════ SUBMIT MODAL ═══════════════ -->
+<div id="submitModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
+    <h3 id="modalTitle" class="text-lg font-bold mb-1"></h3>
+    <p id="modalDesc" class="text-gray-500 text-sm mb-2"></p>
+    <p class="text-sm mb-4">💰 <span id="modalReward" class="font-bold text-green-600"></span> টাকা</p>
+
+    <form id="submitForm" class="space-y-3">
+      <input type="hidden" id="modalTaskId"/>
+      <textarea id="submitContent" rows="3" placeholder="আপনার উত্তর / বর্ণনা লিখুন"
+        class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
+      <input type="file" id="submitFile" class="w-full border rounded-lg p-2 text-sm"/>
+      <div class="flex gap-2">
+        <button type="button" onclick="closeModal()" class="flex-1 bg-gray-200 py-2 rounded-lg font-medium">বাতিল</button>
+        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium">জমা দিন</button>
+      </div>
+      <p id="submitMsg" class="text-sm"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════ FIREBASE + TELEGRAM LOGIC ═══════════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth, signInAnonymously, onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getDatabase, ref, set, get, push, update, onValue
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import {
+  getStorage, ref as sRef, uploadBytes, getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+// ═══ Firebase Config ═══
+const firebaseConfig = {
+  apiKey: "AIzaSyB-PP2p5jiwmqq8HUm6bw34_vBvUnMDSgI",
+  authDomain: "diamond-top-up-9953b.firebaseapp.com",
+  databaseURL: "https://diamond-top-up-9953b-default-rtdb.firebaseio.com",
+  projectId: "diamond-top-up-9953b",
+  storageBucket: "diamond-top-up-9953b.appspot.com",
+  messagingSenderId: "187130123982",
+  appId: "1:187130123982:android:9bb6284a175ecf9f4f229f"
+};
+
+const app = initializeApp(firebaseConfig, "userApp");
+const auth = getAuth(app);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+// ═══ UI Refs ═══
+const $ = id => document.getElementById(id);
+let currentUser = null;
+let currentProfile = {};
+let submittingTask = null;
+let tgUser = null;
+
+// ═══ Telegram Init ═══
+const tg = window.Telegram?.WebApp;
+
+function initTelegram() {
+  if (!tg || !tg.initDataUnsafe?.user) {
+    // Telegram এর বাইরে খোলা হয়েছে
+    $('loadingScreen').classList.add('hidden');
+    $('errorScreen').classList.remove('hidden');
+    return false;
+  }
+
+  tg.ready();
+  tg.expand();
+  tgUser = tg.initDataUnsafe.user;
+  console.log('Telegram User:', tgUser);
+  return true;
+}
+
+// ═══ Auth + Profile Setup ═══
+async function startApp() {
+  $('loadingScreen').classList.remove('hidden');
+  $('errorScreen').classList.add('hidden');
+
+  if (!initTelegram()) return;
+
+  try {
+    // Firebase Anonymous Auth (Firebase Rules এর জন্য)
+    await signInAnonymously(auth);
+  } catch (err) {
+    alert('Firebase Anonymous Auth চালু করুন।\n' + err.message);
+    return;
+  }
+}
+
+onAuthStateChanged(auth, async (fbUser) => {
+  if (!fbUser || !tgUser) return;
+
+  // Telegram ID দিয়ে ডেটাবেসে ইউজার key
+  const uid = 'tg_' + tgUser.id;
+
+  const userRef = ref(db, 'users/' + uid);
+  const snap = await get(userRef);
+
+  if (!snap.exists()) {
+    // নতুন ইউজার
+    await set(userRef, {
+      telegramId: tgUser.id,
+      username: tgUser.username || '',
+      firstName: tgUser.first_name || '',
+      lastName: tgUser.last_name || '',
+      languageCode: tgUser.language_code || '',
+      photoUrl: tgUser.photo_url || '',
+      wallet_balance: 0,
+      total_earned: 0,
+      status: 'active',
+      createdAt: Date.now()
+    });
+  } else {
+    // আপডেট প্রোফাইল (নাম/ফটো পরিবর্তন হলে)
+    await update(userRef, {
+      username: tgUser.username || '',
+      firstName: tgUser.first_name || '',
+      lastName: tgUser.last_name || '',
+      photoUrl: tgUser.photo_url || '',
+      lastSeen: Date.now()
+    });
+  }
+
+  // UI update
+  $('userName').textContent = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') || 'User';
+  $('userHandle').textContent = tgUser.username ? '@' + tgUser.username : ('ID: ' + tgUser.id);
+  if (tgUser.photo_url) {
+    $('userAvatar').src = tgUser.photo_url;
+    $('userAvatar').classList.remove('hidden');
+  }
+
+  currentUser = { uid, ...tgUser };
+
+  // Live profile listener
+  onValue(userRef, s => {
+    currentProfile = s.val() || {};
+    if (currentProfile.status === 'blocked') {
+      alert('❌ আপনার অ্যাকাউন্ট ব্লক করা হয়েছে');
+      tg?.close();
+      return;
+    }
+    $('hdrBalance').textContent = (currentProfile.wallet_balance || 0).toFixed(0);
+    $('wBalance').textContent = (currentProfile.wallet_balance || 0).toFixed(0);
+    $('wEarned').textContent = (currentProfile.total_earned || 0).toFixed(0);
+  });
+
+  $('loadingScreen').classList.add('hidden');
+  $('panel').classList.remove('hidden');
+
+  loadTasks();
+});
+
+startApp();
+
+// ═══ Tabs ═══
+document.querySelectorAll('.tabBtn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tabBtn').forEach(b => {
+      b.className = 'tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap text-gray-600';
+    });
+    btn.className = 'tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap bg-blue-600 text-white';
+    document.querySelectorAll('.tabPane').forEach(p => p.classList.add('hidden'));
+    $('tab-' + btn.dataset.tab).classList.remove('hidden');
+    if (btn.dataset.tab === 'mysub') loadSubmissions();
+    if (btn.dataset.tab === 'wallet') loadWithdrawals();
+  };
+});
+
+// ═══ Escape ═══
+function esc(s) {
+  return String(s || '').replace(/[<>&"]/g, c =>
+    ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+}
+
+// ═══ Tasks ═══
+function loadTasks() {
+  onValue(ref(db, 'tasks'), snap => {
+    const list = $('taskList');
+    list.innerHTML = '';
+    const data = snap.val() || {};
+    const tasks = Object.entries(data)
+      .map(([id, t]) => ({ id, ...t }))
+      .filter(t => t.status === 'active' && (t.filled_slots || 0) < (t.total_slots || 1000));
+
+    if (!tasks.length) {
+      list.innerHTML = '<p class="text-gray-500 text-center py-8">এই মুহূর্তে কোনো টাস্ক নেই।</p>';
+      return;
+    }
+
+    tasks.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'bg-white p-4 rounded-xl shadow';
+      div.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-semibold text-sm flex-1">${esc(t.title)}</h3>
+          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">${esc(t.type)}</span>
+        </div>
+        <p class="text-xs text-gray-500 mb-3">${esc(t.description)}</p>
+        <div class="flex justify-between items-center">
+          <span class="text-green-600 font-bold">৳ ${t.reward}</span>
+          <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm openBtn">শুরু করুন</button>
+        </div>
+        <p class="text-xs text-gray-400 mt-2">${t.filled_slots || 0}/${t.total_slots || 1000} সম্পন্ন</p>
+      `;
+      div.querySelector('.openBtn').onclick = () => openModal(t);
+      list.appendChild(div);
+    });
+  });
+}
+
+// ═══ Modal ═══
+function openModal(t) {
+  submittingTask = t;
+  $('modalTaskId').value = t.id;
+  $('modalTitle').textContent = t.title;
+  $('modalDesc').textContent = t.description || '';
+  $('modalReward').textContent = t.reward;
+  $('submitMsg').textContent = '';
+  $('submitModal').classList.remove('hidden');
+}
+
+window.closeModal = () => {
+  $('submitModal').classList.add('hidden');
+  submittingTask = null;
+};
+
+// ═══ Submit ═══
+$('submitForm').onsubmit = async e => {
+  e.preventDefault();
+  if (!submittingTask) return;
+  $('submitMsg').className = 'text-sm';
+  $('submitMsg').textContent = 'পাঠানো হচ্ছে...';
+
+  try {
+    let fileUrl = null;
+    const file = $('submitFile').files[0];
+    if (file) {
+      const storageRef = sRef(storage, `submissions/${currentUser.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, file);
+      fileUrl = await getDownloadURL(storageRef);
+    }
+
+    const subRef = push(ref(db, 'submissions'));
+    await set(subRef, {
+      taskId: submittingTask.id,
+      taskTitle: submittingTask.title,
+      userId: currentUser.uid,
+      userName: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '),
+      username: tgUser.username || '',
+      telegramId: tgUser.id,
+      content: $('submitContent').value,
+      fileUrl: fileUrl,
+      reward: submittingTask.reward,
+      status: 'pending',
+      createdAt: Date.now()
+    });
+
+    const taskRef = ref(db, 'tasks/' + submittingTask.id);
+    const snap = await get(taskRef);
+    const cur = snap.val() || {};
+    await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
+
+    $('submitMsg').className = 'text-sm text-green-600';
+    $('submitMsg').textContent = '✅ জমা হয়েছে, রিভিউর জন্য অপেক্ষা করুন';
+    $('submitContent').value = '';
+    $('submitFile').value = '';
+
+    tg?.HapticFeedback?.notificationOccurred('success');
+    setTimeout(closeModal, 1200);
+  } catch (err) {
+    $('submitMsg').className = 'text-sm text-red-500';
+    $('submitMsg').textContent = 'সমস্যা: ' + err.message;
+  }
+};
+
+// ═══ My Submissions ═══
+function loadSubmissions() {
+  onValue(ref(db, 'submissions'), snap => {
+    const data = snap.val() || {};
+    const rows = Object.entries(data)
+      .map(([id, s]) => ({ id, ...s }))
+      .filter(s => s.userId === currentUser.uid)
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    const list = $('subList');
+    list.innerHTML = '';
+    if (!rows.length) {
+      list.innerHTML = '<p class="text-gray-500 text-center py-8">এখনো কোনো কাজ জমা দেননি।</p>';
+      return;
+    }
+
+    rows.forEach(s => {
+      const badge = s.status === 'approved' ? 'bg-green-100 text-green-700'
+                  : s.status === 'rejected' ? 'bg-red-100 text-red-700'
+                  : 'bg-yellow-100 text-yellow-700';
+      const div = document.createElement('div');
+      div.className = 'bg-white p-4 rounded-xl shadow flex justify-between items-center';
+      div.innerHTML = `
+        <div class="flex-1 min-w-0">
+          <p class="font-medium text-sm truncate">${esc(s.taskTitle)}</p>
+          <p class="text-xs text-gray-400">${new Date(s.createdAt).toLocaleString('bn-BD')}</p>
+        </div>
+        <div class="text-right ml-2">
+          <span class="${badge} px-2 py-1 rounded-full text-xs">${s.status}</span>
+          <p class="text-green-600 font-bold text-sm mt-1">৳ ${s.reward}</p>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+// ═══ Withdraw ═══
+window.submitWithdraw = async () => {
+  const amount = parseFloat($('wdAmount').value);
+  const method = $('wdMethod').value;
+  const acc = $('wdAccount').value.trim();
+  $('wdMsg').className = 'text-sm';
+
+  if (!amount || amount < 100) {
+    $('wdMsg').className = 'text-sm text-red-500';
+    $('wdMsg').textContent = 'সর্বনিম্ন ১০০ টাকা';
+    return;
+  }
+  if (!acc) {
+    $('wdMsg').className = 'text-sm text-red-500';
+    $('wdMsg').textContent = 'অ্যাকাউন্ট নাম্বার দিন';
+    return;
+  }
+  if (amount > (currentProfile.wallet_balance || 0)) {
+    $('wdMsg').className = 'text-sm text-red-500';
+    $('wdMsg').textContent = 'ব্যালেন্স কম';
+    return;
+  }
+
+  try {
+    const wdRef = push(ref(db, 'withdrawals'));
+    await set(wdRef, {
+      userId: currentUser.uid,
+      userName: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '),
+      username: tgUser.username || '',
+      telegramId: tgUser.id,
+      amount, method,
+      accountNumber: acc,
+      status: 'pending',
+      createdAt: Date.now()
+    });
+
+    await update(ref(db, 'users/' + currentUser.uid), {
+      wallet_balance: (currentProfile.wallet_balance || 0) - amount
+    });
+
+    $('wdMsg').className = 'text-sm text-green-600';
+    $('wdMsg').textContent = '✅ রিকোয়েস্ট জমা হয়েছে';
+    $('wdAmount').value = '';
+    $('wdAccount').value = '';
+    tg?.HapticFeedback?.notificationOccurred('success');
+  } catch (err) {
+    $('wdMsg').className = 'text-sm text-red-500';
+    $('wdMsg').textContent = 'সমস্যা: ' + err.message;
+  }
+};
+
+// ═══ Withdraw History ═══
+function loadWithdrawals() {
+  onValue(ref(db, 'withdrawals'), snap => {
+    const data = snap.val() || {};
+    const rows = Object.entries(data)
+      .map(([id, w]) => ({ id, ...w }))
+      .filter(w => w.userId === currentUser.uid)
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    const list = $('wdList');
+    list.innerHTML = '';
+    if (!rows.length) {
+      list.innerHTML = '<p class="text-gray-500 text-center py-6 text-sm">কোনো উইথড্র নেই।</p>';
+      return;
+    }
+
+    rows.forEach(w => {
+      const badge = w.status === 'paid' ? 'bg-green-100 text-green-700'
+                  : w.status === 'rejected' ? 'bg-red-100 text-red-700'
+                  : 'bg-yellow-100 text-yellow-700';
+      const div = document.createElement('div');
+      div.className = 'bg-white p-3 rounded-xl shadow flex justify-between items-center';
+      div.innerHTML = `
+        <div>
+          <p class="font-medium text-sm">৳ ${w.amount} - ${esc(w.method)}</p>
+          <p class="text-xs text-gray-400">${esc(w.accountNumber)}</p>
+        </div>
+        <span class="${badge} px-2 py-1 rounded-full text-xs">${w.status}</span>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+</script>
+</body>
+</html>
