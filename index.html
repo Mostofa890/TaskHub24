@@ -9,7 +9,6 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-<!-- ═══════════════ LOADING SCREEN ═══════════════ -->
 <div id="loadingScreen" class="min-h-screen bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center p-4">
   <div class="text-center text-white">
     <div class="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent mx-auto mb-4"></div>
@@ -17,7 +16,6 @@
   </div>
 </div>
 
-<!-- ═══════════════ ERROR SCREEN ═══════════════ -->
 <div id="errorScreen" class="hidden min-h-screen bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl p-8 max-w-md text-center">
     <div class="text-5xl mb-4">⚠️</div>
@@ -26,7 +24,6 @@
   </div>
 </div>
 
-<!-- ═══════════════ USER PANEL ═══════════════ -->
 <div id="panel" class="hidden pb-20">
   <header class="bg-white shadow sticky top-0 z-20">
     <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -98,7 +95,6 @@
   </main>
 </div>
 
-<!-- ═══════════════ SUBMIT MODAL ═══════════════ -->
 <div id="submitModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
   <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
     <h3 id="modalTitle" class="text-lg font-bold mb-1"></h3>
@@ -139,11 +135,6 @@
             সার্ভে শেষ করে ১ মিনিট অপেক্ষা করুন — অটো রিওয়ার্ড পাবেন
           </p>
         </div>
-        <div id="timerDiv" class="hidden text-center py-4">
-          <p class="text-sm text-gray-600 mb-2">⏳ অপেক্ষা করুন...</p>
-          <p id="timerDisplay" class="text-4xl font-bold text-blue-600">01:00</p>
-          <p class="text-xs text-gray-400 mt-2">টাইমার শেষ হলে অটো অ্যাওয়ার্ড হবে</p>
-        </div>
       </div>
 
       <div class="flex gap-2">
@@ -155,7 +146,6 @@
   </div>
 </div>
 
-<!-- ═══════════════ FIREBASE + LOGIC ═══════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -165,7 +155,6 @@ import {
   getDatabase, ref, set, get, push, update, onValue
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ═══ Firebase Config ═══
 const firebaseConfig = {
   apiKey: "AIzaSyB-PP2p5jiwmqq8HUm6bw34_vBvUnMDSgI",
   authDomain: "diamond-top-up-9953b.firebaseapp.com",
@@ -180,7 +169,6 @@ const app = initializeApp(firebaseConfig, "userApp");
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ═══ UI Refs ═══
 const $ = id => document.getElementById(id);
 let currentUser = null;
 let currentProfile = {};
@@ -191,9 +179,23 @@ let completedTaskIds = new Set();
 
 const tg = window.Telegram?.WebApp;
 
-// ═══════════════════════════════════════════
-//   IMAGE UPLOAD (ImgBB)
-// ═══════════════════════════════════════════
+// ═══ Check for pending survey reward (on load) ═══
+let pendingSurveyReward = null;
+(function checkSurvey() {
+  const done = localStorage.getItem('survey_done_task');
+  const pendingRaw = localStorage.getItem('pending_survey');
+  if (!done || !pendingRaw) return;
+  try {
+    const p = JSON.parse(pendingRaw);
+    if (String(p.taskId) === String(done)) {
+      pendingSurveyReward = p;
+    }
+  } catch (e) {}
+  localStorage.removeItem('survey_done_task');
+  localStorage.removeItem('pending_survey');
+})();
+
+// ═══ ImgBB (Image) ═══
 const IMGBB_API_KEY = 'bc5a5bca9a50833046600a2cc94de6c6';
 async function uploadToImgBB(file) {
   const fd = new FormData();
@@ -206,9 +208,7 @@ async function uploadToImgBB(file) {
   return data.data.url;
 }
 
-// ═══════════════════════════════════════════
-//   AUDIO UPLOAD (Multi-Service Fallback)
-// ═══════════════════════════════════════════
+// ═══ Audio (Multi-Service Fallback) ═══
 async function uploadAudio(file) {
   const services = [
     { name: 'Bashupload', fn: uploadToBashupload },
@@ -217,8 +217,6 @@ async function uploadAudio(file) {
     { name: 'Uguu.se',    fn: uploadToUguu },
     { name: '0x0.st',     fn: uploadToZeroXZero }
   ];
-
-  let lastError = 'সব সার্ভিস ব্যর্থ';
 
   for (const svc of services) {
     try {
@@ -229,77 +227,57 @@ async function uploadAudio(file) {
       return url;
     } catch (err) {
       console.warn(`❌ ${svc.name} ব্যর্থ:`, err.message);
-      lastError = `${svc.name}: ${err.message}`;
     }
   }
-
   throw new Error('সব সার্ভার ব্যর্থ। আবার চেষ্টা করুন।');
 }
 
-// ১. Bashupload (৫০ GB পর্যন্ত, স্থায়ী)
 async function uploadToBashupload(file) {
   const fd = new FormData();
   fd.append('file', file);
-  const res = await fetch('https://bashupload.com/', {
-    method: 'POST',
-    body: fd
-  });
+  const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd });
   const text = await res.text();
   const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
   if (!match) throw new Error('URL পাওয়া যায়নি');
   return match[0] + '?download=1';
 }
 
-// ২. Temp.sh (৪ GB, ৩ দিন)
 async function uploadToTempSh(file) {
   const fd = new FormData();
   fd.append('file', file);
-  const res = await fetch('https://temp.sh/upload', {
-    method: 'POST',
-    body: fd
-  });
+  const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd });
   const text = (await res.text()).trim();
   if (!text.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
   return text;
 }
 
-// ৩. Litterbox (১ GB, ৭২ ঘন্টা)
 async function uploadToLitterbox(file) {
   const fd = new FormData();
   fd.append('reqtype', 'fileupload');
   fd.append('time', '72h');
   fd.append('fileToUpload', file);
   const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', {
-    method: 'POST',
-    body: fd
+    method: 'POST', body: fd
   });
   const url = (await res.text()).trim();
   if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
   return url;
 }
 
-// ৪. Uguu.se (১২৮ MB, ৪৮ ঘন্টা)
 async function uploadToUguu(file) {
   const fd = new FormData();
   fd.append('files[]', file);
-  const res = await fetch('https://uguu.se/upload?output=text', {
-    method: 'POST',
-    body: fd
-  });
+  const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd });
   const url = (await res.text()).trim();
   if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
   return url;
 }
 
-// ৫. 0x0.st (৫১২ MB, ১ বছর)
 async function uploadToZeroXZero(file) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('expires', '8760');
-  const res = await fetch('https://0x0.st', {
-    method: 'POST',
-    body: fd
-  });
+  const res = await fetch('https://0x0.st', { method: 'POST', body: fd });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const url = (await res.text()).trim();
   if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি');
@@ -385,6 +363,20 @@ onAuthStateChanged(auth, async (fbUser) => {
     loadTasks();
     loadSubmissions();
   });
+
+  // ═══ If survey completed, award after 5 seconds ═══
+  if (pendingSurveyReward) {
+    const p = pendingSurveyReward;
+    pendingSurveyReward = null;
+    setTimeout(async () => {
+      try {
+        await awardSurveyReward(p.taskId, p.reward, p.taskTitle);
+      } catch (err) {
+        console.error('Reward error:', err);
+        alert('রিওয়ার্ড দিতে সমস্যা: ' + err.message);
+      }
+    }, 5000);
+  }
 
   $('loadingScreen').classList.add('hidden');
   $('panel').classList.remove('hidden');
@@ -480,14 +472,12 @@ function openModal(t) {
   $('submitContent').value = '';
   $('submitImage').value = '';
   $('submitVoice').value = '';
-  $('timerDisplay').textContent = '01:00';
 
   $('textInputDiv').classList.add('hidden');
   $('imageInputDiv').classList.add('hidden');
   $('voiceInputDiv').classList.add('hidden');
   $('surveyDiv').classList.add('hidden');
   $('surveyStartDiv').classList.remove('hidden');
-  $('timerDiv').classList.add('hidden');
   $('submitBtn').classList.remove('hidden');
 
   const type = (t.type || 'text').toLowerCase();
@@ -521,66 +511,40 @@ window.closeModal = () => {
   if (surveyTimer) { clearInterval(surveyTimer); surveyTimer = null; }
 };
 
-// ═══ Survey Timer ═══
+// ═══ Survey Start — navigates to survey.html ═══
 function startSurvey(url) {
-  if (tg && tg.openLink) tg.openLink(url);
-  else window.open(url, '_blank');
-
-  $('surveyStartDiv').classList.add('hidden');
-  $('timerDiv').classList.remove('hidden');
-
-  let seconds = 60;
-  $('timerDisplay').textContent = '01:00';
-
-  surveyTimer = setInterval(() => {
-    seconds--;
-    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const s = String(seconds % 60).padStart(2, '0');
-    $('timerDisplay').textContent = `${m}:${s}`;
-
-    if (seconds <= 0) {
-      clearInterval(surveyTimer);
-      surveyTimer = null;
-      autoCompleteSurvey();
-    }
-  }, 1000);
+  const pending = {
+    taskId: submittingTask.id,
+    taskTitle: submittingTask.title,
+    reward: submittingTask.reward,
+    url: url,
+    startedAt: Date.now()
+  };
+  localStorage.setItem('pending_survey', JSON.stringify(pending));
+  window.location.href = 'survey.html';
 }
 
-async function autoCompleteSurvey() {
-  try {
-    $('timerDiv').innerHTML = '<p class="text-green-600 font-bold text-lg">✅ সম্পন্ন!</p>';
-    await awardSurvey(submittingTask);
-    setTimeout(() => {
-      closeModal();
-      alert(`🎉 অভিনন্দন! ৳${submittingTask.reward} আপনার অ্যাকাউন্টে যোগ হয়েছে।`);
-      tg?.HapticFeedback?.notificationOccurred('success');
-    }, 1500);
-  } catch (err) {
-    alert('সমস্যা: ' + err.message);
-  }
-}
-
-async function awardSurvey(task) {
+// ═══ Award Survey Reward (after returning) ═══
+async function awardSurveyReward(taskId, reward, taskTitle) {
   const uid = 'tg_' + tgUser.id;
   const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
 
-  if (completedTaskIds.has(String(task.id))) {
-    alert('⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন।');
-    closeModal();
+  if (completedTaskIds.has(String(taskId))) {
+    console.log('Already completed');
     return;
   }
 
   const subRef = push(ref(db, 'submissions'));
   await set(subRef, {
-    taskId: task.id,
-    taskTitle: task.title,
+    taskId: taskId,
+    taskTitle: taskTitle || 'Survey',
     userId: uid,
     userName: fullName,
     username: tgUser.username || '',
     telegramId: tgUser.id,
     content: 'Auto-completed survey',
     fileUrl: null,
-    reward: task.reward,
+    reward: reward,
     status: 'approved',
     autoApproved: true,
     createdAt: Date.now(),
@@ -588,16 +552,19 @@ async function awardSurvey(task) {
   });
 
   await update(ref(db, 'users/' + uid), {
-    wallet_balance: (currentProfile.wallet_balance || 0) + task.reward,
-    total_earned: (currentProfile.total_earned || 0) + task.reward
+    wallet_balance: (currentProfile.wallet_balance || 0) + reward,
+    total_earned: (currentProfile.total_earned || 0) + reward
   });
 
-  const taskRef = ref(db, 'tasks/' + task.id);
+  const taskRef = ref(db, 'tasks/' + taskId);
   const snap = await get(taskRef);
   const cur = snap.val() || {};
   await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
 
-  completedTaskIds.add(String(task.id));
+  completedTaskIds.add(String(taskId));
+
+  tg?.HapticFeedback?.notificationOccurred('success');
+  alert(`🎉 অভিনন্দন! ৳${reward} আপনার অ্যাকাউন্টে যোগ হয়েছে।`);
 }
 
 // ═══ Submit (Image / Voice / Text) ═══
@@ -621,7 +588,6 @@ $('submitForm').onsubmit = async e => {
     let fileUrl = null;
     const content = $('submitContent').value.trim();
 
-    // ----- IMAGE -----
     if (type === 'image') {
       const file = $('submitImage').files[0];
       if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'ছবি সিলেক্ট করুন'; return; }
@@ -633,8 +599,6 @@ $('submitForm').onsubmit = async e => {
       $('submitMsg').textContent = '📤 ছবি আপলোড হচ্ছে...';
       fileUrl = await uploadToImgBB(file);
     }
-
-    // ----- VOICE -----
     else if (type === 'voice' || type === 'audio') {
       const file = $('submitVoice').files[0];
       if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'অডিও সিলেক্ট করুন'; return; }
@@ -645,8 +609,6 @@ $('submitForm').onsubmit = async e => {
       }
       fileUrl = await uploadAudio(file);
     }
-
-    // ----- TEXT -----
     else if (type === 'text') {
       if (!content) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'টেক্সট লিখুন'; return; }
     }
