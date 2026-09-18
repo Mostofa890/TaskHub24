@@ -126,7 +126,7 @@
         <label class="block text-xs font-medium text-gray-700 mb-1">🎤 ভয়েস / অডিও আপলোড</label>
         <input type="file" id="submitVoice" accept="audio/*"
           class="w-full border rounded-lg p-2 text-sm"/>
-        <p class="text-xs text-gray-400 mt-1">MP3 / WAV / M4A / OGG</p>
+        <p class="text-xs text-gray-400 mt-1">MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫১২ MB)</p>
       </div>
 
       <div id="surveyDiv" class="hidden">
@@ -187,11 +187,11 @@ let currentProfile = {};
 let submittingTask = null;
 let tgUser = null;
 let surveyTimer = null;
-let completedTaskIds = new Set();   // ⭐ ইউজার কোন কোন টাস্ক শেষ করেছে
+let completedTaskIds = new Set();
 
 const tg = window.Telegram?.WebApp;
 
-// ═══ ImgBB (Image) ═══
+// ═══ ImgBB (Image Upload) ═══
 const IMGBB_API_KEY = 'bc5a5bca9a50833046600a2cc94de6c6';
 async function uploadToImgBB(file) {
   const fd = new FormData();
@@ -204,16 +204,22 @@ async function uploadToImgBB(file) {
   return data.data.url;
 }
 
-// ═══ Catbox (Voice/Audio) ═══
-async function uploadToCatbox(file) {
+// ═══ 0x0.st (Voice/Audio Upload — সহজ, সাইনআপ নেই) ═══
+async function uploadToZeroXZero(file) {
   const fd = new FormData();
-  fd.append('reqtype', 'fileupload');
-  fd.append('fileToUpload', file);
-  const res = await fetch('https://catbox.moe/user/api.php', {
-    method: 'POST', body: fd
+  fd.append('file', file);
+  // চাইলে expires সেট করুন (ঘণ্টায়): 720 = 30 দিন, 8760 = 1 বছর
+  fd.append('expires', '8760');
+
+  const res = await fetch('https://0x0.st', {
+    method: 'POST',
+    body: fd
   });
+
+  if (!res.ok) throw new Error('আপলোড ব্যর্থ (' + res.status + ')');
+
   const url = (await res.text()).trim();
-  if (!url.startsWith('http')) throw new Error('Catbox আপলোড ব্যর্থ');
+  if (!url.startsWith('http')) throw new Error('সঠিক URL পাওয়া যায়নি');
   return url;
 }
 
@@ -287,16 +293,12 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('wEarned').textContent = (currentProfile.total_earned || 0).toFixed(0);
   });
 
-  // ⭐ User এর সব সাবমিশন থেকে completed task IDs বের করি
   onValue(ref(db, 'submissions'), snap => {
     const data = snap.val() || {};
     completedTaskIds.clear();
     Object.values(data).forEach(s => {
-      if (s.userId === uid) {
-        completedTaskIds.add(String(s.taskId));
-      }
+      if (s.userId === uid) completedTaskIds.add(String(s.taskId));
     });
-    // UI refresh
     loadTasks();
     loadSubmissions();
   });
@@ -350,7 +352,7 @@ function loadTasks() {
     }
 
     tasks.forEach(t => {
-      const isDone = completedTaskIds.has(String(t.id));  // ⭐ চেক
+      const isDone = completedTaskIds.has(String(t.id));
       const div = document.createElement('div');
       div.className = 'bg-white p-4 rounded-xl shadow ' + (isDone ? 'opacity-70' : '');
       div.innerHTML = `
@@ -364,25 +366,20 @@ function loadTasks() {
         <div class="flex justify-between items-center">
           <span class="text-green-600 font-bold">৳ ${t.reward}</span>
           ${isDone
-            ? `<button disabled class="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg text-sm font-medium cursor-not-allowed">
-                ✅ সম্পন্ন
-               </button>`
+            ? `<button disabled class="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg text-sm font-medium cursor-not-allowed">✅ সম্পন্ন</button>`
             : `<button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm openBtn">শুরু করুন</button>`
           }
         </div>
         <p class="text-xs text-gray-400 mt-2">${t.filled_slots || 0}/${t.total_slots || 1000} সম্পন্ন</p>
       `;
-      if (!isDone) {
-        div.querySelector('.openBtn').onclick = () => openModal(t);
-      }
+      if (!isDone) div.querySelector('.openBtn').onclick = () => openModal(t);
       list.appendChild(div);
     });
   });
 }
 
-// ═══ Modal Setup by Type ═══
+// ═══ Modal ═══
 function openModal(t) {
-  // ⭐ ডাবল চেক — আগেই শেষ হলে খুলবো না
   if (completedTaskIds.has(String(t.id))) {
     alert('⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন।');
     return;
@@ -441,7 +438,7 @@ window.closeModal = () => {
   if (surveyTimer) { clearInterval(surveyTimer); surveyTimer = null; }
 };
 
-// ═══ Survey Timer Flow ═══
+// ═══ Survey Timer ═══
 function startSurvey(url) {
   if (tg && tg.openLink) tg.openLink(url);
   else window.open(url, '_blank');
@@ -484,7 +481,6 @@ async function awardSurvey(task) {
   const uid = 'tg_' + tgUser.id;
   const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
 
-  // ⭐ ডাবল চেক
   if (completedTaskIds.has(String(task.id))) {
     alert('⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন।');
     closeModal();
@@ -518,7 +514,6 @@ async function awardSurvey(task) {
   const cur = snap.val() || {};
   await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
 
-  // ⭐ Set এ যোগ করি
   completedTaskIds.add(String(task.id));
 }
 
@@ -530,7 +525,6 @@ $('submitForm').onsubmit = async e => {
   const type = (submittingTask.type || 'text').toLowerCase();
   if (type === 'survey') return;
 
-  // ⭐ ডাবল চেক
   if (completedTaskIds.has(String(submittingTask.id))) {
     $('submitMsg').className = 'text-sm text-red-500';
     $('submitMsg').textContent = '⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন';
@@ -553,8 +547,14 @@ $('submitForm').onsubmit = async e => {
     else if (type === 'voice' || type === 'audio') {
       const file = $('submitVoice').files[0];
       if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'অডিও সিলেক্ট করুন'; return; }
-      $('submitMsg').textContent = '📤 অডিও আপলোড হচ্ছে...';
-      fileUrl = await uploadToCatbox(file);
+      // ফাইল সাইজ চেক (৫০০ MB limit for 0x0.st)
+      if (file.size > 500 * 1024 * 1024) {
+        $('submitMsg').className = 'text-sm text-red-500';
+        $('submitMsg').textContent = '⚠️ ফাইল অনেক বড় (৫০০ MB এর কম হতে হবে)';
+        return;
+      }
+      $('submitMsg').textContent = '📤 অডিও আপলোড হচ্ছে... (একটু সময় লাগবে)';
+      fileUrl = await uploadToZeroXZero(file);
     }
     else if (type === 'text') {
       if (!content) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'টেক্সট লিখুন'; return; }
@@ -585,7 +585,6 @@ $('submitForm').onsubmit = async e => {
     const cur = snap.val() || {};
     await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
 
-    // ⭐ Set এ যোগ করি
     completedTaskIds.add(String(submittingTask.id));
 
     $('submitMsg').className = 'text-sm text-green-600';
@@ -594,7 +593,7 @@ $('submitForm').onsubmit = async e => {
     tg?.HapticFeedback?.notificationOccurred('success');
     setTimeout(() => {
       closeModal();
-      loadTasks();  // টাস্ক লিস্ট রিফ্রেশ
+      loadTasks();
     }, 1200);
   } catch (err) {
     $('submitMsg').className = 'text-sm text-red-500';
