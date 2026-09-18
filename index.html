@@ -22,13 +22,12 @@
   <div class="bg-white rounded-2xl p-8 max-w-md text-center">
     <div class="text-5xl mb-4">⚠️</div>
     <h2 class="text-xl font-bold mb-2">Telegram থেকে খুলুন</h2>
-    <p class="text-gray-600 text-sm">এই অ্যাপটি শুধু Telegram বটের ভেতর থেকে খোলা যাবে। অনুগ্রহ করে আমাদের বটে গিয়ে "Open App" বাটনে ক্লিক করুন।</p>
+    <p class="text-gray-600 text-sm">এই অ্যাপটি শুধু Telegram বটের ভেতর থেকে খোলা যাবে।</p>
   </div>
 </div>
 
 <!-- ═══════════════ USER PANEL ═══════════════ -->
 <div id="panel" class="hidden pb-20">
-  <!-- Header -->
   <header class="bg-white shadow sticky top-0 z-20">
     <div class="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -45,7 +44,6 @@
     </div>
   </header>
 
-  <!-- Tabs -->
   <div class="max-w-2xl mx-auto px-4 pt-3">
     <div class="flex gap-1 bg-white rounded-lg p-1 shadow">
       <button data-tab="tasks" class="tabBtn flex-1 px-3 py-2 rounded-md font-medium text-sm whitespace-nowrap bg-blue-600 text-white">📋 টাস্ক</button>
@@ -55,20 +53,16 @@
   </div>
 
   <main class="max-w-2xl mx-auto p-4">
-
-    <!-- TASKS -->
     <section id="tab-tasks" class="tabPane">
       <h2 class="text-base font-semibold mb-3">উপলব্ধ টাস্ক</h2>
       <div id="taskList" class="grid gap-3"></div>
     </section>
 
-    <!-- MY SUBMISSIONS -->
     <section id="tab-mysub" class="tabPane hidden">
       <h2 class="text-base font-semibold mb-3">আমার জমা দেওয়া কাজ</h2>
       <div id="subList" class="space-y-2"></div>
     </section>
 
-    <!-- WALLET -->
     <section id="tab-wallet" class="tabPane hidden">
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-white p-4 rounded-xl shadow">
@@ -109,24 +103,59 @@
   <div class="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-lg p-5 max-h-[90vh] overflow-y-auto">
     <h3 id="modalTitle" class="text-lg font-bold mb-1"></h3>
     <p id="modalDesc" class="text-gray-500 text-sm mb-2"></p>
-    <p class="text-sm mb-4">💰 <span id="modalReward" class="font-bold text-green-600"></span> টাকা</p>
+    <p class="text-sm mb-4">💰 <span id="modalReward" class="font-bold text-green-600"></span> টাকা
+      <span id="modalTypeBadge" class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded ml-1"></span>
+    </p>
 
     <form id="submitForm" class="space-y-3">
       <input type="hidden" id="modalTaskId"/>
-      <textarea id="submitContent" rows="3" placeholder="আপনার উত্তর / বর্ণনা লিখুন"
-        class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
-      <input type="file" id="submitFile" accept="image/*" class="w-full border rounded-lg p-2 text-sm"/>
-      <p class="text-xs text-gray-400">📷 শুধু ছবি (JPG/PNG/GIF/WEBP)</p>
+
+      <div id="textInputDiv">
+        <textarea id="submitContent" rows="3" placeholder="আপনার উত্তর / বর্ণনা লিখুন"
+          class="w-full px-3 py-2 border rounded-lg text-sm"></textarea>
+      </div>
+
+      <div id="imageInputDiv" class="hidden">
+        <label class="block text-xs font-medium text-gray-700 mb-1">📷 ছবি আপলোড করুন</label>
+        <input type="file" id="submitImage" accept="image/*"
+          class="w-full border rounded-lg p-2 text-sm"/>
+        <p class="text-xs text-gray-400 mt-1">JPG / PNG / GIF / WEBP</p>
+      </div>
+
+      <div id="voiceInputDiv" class="hidden">
+        <label class="block text-xs font-medium text-gray-700 mb-1">🎤 ভয়েস / অডিও আপলোড</label>
+        <input type="file" id="submitVoice" accept="audio/*"
+          class="w-full border rounded-lg p-2 text-sm"/>
+        <p class="text-xs text-gray-400 mt-1">MP3 / WAV / M4A / OGG</p>
+      </div>
+
+      <div id="surveyDiv" class="hidden">
+        <div id="surveyStartDiv">
+          <button type="button" id="openSurveyBtn"
+            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg font-medium">
+            🔗 সার্ভে খুলুন
+          </button>
+          <p class="text-xs text-gray-500 text-center mt-2">
+            সার্ভে শেষ করে ১ মিনিট অপেক্ষা করুন — অটো রিওয়ার্ড পাবেন
+          </p>
+        </div>
+        <div id="timerDiv" class="hidden text-center py-4">
+          <p class="text-sm text-gray-600 mb-2">⏳ অপেক্ষা করুন...</p>
+          <p id="timerDisplay" class="text-4xl font-bold text-blue-600">01:00</p>
+          <p class="text-xs text-gray-400 mt-2">টাইমার শেষ হলে অটো অ্যাওয়ার্ড হবে</p>
+        </div>
+      </div>
+
       <div class="flex gap-2">
         <button type="button" onclick="closeModal()" class="flex-1 bg-gray-200 py-2 rounded-lg font-medium">বাতিল</button>
-        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium">জমা দিন</button>
+        <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium">জমা দিন</button>
       </div>
       <p id="submitMsg" class="text-sm"></p>
     </form>
   </div>
 </div>
 
-<!-- ═══════════════ FIREBASE + TELEGRAM LOGIC ═══════════════ -->
+<!-- ═══════════════ FIREBASE + LOGIC ═══════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
@@ -157,61 +186,61 @@ let currentUser = null;
 let currentProfile = {};
 let submittingTask = null;
 let tgUser = null;
+let surveyTimer = null;
+let completedTaskIds = new Set();   // ⭐ ইউজার কোন কোন টাস্ক শেষ করেছে
 
-// ═══ Telegram Init ═══
 const tg = window.Telegram?.WebApp;
 
-// ═══ ImgBB Upload (Firebase Storage এর বদলে) ═══
+// ═══ ImgBB (Image) ═══
 const IMGBB_API_KEY = 'bc5a5bca9a50833046600a2cc94de6c6';
-
 async function uploadToImgBB(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-
+  const fd = new FormData();
+  fd.append('image', file);
   const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-    method: 'POST',
-    body: formData
+    method: 'POST', body: fd
   });
-
   const data = await res.json();
-  if (!data.success) throw new Error(data.error?.message || 'ImgBB আপলোড ব্যর্থ');
-  return data.data.url; // সরাসরি ইমেজ URL
+  if (!data.success) throw new Error(data.error?.message || 'ImgBB ব্যর্থ');
+  return data.data.url;
 }
 
+// ═══ Catbox (Voice/Audio) ═══
+async function uploadToCatbox(file) {
+  const fd = new FormData();
+  fd.append('reqtype', 'fileupload');
+  fd.append('fileToUpload', file);
+  const res = await fetch('https://catbox.moe/user/api.php', {
+    method: 'POST', body: fd
+  });
+  const url = (await res.text()).trim();
+  if (!url.startsWith('http')) throw new Error('Catbox আপলোড ব্যর্থ');
+  return url;
+}
+
+// ═══ Telegram Init ═══
 function initTelegram() {
   if (!tg || !tg.initDataUnsafe?.user) {
     $('loadingScreen').classList.add('hidden');
     $('errorScreen').classList.remove('hidden');
     return false;
   }
-
   tg.ready();
   tg.expand();
   tgUser = tg.initDataUnsafe.user;
-  console.log('Telegram User:', tgUser);
   return true;
 }
 
-// ═══ Auth + Profile Setup ═══
 async function startApp() {
   $('loadingScreen').classList.remove('hidden');
   $('errorScreen').classList.add('hidden');
-
   if (!initTelegram()) return;
-
-  try {
-    await signInAnonymously(auth);
-  } catch (err) {
-    alert('Firebase Anonymous Auth চালু করুন।\n' + err.message);
-    return;
-  }
+  try { await signInAnonymously(auth); }
+  catch (err) { alert('Firebase Anonymous Auth চালু করুন।\n' + err.message); }
 }
 
 onAuthStateChanged(auth, async (fbUser) => {
   if (!fbUser || !tgUser) return;
-
   const uid = 'tg_' + tgUser.id;
-
   const userRef = ref(db, 'users/' + uid);
   const snap = await get(userRef);
 
@@ -221,7 +250,6 @@ onAuthStateChanged(auth, async (fbUser) => {
       username: tgUser.username || '',
       firstName: tgUser.first_name || '',
       lastName: tgUser.last_name || '',
-      languageCode: tgUser.language_code || '',
       photoUrl: tgUser.photo_url || '',
       wallet_balance: 0,
       total_earned: 0,
@@ -259,10 +287,22 @@ onAuthStateChanged(auth, async (fbUser) => {
     $('wEarned').textContent = (currentProfile.total_earned || 0).toFixed(0);
   });
 
+  // ⭐ User এর সব সাবমিশন থেকে completed task IDs বের করি
+  onValue(ref(db, 'submissions'), snap => {
+    const data = snap.val() || {};
+    completedTaskIds.clear();
+    Object.values(data).forEach(s => {
+      if (s.userId === uid) {
+        completedTaskIds.add(String(s.taskId));
+      }
+    });
+    // UI refresh
+    loadTasks();
+    loadSubmissions();
+  });
+
   $('loadingScreen').classList.add('hidden');
   $('panel').classList.remove('hidden');
-
-  loadTasks();
 });
 
 startApp();
@@ -281,11 +321,18 @@ document.querySelectorAll('.tabBtn').forEach(btn => {
   };
 });
 
-// ═══ Escape ═══
 function esc(s) {
   return String(s || '').replace(/[<>&"]/g, c =>
     ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
 }
+
+const TYPE_LABEL = {
+  image: '🖼️ ছবি',
+  voice: '🎤 ভয়েস',
+  audio: '🎤 ভয়েস',
+  survey: '📊 সার্ভে',
+  text: '📝 টেক্সট'
+};
 
 // ═══ Tasks ═══
 function loadTasks() {
@@ -303,67 +350,230 @@ function loadTasks() {
     }
 
     tasks.forEach(t => {
+      const isDone = completedTaskIds.has(String(t.id));  // ⭐ চেক
       const div = document.createElement('div');
-      div.className = 'bg-white p-4 rounded-xl shadow';
+      div.className = 'bg-white p-4 rounded-xl shadow ' + (isDone ? 'opacity-70' : '');
       div.innerHTML = `
         <div class="flex justify-between items-start mb-2">
           <h3 class="font-semibold text-sm flex-1">${esc(t.title)}</h3>
-          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">${esc(t.type)}</span>
+          <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2">
+            ${TYPE_LABEL[t.type] || esc(t.type)}
+          </span>
         </div>
         <p class="text-xs text-gray-500 mb-3">${esc(t.description)}</p>
         <div class="flex justify-between items-center">
           <span class="text-green-600 font-bold">৳ ${t.reward}</span>
-          <button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm openBtn">শুরু করুন</button>
+          ${isDone
+            ? `<button disabled class="bg-green-100 text-green-700 px-4 py-1.5 rounded-lg text-sm font-medium cursor-not-allowed">
+                ✅ সম্পন্ন
+               </button>`
+            : `<button class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm openBtn">শুরু করুন</button>`
+          }
         </div>
         <p class="text-xs text-gray-400 mt-2">${t.filled_slots || 0}/${t.total_slots || 1000} সম্পন্ন</p>
       `;
-      div.querySelector('.openBtn').onclick = () => openModal(t);
+      if (!isDone) {
+        div.querySelector('.openBtn').onclick = () => openModal(t);
+      }
       list.appendChild(div);
     });
   });
 }
 
-// ═══ Modal ═══
+// ═══ Modal Setup by Type ═══
 function openModal(t) {
+  // ⭐ ডাবল চেক — আগেই শেষ হলে খুলবো না
+  if (completedTaskIds.has(String(t.id))) {
+    alert('⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন।');
+    return;
+  }
+
   submittingTask = t;
   $('modalTaskId').value = t.id;
   $('modalTitle').textContent = t.title;
   $('modalDesc').textContent = t.description || '';
   $('modalReward').textContent = t.reward;
+  $('modalTypeBadge').textContent = TYPE_LABEL[t.type] || t.type;
   $('submitMsg').textContent = '';
+  $('submitMsg').className = 'text-sm';
+
+  $('submitContent').value = '';
+  $('submitImage').value = '';
+  $('submitVoice').value = '';
+  $('timerDisplay').textContent = '01:00';
+
+  $('textInputDiv').classList.add('hidden');
+  $('imageInputDiv').classList.add('hidden');
+  $('voiceInputDiv').classList.add('hidden');
+  $('surveyDiv').classList.add('hidden');
+  $('surveyStartDiv').classList.remove('hidden');
+  $('timerDiv').classList.add('hidden');
+  $('submitBtn').classList.remove('hidden');
+
+  const type = (t.type || 'text').toLowerCase();
+
+  if (type === 'image') {
+    $('imageInputDiv').classList.remove('hidden');
+  } else if (type === 'voice' || type === 'audio') {
+    $('voiceInputDiv').classList.remove('hidden');
+  } else if (type === 'survey') {
+    $('surveyDiv').classList.remove('hidden');
+    $('submitBtn').classList.add('hidden');
+    const url = t.link || (t.description && t.description.startsWith('http') ? t.description : null);
+    if (!url) {
+      $('submitMsg').className = 'text-sm text-red-500';
+      $('submitMsg').textContent = '⚠️ এই সার্ভের লিংক সেট করা নেই।';
+      $('openSurveyBtn').disabled = true;
+    } else {
+      $('openSurveyBtn').disabled = false;
+      $('openSurveyBtn').onclick = () => startSurvey(url);
+    }
+  } else {
+    $('textInputDiv').classList.remove('hidden');
+  }
+
   $('submitModal').classList.remove('hidden');
 }
 
 window.closeModal = () => {
   $('submitModal').classList.add('hidden');
   submittingTask = null;
+  if (surveyTimer) { clearInterval(surveyTimer); surveyTimer = null; }
 };
 
-// ═══ Submit (ImgBB Upload) ═══
+// ═══ Survey Timer Flow ═══
+function startSurvey(url) {
+  if (tg && tg.openLink) tg.openLink(url);
+  else window.open(url, '_blank');
+
+  $('surveyStartDiv').classList.add('hidden');
+  $('timerDiv').classList.remove('hidden');
+
+  let seconds = 60;
+  $('timerDisplay').textContent = '01:00';
+
+  surveyTimer = setInterval(() => {
+    seconds--;
+    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    $('timerDisplay').textContent = `${m}:${s}`;
+
+    if (seconds <= 0) {
+      clearInterval(surveyTimer);
+      surveyTimer = null;
+      autoCompleteSurvey();
+    }
+  }, 1000);
+}
+
+async function autoCompleteSurvey() {
+  try {
+    $('timerDiv').innerHTML = '<p class="text-green-600 font-bold text-lg">✅ সম্পন্ন!</p>';
+    await awardSurvey(submittingTask);
+    setTimeout(() => {
+      closeModal();
+      alert(`🎉 অভিনন্দন! ৳${submittingTask.reward} আপনার অ্যাকাউন্টে যোগ হয়েছে।`);
+      tg?.HapticFeedback?.notificationOccurred('success');
+    }, 1500);
+  } catch (err) {
+    alert('সমস্যা: ' + err.message);
+  }
+}
+
+async function awardSurvey(task) {
+  const uid = 'tg_' + tgUser.id;
+  const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
+
+  // ⭐ ডাবল চেক
+  if (completedTaskIds.has(String(task.id))) {
+    alert('⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন।');
+    closeModal();
+    return;
+  }
+
+  const subRef = push(ref(db, 'submissions'));
+  await set(subRef, {
+    taskId: task.id,
+    taskTitle: task.title,
+    userId: uid,
+    userName: fullName,
+    username: tgUser.username || '',
+    telegramId: tgUser.id,
+    content: 'Auto-completed survey',
+    fileUrl: null,
+    reward: task.reward,
+    status: 'approved',
+    autoApproved: true,
+    createdAt: Date.now(),
+    reviewedAt: Date.now()
+  });
+
+  await update(ref(db, 'users/' + uid), {
+    wallet_balance: (currentProfile.wallet_balance || 0) + task.reward,
+    total_earned: (currentProfile.total_earned || 0) + task.reward
+  });
+
+  const taskRef = ref(db, 'tasks/' + task.id);
+  const snap = await get(taskRef);
+  const cur = snap.val() || {};
+  await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
+
+  // ⭐ Set এ যোগ করি
+  completedTaskIds.add(String(task.id));
+}
+
+// ═══ Submit (Image / Voice / Text) ═══
 $('submitForm').onsubmit = async e => {
   e.preventDefault();
   if (!submittingTask) return;
+
+  const type = (submittingTask.type || 'text').toLowerCase();
+  if (type === 'survey') return;
+
+  // ⭐ ডাবল চেক
+  if (completedTaskIds.has(String(submittingTask.id))) {
+    $('submitMsg').className = 'text-sm text-red-500';
+    $('submitMsg').textContent = '⚠️ আপনি ইতিমধ্যে এই টাস্কটি সম্পন্ন করেছেন';
+    return;
+  }
+
   $('submitMsg').className = 'text-sm';
-  $('submitMsg').textContent = 'পাঠানো হচ্ছে...';
+  $('submitMsg').textContent = 'যাচাই করা হচ্ছে...';
 
   try {
     let fileUrl = null;
-    const file = $('submitFile').files[0];
-    if (file) {
-      $('submitMsg').textContent = '📤 ইমেজ আপলোড হচ্ছে...';
+    const content = $('submitContent').value.trim();
+
+    if (type === 'image') {
+      const file = $('submitImage').files[0];
+      if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'ছবি সিলেক্ট করুন'; return; }
+      $('submitMsg').textContent = '📤 ছবি আপলোড হচ্ছে...';
       fileUrl = await uploadToImgBB(file);
-      $('submitMsg').textContent = '✅ ইমেজ আপলোড সম্পন্ন, ডেটা সেভ হচ্ছে...';
     }
+    else if (type === 'voice' || type === 'audio') {
+      const file = $('submitVoice').files[0];
+      if (!file) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'অডিও সিলেক্ট করুন'; return; }
+      $('submitMsg').textContent = '📤 অডিও আপলোড হচ্ছে...';
+      fileUrl = await uploadToCatbox(file);
+    }
+    else if (type === 'text') {
+      if (!content) { $('submitMsg').className = 'text-sm text-red-500'; $('submitMsg').textContent = 'টেক্সট লিখুন'; return; }
+    }
+
+    $('submitMsg').textContent = '✅ সেভ হচ্ছে...';
+
+    const uid = 'tg_' + tgUser.id;
+    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
 
     const subRef = push(ref(db, 'submissions'));
     await set(subRef, {
       taskId: submittingTask.id,
       taskTitle: submittingTask.title,
-      userId: currentUser.uid,
-      userName: [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '),
+      userId: uid,
+      userName: fullName,
       username: tgUser.username || '',
       telegramId: tgUser.id,
-      content: $('submitContent').value,
+      content: content,
       fileUrl: fileUrl,
       reward: submittingTask.reward,
       status: 'pending',
@@ -375,13 +585,17 @@ $('submitForm').onsubmit = async e => {
     const cur = snap.val() || {};
     await update(taskRef, { filled_slots: (cur.filled_slots || 0) + 1 });
 
+    // ⭐ Set এ যোগ করি
+    completedTaskIds.add(String(submittingTask.id));
+
     $('submitMsg').className = 'text-sm text-green-600';
     $('submitMsg').textContent = '✅ জমা হয়েছে, রিভিউর জন্য অপেক্ষা করুন';
-    $('submitContent').value = '';
-    $('submitFile').value = '';
 
     tg?.HapticFeedback?.notificationOccurred('success');
-    setTimeout(closeModal, 1200);
+    setTimeout(() => {
+      closeModal();
+      loadTasks();  // টাস্ক লিস্ট রিফ্রেশ
+    }, 1200);
   } catch (err) {
     $('submitMsg').className = 'text-sm text-red-500';
     $('submitMsg').textContent = 'সমস্যা: ' + err.message;
@@ -414,7 +628,10 @@ function loadSubmissions() {
         <div class="flex-1 min-w-0">
           <p class="font-medium text-sm truncate">${esc(s.taskTitle)}</p>
           <p class="text-xs text-gray-400">${new Date(s.createdAt).toLocaleString('bn-BD')}</p>
-          ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" class="text-blue-600 underline text-xs">📎 ছবি দেখুন</a>` : ''}
+          ${s.autoApproved ? '<p class="text-xs text-green-600">⚡ অটো-অনুমোদিত</p>' : ''}
+          ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" class="text-blue-600 underline text-xs">
+            ${s.fileUrl.match(/\.(mp3|wav|m4a|ogg|oga)/i) ? '🎤 অডিও শুনুন' : '📎 ফাইল দেখুন'}
+          </a>` : ''}
         </div>
         <div class="text-right ml-2">
           <span class="${badge} px-2 py-1 rounded-full text-xs">${s.status}</span>
