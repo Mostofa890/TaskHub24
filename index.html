@@ -270,17 +270,24 @@
         .task-content label:first-child{margin-top:0;}
         .task-content input[type="file"]{width:100%;padding:12px;border:2px dashed #c7c9d9;border-radius:12px;background:#fafaff;font-size:0.82rem;cursor:pointer;font-weight:600;color:#4b5563;}
         .task-content input[type="file"]:hover{border-color:#6C5CE7;background:#f5f4ff;}
+        .task-content input[type="file"]:disabled{opacity:0.5;cursor:not-allowed;background:#eee;}
         .task-content textarea{width:100%;padding:12px;border:1.5px solid #e1e1e1;border-radius:12px;font-size:0.88rem;background:#f9f9f9;outline:none;transition:0.3s;font-weight:500;font-family:inherit;resize:vertical;}
         .task-content textarea:focus{border-color:#6C5CE7;background:#fff;box-shadow:0 0 0 4px rgba(108,92,231,0.1);}
+        .task-content textarea:disabled{opacity:0.5;cursor:not-allowed;background:#eee;}
         .task-content small{display:block;font-size:0.7rem;color:#9ca3af;margin-top:6px;font-weight:600;}
         .task-hint-box{padding:10px 14px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:8px;font-size:0.76rem;color:#92400e;font-weight:600;line-height:1.45;margin-top:14px;}
+        .task-status-warning{padding:14px 18px;background:linear-gradient(135deg,#FFF3CD,#FEF3C7);border-left:4px solid #f39c12;border-radius:10px;font-size:0.85rem;color:#856404;font-weight:700;line-height:1.5;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+        .task-status-warning i{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
+        .task-status-info{padding:14px 18px;background:linear-gradient(135deg,#D1FAE5,#ECFDF5);border-left:4px solid #10b981;border-radius:10px;font-size:0.85rem;color:#065f46;font-weight:700;line-height:1.5;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+        .task-status-info i{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
         .task-actions{display:flex;gap:10px;padding:14px 18px 18px;}
         .task-btn{flex:1;padding:13px;border-radius:12px;font-weight:800;font-size:0.9rem;border:none;cursor:pointer;transition:0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
         .task-btn:active{transform:scale(0.97);}
-        .task-btn:disabled{opacity:0.6;cursor:not-allowed;}
+        .task-btn:disabled{opacity:0.55;cursor:not-allowed;}
         .task-btn-cancel{background:#e5e7eb;color:#374151;}
         .task-btn-submit{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;box-shadow:0 5px 15px rgba(108,92,231,0.3);}
         .task-btn-submit:hover:not(:disabled){box-shadow:0 8px 20px rgba(108,92,231,0.4);}
+        .task-btn-pending{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;cursor:not-allowed;}
 
         /* ═══════════ TASKS PAGE — INNER TABS ═══════════ */
         .tasks-inner-tabs{display:flex;gap:8px;padding:0 20px 16px;}
@@ -376,6 +383,7 @@
             <span class="cat-box" id="taskSubmitTimeLeft"></span>
         </div>
         <div class="task-desc-box" id="taskSubmitDesc"></div>
+        <div id="taskStatusBannerWrap"></div>
         <div class="task-content" id="taskContentArea"></div>
         <div class="task-actions">
             <button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button>
@@ -420,7 +428,6 @@
         <div id="ad-area" class="ad-grid"></div>
     </div>
 
-    <!-- ✅ TASKS PAGE — with 2 inner tabs -->
     <div id="page-tasks" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-tasks"></i> Tasks</div>
 
@@ -478,7 +485,6 @@
         </div>
     </div>
 
-    <!-- ✅ HISTORY PAGE — Task History REMOVED, only Ad History -->
     <div id="page-history" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-history" style="color:var(--primary);"></i> Ad Earning History</div>
@@ -576,10 +582,10 @@ let cycleTimerInterval = null;
 let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: null, adSlotIndex: null, paused: false, wasCancelled: false };
 let MIN_AD_WATCH_TIME = 15;
 
-let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false };
+let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 
 // ═══════════════════════════════════════════════════════
-// ✅ TASKS INNER TAB SWITCHER
+// ✅ TASKS INNER TAB
 // ═══════════════════════════════════════════════════════
 function switchTasksInnerTab(which) {
     const btnAvail = document.getElementById('tabBtnAvailable');
@@ -621,7 +627,6 @@ function isAllAdsCompleted() {
     }
     return hasConfigured;
 }
-
 async function startAdsResetCountdown() {
     if (appState.user.adsResetTime && appState.user.adsResetTime > Date.now()) return;
     const resetTime = Date.now() + (AD_RESET_HOURS * 60 * 60 * 1000);
@@ -630,7 +635,6 @@ async function startAdsResetCountdown() {
     try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
     toast('🎉 সব অ্যাড দেখা শেষ! ' + AD_RESET_HOURS + ' ঘন্টা পর আবার দেখতে পারবেন।');
 }
-
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
     appState.user.dailyAds = {};
@@ -640,7 +644,6 @@ async function forceCycleReset() {
     toast('🔄 অ্যাড রিসেট হয়েছে! আবার দেখতে পারবেন।');
     try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0 }); } catch (e) {}
 }
-
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
 function formatTimeUntil(targetMs) {
@@ -666,7 +669,6 @@ function updateCycleUI() {
     label.textContent = '⏸️ Not Started';
     timer.textContent = 'Watch All Ads';
 }
-
 function getDeviceId() {
     let deviceId = localStorage.getItem('nexearn_device_id');
     if (!deviceId) { deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('nexearn_device_id', deviceId); }
@@ -698,23 +700,16 @@ async function uploadAudio(file) {
         { name: '0x0.st',     fn: uploadToZeroXZero }
     ];
     for (const svc of services) {
-        try { console.log(`📤 ${svc.name} এ আপলোড চেষ্টা...`); const url = await svc.fn(file); console.log(`✅ ${svc.name} সফল:`, url); return url; }
-        catch (err) { console.warn(`❌ ${svc.name} ব্যর্থ:`, err.message); }
+        try { const url = await svc.fn(file); return url; }
+        catch (err) {}
     }
     throw new Error('সব সার্ভার ব্যর্থ। আবার চেষ্টা করুন।');
 }
-async function uploadToBashupload(file) {
-    const fd = new FormData(); fd.append('file', file);
-    const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd });
-    const text = await res.text();
-    const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
-    if (!match) throw new Error('URL পাওয়া যায়নি');
-    return match[0] + '?download=1';
-}
-async function uploadToTempSh(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd }); const text = (await res.text()).trim(); if (!text.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return text; }
-async function uploadToLitterbox(file) { const fd = new FormData(); fd.append('reqtype', 'fileupload'); fd.append('time', '72h'); fd.append('fileToUpload', file); const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return url; }
-async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[]', file); const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return url; }
-async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP ' + res.status); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return url; }
+async function uploadToBashupload(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd }); const text = await res.text(); const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/); if (!match) throw new Error('fail'); return match[0] + '?download=1'; }
+async function uploadToTempSh(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd }); const text = (await res.text()).trim(); if (!text.startsWith('http')) throw new Error('fail'); return text; }
+async function uploadToLitterbox(file) { const fd = new FormData(); fd.append('reqtype', 'fileupload'); fd.append('time', '72h'); fd.append('fileToUpload', file); const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
+async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[]', file); const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
+async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP'); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
 
 // ═══════════════════════════════════════════════════════
 // ✅ SURVEY RETURN REWARD
@@ -735,7 +730,6 @@ function checkPendingSurveyReward() {
     localStorage.removeItem('pending_survey');
     return null;
 }
-
 async function awardSurveyReward(p) {
     const taskId = p.taskId;
     if (!taskId) return;
@@ -795,7 +789,6 @@ function showBonus() {
     document.getElementById('app').classList.add('blurred');
 }
 function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
-
 async function claimDailyBonus() {
     if (!isOnline) { toast('No internet connection!'); return; }
     const btn = document.getElementById('btnClaimBonus');
@@ -869,7 +862,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         return true;
     } catch(e) { return false; }
 }
-
 function computeCommissionSplit(earnedAmount) {
     const referrerId = appState.user.referredBy;
     const rate = Number(REF_COMMISSION_RATE || 0);
@@ -945,7 +937,7 @@ function startPeriodicRecheck() {
 function stopPeriodicRecheck() { if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; } stopCycleTimer(); }
 
 // ═══════════════════════════════════════════════════════
-// ✅ AD WATCH SYSTEM
+// ✅ AD WATCH
 // ═══════════════════════════════════════════════════════
 function showAdTimer(slotIndex) {
     if (!isOnline) { toast('No internet connection!'); return; }
@@ -1194,7 +1186,7 @@ function renderAds() {
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ TASK SYSTEM (Survey → survey.html | Others → modal)
+// ✅ TASK SYSTEM
 // ═══════════════════════════════════════════════════════
 function getTaskTypeIcon(type) {
     switch ((type || '').toLowerCase()) {
@@ -1229,6 +1221,7 @@ function isTaskAutoDeleted(task) {
     return Date.now() > (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000);
 }
 
+// ✅ UPDATED: Render New Tasks — Only Start / Completed / Expired / Full
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -1249,20 +1242,22 @@ function renderNewTasks() {
         const totalSlots = task.totalSlots || 100;
         const slotsLeft = Math.max(0, totalSlots - submittedCount);
         const isDone = status === 'approved';
-        const isPending = status === 'pending';
-        const isRejected = status === 'rejected';
         const typeIcon = getTaskTypeIcon(task.type);
         const typeLabel = getTaskTypeLabel(task.type);
 
         let btnHtml;
-        let statusBadge = '';
 
-        if (isExpired) { btnHtml = `<button class="btn-act" style="background:#ccc; color:#666;" disabled>Expired</button>`; statusBadge = `<span style="font-size:0.7rem; color:#ff4757; font-weight:bold;"><i class="fas fa-clock"></i> Expired</span>`; }
-        else if (isDone) { btnHtml = `<button class="btn-act" style="background:#00b894; color:#fff;" disabled>Completed</button>`; statusBadge = `<span style="font-size:0.7rem; color:#00b894; font-weight:bold;"><i class="fas fa-check-circle"></i> Done</span>`; }
-        else if (isPending) { btnHtml = `<button class="btn-act" style="background:#f39c12; color:#fff;" disabled>Pending</button>`; statusBadge = `<span style="font-size:0.7rem; color:#f39c12; font-weight:bold;"><i class="fas fa-hourglass-half"></i> Under Review</span>`; }
-        else if (isRejected) { btnHtml = `<button class="btn-act btn-start" style="background:#6C5CE7; color:#fff;" onclick="openTaskSubmit('${taskId}')">Re-Submit</button>`; statusBadge = `<span style="font-size:0.7rem; color:#ff4757; font-weight:bold;"><i class="fas fa-times-circle"></i> Rejected</span>`; }
-        else if (slotsLeft <= 0) { btnHtml = `<button class="btn-act" style="background:#ccc; color:#666;" disabled>Full</button>`; }
-        else { btnHtml = `<button class="btn-act btn-start" style="background:#6C5CE7; color:#fff;" onclick="openTaskSubmit('${taskId}')">Start</button>`; }
+        if (isExpired) {
+            btnHtml = `<button class="btn-act" style="background:#ccc; color:#666; cursor:not-allowed;" disabled>Expired</button>`;
+        } else if (isDone) {
+            // ✅ Approved → cannot start again
+            btnHtml = `<button class="btn-act" style="background:#00b894; color:#fff; cursor:not-allowed;" disabled>✓ Completed</button>`;
+        } else if (slotsLeft <= 0) {
+            btnHtml = `<button class="btn-act" style="background:#ccc; color:#666; cursor:not-allowed;" disabled>Full</button>`;
+        } else {
+            // ✅ New / Pending / Rejected → Only show "Start" button
+            btnHtml = `<button class="btn-act btn-start" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:#fff; box-shadow:0 4px 12px rgba(108,92,231,.3);" onclick="openTaskSubmit('${taskId}')">Start</button>`;
+        }
 
         el.innerHTML += `
             <div class="task-item" style="flex-direction:column; align-items:flex-start; gap:10px; ${isExpired ? 'opacity:0.7;' : ''}">
@@ -1280,7 +1275,6 @@ function renderNewTasks() {
                     <div>
                         <p style="font-size:0.7rem; color:#ff4757;"><i class="fas fa-clock"></i> ${isExpired ? 'Expired' : (task.timeLimit || '7 days')}</p>
                         <p style="font-size:0.7rem; color:#6b7280;">${slotsLeft} slots left</p>
-                        ${statusBadge}
                     </div>
                     ${btnHtml}
                 </div>
@@ -1291,18 +1285,29 @@ function renderNewTasks() {
     if (!hasVisibleTask) { el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক নেই</p></div>'; }
 }
 
+// ✅ UPDATED: openTaskSubmit — handles pending & rejected states
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
     if (!task) { toast('Task not found'); return; }
     if (isTaskExpired(task)) { toast('This task has expired'); return; }
-    const st = appState.user.taskStatuses && appState.user.taskStatuses[taskId];
-    if (st === 'approved') { toast('এই টাস্কটি ইতিমধ্যে সম্পন্ন করেছেন'); return; }
-    if (st === 'pending') { toast('এই টাস্কটি রিভিউতে আছে'); return; }
+
+    const status = appState.user.taskStatuses ? appState.user.taskStatuses[taskId] : null;
+
+    // ✅ Approved → Block completely
+    if (status === 'approved') {
+        toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন');
+        return;
+    }
 
     const type = (task.type || 'text').toLowerCase();
+    taskState.taskId = taskId;
+    taskState.task = task;
+    taskState.type = type;
+    taskState.submitting = false;
+    taskState.currentStatus = status || 'new';
 
-    // ✅ Survey → survey.html
-    if (type === 'survey') {
+    // ✅ Survey: only redirect if NOT pending (already submitted)
+    if (type === 'survey' && status !== 'pending') {
         const pending = {
             taskId: taskId,
             taskTitle: task.title || 'Survey',
@@ -1316,11 +1321,6 @@ function openTaskSubmit(taskId) {
         return;
     }
 
-    taskState.taskId = taskId;
-    taskState.task = task;
-    taskState.type = type;
-    taskState.submitting = false;
-
     const sym = appState.config.currencySymbol || 'TK';
     document.getElementById('taskHeadIcon').textContent = getTaskTypeIcon(task.type);
     document.getElementById('taskSubmitTitle').textContent = task.title || 'Task';
@@ -1331,37 +1331,82 @@ function openTaskSubmit(taskId) {
 
     const contentArea = document.getElementById('taskContentArea');
     const actionBtn = document.getElementById('taskSubmitActionBtn');
+    const bannerWrap = document.getElementById('taskStatusBannerWrap');
     contentArea.innerHTML = '';
+    bannerWrap.innerHTML = '';
     actionBtn.disabled = false;
+    actionBtn.className = 'task-btn task-btn-submit';
     actionBtn.style.display = 'flex';
 
-    if (type === 'image') {
-        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
+    // ✅ Determine if user can submit
+    const isPending = (status === 'pending');
+    const isRejected = (status === 'rejected');
+
+    // Show banner
+    if (isPending) {
+        bannerWrap.innerHTML = `
+            <div class="task-status-warning" style="margin:14px 18px 0;">
+                <i class="fas fa-hourglass-half"></i>
+                <div>
+                    <b>⏳ Already Submitted</b><br>
+                    <span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি আগেই জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span>
+                </div>
+            </div>`;
+    } else if (isRejected) {
+        bannerWrap.innerHTML = `
+            <div class="task-status-info" style="margin:14px 18px 0;">
+                <i class="fas fa-redo"></i>
+                <div>
+                    <b>🔄 Re-Submit Chance</b><br>
+                    <span style="font-weight:600;font-size:0.78rem;">আপনার আগের submission টি reject হয়েছিল। আপনি আরেকবার চেষ্টা করতে পারবেন।</span>
+                </div>
+            </div>`;
+    }
+
+    // Build content per type
+    if (type === 'survey') {
+        // Survey but pending → show "already submitted" only
+        actionBtn.style.display = 'none';
+        contentArea.innerHTML = `
+            <div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;">
+                <i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>
+                Survey already submitted, waiting for approval
+            </div>`;
+    } else if (type === 'image') {
         contentArea.innerHTML = `
             <label>📷 ছবি আপলোড করুন *</label>
-            <input type="file" id="taskImageInput" accept="image/*"/>
+            <input type="file" id="taskImageInput" accept="image/*" ${isPending ? 'disabled' : ''}/>
             <small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small>
             <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..."></textarea>
-            <div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>
+            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
+            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>`}
         `;
     } else if (type === 'voice' || type === 'audio') {
-        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
         contentArea.innerHTML = `
             <label>🎤 ভয়েস / অডিও আপলোড করুন *</label>
-            <input type="file" id="taskVoiceInput" accept="audio/*"/>
+            <input type="file" id="taskVoiceInput" accept="audio/*" ${isPending ? 'disabled' : ''}/>
             <small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small>
             <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..."></textarea>
-            <div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>
+            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
+            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>`}
         `;
     } else {
-        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
         contentArea.innerHTML = `
             <label>📝 আপনার উত্তর লিখুন *</label>
-            <textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..."></textarea>
-            <div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>
+            <textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
+            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}
         `;
+    }
+
+    // ✅ Disable submit button if pending
+    if (isPending) {
+        actionBtn.disabled = true;
+        actionBtn.className = 'task-btn task-btn-pending';
+        actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Already Submitted';
+    } else {
+        actionBtn.disabled = false;
+        actionBtn.className = 'task-btn task-btn-submit';
+        actionBtn.innerHTML = isRejected ? '<i class="fas fa-redo"></i> Re-Submit' : '<i class="fas fa-paper-plane"></i> জমা দিন';
     }
 
     document.getElementById('taskSubmitModal').classList.add('active');
@@ -1370,6 +1415,8 @@ function openTaskSubmit(taskId) {
 
 async function submitGenericTask() {
     if (taskState.submitting) return;
+    if (taskState.currentStatus === 'pending') { toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে'); return; }
+
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
@@ -1441,12 +1488,12 @@ async function submitGenericTask() {
 function closeTaskSubmit() {
     document.getElementById('taskSubmitModal').classList.remove('active');
     document.getElementById('app').classList.remove('blurred');
-    taskState.taskId = null; taskState.task = null; taskState.submitting = false;
+    taskState.taskId = null; taskState.task = null; taskState.submitting = false; taskState.currentStatus = 'new';
 }
 function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক বাতিল'); }
 
 // ═══════════════════════════════════════════════════════
-// ✅ TASK HISTORY (Tasks পেজের ২য় ট্যাব)
+// ✅ TASK HISTORY
 // ═══════════════════════════════════════════════════════
 async function loadTaskHistory() {
     const container = document.getElementById('taskHistoryArea');
@@ -1518,7 +1565,7 @@ async function loadTaskHistory() {
                     <div class="th-card-meta">
                         <div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div>
                         <div class="row"><i class="fas fa-calendar"></i> Submitted: ${dateStr}</div>
-                        ${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved (no review needed)</span></div>` :
+                        ${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved</span></div>` :
                           (reviewedAt ? `<div class="row"><i class="fas fa-check-double"></i> Reviewed: ${reviewedAt}</div>` : '')}
                     </div>
                     ${contentPreview}
@@ -1583,9 +1630,6 @@ async function loadWithdrawHistory() {
     } catch (e) {}
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ HELPERS
-// ═══════════════════════════════════════════════════════
 function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '/app?startapp=' + tgUser.id; }
 function copyLink() { navigator.clipboard.writeText(getRefLink()); toast('Link Copied!'); }
 function shareLink() { const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=Join%20Now!'; if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
