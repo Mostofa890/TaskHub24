@@ -287,6 +287,14 @@
         .task-btn-locked{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;cursor:not-allowed;}
         .task-btn-redirect{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;box-shadow:0 5px 15px rgba(239,68,68,0.3);}
 
+        /* ✅ NEW: Open Link Box for screenshot tasks */
+        .task-open-link-box{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:2px dashed #6C5CE7;border-radius:16px;padding:16px;text-align:center;margin-bottom:6px;}
+        .task-open-link-label{font-size:0.75rem;font-weight:800;color:#4338ca;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;}
+        .task-open-link-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 8px 20px rgba(108,92,231,0.35);transition:0.2s;font-family:inherit;}
+        .task-open-link-btn:active{transform:scale(0.97);box-shadow:0 4px 12px rgba(108,92,231,0.3);}
+        .task-open-link-btn i{font-size:1.05rem;}
+        .task-open-link-box small{display:block;font-size:0.72rem;color:#4338ca;margin-top:10px;font-weight:600;line-height:1.4;}
+
         .tasks-inner-tabs{display:flex;gap:8px;padding:0 20px 16px;}
         .tasks-inner-tab{flex:1;padding:11px 12px;border-radius:14px;background:#fff;color:#6b7280;font-weight:800;font-size:0.82rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
         .tasks-inner-tab.active{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(108,92,231,.28);}
@@ -570,6 +578,38 @@ let MIN_AD_WATCH_TIME = 15;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
+
+// ═══════════════════════════════════════════════════════
+// ✅ TASK TYPE HELPERS
+// ═══════════════════════════════════════════════════════
+// Special task types that have their own custom UI
+const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
+
+// ✅ Any task that is NOT a special type will be treated as a "screenshot/link" task
+function isScreenshotTask(type) {
+    const t = String(type || '').toLowerCase();
+    if (!t) return false;
+    return !SPECIAL_TASK_TYPES.includes(t);
+}
+
+// ✅ Open external link inside Telegram WebApp (or browser fallback)
+function openTaskLink(url) {
+    if (!url || url === '#' || url === 'undefined') {
+        toast('⚠️ এই টাস্কে কোনো লিংক নেই');
+        return;
+    }
+    try {
+        if (tg && typeof tg.openLink === 'function') {
+            tg.openLink(url, { try_instant_view: false });
+            return;
+        }
+        if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) {
+            tg.openTelegramLink(url);
+            return;
+        }
+    } catch (e) {}
+    window.open(url, '_blank');
+}
 
 function getTaskUserState(taskId) {
     const subs = userSubmissionsCache[String(taskId)] || [];
@@ -1290,8 +1330,12 @@ function renderNewTasks() {
 
 // ═══════════════════════════════════════════════════════
 // ✅ OPEN TASK SUBMIT
-// - Survey & YouTube Video View → redirect to external page
-// - Others → modal
+// - Survey → survey.html
+// - YouTube Video View → youtube.html (timer)
+// - Voice / Image / Text → modal (upload / text)
+// - ✅ All OTHER types (youtube_like, app_download, website_visit, telegram_join,
+//   facebook_like, instagram_follow, twitter_follow, tiktok_follow, sign_up,
+//   general, other, etc.) → modal with "Open Link" button + Screenshot upload
 // ═══════════════════════════════════════════════════════
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
@@ -1326,7 +1370,6 @@ function openTaskSubmit(taskId) {
             window.location.href = 'survey.html';
             return;
         }
-        // Pending / locked → show info in modal
     }
 
     // ✅ YOUTUBE VIDEO VIEW: redirect to youtube.html if NEW or RE-SUBMIT allowed
@@ -1344,7 +1387,6 @@ function openTaskSubmit(taskId) {
             window.location.href = 'youtube.html';
             return;
         }
-        // Pending / locked → show info in modal
     }
 
     const sym = appState.config.currencySymbol || 'TK';
@@ -1384,21 +1426,41 @@ function openTaskSubmit(taskId) {
         }
     }
 
-    // Content per type
+    // ═══ Content per type ═══
     if (type === 'survey') {
-        // Only reachable if Pending or locked
         actionBtn.style.display = 'none';
         contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>${isPending ? 'Survey already submitted, waiting for approval' : 'Survey cannot be re-submitted'}</div>`;
     } else if (type === 'youtube_video_view') {
-        // Only reachable if Pending or locked
         actionBtn.style.display = 'none';
         contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#ef4444;margin-bottom:10px;display:block;"></i>${isPending ? 'YouTube video already watched, waiting for approval' : 'YouTube video cannot be re-submitted'}</div>`;
-    } else if (type === 'image') {
+    } else if (type === 'image' || type === 'image_upload') {
         contentArea.innerHTML = `<label>📷 ছবি আপলোড করুন *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
-    } else if (type === 'voice' || type === 'audio') {
+    } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
         contentArea.innerHTML = `<label>🎤 ভয়েস / অডিও আপলোড করুন *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
-    } else {
+    } else if (type === 'text' || type === 'text_writing') {
         contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}`;
+    } else if (isScreenshotTask(type)) {
+        // ✅ NEW: Open Link + Screenshot upload for all other types
+        const taskUrl = task.url || task.link || '';
+        const hasUrl = taskUrl && taskUrl !== '#' && taskUrl !== 'undefined';
+        contentArea.innerHTML = `
+            <div class="task-open-link-box">
+                <div class="task-open-link-label">🔗 টাস্ক লিংক</div>
+                <button class="task-open-link-btn" onclick="openTaskLink('${esc(taskUrl)}')" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;cursor:not-allowed;"' : ''}>
+                    <i class="fas fa-external-link-alt"></i> Open Link
+                </button>
+                <small>👆 লিংকে ক্লিক করে টাস্কটি সম্পন্ন করুন, তারপর <b>স্ক্রিনশট</b> নিয়ে নিচে আপলোড করুন।</small>
+            </div>
+            <label>📷 স্ক্রিনশট আপলোড করুন *</label>
+            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
+            <small>JPG / PNG / WEBP (সর্বোচ্চ ৩০ MB)</small>
+            <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
+            <textarea id="taskTextInput" rows="2" placeholder="প্রয়োজন হলে কিছু লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-camera"></i> টাস্ক লিংকে কাজ শেষ করে <b>স্ক্রিনশট</b> নিন → তারপর ছবি আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}
+        `;
+    } else {
+        // Fallback: treat as text
+        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     }
 
     // Button state
@@ -1424,7 +1486,7 @@ function openTaskSubmit(taskId) {
     document.getElementById('app').classList.add('blurred');
 }
 
-// ✅ SUBMIT GENERIC (image/voice/text only — survey & youtube handled by redirect)
+// ✅ SUBMIT GENERIC — handles image / voice / text / screenshot-task
 async function submitGenericTask() {
     if (taskState.submitting) return;
     const task = taskState.task;
@@ -1447,16 +1509,17 @@ async function submitGenericTask() {
     let fileUrl = null;
 
     try {
-        if (type === 'image') {
+        if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
+            // ✅ Both normal image task AND screenshot/link tasks upload a screenshot
             const input = document.getElementById('taskImageInput');
             const file = input && input.files[0];
-            if (!file) { toast('⚠️ ছবি সিলেক্ট করুন'); return; }
+            if (!file) { toast('⚠️ স্ক্রিনশট / ছবি সিলেক্ট করুন'); return; }
             if (file.size > 30 * 1024 * 1024) { toast('⚠️ ছবি ৩০ MB এর কম হতে হবে'); return; }
             taskState.submitting = true; actionBtn.disabled = true;
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
             toast('📤 ছবি আপলোড হচ্ছে...');
             fileUrl = await uploadToImgBB(file);
-        } else if (type === 'voice' || type === 'audio') {
+        } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
             const input = document.getElementById('taskVoiceInput');
             const file = input && input.files[0];
             if (!file) { toast('⚠️ অডিও সিলেক্ট করুন'); return; }
@@ -1465,7 +1528,10 @@ async function submitGenericTask() {
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
             toast('📤 অডিও আপলোড হচ্ছে...');
             fileUrl = await uploadAudio(file);
-        } else if (type === 'text') {
+        } else if (type === 'text' || type === 'text_writing') {
+            if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
+        } else {
+            // fallback text
             if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
         }
 
