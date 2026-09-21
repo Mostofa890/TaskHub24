@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <style>
         :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
         *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
@@ -75,10 +74,6 @@
         .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
         .task-list{display:flex;flex-direction:column;gap:12px;padding:0 20px 30px;}
         .task-item{background:var(--surface);padding:15px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 12px rgba(0,0,0,.03);}
-        .task-left{display:flex;align-items:center;gap:15px;}
-        .task-icon{width:45px;height:45px;border-radius:12px;object-fit:cover;}
-        .task-info h4{font-size:.95rem;font-weight:700;line-height:1.2;}
-        .task-info small{color:#00b894;font-weight:600;font-size:.8rem;}
         .btn-act{padding:8px 20px;border-radius:50px;border:none;font-weight:700;font-size:.8rem;cursor:pointer;min-width:90px;}
         .btn-start{background:var(--text);color:#fff;}
         .btn-wait{background:#ffeaa7;color:#d63031;cursor:not-allowed;}
@@ -245,13 +240,12 @@
         .comm-item-info p{font-size:.68rem;color:#10b981;font-weight:600;}
         .comm-item-amt{font-weight:900;font-size:.95rem;color:#00b894;flex-shrink:0;text-align:right;}
         .comm-item-amt small{display:block;font-size:.62rem;font-weight:600;color:#888;margin-top:2px;}
-        .modal { transition: opacity 0.3s ease; }
         .status-badge { padding:4px 12px; border-radius:20px; font-size:0.75rem; font-weight:700; }
         .status-approved { background:#D4EDDA; color:#155724; }
         .status-pending { background:#FFF3CD; color:#856404; }
         .status-rejected { background:#F8D7DA; color:#721C24; }
+        .status-cancelled { background:#E2E3E5; color:#383D41; }
 
-        /* ═══════════ TASK SUBMIT MODAL ═══════════ */
         #taskSubmitModal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 15px;}
         #taskSubmitModal.active{display:block;}
         .task-shell{max-width:460px;margin:20px auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5);animation:pop 0.3s ease-out;}
@@ -276,10 +270,12 @@
         .task-content textarea:disabled{opacity:0.5;cursor:not-allowed;background:#eee;}
         .task-content small{display:block;font-size:0.7rem;color:#9ca3af;margin-top:6px;font-weight:600;}
         .task-hint-box{padding:10px 14px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:8px;font-size:0.76rem;color:#92400e;font-weight:600;line-height:1.45;margin-top:14px;}
-        .task-status-warning{padding:14px 18px;background:linear-gradient(135deg,#FFF3CD,#FEF3C7);border-left:4px solid #f39c12;border-radius:10px;font-size:0.85rem;color:#856404;font-weight:700;line-height:1.5;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+        .task-status-warning{padding:14px 18px;background:linear-gradient(135deg,#FFF3CD,#FEF3C7);border-left:4px solid #f39c12;border-radius:10px;font-size:0.85rem;color:#856404;font-weight:700;line-height:1.5;display:flex;align-items:flex-start;gap:10px;}
         .task-status-warning i{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
-        .task-status-info{padding:14px 18px;background:linear-gradient(135deg,#D1FAE5,#ECFDF5);border-left:4px solid #10b981;border-radius:10px;font-size:0.85rem;color:#065f46;font-weight:700;line-height:1.5;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;}
+        .task-status-info{padding:14px 18px;background:linear-gradient(135deg,#D1FAE5,#ECFDF5);border-left:4px solid #10b981;border-radius:10px;font-size:0.85rem;color:#065f46;font-weight:700;line-height:1.5;display:flex;align-items:flex-start;gap:10px;}
         .task-status-info i{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
+        .task-status-cancelled{padding:14px 18px;background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border-left:4px solid #ef4444;border-radius:10px;font-size:0.85rem;color:#991b1b;font-weight:700;line-height:1.5;display:flex;align-items:flex-start;gap:10px;}
+        .task-status-cancelled i{font-size:1.3rem;flex-shrink:0;margin-top:1px;}
         .task-actions{display:flex;gap:10px;padding:14px 18px 18px;}
         .task-btn{flex:1;padding:13px;border-radius:12px;font-weight:800;font-size:0.9rem;border:none;cursor:pointer;transition:0.2s;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;}
         .task-btn:active{transform:scale(0.97);}
@@ -288,8 +284,8 @@
         .task-btn-submit{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;box-shadow:0 5px 15px rgba(108,92,231,0.3);}
         .task-btn-submit:hover:not(:disabled){box-shadow:0 8px 20px rgba(108,92,231,0.4);}
         .task-btn-pending{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;cursor:not-allowed;}
+        .task-btn-locked{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;cursor:not-allowed;}
 
-        /* ═══════════ TASKS PAGE — INNER TABS ═══════════ */
         .tasks-inner-tabs{display:flex;gap:8px;padding:0 20px 16px;}
         .tasks-inner-tab{flex:1;padding:11px 12px;border-radius:14px;background:#fff;color:#6b7280;font-weight:800;font-size:0.82rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
         .tasks-inner-tab.active{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(108,92,231,.28);}
@@ -297,12 +293,12 @@
         .tasks-inner-pane{display:none;}
         .tasks-inner-pane.active{display:block;animation:fadeIn .25s ease;}
 
-        /* ═══════════ TASK HISTORY CARDS ═══════════ */
         .th-card{background:#fff;margin:0 20px 12px;padding:16px;border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,.04);border-left:5px solid #6C5CE7;position:relative;transition:all .2s;}
         .th-card:hover{box-shadow:0 10px 24px rgba(0,0,0,.08);transform:translateY(-1px);}
         .th-card.approved{border-left-color:#00b894;}
         .th-card.pending{border-left-color:#f39c12;}
         .th-card.rejected{border-left-color:#ff4757;}
+        .th-card.cancelled{border-left-color:#64748b;}
         .th-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
         .th-card-title{font-size:0.92rem;font-weight:800;color:#2D3436;line-height:1.3;display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
         .th-card-badge{padding:4px 11px;border-radius:20px;font-size:0.68rem;font-weight:800;letter-spacing:0.3px;white-space:nowrap;text-transform:uppercase;}
@@ -317,6 +313,9 @@
         .th-reason-box{margin-top:10px;padding:10px 12px;background:#FFF5F5;border-left:3px solid #ff4757;border-radius:8px;font-size:0.78rem;color:#721C24;font-weight:600;line-height:1.5;}
         .th-reason-box i{color:#ff4757;margin-right:5px;}
         .th-reason-box b{color:#991b1b;}
+        .th-resubmit-btn{margin-top:12px;width:100%;padding:11px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:0.85rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(108,92,231,.3);}
+        .th-resubmit-btn:active{transform:scale(0.98);}
+        .th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
     </style>
 </head>
 <body>
@@ -383,7 +382,7 @@
             <span class="cat-box" id="taskSubmitTimeLeft"></span>
         </div>
         <div class="task-desc-box" id="taskSubmitDesc"></div>
-        <div id="taskStatusBannerWrap"></div>
+        <div id="taskStatusBannerWrap" style="padding:14px 18px 0;"></div>
         <div class="task-content" id="taskContentArea"></div>
         <div class="task-actions">
             <button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button>
@@ -430,23 +429,12 @@
 
     <div id="page-tasks" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-tasks"></i> Tasks</div>
-
         <div class="tasks-inner-tabs">
-            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')">
-                <i class="fas fa-list-check"></i> Available Tasks
-            </button>
-            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')">
-                <i class="fas fa-clock-rotate-left"></i> Task History
-            </button>
+            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available Tasks</button>
+            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> Task History</button>
         </div>
-
-        <div id="tasksPaneAvailable" class="tasks-inner-pane active">
-            <div id="task-area" class="task-list"></div>
-        </div>
-
-        <div id="tasksPaneHistory" class="tasks-inner-pane">
-            <div id="taskHistoryArea"></div>
-        </div>
+        <div id="tasksPaneAvailable" class="tasks-inner-pane active"><div id="task-area" class="task-list"></div></div>
+        <div id="tasksPaneHistory" class="tasks-inner-pane"><div id="taskHistoryArea"></div></div>
     </div>
 
     <div id="page-referral" class="page-section">
@@ -462,9 +450,6 @@
             <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">এই লিংকটি শেয়ার করুন। বন্ধুরা যোগ দিলে আপনি <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
             <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার করুন</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
-            <div style="margin-top:12px;padding:10px 12px;background:rgba(0,184,148,0.1);border-radius:10px;border:1px dashed rgba(0,184,148,0.4);">
-                <p style="font-size:0.75rem;color:#0e7a61;font-weight:700;line-height:1.4;"><i class="fas fa-info-circle"></i> আপনার বন্ধুরা যত টাকা ইনকাম করবে তার <b id="commInfoRate">2%</b> আপনি কমিশন পাবেন।</p>
-            </div>
         </div>
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
@@ -584,28 +569,77 @@ let MIN_AD_WATCH_TIME = 15;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 
+// ✅ NEW: Cache of user's task submissions (real-time synced)
+let userSubmissionsCache = {};
+
 // ═══════════════════════════════════════════════════════
-// ✅ TASKS INNER TAB
+// ✅ TASK USER STATE HELPER (from real-time submission cache)
 // ═══════════════════════════════════════════════════════
+function getTaskUserState(taskId) {
+    const subs = userSubmissionsCache[String(taskId)] || [];
+    if (subs.length === 0) return { status: 'new', resubmitCount: 0, latest: null };
+    const latest = subs[0];
+    const status = (latest.status || 'pending').toLowerCase();
+    // resubmitCount = how many extra submissions after the first one
+    const resubmitCount = Math.max(0, subs.length - 1);
+    return { status, resubmitCount, latest };
+}
+
+// Whether user can submit (or re-submit) this task
+function canSubmitTask(taskId) {
+    const s = getTaskUserState(taskId);
+    if (s.status === 'approved') return false;
+    if (s.status === 'pending') return false;
+    if (s.status === 'rejected' || s.status === 'cancelled') {
+        return s.resubmitCount === 0; // Only ONE re-submit allowed
+    }
+    return true; // new
+}
+
 function switchTasksInnerTab(which) {
     const btnAvail = document.getElementById('tabBtnAvailable');
     const btnHist = document.getElementById('tabBtnHistory');
     const paneAvail = document.getElementById('tasksPaneAvailable');
     const paneHist = document.getElementById('tasksPaneHistory');
     if (which === 'history') {
-        btnAvail.classList.remove('active');
-        btnHist.classList.add('active');
-        paneAvail.classList.remove('active');
-        paneHist.classList.add('active');
+        btnAvail.classList.remove('active'); btnHist.classList.add('active');
+        paneAvail.classList.remove('active'); paneHist.classList.add('active');
         loadTaskHistory();
     } else {
-        btnHist.classList.remove('active');
-        btnAvail.classList.add('active');
-        paneHist.classList.remove('active');
-        paneAvail.classList.add('active');
+        btnHist.classList.remove('active'); btnAvail.classList.add('active');
+        paneHist.classList.remove('active'); paneAvail.classList.add('active');
         renderNewTasks();
     }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+// ═══════════════════════════════════════════════════════
+// ✅ REAL-TIME SUBMISSIONS LISTENER
+// ═══════════════════════════════════════════════════════
+function setupUserSubmissionsListener() {
+    db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).on('value', snap => {
+        userSubmissionsCache = {};
+        snap.forEach(child => {
+            const sub = child.val();
+            const tid = String(sub.taskId);
+            if (!userSubmissionsCache[tid]) userSubmissionsCache[tid] = [];
+            userSubmissionsCache[tid].push(sub);
+        });
+        // Sort desc by createdAt
+        Object.keys(userSubmissionsCache).forEach(tid => {
+            userSubmissionsCache[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+            // Sync status back to user node for consistency
+            const latest = userSubmissionsCache[tid][0];
+            if (latest && latest.status) {
+                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+                appState.user.taskStatuses[tid] = latest.status;
+            }
+        });
+        renderNewTasks();
+        if (document.getElementById('tasksPaneHistory') && document.getElementById('tasksPaneHistory').classList.contains('active')) {
+            loadTaskHistory();
+        }
+    });
 }
 
 // ═══════════════════════════════════════════════════════
@@ -622,8 +656,7 @@ function isAllAdsCompleted() {
         const configured = slot && slot.network && slot.network !== 'none';
         if (!configured) continue;
         hasConfigured = true;
-        const done = Number(dailyAds[i] || 0);
-        if (done < limit) return false;
+        if (Number(dailyAds[i] || 0) < limit) return false;
     }
     return hasConfigured;
 }
@@ -639,8 +672,7 @@ async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
     appState.user.dailyAds = {};
     appState.user.adsResetTime = 0;
-    renderAds();
-    updateCycleUI();
+    renderAds(); updateCycleUI();
     toast('🔄 অ্যাড রিসেট হয়েছে! আবার দেখতে পারবেন।');
     try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0 }); } catch (e) {}
 }
@@ -648,9 +680,7 @@ function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterv
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
 function formatTimeUntil(targetMs) {
     const diff = Math.max(0, targetMs - Date.now());
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    const s = Math.floor((diff % 60000) / 1000);
+    const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
     return String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's';
 }
 function updateCycleUI() {
@@ -661,13 +691,10 @@ function updateCycleUI() {
     if (resetTime > 0) {
         const remaining = resetTime - Date.now();
         if (remaining <= 0) { label.textContent = '🔄 Resetting...'; timer.textContent = '00h 00m 00s'; forceCycleReset(); return; }
-        label.textContent = '⏳ Next Reset In';
-        timer.textContent = formatTimeUntil(resetTime);
-        return;
+        label.textContent = '⏳ Next Reset In'; timer.textContent = formatTimeUntil(resetTime); return;
     }
     if (isAllAdsCompleted()) { startAdsResetCountdown(); return; }
-    label.textContent = '⏸️ Not Started';
-    timer.textContent = 'Watch All Ads';
+    label.textContent = '⏸️ Not Started'; timer.textContent = 'Watch All Ads';
 }
 function getDeviceId() {
     let deviceId = localStorage.getItem('nexearn_device_id');
@@ -681,9 +708,6 @@ function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;',
 function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Not Completed!'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
-// ═══════════════════════════════════════════════════════
-// ✅ FILE UPLOAD HELPERS
-// ═══════════════════════════════════════════════════════
 async function uploadToImgBB(file) {
     const fd = new FormData(); fd.append('image', file);
     const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
@@ -692,17 +716,8 @@ async function uploadToImgBB(file) {
     return data.data.url;
 }
 async function uploadAudio(file) {
-    const services = [
-        { name: 'Bashupload', fn: uploadToBashupload },
-        { name: 'Temp.sh',    fn: uploadToTempSh },
-        { name: 'Litterbox',  fn: uploadToLitterbox },
-        { name: 'Uguu.se',    fn: uploadToUguu },
-        { name: '0x0.st',     fn: uploadToZeroXZero }
-    ];
-    for (const svc of services) {
-        try { const url = await svc.fn(file); return url; }
-        catch (err) {}
-    }
+    const services = [ uploadToBashupload, uploadToTempSh, uploadToLitterbox, uploadToUguu, uploadToZeroXZero ];
+    for (const fn of services) { try { return await fn(file); } catch (err) {} }
     throw new Error('সব সার্ভার ব্যর্থ। আবার চেষ্টা করুন।');
 }
 async function uploadToBashupload(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd }); const text = await res.text(); const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/); if (!match) throw new Error('fail'); return match[0] + '?download=1'; }
@@ -721,19 +736,18 @@ function checkPendingSurveyReward() {
     try {
         const p = JSON.parse(pendingRaw);
         if (String(p.taskId) === String(done)) {
-            localStorage.removeItem('survey_done_task');
-            localStorage.removeItem('pending_survey');
+            localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey');
             return p;
         }
     } catch(e) {}
-    localStorage.removeItem('survey_done_task');
-    localStorage.removeItem('pending_survey');
+    localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey');
     return null;
 }
 async function awardSurveyReward(p) {
     const taskId = p.taskId;
     if (!taskId) return;
-    if (appState.user.taskStatuses && appState.user.taskStatuses[taskId] === 'approved') return;
+    const userState = getTaskUserState(taskId);
+    if (userState.status === 'approved') return;
 
     const baseReward = Number(p.reward || 0);
     const split = computeCommissionSplit(baseReward);
@@ -753,7 +767,6 @@ async function awardSurveyReward(p) {
             fileUrl: null, status: 'approved', autoApproved: true,
             createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
         });
-
         await db.ref('users/' + tgUser.id).update({
             balance: newBal, totalEarned: newEarn,
             ['taskStatuses/' + taskId]: 'approved',
@@ -761,22 +774,18 @@ async function awardSurveyReward(p) {
         });
         await db.ref('config/newTasks/' + taskId + '/submittedCount').transaction(c => (c || 0) + 1);
 
-        appState.user.balance = newBal;
-        appState.user.totalEarned = newEarn;
+        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
         if (!appState.user.taskHistory) appState.user.taskHistory = {};
         appState.user.taskStatuses[taskId] = 'approved';
         appState.user.taskHistory[taskId] = taskTimestamp;
 
-        if (referrerCommission > 0) {
-            await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
-        }
+        if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
 
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
-        renderNewTasks();
-        loadTaskHistory();
-    } catch (e) { console.error('Survey reward error:', e); toast('❌ রিওয়ার্ড সমস্যা'); }
+        renderNewTasks(); loadTaskHistory();
+    } catch (e) { console.error(e); toast('❌ রিওয়ার্ড সমস্যা'); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -824,11 +833,9 @@ async function claimDailyBonus() {
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus');
-        await updateTextElements();
-        hideBonus();
+        await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম সফল! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
-        console.error('Bonus Error:', e);
         toast(e.message === 'Ad Closed' ? '❌ অ্যাডটি সম্পূর্ণ দেখেননি!' : '❌ অ্যাড লোড সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
@@ -837,9 +844,6 @@ async function claimDailyBonus() {
     }
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ COMMISSION
-// ═══════════════════════════════════════════════════════
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
@@ -856,9 +860,7 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
         await db.ref('users/' + referrerId).update({ balance: newBal, totalEarned: newEarn, totalCommission: newTotalComm, commissionHistory: commHist });
-        try {
-            await sendNotification(referrerId, '💰 <b>নতুন কমিশন পেয়েছেন!</b>\n\n👤 ' + (appState.user.name || 'Your referral') + '\n💰 তারা কামালো: <b>' + Number(originalEarned).toFixed(4) + ' TK</b>\n📊 Source: ' + source + '\n💵 কমিশন (' + REF_COMMISSION_RATE + '%): <b>+' + commissionAmount.toFixed(4) + ' TK</b>');
-        } catch(e) {}
+        try { await sendNotification(referrerId, '💰 নতুন কমিশন পেয়েছেন! +' + commissionAmount.toFixed(4) + ' TK'); } catch(e) {}
         return true;
     } catch(e) { return false; }
 }
@@ -872,9 +874,6 @@ function computeCommissionSplit(earnedAmount) {
     return { userReward: Number(earnedAmount), referrerCommission: commission, mode };
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ NETWORK & CHANNELS
-// ═══════════════════════════════════════════════════════
 function getNetworkAdjustedTime() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (!conn) return { seconds: 15, label: 'Unknown', type: 'good', speed: '4G' };
@@ -908,8 +907,7 @@ async function markVerified() {
     const verifiedMap = {}; links.forEach(l => { verifiedMap[l.chatId] = true; });
     await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
     await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
-    appState.user.verifiedChannels = verifiedMap;
-    channelVerified = true;
+    appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
@@ -936,24 +934,18 @@ function startPeriodicRecheck() {
 }
 function stopPeriodicRecheck() { if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; } stopCycleTimer(); }
 
-// ═══════════════════════════════════════════════════════
-// ✅ AD WATCH
-// ═══════════════════════════════════════════════════════
 function showAdTimer(slotIndex) {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
     trackAdClick();
     adTimerState.wasCancelled = false;
     const net = getNetworkAdjustedTime();
-    adTimerState.totalSeconds = net.seconds;
-    adTimerState.remaining = net.seconds;
-    adTimerState.adSlotIndex = slotIndex;
-    MIN_AD_WATCH_TIME = net.seconds;
+    adTimerState.totalSeconds = net.seconds; adTimerState.remaining = net.seconds;
+    adTimerState.adSlotIndex = slotIndex; MIN_AD_WATCH_TIME = net.seconds;
     document.getElementById('timerCountdown').textContent = net.seconds;
     document.getElementById('timerExtraTime').textContent = net.seconds + 's';
     document.getElementById('timerExtraAdapt').textContent = net.seconds === 15 ? 'Standard' : 'Adaptive +' + (net.seconds - 15) + 's';
-    const dot = document.getElementById('netDot');
-    dot.className = 'status-dot ' + net.type;
+    const dot = document.getElementById('netDot'); dot.className = 'status-dot ' + net.type;
     document.getElementById('netLabel').textContent = 'Network: ' + net.label;
     document.getElementById('netSpeed').textContent = net.speed;
     document.getElementById('timerCircle').style.strokeDashoffset = 377;
@@ -1080,9 +1072,6 @@ function switchTab(tabId, el) {
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ REFERRAL / WITHDRAWAL
-// ═══════════════════════════════════════════════════════
 async function calculateValidReferrals() {
     try {
         const refs = appState.user.referredUsers || {};
@@ -1095,8 +1084,7 @@ async function calculateValidReferrals() {
             if (bal >= MIN_REFERRAL_BALANCE) count++;
         });
         await Promise.all(promises);
-        validReferralCount = count;
-        return count;
+        validReferralCount = count; return count;
     } catch(e) { validReferralCount = 0; return 0; }
 }
 function getWithdrawLevel() {
@@ -1151,7 +1139,6 @@ function checkBan() {
         return true;
     } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
 }
-
 function renderAds() {
     const el = document.getElementById('ad-area');
     if (!el) return;
@@ -1185,15 +1172,11 @@ function renderAds() {
     }
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ TASK SYSTEM
-// ═══════════════════════════════════════════════════════
 function getTaskTypeIcon(type) {
     switch ((type || '').toLowerCase()) {
         case 'survey': return '📊';
         case 'image':  return '🖼️';
-        case 'voice':
-        case 'audio':  return '🎤';
+        case 'voice': case 'audio': return '🎤';
         case 'text':   return '📝';
         default:       return '📋';
     }
@@ -1202,8 +1185,7 @@ function getTaskTypeLabel(type) {
     switch ((type || '').toLowerCase()) {
         case 'survey': return 'Survey Task';
         case 'image':  return 'Image Task';
-        case 'voice':
-        case 'audio':  return 'Voice Task';
+        case 'voice': case 'audio': return 'Voice Task';
         case 'text':   return 'Text Task';
         default:       return 'Task';
     }
@@ -1221,7 +1203,7 @@ function isTaskAutoDeleted(task) {
     return Date.now() > (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000);
 }
 
-// ✅ UPDATED: Render New Tasks — Only Start / Completed / Expired / Full
+// ✅ RENDER NEW TASKS — button always "Start" unless approved/expired/full
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -1237,7 +1219,8 @@ function renderNewTasks() {
         hasVisibleTask = true;
 
         const isExpired = isTaskExpired(task);
-        const status = appState.user.taskStatuses ? appState.user.taskStatuses[taskId] : null;
+        const userState = getTaskUserState(taskId);
+        const status = userState.status;
         const submittedCount = task.submittedCount || 0;
         const totalSlots = task.totalSlots || 100;
         const slotsLeft = Math.max(0, totalSlots - submittedCount);
@@ -1246,16 +1229,14 @@ function renderNewTasks() {
         const typeLabel = getTaskTypeLabel(task.type);
 
         let btnHtml;
-
         if (isExpired) {
             btnHtml = `<button class="btn-act" style="background:#ccc; color:#666; cursor:not-allowed;" disabled>Expired</button>`;
         } else if (isDone) {
-            // ✅ Approved → cannot start again
             btnHtml = `<button class="btn-act" style="background:#00b894; color:#fff; cursor:not-allowed;" disabled>✓ Completed</button>`;
         } else if (slotsLeft <= 0) {
             btnHtml = `<button class="btn-act" style="background:#ccc; color:#666; cursor:not-allowed;" disabled>Full</button>`;
         } else {
-            // ✅ New / Pending / Rejected → Only show "Start" button
+            // Always show Start; state details shown in modal
             btnHtml = `<button class="btn-act btn-start" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:#fff; box-shadow:0 4px 12px rgba(108,92,231,.3);" onclick="openTaskSubmit('${taskId}')">Start</button>`;
         }
 
@@ -1285,15 +1266,17 @@ function renderNewTasks() {
     if (!hasVisibleTask) { el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক নেই</p></div>'; }
 }
 
-// ✅ UPDATED: openTaskSubmit — handles pending & rejected states
+// ✅ OPEN TASK SUBMIT — checks current status, shows banner, enables/disables submit
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
     if (!task) { toast('Task not found'); return; }
     if (isTaskExpired(task)) { toast('This task has expired'); return; }
 
-    const status = appState.user.taskStatuses ? appState.user.taskStatuses[taskId] : null;
+    const userState = getTaskUserState(taskId);
+    const status = userState.status;
+    const resubmitCount = userState.resubmitCount;
 
-    // ✅ Approved → Block completely
+    // Approved → block
     if (status === 'approved') {
         toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন');
         return;
@@ -1304,10 +1287,10 @@ function openTaskSubmit(taskId) {
     taskState.task = task;
     taskState.type = type;
     taskState.submitting = false;
-    taskState.currentStatus = status || 'new';
+    taskState.currentStatus = status;
 
-    // ✅ Survey: only redirect if NOT pending (already submitted)
-    if (type === 'survey' && status !== 'pending') {
+    // Survey redirect only if NEW (never submitted)
+    if (type === 'survey' && status === 'new') {
         const pending = {
             taskId: taskId,
             taskTitle: task.title || 'Survey',
@@ -1338,75 +1321,122 @@ function openTaskSubmit(taskId) {
     actionBtn.className = 'task-btn task-btn-submit';
     actionBtn.style.display = 'flex';
 
-    // ✅ Determine if user can submit
     const isPending = (status === 'pending');
     const isRejected = (status === 'rejected');
+    const isCancelled = (status === 'cancelled');
+    const isRejectedOrCancelled = isRejected || isCancelled;
 
-    // Show banner
+    let canResubmit = false;
+    let lockedOut = false;
+
     if (isPending) {
         bannerWrap.innerHTML = `
-            <div class="task-status-warning" style="margin:14px 18px 0;">
+            <div class="task-status-warning">
                 <i class="fas fa-hourglass-half"></i>
                 <div>
-                    <b>⏳ Already Submitted</b><br>
-                    <span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি আগেই জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span>
+                    <b>⏳ Pending</b><br>
+                    <span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span>
                 </div>
             </div>`;
-    } else if (isRejected) {
-        bannerWrap.innerHTML = `
-            <div class="task-status-info" style="margin:14px 18px 0;">
-                <i class="fas fa-redo"></i>
-                <div>
-                    <b>🔄 Re-Submit Chance</b><br>
-                    <span style="font-weight:600;font-size:0.78rem;">আপনার আগের submission টি reject হয়েছিল। আপনি আরেকবার চেষ্টা করতে পারবেন।</span>
-                </div>
-            </div>`;
+        lockedOut = true;
+    } else if (isRejectedOrCancelled) {
+        if (resubmitCount === 0) {
+            canResubmit = true;
+            bannerWrap.innerHTML = `
+                <div class="task-status-info">
+                    <i class="fas fa-redo"></i>
+                    <div>
+                        <b>🔄 ${isCancelled ? 'Cancelled' : 'Rejected'} — Re-Submit Chance (1/1)</b><br>
+                        <span style="font-weight:600;font-size:0.78rem;">Admin আপনার submission টি ${isCancelled ? 'cancel' : 'reject'} করেছেন। আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span>
+                    </div>
+                </div>`;
+        } else {
+            lockedOut = true;
+            bannerWrap.innerHTML = `
+                <div class="task-status-cancelled">
+                    <i class="fas fa-ban"></i>
+                    <div>
+                        <b>❌ ${isCancelled ? 'Cancelled' : 'Rejected'} — No More Re-Submit</b><br>
+                        <span style="font-weight:600;font-size:0.78rem;">আপনি ইতিমধ্যে re-submit ব্যবহার করে ফেলেছেন। এই টাস্কে আর জমা দিতে পারবেন না।</span>
+                    </div>
+                </div>`;
+        }
     }
 
-    // Build content per type
+    // Show content per type
     if (type === 'survey') {
-        // Survey but pending → show "already submitted" only
-        actionBtn.style.display = 'none';
-        contentArea.innerHTML = `
-            <div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;">
-                <i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>
-                Survey already submitted, waiting for approval
-            </div>`;
+        if (isPending || lockedOut) {
+            actionBtn.style.display = 'none';
+            contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>${isPending ? 'Survey already submitted, waiting for approval' : 'Survey cannot be re-submitted'}</div>`;
+        } else {
+            // Survey for re-submit — send to survey.html again
+            actionBtn.style.display = 'none';
+            contentArea.innerHTML = `
+                <div style="padding:16px 0;text-align:center;">
+                    <button id="reopenSurveyBtn" class="btn-survey-open" style="width:100%;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:14px;border-radius:12px;font-weight:800;border:none;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+                        <i class="fas fa-redo"></i> Re-Submit Survey
+                    </button>
+                    <p style="font-size:0.72rem;color:#9ca3af;margin-top:10px;">Timer শেষ হলে রিওয়ার্ড পাবেন</p>
+                </div>`;
+            setTimeout(() => {
+                const b = document.getElementById('reopenSurveyBtn');
+                if (b) b.onclick = () => {
+                    const pending = {
+                        taskId: taskId,
+                        taskTitle: task.title || 'Survey',
+                        reward: task.reward || 0,
+                        url: task.url || task.link || '',
+                        timer: parseInt(task.timer) || 60,
+                        startedAt: Date.now()
+                    };
+                    localStorage.setItem('pending_survey', JSON.stringify(pending));
+                    window.location.href = 'survey.html';
+                };
+            }, 50);
+        }
     } else if (type === 'image') {
         contentArea.innerHTML = `
             <label>📷 ছবি আপলোড করুন *</label>
-            <input type="file" id="taskImageInput" accept="image/*" ${isPending ? 'disabled' : ''}/>
+            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
             <small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small>
             <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
-            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>`}
+            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}
         `;
     } else if (type === 'voice' || type === 'audio') {
         contentArea.innerHTML = `
             <label>🎤 ভয়েস / অডিও আপলোড করুন *</label>
-            <input type="file" id="taskVoiceInput" accept="audio/*" ${isPending ? 'disabled' : ''}/>
+            <input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/>
             <small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small>
             <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
-            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>`}
+            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}
         `;
     } else {
         contentArea.innerHTML = `
             <label>📝 আপনার উত্তর লিখুন *</label>
-            <textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${isPending ? 'disabled' : ''}></textarea>
-            ${isPending ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}
+            <textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}
         `;
     }
 
-    // ✅ Disable submit button if pending
+    // Button state
     if (isPending) {
         actionBtn.disabled = true;
         actionBtn.className = 'task-btn task-btn-pending';
-        actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Already Submitted';
+        actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Pending';
+    } else if (lockedOut) {
+        actionBtn.disabled = true;
+        actionBtn.className = 'task-btn task-btn-locked';
+        actionBtn.innerHTML = '<i class="fas fa-ban"></i> No More Re-Submit';
+    } else if (canResubmit) {
+        actionBtn.disabled = false;
+        actionBtn.className = 'task-btn task-btn-submit';
+        actionBtn.innerHTML = '<i class="fas fa-redo"></i> Re-Submit';
     } else {
         actionBtn.disabled = false;
         actionBtn.className = 'task-btn task-btn-submit';
-        actionBtn.innerHTML = isRejected ? '<i class="fas fa-redo"></i> Re-Submit' : '<i class="fas fa-paper-plane"></i> জমা দিন';
+        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
     }
 
     document.getElementById('taskSubmitModal').classList.add('active');
@@ -1415,11 +1445,17 @@ function openTaskSubmit(taskId) {
 
 async function submitGenericTask() {
     if (taskState.submitting) return;
-    if (taskState.currentStatus === 'pending') { toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে'); return; }
-
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
+
+    // Block pending & locked-out
+    if (!canSubmitTask(taskId)) {
+        const s = getTaskUserState(taskId);
+        if (s.status === 'pending') toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে');
+        else toast('❌ এই টাস্কে আর re-submit করা যাবে না');
+        return;
+    }
 
     const type = taskState.type;
     const actionBtn = document.getElementById('taskSubmitActionBtn');
@@ -1475,8 +1511,7 @@ async function submitGenericTask() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         toast('✅ জমা হয়েছে! অ্যাডমিন যাচাই করে রিওয়ার্ড দিবে।');
         closeTaskSubmit();
-        renderNewTasks();
-        loadTaskHistory();
+        // Real-time listener auto-updates
     } catch (err) {
         console.error('Submit error:', err);
         toast('❌ সমস্যা: ' + err.message);
@@ -1492,9 +1527,7 @@ function closeTaskSubmit() {
 }
 function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক বাতিল'); }
 
-// ═══════════════════════════════════════════════════════
-// ✅ TASK HISTORY
-// ═══════════════════════════════════════════════════════
+// ✅ TASK HISTORY — with Re-Submit button for one-time-allowed entries
 async function loadTaskHistory() {
     const container = document.getElementById('taskHistoryArea');
     if (!container) return;
@@ -1519,12 +1552,29 @@ async function loadTaskHistory() {
             return;
         }
 
-        subs.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+        // Group by taskId — show LATEST submission per task
+        const byTask = {};
+        subs.forEach(sub => {
+            const tid = String(sub.taskId);
+            if (!byTask[tid]) byTask[tid] = [];
+            byTask[tid].push(sub);
+        });
+        Object.keys(byTask).forEach(tid => {
+            byTask[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+        });
+
+        const taskList = Object.keys(byTask).map(tid => byTask[tid][0]);
+        taskList.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+
         const sym = appState.config.currencySymbol || 'TK';
         const tasks = appState.config.newTasks || {};
 
         let html = '';
-        subs.forEach(sub => {
+        taskList.forEach(sub => {
+            const tid = String(sub.taskId);
+            const allSubsForTask = byTask[tid];
+            const subCount = allSubsForTask.length;
+            const resubmitCount = Math.max(0, subCount - 1);
             const status = (sub.status || 'pending').toLowerCase();
             const stClass = status === 'approved' ? 'approved' :
                             status === 'rejected' ? 'rejected' :
@@ -1533,7 +1583,7 @@ async function loadTaskHistory() {
                             status === 'rejected' ? '❌ Rejected' :
                             status === 'cancelled' ? '⛔ Cancelled' : '⏳ Pending';
 
-            const taskMeta = tasks[sub.taskId] || {};
+            const taskMeta = tasks[tid] || {};
             const icon = getTaskTypeIcon(taskMeta.type);
             const ts = sub.createdAt || sub.timestamp || 0;
             const dateStr = ts ? new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
@@ -1541,20 +1591,36 @@ async function loadTaskHistory() {
             const isAutoApproved = sub.autoApproved === true;
             const reviewedAt = sub.reviewedAt ? new Date(sub.reviewedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 
-            const reasonHtml = (status === 'rejected' && sub.reason) ? `
-                <div class="th-reason-box">
-                    <i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}
-                </div>` : '';
+            const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `
+                <div class="th-reason-box"><i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
 
             const fileHtml = sub.fileUrl ? `
                 <div class="th-card-meta" style="margin-top:6px;">
                     <div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div>
                 </div>` : '';
 
-            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl) ? `
+            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl && sub.content.indexOf('Auto-completed') !== 0) ? `
                 <div class="th-card-meta" style="margin-top:6px;">
                     <div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div>
                 </div>` : '';
+
+            // Re-submit button — only for latest rejected/cancelled AND resubmitCount === 0
+            let actionHtml = '';
+            if ((status === 'rejected' || status === 'cancelled')) {
+                if (resubmitCount === 0) {
+                    const isExpired = isTaskExpired(taskMeta);
+                    if (!isExpired) {
+                        actionHtml = `<button class="th-resubmit-btn" onclick="openTaskSubmit('${tid}')"><i class="fas fa-redo"></i> Re-Submit (1/1)</button>`;
+                    } else {
+                        actionHtml = `<div class="th-locked-note">⏰ Task expired — cannot re-submit</div>`;
+                    }
+                } else {
+                    actionHtml = `<div class="th-locked-note">🔒 You already used your one-time re-submit</div>`;
+                }
+            }
+
+            // Show if user has multiple submissions
+            const historyCountHtml = (resubmitCount > 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-list-ol"></i>Total submissions: <b>${subCount}</b></div></div>` : '';
 
             html += `
                 <div class="th-card ${stClass}">
@@ -1570,7 +1636,9 @@ async function loadTaskHistory() {
                     </div>
                     ${contentPreview}
                     ${fileHtml}
+                    ${historyCountHtml}
                     ${reasonHtml}
+                    ${actionHtml}
                 </div>
             `;
         });
@@ -1584,9 +1652,6 @@ async function loadTaskHistory() {
 
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
-// ═══════════════════════════════════════════════════════
-// ✅ WITHDRAW
-// ═══════════════════════════════════════════════════════
 async function requestWithdraw() {
     if (!isOnline) { toast('No internet connection!'); return; }
     const method = document.getElementById('wd-method').value;
@@ -1610,8 +1675,8 @@ async function requestWithdraw() {
         await db.ref('users/' + appState.user.id).update({ balance: appState.user.balance - amount, withdrawCount: newCount });
         document.getElementById('wd-account').value = ''; document.getElementById('wd-amount').value = '';
         toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
-        await sendNotification(tgUser.id, '✅ <b>Withdraw Request!</b>\n\n💰 Amount: ' + amount + ' TK');
-        await sendNotification(ADMIN_ID, '💰 <b>New Withdraw</b>\n\n👤 ' + appState.user.name + '\n💵 ' + amount + ' TK');
+        await sendNotification(tgUser.id, '✅ Withdraw Request! Amount: ' + amount + ' TK');
+        await sendNotification(ADMIN_ID, '💰 New Withdraw: ' + appState.user.name + ' - ' + amount + ' TK');
         updateWithdrawInfo();
     } catch (e) { toast('Error Processing Request'); }
 }
@@ -1768,7 +1833,6 @@ async function checkChannelMembership(userId, chatId) {
         return data.ok && ['member', 'administrator', 'creator'].includes(data.result?.status);
     } catch (e) { return false; }
 }
-
 function renderChannelButtons() {
     const container = document.getElementById('channelLinks'); container.innerHTML = '';
     const links = getCurrentChannelLinks();
@@ -1787,7 +1851,6 @@ function renderChannelButtons() {
     verifyInterval = setInterval(checkAndUpdateStatus, 3000);
     setTimeout(checkAndUpdateStatus, 1500);
 }
-
 async function checkAndUpdateStatus() {
     const userId = tgUser.id;
     const buttons = document.querySelectorAll('.channel-btn');
@@ -1809,7 +1872,6 @@ async function checkAndUpdateStatus() {
         statusEl.className = 'verify-status error';
     }
 }
-
 async function showAppAfterVerify() {
     if (!isOnline) { document.getElementById('offlineOverlay').classList.add('active'); return; }
     if (checkMaintenance()) return;
@@ -1819,8 +1881,7 @@ async function showAppAfterVerify() {
     startPeriodicRecheck();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
 }
-
-function openLink(url) { if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank'); }
+function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
 // ═══════════════════════════════════════════════════════
 // ✅ INIT
@@ -1959,7 +2020,7 @@ window.onload = () => {
                         await db.ref('users/' + refBy).update({ referrals: (r.referrals || 0) + 1, balance: (r.balance || 0) + rBonus, totalEarned: (r.totalEarned || 0) + rBonus });
                         await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', joinedAt: Date.now(), username: tgUser.username || '' });
                         await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
-                        await sendNotification(refBy, '🎉 <b>New Referral!</b>\n\n👤 ' + tgUser.first_name + ' joined using your link.\n💰 You earned ' + rBonus + ' TK!');
+                        await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
                     }
                 }
             }
@@ -2002,6 +2063,8 @@ window.onload = () => {
                     isBooted = true;
                     if (checkMaintenance()) { setLoading(false); return; }
                     if (checkBan()) { setLoading(false); return; }
+                    // ✅ Set up real-time submissions listener
+                    setupUserSubmissionsListener();
                     await fetchTaskStatuses();
                     const needs = await needsVerification();
                     if (needs) {
@@ -2018,9 +2081,7 @@ window.onload = () => {
                     }
 
                     const pendingReward = checkPendingSurveyReward();
-                    if (pendingReward) {
-                        setTimeout(() => awardSurveyReward(pendingReward), 2000);
-                    }
+                    if (pendingReward) { setTimeout(() => awardSurveyReward(pendingReward), 2000); }
                 }
             }
         });
