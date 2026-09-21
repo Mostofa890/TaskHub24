@@ -285,6 +285,7 @@
         .task-btn-submit:hover:not(:disabled){box-shadow:0 8px 20px rgba(108,92,231,0.4);}
         .task-btn-pending{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;cursor:not-allowed;}
         .task-btn-locked{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;cursor:not-allowed;}
+        .task-btn-redirect{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;box-shadow:0 5px 15px rgba(239,68,68,0.3);}
 
         .tasks-inner-tabs{display:flex;gap:8px;padding:0 20px 16px;}
         .tasks-inner-tab{flex:1;padding:11px 12px;border-radius:14px;background:#fff;color:#6b7280;font-weight:800;font-size:0.82rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
@@ -568,34 +569,23 @@ let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: n
 let MIN_AD_WATCH_TIME = 15;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
-
-// ✅ NEW: Cache of user's task submissions (real-time synced)
 let userSubmissionsCache = {};
 
-// ═══════════════════════════════════════════════════════
-// ✅ TASK USER STATE HELPER (from real-time submission cache)
-// ═══════════════════════════════════════════════════════
 function getTaskUserState(taskId) {
     const subs = userSubmissionsCache[String(taskId)] || [];
     if (subs.length === 0) return { status: 'new', resubmitCount: 0, latest: null };
     const latest = subs[0];
     const status = (latest.status || 'pending').toLowerCase();
-    // resubmitCount = how many extra submissions after the first one
     const resubmitCount = Math.max(0, subs.length - 1);
     return { status, resubmitCount, latest };
 }
-
-// Whether user can submit (or re-submit) this task
 function canSubmitTask(taskId) {
     const s = getTaskUserState(taskId);
     if (s.status === 'approved') return false;
     if (s.status === 'pending') return false;
-    if (s.status === 'rejected' || s.status === 'cancelled') {
-        return s.resubmitCount === 0; // Only ONE re-submit allowed
-    }
-    return true; // new
+    if (s.status === 'rejected' || s.status === 'cancelled') return s.resubmitCount === 0;
+    return true;
 }
-
 function switchTasksInnerTab(which) {
     const btnAvail = document.getElementById('tabBtnAvailable');
     const btnHist = document.getElementById('tabBtnHistory');
@@ -613,9 +603,6 @@ function switchTasksInnerTab(which) {
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ REAL-TIME SUBMISSIONS LISTENER
-// ═══════════════════════════════════════════════════════
 function setupUserSubmissionsListener() {
     db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).on('value', snap => {
         userSubmissionsCache = {};
@@ -625,10 +612,8 @@ function setupUserSubmissionsListener() {
             if (!userSubmissionsCache[tid]) userSubmissionsCache[tid] = [];
             userSubmissionsCache[tid].push(sub);
         });
-        // Sort desc by createdAt
         Object.keys(userSubmissionsCache).forEach(tid => {
             userSubmissionsCache[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
-            // Sync status back to user node for consistency
             const latest = userSubmissionsCache[tid][0];
             if (latest && latest.status) {
                 if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
@@ -642,9 +627,6 @@ function setupUserSubmissionsListener() {
     });
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ AD RESET SYSTEM
-// ═══════════════════════════════════════════════════════
 function isAllAdsCompleted() {
     const slots = appState.config.adSlots || [];
     if (slots.length === 0) return false;
@@ -727,7 +709,7 @@ async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[
 async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP'); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
 
 // ═══════════════════════════════════════════════════════
-// ✅ SURVEY RETURN REWARD
+// ✅ EXTERNAL TASK RETURN REWARDS (Survey + YouTube)
 // ═══════════════════════════════════════════════════════
 function checkPendingSurveyReward() {
     const done = localStorage.getItem('survey_done_task');
@@ -743,7 +725,21 @@ function checkPendingSurveyReward() {
     localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey');
     return null;
 }
-async function awardSurveyReward(p) {
+function checkPendingYoutubeReward() {
+    const done = localStorage.getItem('youtube_done_task');
+    const pendingRaw = localStorage.getItem('pending_youtube');
+    if (!done || !pendingRaw) return null;
+    try {
+        const p = JSON.parse(pendingRaw);
+        if (String(p.taskId) === String(done)) {
+            localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube');
+            return p;
+        }
+    } catch(e) {}
+    localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube');
+    return null;
+}
+async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
     const userState = getTaskUserState(taskId);
@@ -762,8 +758,8 @@ async function awardSurveyReward(p) {
         await db.ref('taskSubmissions/' + subId).set({
             userId: tgUser.id, userName: tgUser.first_name || 'User',
             username: tgUser.username || '', telegramId: tgUser.id,
-            taskId: taskId, taskTitle: p.taskTitle || 'Survey',
-            reward: baseReward, content: 'Auto-completed survey (external page)',
+            taskId: taskId, taskTitle: p.taskTitle || taskTypeLabel,
+            reward: baseReward, content: 'Auto-completed ' + taskTypeLabel + ' (external page)',
             fileUrl: null, status: 'approved', autoApproved: true,
             createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
         });
@@ -788,9 +784,6 @@ async function awardSurveyReward(p) {
     } catch (e) { console.error(e); toast('❌ রিওয়ার্ড সমস্যা'); }
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ DAILY BONUS
-// ═══════════════════════════════════════════════════════
 function showBonus() {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (appState.user.dailyBonusDate === todayStr()) { toast('আজকের বোনাস আগেই নেওয়া হয়েছে!'); return; }
@@ -1175,20 +1168,45 @@ function renderAds() {
 function getTaskTypeIcon(type) {
     switch ((type || '').toLowerCase()) {
         case 'survey': return '📊';
-        case 'image':  return '🖼️';
+        case 'image': return '🖼️';
         case 'voice': case 'audio': return '🎤';
-        case 'text':   return '📝';
-        default:       return '📋';
+        case 'text': return '📝';
+        case 'youtube_video_view': return '▶️';
+        case 'youtube_like': return '👍';
+        case 'youtube_comment': return '💬';
+        case 'youtube_subscribe': return '🔔';
+        case 'app_download': return '📱';
+        case 'app_install': return '📲';
+        case 'website_visit': return '🌐';
+        case 'telegram_join': return '✈️';
+        case 'telegram_channel': return '📢';
+        case 'facebook_like': return '👍';
+        case 'facebook_follow': return '👥';
+        case 'instagram_follow': return '👥';
+        case 'instagram_like': return '❤️';
+        case 'twitter_follow': return '🐦';
+        case 'tiktok_follow': return '🎵';
+        case 'voice_recording': return '🎙️';
+        case 'image_upload': return '📷';
+        case 'text_writing': return '✍️';
+        case 'sign_up': return '📝';
+        case 'general': return '📋';
+        case 'other': return '🔧';
+        default: return '📋';
     }
 }
 function getTaskTypeLabel(type) {
-    switch ((type || '').toLowerCase()) {
-        case 'survey': return 'Survey Task';
-        case 'image':  return 'Image Task';
-        case 'voice': case 'audio': return 'Voice Task';
-        case 'text':   return 'Text Task';
-        default:       return 'Task';
-    }
+    const m = {
+        survey: 'Survey Task', image: 'Image Task', voice: 'Voice Task', audio: 'Voice Task', text: 'Text Task',
+        youtube_video_view: 'YouTube Video View', youtube_like: 'YouTube Like', youtube_comment: 'YouTube Comment',
+        youtube_subscribe: 'YouTube Subscribe', app_download: 'App Download', app_install: 'App Install',
+        website_visit: 'Website Visit', telegram_join: 'Telegram Join', telegram_channel: 'Telegram Channel',
+        facebook_like: 'Facebook Like', facebook_follow: 'Facebook Follow', instagram_follow: 'Instagram Follow',
+        instagram_like: 'Instagram Like', twitter_follow: 'Twitter Follow', tiktok_follow: 'TikTok Follow',
+        voice_recording: 'Voice Recording', image_upload: 'Image Upload', text_writing: 'Text Writing',
+        sign_up: 'Sign Up', general: 'General', other: 'Other'
+    };
+    return m[(type || '').toLowerCase()] || 'Task';
 }
 function isTaskExpired(task) {
     if (!task.createdAt) return false;
@@ -1202,8 +1220,13 @@ function isTaskAutoDeleted(task) {
     const days = daysMatch ? parseInt(daysMatch[1]) : 7;
     return Date.now() > (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000);
 }
+function isLinkTask(type) {
+    return type !== 'voice' && type !== 'image' && type !== 'text' && type !== 'audio' && type !== 'voice_recording' && type !== 'image_upload' && type !== 'text_writing';
+}
+function isRedirectTask(type) {
+    return type === 'survey' || type === 'youtube_video_view';
+}
 
-// ✅ RENDER NEW TASKS — button always "Start" unless approved/expired/full
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -1236,7 +1259,6 @@ function renderNewTasks() {
         } else if (slotsLeft <= 0) {
             btnHtml = `<button class="btn-act" style="background:#ccc; color:#666; cursor:not-allowed;" disabled>Full</button>`;
         } else {
-            // Always show Start; state details shown in modal
             btnHtml = `<button class="btn-act btn-start" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE); color:#fff; box-shadow:0 4px 12px rgba(108,92,231,.3);" onclick="openTaskSubmit('${taskId}')">Start</button>`;
         }
 
@@ -1266,7 +1288,11 @@ function renderNewTasks() {
     if (!hasVisibleTask) { el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক নেই</p></div>'; }
 }
 
-// ✅ OPEN TASK SUBMIT — checks current status, shows banner, enables/disables submit
+// ═══════════════════════════════════════════════════════
+// ✅ OPEN TASK SUBMIT
+// - Survey & YouTube Video View → redirect to external page
+// - Others → modal
+// ═══════════════════════════════════════════════════════
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
     if (!task) { toast('Task not found'); return; }
@@ -1276,11 +1302,7 @@ function openTaskSubmit(taskId) {
     const status = userState.status;
     const resubmitCount = userState.resubmitCount;
 
-    // Approved → block
-    if (status === 'approved') {
-        toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন');
-        return;
-    }
+    if (status === 'approved') { toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন'); return; }
 
     const type = (task.type || 'text').toLowerCase();
     taskState.taskId = taskId;
@@ -1289,19 +1311,40 @@ function openTaskSubmit(taskId) {
     taskState.submitting = false;
     taskState.currentStatus = status;
 
-    // Survey redirect only if NEW (never submitted)
-    if (type === 'survey' && status === 'new') {
-        const pending = {
-            taskId: taskId,
-            taskTitle: task.title || 'Survey',
-            reward: task.reward || 0,
-            url: task.url || task.link || '',
-            timer: parseInt(task.timer) || 60,
-            startedAt: Date.now()
-        };
-        localStorage.setItem('pending_survey', JSON.stringify(pending));
-        window.location.href = 'survey.html';
-        return;
+    // ✅ SURVEY: redirect if NEW or RE-SUBMIT allowed
+    if (type === 'survey') {
+        if (status === 'new' || (status === 'rejected' || status === 'cancelled') && resubmitCount === 0) {
+            const pending = {
+                taskId: taskId,
+                taskTitle: task.title || 'Survey',
+                reward: task.reward || 0,
+                url: task.url || task.link || '',
+                timer: parseInt(task.timer) || 60,
+                startedAt: Date.now()
+            };
+            localStorage.setItem('pending_survey', JSON.stringify(pending));
+            window.location.href = 'survey.html';
+            return;
+        }
+        // Pending / locked → show info in modal
+    }
+
+    // ✅ YOUTUBE VIDEO VIEW: redirect to youtube.html if NEW or RE-SUBMIT allowed
+    if (type === 'youtube_video_view') {
+        if (status === 'new' || ((status === 'rejected' || status === 'cancelled') && resubmitCount === 0)) {
+            const pending = {
+                taskId: taskId,
+                taskTitle: task.title || 'YouTube Video View',
+                reward: task.reward || 0,
+                url: task.url || task.link || '',
+                timer: parseInt(task.timer) || 60,
+                startedAt: Date.now()
+            };
+            localStorage.setItem('pending_youtube', JSON.stringify(pending));
+            window.location.href = 'youtube.html';
+            return;
+        }
+        // Pending / locked → show info in modal
     }
 
     const sym = appState.config.currencySymbol || 'TK';
@@ -1325,99 +1368,37 @@ function openTaskSubmit(taskId) {
     const isRejected = (status === 'rejected');
     const isCancelled = (status === 'cancelled');
     const isRejectedOrCancelled = isRejected || isCancelled;
-
     let canResubmit = false;
     let lockedOut = false;
 
     if (isPending) {
-        bannerWrap.innerHTML = `
-            <div class="task-status-warning">
-                <i class="fas fa-hourglass-half"></i>
-                <div>
-                    <b>⏳ Pending</b><br>
-                    <span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span>
-                </div>
-            </div>`;
+        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span></div></div>`;
         lockedOut = true;
     } else if (isRejectedOrCancelled) {
         if (resubmitCount === 0) {
             canResubmit = true;
-            bannerWrap.innerHTML = `
-                <div class="task-status-info">
-                    <i class="fas fa-redo"></i>
-                    <div>
-                        <b>🔄 ${isCancelled ? 'Cancelled' : 'Rejected'} — Re-Submit Chance (1/1)</b><br>
-                        <span style="font-weight:600;font-size:0.78rem;">Admin আপনার submission টি ${isCancelled ? 'cancel' : 'reject'} করেছেন। আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span>
-                    </div>
-                </div>`;
+            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 ${isCancelled ? 'Cancelled' : 'Rejected'} — Re-Submit Chance (1/1)</b><br><span style="font-weight:600;font-size:0.78rem;">Admin আপনার submission টি ${isCancelled ? 'cancel' : 'reject'} করেছেন। আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span></div></div>`;
         } else {
             lockedOut = true;
-            bannerWrap.innerHTML = `
-                <div class="task-status-cancelled">
-                    <i class="fas fa-ban"></i>
-                    <div>
-                        <b>❌ ${isCancelled ? 'Cancelled' : 'Rejected'} — No More Re-Submit</b><br>
-                        <span style="font-weight:600;font-size:0.78rem;">আপনি ইতিমধ্যে re-submit ব্যবহার করে ফেলেছেন। এই টাস্কে আর জমা দিতে পারবেন না।</span>
-                    </div>
-                </div>`;
+            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ ${isCancelled ? 'Cancelled' : 'Rejected'} — No More Re-Submit</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি ইতিমধ্যে re-submit ব্যবহার করে ফেলেছেন।</span></div></div>`;
         }
     }
 
-    // Show content per type
+    // Content per type
     if (type === 'survey') {
-        if (isPending || lockedOut) {
-            actionBtn.style.display = 'none';
-            contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>${isPending ? 'Survey already submitted, waiting for approval' : 'Survey cannot be re-submitted'}</div>`;
-        } else {
-            // Survey for re-submit — send to survey.html again
-            actionBtn.style.display = 'none';
-            contentArea.innerHTML = `
-                <div style="padding:16px 0;text-align:center;">
-                    <button id="reopenSurveyBtn" class="btn-survey-open" style="width:100%;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:14px;border-radius:12px;font-weight:800;border:none;cursor:pointer;font-size:0.95rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-                        <i class="fas fa-redo"></i> Re-Submit Survey
-                    </button>
-                    <p style="font-size:0.72rem;color:#9ca3af;margin-top:10px;">Timer শেষ হলে রিওয়ার্ড পাবেন</p>
-                </div>`;
-            setTimeout(() => {
-                const b = document.getElementById('reopenSurveyBtn');
-                if (b) b.onclick = () => {
-                    const pending = {
-                        taskId: taskId,
-                        taskTitle: task.title || 'Survey',
-                        reward: task.reward || 0,
-                        url: task.url || task.link || '',
-                        timer: parseInt(task.timer) || 60,
-                        startedAt: Date.now()
-                    };
-                    localStorage.setItem('pending_survey', JSON.stringify(pending));
-                    window.location.href = 'survey.html';
-                };
-            }, 50);
-        }
+        // Only reachable if Pending or locked
+        actionBtn.style.display = 'none';
+        contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#f39c12;margin-bottom:10px;display:block;"></i>${isPending ? 'Survey already submitted, waiting for approval' : 'Survey cannot be re-submitted'}</div>`;
+    } else if (type === 'youtube_video_view') {
+        // Only reachable if Pending or locked
+        actionBtn.style.display = 'none';
+        contentArea.innerHTML = `<div style="padding:20px 0;text-align:center;color:#6b7280;font-weight:600;"><i class="fas fa-info-circle" style="font-size:2rem;color:#ef4444;margin-bottom:10px;display:block;"></i>${isPending ? 'YouTube video already watched, waiting for approval' : 'YouTube video cannot be re-submitted'}</div>`;
     } else if (type === 'image') {
-        contentArea.innerHTML = `
-            <label>📷 ছবি আপলোড করুন *</label>
-            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
-            <small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small>
-            <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
-            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}
-        `;
+        contentArea.innerHTML = `<label>📷 ছবি আপলোড করুন *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
     } else if (type === 'voice' || type === 'audio') {
-        contentArea.innerHTML = `
-            <label>🎤 ভয়েস / অডিও আপলোড করুন *</label>
-            <input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/>
-            <small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small>
-            <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
-            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}
-        `;
+        contentArea.innerHTML = `<label>🎤 ভয়েস / অডিও আপলোড করুন *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
     } else {
-        contentArea.innerHTML = `
-            <label>📝 আপনার উত্তর লিখুন *</label>
-            <textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
-            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}
-        `;
+        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}`;
     }
 
     // Button state
@@ -1443,20 +1424,22 @@ function openTaskSubmit(taskId) {
     document.getElementById('app').classList.add('blurred');
 }
 
+// ✅ SUBMIT GENERIC (image/voice/text only — survey & youtube handled by redirect)
 async function submitGenericTask() {
     if (taskState.submitting) return;
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
-
-    // Block pending & locked-out
+    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') {
+        toast('⚠️ এই টাস্ক modal এ সাবমিট হয় না');
+        return;
+    }
     if (!canSubmitTask(taskId)) {
         const s = getTaskUserState(taskId);
         if (s.status === 'pending') toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে');
         else toast('❌ এই টাস্কে আর re-submit করা যাবে না');
         return;
     }
-
     const type = taskState.type;
     const actionBtn = document.getElementById('taskSubmitActionBtn');
     const textInput = document.getElementById('taskTextInput');
@@ -1511,7 +1494,6 @@ async function submitGenericTask() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         toast('✅ জমা হয়েছে! অ্যাডমিন যাচাই করে রিওয়ার্ড দিবে।');
         closeTaskSubmit();
-        // Real-time listener auto-updates
     } catch (err) {
         console.error('Submit error:', err);
         toast('❌ সমস্যা: ' + err.message);
@@ -1527,12 +1509,11 @@ function closeTaskSubmit() {
 }
 function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক বাতিল'); }
 
-// ✅ TASK HISTORY — with Re-Submit button for one-time-allowed entries
+// ✅ TASK HISTORY
 async function loadTaskHistory() {
     const container = document.getElementById('taskHistoryArea');
     if (!container) return;
     container.innerHTML = '<p style="text-align:center;color:#999;padding:30px 0;font-weight:600;">Loading history...</p>';
-
     try {
         const snap = await db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).once('value');
         const subs = [];
@@ -1541,34 +1522,21 @@ async function loadTaskHistory() {
             v._id = child.key;
             subs.push(v);
         });
-
         if (subs.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state" style="padding:50px 20px;">
-                    <i class="fas fa-clipboard-list"></i>
-                    <p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p>
-                    <p style="font-size:0.75rem; margin-top:8px; color:#bbb;">Available Tasks ট্যাব থেকে টাস্ক শুরু করুন</p>
-                </div>`;
+            container.innerHTML = `<div class="empty-state" style="padding:50px 20px;"><i class="fas fa-clipboard-list"></i><p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p><p style="font-size:0.75rem; margin-top:8px; color:#bbb;">Available Tasks ট্যাব থেকে টাস্ক শুরু করুন</p></div>`;
             return;
         }
-
-        // Group by taskId — show LATEST submission per task
         const byTask = {};
         subs.forEach(sub => {
             const tid = String(sub.taskId);
             if (!byTask[tid]) byTask[tid] = [];
             byTask[tid].push(sub);
         });
-        Object.keys(byTask).forEach(tid => {
-            byTask[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
-        });
-
+        Object.keys(byTask).forEach(tid => { byTask[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0)); });
         const taskList = Object.keys(byTask).map(tid => byTask[tid][0]);
         taskList.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
-
         const sym = appState.config.currencySymbol || 'TK';
         const tasks = appState.config.newTasks || {};
-
         let html = '';
         taskList.forEach(sub => {
             const tid = String(sub.taskId);
@@ -1576,35 +1544,17 @@ async function loadTaskHistory() {
             const subCount = allSubsForTask.length;
             const resubmitCount = Math.max(0, subCount - 1);
             const status = (sub.status || 'pending').toLowerCase();
-            const stClass = status === 'approved' ? 'approved' :
-                            status === 'rejected' ? 'rejected' :
-                            status === 'cancelled' ? 'cancelled' : 'pending';
-            const stLabel = status === 'approved' ? '✅ Approved' :
-                            status === 'rejected' ? '❌ Rejected' :
-                            status === 'cancelled' ? '⛔ Cancelled' : '⏳ Pending';
-
+            const stClass = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status === 'cancelled' ? 'cancelled' : 'pending';
+            const stLabel = status === 'approved' ? '✅ Approved' : status === 'rejected' ? '❌ Rejected' : status === 'cancelled' ? '⛔ Cancelled' : '⏳ Pending';
             const taskMeta = tasks[tid] || {};
             const icon = getTaskTypeIcon(taskMeta.type);
             const ts = sub.createdAt || sub.timestamp || 0;
             const dateStr = ts ? new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-
             const isAutoApproved = sub.autoApproved === true;
             const reviewedAt = sub.reviewedAt ? new Date(sub.reviewedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
-
-            const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `
-                <div class="th-reason-box"><i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
-
-            const fileHtml = sub.fileUrl ? `
-                <div class="th-card-meta" style="margin-top:6px;">
-                    <div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div>
-                </div>` : '';
-
-            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl && sub.content.indexOf('Auto-completed') !== 0) ? `
-                <div class="th-card-meta" style="margin-top:6px;">
-                    <div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div>
-                </div>` : '';
-
-            // Re-submit button — only for latest rejected/cancelled AND resubmitCount === 0
+            const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `<div class="th-reason-box"><i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
+            const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div></div>` : '';
+            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl && sub.content.indexOf('Auto-completed') !== 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div></div>` : '';
             let actionHtml = '';
             if ((status === 'rejected' || status === 'cancelled')) {
                 if (resubmitCount === 0) {
@@ -1618,38 +1568,15 @@ async function loadTaskHistory() {
                     actionHtml = `<div class="th-locked-note">🔒 You already used your one-time re-submit</div>`;
                 }
             }
-
-            // Show if user has multiple submissions
             const historyCountHtml = (resubmitCount > 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-list-ol"></i>Total submissions: <b>${subCount}</b></div></div>` : '';
-
-            html += `
-                <div class="th-card ${stClass}">
-                    <div class="th-card-head">
-                        <div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div>
-                        <span class="th-card-badge ${stClass}">${stLabel}</span>
-                    </div>
-                    <div class="th-card-meta">
-                        <div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div>
-                        <div class="row"><i class="fas fa-calendar"></i> Submitted: ${dateStr}</div>
-                        ${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved</span></div>` :
-                          (reviewedAt ? `<div class="row"><i class="fas fa-check-double"></i> Reviewed: ${reviewedAt}</div>` : '')}
-                    </div>
-                    ${contentPreview}
-                    ${fileHtml}
-                    ${historyCountHtml}
-                    ${reasonHtml}
-                    ${actionHtml}
-                </div>
-            `;
+            html += `<div class="th-card ${stClass}"><div class="th-card-head"><div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div><span class="th-card-badge ${stClass}">${stLabel}</span></div><div class="th-card-meta"><div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div><div class="row"><i class="fas fa-calendar"></i> Submitted: ${dateStr}</div>${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved</span></div>` : (reviewedAt ? `<div class="row"><i class="fas fa-check-double"></i> Reviewed: ${reviewedAt}</div>` : '')}</div>${contentPreview}${fileHtml}${historyCountHtml}${reasonHtml}${actionHtml}</div>`;
         });
-
         container.innerHTML = html;
     } catch (e) {
         console.error('Task history load error:', e);
         container.innerHTML = '<p style="text-align:center;color:#ef4444;padding:30px 0;font-weight:600;">Failed to load history</p>';
     }
 }
-
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
 async function requestWithdraw() {
@@ -2063,7 +1990,6 @@ window.onload = () => {
                     isBooted = true;
                     if (checkMaintenance()) { setLoading(false); return; }
                     if (checkBan()) { setLoading(false); return; }
-                    // ✅ Set up real-time submissions listener
                     setupUserSubmissionsListener();
                     await fetchTaskStatuses();
                     const needs = await needsVerification();
@@ -2080,8 +2006,11 @@ window.onload = () => {
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
 
-                    const pendingReward = checkPendingSurveyReward();
-                    if (pendingReward) { setTimeout(() => awardSurveyReward(pendingReward), 2000); }
+                    // ✅ Check pending external task rewards (survey + youtube)
+                    const pendingSurvey = checkPendingSurveyReward();
+                    if (pendingSurvey) { setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500); }
+                    const pendingYoutube = checkPendingYoutubeReward();
+                    if (pendingYoutube) { setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500); }
                 }
             }
         });
