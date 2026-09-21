@@ -6,7 +6,7 @@
 <title>সার্ভে চলছে...</title>
 <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- ═══════════ Popunder / Auto Ads ═══════════ -->
+<!-- ═══════════ Adsterra Popunder / Auto Ads ═══════════ -->
 <script src="https://pl29210461.profitableratecpmnetwork.com/64/dd/cc/64ddccac44c4f949da48ae23ee7766be.js"></script>
 <script src="https://pl29210549.profitableratecpmnetwork.com/47/e4/9f/47e49fe632ef4f91d0dbb970db07dfef.js"></script>
 </head>
@@ -19,7 +19,7 @@
     <p id="taskTitle" class="text-sm opacity-90 mt-1"></p>
   </div>
 
-  <!-- ═══════════ ধাপ ১: আসল সার্ভে ═══════════ -->
+  <!-- ধাপ ১: আসল সার্ভে -->
   <div class="p-5 border-b">
     <p class="text-xs text-gray-500 mb-2">ধাপ ১: সার্ভে সম্পন্ন করুন</p>
     <button id="openRealSurveyBtn"
@@ -29,17 +29,15 @@
     <p class="text-xs text-gray-400 mt-2 text-center">সার্ভে শেষ করে এই পেজে ফিরে আসুন</p>
   </div>
 
-  <!-- ═══════════ ধাপ ২: বিজ্ঞাপন ═══════════ -->
+  <!-- ধাপ ২: বিজ্ঞাপন (Adsterra) -->
   <div class="p-5 bg-gray-50 border-b">
     <p class="text-xs text-gray-500 mb-2">ধাপ ২: বিজ্ঞাপন দেখুন</p>
 
-    <!-- Native Ad (Adsterra/ProfitCPM) -->
     <div id="adBox" class="bg-white rounded-xl p-2 border-2 border-dashed border-yellow-400 flex justify-center items-center" style="min-height: 260px;">
       <script async="async" data-cfasync="false" src="https://pl31395162.profitableratecpmnetwork.com/d48754e3b711acfd2fe8123c6022f767/invoke.js"></script>
       <div id="container-d48754e3b711acfd2fe8123c6022f767"></div>
     </div>
 
-    <!-- Direct Link Ad Banner -->
     <a href="https://www.profitableratecpmnetwork.com/g1x06s932?key=39199b33771ac56684889619f7018043"
        target="_blank"
        class="block mt-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white text-center py-3 rounded-xl font-medium text-sm shadow-md hover:shadow-lg transition">
@@ -49,7 +47,7 @@
     <p class="text-xs text-red-500 mt-2 text-center">⚠️ এই পেজ মাঝপথে বন্ধ করলে রিওয়ার্ড পাবেন না!</p>
   </div>
 
-  <!-- ═══════════ ধাপ ৩: টাইমার ═══════════ -->
+  <!-- ধাপ ৩: টাইমার -->
   <div class="p-6 text-center">
     <p class="text-sm text-gray-600 mb-3">ধাপ ৩: টাইমার শেষ হওয়া পর্যন্ত অপেক্ষা করুন</p>
     <div class="relative inline-block">
@@ -63,7 +61,7 @@
       </div>
     </div>
     <p class="text-xs text-gray-500 mt-3">
-      টাইমার শেষ হলে পেজ অটো বন্ধ হবে এবং ৫ সেকেন্ড পর রিওয়ার্ড যোগ হবে
+      টাইমার শেষ হলে অটো ব্যাক হবে এবং রিওয়ার্ড যোগ হবে
     </p>
   </div>
 
@@ -108,24 +106,21 @@ document.getElementById('openRealSurveyBtn').onclick = () => {
 };
 
 // ═══════════════════════════════════════════
-//   Timer Setup (অ্যাডমিন প্যানেল থেকে সেট করা সময় অনুযায়ী)
+//   Timer Setup
 // ═══════════════════════════════════════════
-const timerSeconds = parseInt(pending.timer) || 60; // ডিফল্ট ৬০ সেকেন্ড
+const timerSeconds = parseInt(pending.timer) || 60;
 let seconds = timerSeconds;
 const total = timerSeconds;
 
-// ═══ Initial Display ═══
 const initM = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
 const initS = String(timerSeconds % 60).padStart(2, '0');
 document.getElementById('timerText').textContent = `${initM}:${initS}`;
 
-// ═══ Progress Circle ═══
 const circumference = 2 * Math.PI * 56;
 const circle = document.getElementById('progressCircle');
 circle.style.strokeDasharray = circumference;
 circle.style.strokeDashoffset = 0;
 
-// ═══ Prevent leaving early ═══
 let completed = false;
 window.addEventListener('beforeunload', (e) => {
   if (!completed) {
@@ -135,7 +130,6 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 
-// ═══ Timer Countdown ═══
 const timerInterval = setInterval(() => {
   seconds--;
   const m = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -151,7 +145,6 @@ const timerInterval = setInterval(() => {
   }
 }, 1000);
 
-// ═══ On Complete ═══
 function onComplete() {
   completed = true;
   localStorage.setItem('survey_done_task', String(pending.taskId));
@@ -162,7 +155,6 @@ function onComplete() {
   }, 1500);
 }
 
-// ═══ Cancel ═══
 function cancelSurvey() {
   if (!confirm('বাতিল করলে রিওয়ার্ড পাবেন না। বাতিল করবেন?')) return;
   completed = true;
