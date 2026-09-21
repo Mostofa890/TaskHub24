@@ -281,6 +281,35 @@
         .task-btn-cancel{background:#e5e7eb;color:#374151;}
         .task-btn-submit{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;box-shadow:0 5px 15px rgba(108,92,231,0.3);}
         .task-btn-submit:hover:not(:disabled){box-shadow:0 8px 20px rgba(108,92,231,0.4);}
+
+        /* ═══════════ TASKS PAGE — INNER TABS ═══════════ */
+        .tasks-inner-tabs{display:flex;gap:8px;padding:0 20px 16px;}
+        .tasks-inner-tab{flex:1;padding:11px 12px;border-radius:14px;background:#fff;color:#6b7280;font-weight:800;font-size:0.82rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+        .tasks-inner-tab.active{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(108,92,231,.28);}
+        .tasks-inner-tab i{font-size:0.95rem;}
+        .tasks-inner-pane{display:none;}
+        .tasks-inner-pane.active{display:block;animation:fadeIn .25s ease;}
+
+        /* ═══════════ TASK HISTORY CARDS ═══════════ */
+        .th-card{background:#fff;margin:0 20px 12px;padding:16px;border-radius:18px;box-shadow:0 6px 16px rgba(0,0,0,.04);border-left:5px solid #6C5CE7;position:relative;transition:all .2s;}
+        .th-card:hover{box-shadow:0 10px 24px rgba(0,0,0,.08);transform:translateY(-1px);}
+        .th-card.approved{border-left-color:#00b894;}
+        .th-card.pending{border-left-color:#f39c12;}
+        .th-card.rejected{border-left-color:#ff4757;}
+        .th-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+        .th-card-title{font-size:0.92rem;font-weight:800;color:#2D3436;line-height:1.3;display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+        .th-card-badge{padding:4px 11px;border-radius:20px;font-size:0.68rem;font-weight:800;letter-spacing:0.3px;white-space:nowrap;text-transform:uppercase;}
+        .th-card-badge.approved{background:#D4EDDA;color:#155724;}
+        .th-card-badge.pending{background:#FFF3CD;color:#856404;}
+        .th-card-badge.rejected{background:#F8D7DA;color:#721C24;}
+        .th-card-badge.cancelled{background:#E2E3E5;color:#383D41;}
+        .th-card-meta{display:flex;flex-direction:column;gap:5px;font-size:0.78rem;color:#666;font-weight:600;}
+        .th-card-meta .row{display:flex;align-items:center;gap:8px;}
+        .th-card-meta .row i{width:16px;text-align:center;color:#9ca3af;}
+        .th-card-meta .row .reward{color:#00b894;font-weight:800;}
+        .th-reason-box{margin-top:10px;padding:10px 12px;background:#FFF5F5;border-left:3px solid #ff4757;border-radius:8px;font-size:0.78rem;color:#721C24;font-weight:600;line-height:1.5;}
+        .th-reason-box i{color:#ff4757;margin-right:5px;}
+        .th-reason-box b{color:#991b1b;}
     </style>
 </head>
 <body>
@@ -335,7 +364,6 @@
     <div class="timer-actions"><button class="btn-cancel" onclick="cancelAdTimer()"><i class="fas fa-times"></i> Cancel</button><button class="btn-waiting" id="timerWaitBtn" disabled><i class="fas fa-spinner"></i> Waiting…</button></div>
 </div></div>
 
-<!-- Universal Task Submit Modal (image/voice/text only — survey goes to survey.html) -->
 <div id="taskSubmitModal">
     <div class="task-shell">
         <div class="task-head">
@@ -392,9 +420,26 @@
         <div id="ad-area" class="ad-grid"></div>
     </div>
 
+    <!-- ✅ TASKS PAGE — with 2 inner tabs -->
     <div id="page-tasks" class="page-section">
-        <div class="sec-head"><i class="fas fa-tasks"></i> Available Tasks</div>
-        <div id="task-area" class="task-list"></div>
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-tasks"></i> Tasks</div>
+
+        <div class="tasks-inner-tabs">
+            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')">
+                <i class="fas fa-list-check"></i> Available Tasks
+            </button>
+            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')">
+                <i class="fas fa-clock-rotate-left"></i> Task History
+            </button>
+        </div>
+
+        <div id="tasksPaneAvailable" class="tasks-inner-pane active">
+            <div id="task-area" class="task-list"></div>
+        </div>
+
+        <div id="tasksPaneHistory" class="tasks-inner-pane">
+            <div id="taskHistoryArea"></div>
+        </div>
     </div>
 
     <div id="page-referral" class="page-section">
@@ -433,6 +478,7 @@
         </div>
     </div>
 
+    <!-- ✅ HISTORY PAGE — Task History REMOVED, only Ad History -->
     <div id="page-history" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-history" style="color:var(--primary);"></i> Ad Earning History</div>
@@ -441,10 +487,6 @@
                 <div class="stat-mini"><div class="num green" id="histAdTotal">0</div><div class="lbl">Total Earned</div></div>
             </div>
             <div id="adHistoryList"><div class="empty-state"><i class="fas fa-play-circle"></i><p>এখনো কোনো অ্যাড দেখা হয়নি</p></div></div>
-        </div>
-        <div class="premium-card">
-            <div class="card-title"><i class="fas fa-tasks" style="color:#f39c12;"></i> My Task History</div>
-            <div id="myTasksList"><div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক সম্পন্ন হয়নি</p></div></div>
         </div>
     </div>
 
@@ -534,12 +576,35 @@ let cycleTimerInterval = null;
 let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: null, adSlotIndex: null, paused: false, wasCancelled: false };
 let MIN_AD_WATCH_TIME = 15;
 
-// Task State (for image/voice/text)
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false };
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ TASKS INNER TAB SWITCHER
+// ═══════════════════════════════════════════════════════
+function switchTasksInnerTab(which) {
+    const btnAvail = document.getElementById('tabBtnAvailable');
+    const btnHist = document.getElementById('tabBtnHistory');
+    const paneAvail = document.getElementById('tasksPaneAvailable');
+    const paneHist = document.getElementById('tasksPaneHistory');
+    if (which === 'history') {
+        btnAvail.classList.remove('active');
+        btnHist.classList.add('active');
+        paneAvail.classList.remove('active');
+        paneHist.classList.add('active');
+        loadTaskHistory();
+    } else {
+        btnHist.classList.remove('active');
+        btnAvail.classList.add('active');
+        paneHist.classList.remove('active');
+        paneAvail.classList.add('active');
+        renderNewTasks();
+    }
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+// ═══════════════════════════════════════════════════════
 // ✅ AD RESET SYSTEM
-// ===================================================
+// ═══════════════════════════════════════════════════════
 function isAllAdsCompleted() {
     const slots = appState.config.adSlots || [];
     if (slots.length === 0) return false;
@@ -614,9 +679,9 @@ function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;',
 function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Not Completed!'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
 // ✅ FILE UPLOAD HELPERS
-// ===================================================
+// ═══════════════════════════════════════════════════════
 async function uploadToImgBB(file) {
     const fd = new FormData(); fd.append('image', file);
     const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
@@ -651,9 +716,9 @@ async function uploadToLitterbox(file) { const fd = new FormData(); fd.append('r
 async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[]', file); const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return url; }
 async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP ' + res.status); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('URL পাওয়া যায়নি'); return url; }
 
-// ===================================================
-// ✅ SURVEY RETURN REWARD (localStorage handoff)
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ SURVEY RETURN REWARD
+// ═══════════════════════════════════════════════════════
 function checkPendingSurveyReward() {
     const done = localStorage.getItem('survey_done_task');
     const pendingRaw = localStorage.getItem('pending_survey');
@@ -720,9 +785,9 @@ async function awardSurveyReward(p) {
     } catch (e) { console.error('Survey reward error:', e); toast('❌ রিওয়ার্ড সমস্যা'); }
 }
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
 // ✅ DAILY BONUS
-// ===================================================
+// ═══════════════════════════════════════════════════════
 function showBonus() {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (appState.user.dailyBonusDate === todayStr()) { toast('আজকের বোনাস আগেই নেওয়া হয়েছে!'); return; }
@@ -779,9 +844,9 @@ async function claimDailyBonus() {
     }
 }
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
 // ✅ COMMISSION
-// ===================================================
+// ═══════════════════════════════════════════════════════
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
@@ -815,9 +880,9 @@ function computeCommissionSplit(earnedAmount) {
     return { userReward: Number(earnedAmount), referrerCommission: commission, mode };
 }
 
-// ===================================================
-// ✅ CHANNELS & NETWORK
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ NETWORK & CHANNELS
+// ═══════════════════════════════════════════════════════
 function getNetworkAdjustedTime() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (!conn) return { seconds: 15, label: 'Unknown', type: 'good', speed: '4G' };
@@ -830,7 +895,6 @@ function getNetworkAdjustedTime() {
     if (type === 'slow-2g' || downlink < 0.5) { seconds = 25; label = 'Poor — +10s'; statusType = 'poor'; }
     return { seconds, label, type: statusType, speed: speedLabel };
 }
-
 function getCurrentChannelLinks() {
     return channelLinks.length ? channelLinks : [
         { label: 'NexEarn Channel', chatId: 'nexearn2' },
@@ -839,7 +903,6 @@ function getCurrentChannelLinks() {
         { label: 'NexEarn Payment', chatId: 'nexearn2_payment' }
     ];
 }
-
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     const links = getCurrentChannelLinks();
@@ -848,7 +911,6 @@ async function needsVerification() {
     for (const link of links) { const joined = await checkChannelMembership(tgUser.id, link.chatId); if (!joined) return true; }
     return false;
 }
-
 async function markVerified() {
     const links = getCurrentChannelLinks();
     const verifiedMap = {}; links.forEach(l => { verifiedMap[l.chatId] = true; });
@@ -857,7 +919,6 @@ async function markVerified() {
     appState.user.verifiedChannels = verifiedMap;
     channelVerified = true;
 }
-
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer();
@@ -883,9 +944,9 @@ function startPeriodicRecheck() {
 }
 function stopPeriodicRecheck() { if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; } stopCycleTimer(); }
 
-// ===================================================
-// ✅ AD WATCH
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ AD WATCH SYSTEM
+// ═══════════════════════════════════════════════════════
 function showAdTimer(slotIndex) {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
@@ -909,7 +970,6 @@ function showAdTimer(slotIndex) {
     document.getElementById('app').classList.add('blurred');
     startTimerCountdown();
 }
-
 function startTimerCountdown() {
     if (adTimerState.timerId) { clearInterval(adTimerState.timerId); adTimerState.timerId = null; }
     adTimerState.running = true;
@@ -932,7 +992,6 @@ function startTimerCountdown() {
         }
     }, 1000);
 }
-
 function cancelAdTimer() {
     if (adTimerState.timerId) { clearInterval(adTimerState.timerId); adTimerState.timerId = null; }
     adTimerState.running = false; adTimerState.wasCancelled = true;
@@ -940,21 +999,17 @@ function cancelAdTimer() {
     document.getElementById('app').classList.remove('blurred');
     showAdError('⏹️ Ad Cancelled!', 'You cancelled the ad before it finished.');
 }
-
 async function executeAdWatch(slotIndex) {
     document.getElementById('adTimerOverlay').classList.remove('active');
     document.getElementById('app').classList.remove('blurred');
     if (adTimerState.wasCancelled) return;
     await watchAd(slotIndex);
 }
-
 function startAdWatch(i) { showAdTimer(i); }
-
 function trackAdClick() {
     db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
-
 async function watchAd(i) {
     if (slotLocks[i]) return;
     slotLocks[i] = true; isAdWatching = true;
@@ -1005,12 +1060,10 @@ async function watchAd(i) {
         else showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
     } finally { slotLocks[i] = false; isAdWatching = false; adTimerState.wasCancelled = false; }
 }
-
 function setupNetworkListener() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     if (conn) { conn.addEventListener('change', () => { if (adTimerState.running) { const net = getNetworkAdjustedTime(); document.getElementById('netSpeed').textContent = net.speed; const dot = document.getElementById('netDot'); dot.className = 'status-dot ' + net.type; document.getElementById('netLabel').textContent = 'Network: ' + net.label; } }); }
 }
-
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
     const offlineOverlay = document.getElementById('offlineOverlay');
@@ -1027,14 +1080,17 @@ function switchTab(tabId, el) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + tabId).classList.add('active');
     el.classList.add('active');
-    if (tabId === 'tasks') renderNewTasks();
+    if (tabId === 'tasks') { renderNewTasks(); loadTaskHistory(); }
     if (tabId === 'leaderboard') loadLeaderboard();
     if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
-    if (tabId === 'history') { loadAdHistory(); loadTaskHistory(); }
+    if (tabId === 'history') { loadAdHistory(); }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
+// ═══════════════════════════════════════════════════════
+// ✅ REFERRAL / WITHDRAWAL
+// ═══════════════════════════════════════════════════════
 async function calculateValidReferrals() {
     try {
         const refs = appState.user.referredUsers || {};
@@ -1051,7 +1107,6 @@ async function calculateValidReferrals() {
         return count;
     } catch(e) { validReferralCount = 0; return 0; }
 }
-
 function getWithdrawLevel() {
     if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
     const count = appState.user.withdrawCount || 0;
@@ -1061,7 +1116,6 @@ function getWithdrawLevel() {
     if (count > 0) { const levelIndex = Math.min(count, withdrawLevels.length - 1); const eligibleIndex = withdrawLevels.indexOf(eligibleLevel); const finalIndex = Math.max(eligibleIndex, levelIndex); return withdrawLevels[Math.min(finalIndex, withdrawLevels.length - 1)]; }
     return eligibleLevel;
 }
-
 function updateWithdrawInfo() {
     const level = getWithdrawLevel();
     const reqRefs = level.requiredRefs || 5;
@@ -1075,7 +1129,6 @@ function updateWithdrawInfo() {
     if (!canWithdraw) { notice.textContent = '⚠️ Need ' + (reqRefs - validReferralCount) + ' more qualified referrals'; notice.style.color = '#ff4757'; }
     else { notice.textContent = '✅ Eligible for withdraw (Level ' + (level.level || 1) + ')'; notice.style.color = '#00b894'; }
 }
-
 function checkMaintenance() {
     if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
         document.getElementById('maintenanceOverlay').classList.add('active');
@@ -1091,7 +1144,6 @@ function checkMaintenance() {
         return true;
     } else { document.getElementById('maintenanceOverlay').classList.remove('active'); if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; } return false; }
 }
-
 function updateMaintenanceTimer() {
     if (!maintenanceEndTime) return;
     const diff = Math.max(0, Math.floor((maintenanceEndTime - Date.now()) / 1000));
@@ -1099,7 +1151,6 @@ function updateMaintenanceTimer() {
     document.getElementById('maintenanceTime').textContent = '⏳ ' + mins + 'm ' + secs + 's remaining';
     if (diff <= 0) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
 }
-
 function checkBan() {
     if (appState.user && appState.user.isBanned) {
         document.getElementById('bannedOverlay').classList.add('active');
@@ -1142,9 +1193,9 @@ function renderAds() {
     }
 }
 
-// ===================================================
-// ✅ TASK SYSTEM (Survey → survey.html | Image/Voice/Text → modal)
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ TASK SYSTEM (Survey → survey.html | Others → modal)
+// ═══════════════════════════════════════════════════════
 function getTaskTypeIcon(type) {
     switch ((type || '').toLowerCase()) {
         case 'survey': return '📊';
@@ -1165,7 +1216,6 @@ function getTaskTypeLabel(type) {
         default:       return 'Task';
     }
 }
-
 function isTaskExpired(task) {
     if (!task.createdAt) return false;
     const daysMatch = (task.timeLimit || '7 days').match(/(\d+)/);
@@ -1251,7 +1301,7 @@ function openTaskSubmit(taskId) {
 
     const type = (task.type || 'text').toLowerCase();
 
-    // ✅ Survey type → redirect to survey.html
+    // ✅ Survey → survey.html
     if (type === 'survey') {
         const pending = {
             taskId: taskId,
@@ -1266,7 +1316,6 @@ function openTaskSubmit(taskId) {
         return;
     }
 
-    // Other types → open in-modal
     taskState.taskId = taskId;
     taskState.task = task;
     taskState.type = type;
@@ -1296,8 +1345,7 @@ function openTaskSubmit(taskId) {
             <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..."></textarea>
             <div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>
         `;
-    }
-    else if (type === 'voice' || type === 'audio') {
+    } else if (type === 'voice' || type === 'audio') {
         actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
         contentArea.innerHTML = `
             <label>🎤 ভয়েস / অডিও আপলোড করুন *</label>
@@ -1307,8 +1355,7 @@ function openTaskSubmit(taskId) {
             <textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..."></textarea>
             <div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>জমা দিন</b> বাটনে ক্লিক করুন।</div>
         `;
-    }
-    else {
+    } else {
         actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
         contentArea.innerHTML = `
             <label>📝 আপনার উত্তর লিখুন *</label>
@@ -1343,8 +1390,7 @@ async function submitGenericTask() {
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
             toast('📤 ছবি আপলোড হচ্ছে...');
             fileUrl = await uploadToImgBB(file);
-        }
-        else if (type === 'voice' || type === 'audio') {
+        } else if (type === 'voice' || type === 'audio') {
             const input = document.getElementById('taskVoiceInput');
             const file = input && input.files[0];
             if (!file) { toast('⚠️ অডিও সিলেক্ট করুন'); return; }
@@ -1353,8 +1399,7 @@ async function submitGenericTask() {
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
             toast('📤 অডিও আপলোড হচ্ছে...');
             fileUrl = await uploadAudio(file);
-        }
-        else if (type === 'text') {
+        } else if (type === 'text') {
             if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
         }
 
@@ -1400,51 +1445,101 @@ function closeTaskSubmit() {
 }
 function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক বাতিল'); }
 
-// ===================================================
-// ✅ TASK HISTORY
-// ===================================================
+// ═══════════════════════════════════════════════════════
+// ✅ TASK HISTORY (Tasks পেজের ২য় ট্যাব)
+// ═══════════════════════════════════════════════════════
 async function loadTaskHistory() {
-    const container = document.getElementById('myTasksList');
+    const container = document.getElementById('taskHistoryArea');
     if (!container) return;
-    const statuses = appState.user.taskStatuses || {};
-    const tasks = appState.config.newTasks || {};
-    const taskHistory = appState.user.taskHistory || {};
-    const sym = appState.config.currencySymbol || 'TK';
+    container.innerHTML = '<p style="text-align:center;color:#999;padding:30px 0;font-weight:600;">Loading history...</p>';
 
-    const relevantIds = Object.keys(statuses).filter(id => ['approved', 'pending', 'rejected'].includes(statuses[id]));
-    if (relevantIds.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক সম্পন্ন হয়নি</p></div>'; return; }
+    try {
+        const snap = await db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).once('value');
+        const subs = [];
+        snap.forEach(child => {
+            const v = child.val();
+            v._id = child.key;
+            subs.push(v);
+        });
 
-    let html = '';
-    relevantIds.forEach(taskId => {
-        const task = tasks[taskId];
-        if (!task) return;
-        const st = statuses[taskId];
-        const ts = taskHistory[taskId];
-        const dateStr = ts ? new Date(ts).toLocaleString() : '';
-        const icon = getTaskTypeIcon(task.type);
-        let statusBadge = ''; let borderColor = '#6C5CE7';
-        if (st === 'approved') { statusBadge = '<span class="status-badge status-approved">✅ Approved</span>'; borderColor = '#00b894'; }
-        else if (st === 'pending') { statusBadge = '<span class="status-badge status-pending">⏳ Pending</span>'; borderColor = '#f39c12'; }
-        else if (st === 'rejected') { statusBadge = '<span class="status-badge status-rejected">❌ Rejected</span>'; borderColor = '#ff4757'; }
+        if (subs.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state" style="padding:50px 20px;">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p>
+                    <p style="font-size:0.75rem; margin-top:8px; color:#bbb;">Available Tasks ট্যাব থেকে টাস্ক শুরু করুন</p>
+                </div>`;
+            return;
+        }
 
-        html += `<div class="premium-card" style="margin-bottom:12px; border-left:4px solid ${borderColor};">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h4 style="font-size:0.95rem; font-weight:700;">${icon} ${esc(task.title)}</h4>${statusBadge}
-            </div>
-            <div style="margin-top:8px; font-size:0.8rem; color:#666;">
-                <p><i class="fas fa-coins"></i> Reward: <b>${task.reward} ${sym}</b></p>
-                <p><i class="fas fa-clock"></i> ${dateStr}</p>
-            </div>
-        </div>`;
-    });
-    container.innerHTML = html;
+        subs.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+        const sym = appState.config.currencySymbol || 'TK';
+        const tasks = appState.config.newTasks || {};
+
+        let html = '';
+        subs.forEach(sub => {
+            const status = (sub.status || 'pending').toLowerCase();
+            const stClass = status === 'approved' ? 'approved' :
+                            status === 'rejected' ? 'rejected' :
+                            status === 'cancelled' ? 'cancelled' : 'pending';
+            const stLabel = status === 'approved' ? '✅ Approved' :
+                            status === 'rejected' ? '❌ Rejected' :
+                            status === 'cancelled' ? '⛔ Cancelled' : '⏳ Pending';
+
+            const taskMeta = tasks[sub.taskId] || {};
+            const icon = getTaskTypeIcon(taskMeta.type);
+            const ts = sub.createdAt || sub.timestamp || 0;
+            const dateStr = ts ? new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+            const isAutoApproved = sub.autoApproved === true;
+            const reviewedAt = sub.reviewedAt ? new Date(sub.reviewedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+            const reasonHtml = (status === 'rejected' && sub.reason) ? `
+                <div class="th-reason-box">
+                    <i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}
+                </div>` : '';
+
+            const fileHtml = sub.fileUrl ? `
+                <div class="th-card-meta" style="margin-top:6px;">
+                    <div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div>
+                </div>` : '';
+
+            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl) ? `
+                <div class="th-card-meta" style="margin-top:6px;">
+                    <div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div>
+                </div>` : '';
+
+            html += `
+                <div class="th-card ${stClass}">
+                    <div class="th-card-head">
+                        <div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div>
+                        <span class="th-card-badge ${stClass}">${stLabel}</span>
+                    </div>
+                    <div class="th-card-meta">
+                        <div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div>
+                        <div class="row"><i class="fas fa-calendar"></i> Submitted: ${dateStr}</div>
+                        ${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved (no review needed)</span></div>` :
+                          (reviewedAt ? `<div class="row"><i class="fas fa-check-double"></i> Reviewed: ${reviewedAt}</div>` : '')}
+                    </div>
+                    ${contentPreview}
+                    ${fileHtml}
+                    ${reasonHtml}
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    } catch (e) {
+        console.error('Task history load error:', e);
+        container.innerHTML = '<p style="text-align:center;color:#ef4444;padding:30px 0;font-weight:600;">Failed to load history</p>';
+    }
 }
 
-async function fetchTaskStatuses() { renderNewTasks(); }
+async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
 // ✅ WITHDRAW
-// ===================================================
+// ═══════════════════════════════════════════════════════
 async function requestWithdraw() {
     if (!isOnline) { toast('No internet connection!'); return; }
     const method = document.getElementById('wd-method').value;
@@ -1473,7 +1568,6 @@ async function requestWithdraw() {
         updateWithdrawInfo();
     } catch (e) { toast('Error Processing Request'); }
 }
-
 async function loadWithdrawHistory() {
     if (!isOnline) { document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No internet.</p>'; return; }
     try {
@@ -1489,6 +1583,9 @@ async function loadWithdrawHistory() {
     } catch (e) {}
 }
 
+// ═══════════════════════════════════════════════════════
+// ✅ HELPERS
+// ═══════════════════════════════════════════════════════
 function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '/app?startapp=' + tgUser.id; }
 function copyLink() { navigator.clipboard.writeText(getRefLink()); toast('Link Copied!'); }
 function shareLink() { const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=Join%20Now!'; if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
@@ -1522,7 +1619,6 @@ async function loadMyReferrals() {
         document.getElementById('refQualifiedCount').textContent = qualifiedCount;
     } catch (e) {}
 }
-
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
     const hist = appState.user.commissionHistory || {};
@@ -1537,7 +1633,6 @@ function loadCommissionHistory() {
     });
     container.innerHTML = html;
 }
-
 function loadAdHistory() {
     const container = document.getElementById('adHistoryList');
     const hist = appState.user.adHistory || {};
@@ -1581,15 +1676,13 @@ async function updateTextElements() {
     wdSel.innerHTML = '<option value="">Select Method</option>';
     if (appState.config.paymentMethods) { appState.config.paymentMethods.forEach(m => { wdSel.innerHTML += '<option value="' + m + '" ' + (currentVal === m ? 'selected' : '') + '>' + m + '</option>'; }); }
     if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) { withdrawLevels = appState.config.withdrawLevels; }
-    else {
-        withdrawLevels = [
-            { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' },
-            { level: 2, requiredRefs: 7, fee: 4, minAmount: 10, maxAmount: 200, time: '30 Min-1 Hours' },
-            { level: 3, requiredRefs: 7, fee: 3, minAmount: 10, maxAmount: 300, time: '30 Min-1 Hours' },
-            { level: 4, requiredRefs: 7, fee: 2, minAmount: 10, maxAmount: 400, time: '30 Min-1 Hours' },
-            { level: 5, requiredRefs: 7, fee: 1, minAmount: 10, maxAmount: 500, time: '30 Min-1 Hours' }
-        ];
-    }
+    else { withdrawLevels = [
+        { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' },
+        { level: 2, requiredRefs: 7, fee: 4, minAmount: 10, maxAmount: 200, time: '30 Min-1 Hours' },
+        { level: 3, requiredRefs: 7, fee: 3, minAmount: 10, maxAmount: 300, time: '30 Min-1 Hours' },
+        { level: 4, requiredRefs: 7, fee: 2, minAmount: 10, maxAmount: 400, time: '30 Min-1 Hours' },
+        { level: 5, requiredRefs: 7, fee: 1, minAmount: 10, maxAmount: 500, time: '30 Min-1 Hours' }
+    ]; }
     await calculateValidReferrals();
     updateWithdrawInfo();
 }
@@ -1685,9 +1778,9 @@ async function showAppAfterVerify() {
 
 function openLink(url) { if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank'); }
 
-// ===================================================
+// ═══════════════════════════════════════════════════════
 // ✅ INIT
-// ===================================================
+// ═══════════════════════════════════════════════════════
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
@@ -1880,7 +1973,6 @@ window.onload = () => {
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
 
-                    // ✅ Check for completed survey reward from survey.html
                     const pendingReward = checkPendingSurveyReward();
                     if (pendingReward) {
                         setTimeout(() => awardSurveyReward(pendingReward), 2000);
