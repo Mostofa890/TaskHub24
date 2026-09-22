@@ -75,7 +75,7 @@
     .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
 
     /* ═══════════════════════════════════════════════════
-       ✅ NEW COLORFUL TASK CARD DESIGN
+       ✅ TASK CARD — ribbon moved inline (no overlap w/ reward)
        ═══════════════════════════════════════════════════ */
     .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
     @keyframes taskBorderShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
@@ -98,8 +98,9 @@
     .task-item.grad-text .task-emoji{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 6px 14px rgba(0,184,148,.4);}
     .task-item.grad-link .task-emoji{background:linear-gradient(135deg,#f39c12,#f6b04a);box-shadow:0 6px 14px rgba(243,156,18,.4);}
     .task-name{font-size:1rem;font-weight:800;color:#1a1a2e;line-height:1.25;display:inline-block;vertical-align:middle;max-width:calc(100% - 60px);}
-    .task-cat{font-size:0.7rem;color:#6b7280;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:5px;}
-    .task-reward-badge{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:6px 12px;border-radius:12px;font-weight:800;font-size:0.85rem;box-shadow:0 6px 14px rgba(0,184,148,.3);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;}
+    .task-cat-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+    .task-cat{font-size:0.7rem;color:#6b7280;font-weight:600;display:inline-flex;align-items:center;gap:5px;}
+    .task-reward-badge{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:6px 12px;border-radius:12px;font-weight:800;font-size:0.85rem;box-shadow:0 6px 14px rgba(0,184,148,.3);white-space:nowrap;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;}
     .task-info-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:12px;position:relative;z-index:1;flex-wrap:wrap;}
     .task-meta{display:flex;flex-direction:column;gap:4px;font-size:0.7rem;color:#64748b;font-weight:700;}
     .task-meta .meta-item{display:flex;align-items:center;gap:5px;}
@@ -114,12 +115,13 @@
     .btn-act.done-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 6px 16px rgba(0,184,148,.35);}
     .btn-act.expired-btn{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;}
     .btn-act.full-btn{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;}
-    .task-ribbon{position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:4px 10px;border-radius:20px;font-size:0.62rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 4px 10px rgba(255,71,87,.4);z-index:2;}
-    .task-ribbon.new{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 4px 10px rgba(0,184,148,.4);}
-    .task-ribbon.hot{background:linear-gradient(135deg,#f39c12,#f6b04a);box-shadow:0 4px 10px rgba(243,156,18,.4);}
-    .task-ribbon.cooldown{background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 4px 10px rgba(99,102,241,.4);}
 
-    /* ✅ Countdown display */
+    /* ✅ Ribbon now INLINE (no absolute positioning) */
+    .task-ribbon{display:inline-flex;align-items:center;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:3px 9px;border-radius:20px;font-size:0.6rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 3px 8px rgba(255,71,87,.35);line-height:1.3;}
+    .task-ribbon.new{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 3px 8px rgba(0,184,148,.35);}
+    .task-ribbon.hot{background:linear-gradient(135deg,#f39c12,#f6b04a);box-shadow:0 3px 8px rgba(243,156,18,.35);}
+    .task-ribbon.cooldown{background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 3px 8px rgba(99,102,241,.35);}
+
     .task-countdown{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;padding:10px 16px;border-radius:14px;min-width:120px;box-shadow:0 6px 16px rgba(30,27,75,.4);}
     .task-countdown .cd-label{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-bottom:3px;}
     .task-countdown .cd-time{font-size:1.05rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;color:#00cec9;text-shadow:0 0 12px rgba(0,206,201,.5);}
@@ -130,10 +132,8 @@
     .empty-state i{font-size:2.5rem;color:#ccc;margin-bottom:10px;display:block;}
     .empty-state p{font-size:0.85rem;font-weight:600;}
 
-    /* task count badge */
     .task-count-badge{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:20px;margin-left:6px;box-shadow:0 4px 12px rgba(108,92,231,.35);letter-spacing:.3px;min-width:24px;}
 
-    /* Other existing styles below (unchanged) */
     .premium-card{background:var(--surface);margin:0 20px 15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.02);}
     .card-title{font-size:1.05rem;font-weight:800;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:10px;}
     .ref-link-box{background:rgba(108,92,231,0.08);padding:15px;border-radius:12px;font-size:0.9rem;word-break:break-all;margin-bottom:15px;border:1px dashed var(--primary);text-align:center;font-weight:700;color:var(--primary);}
@@ -196,25 +196,74 @@
     .bonus-claim{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
 
-    /* ✅ Become Admin Popup */
-    .become-admin-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:13000;padding:18px;background:rgba(0,0,0,.55);backdrop-filter:blur(12px);}
-    .become-admin-overlay.show{display:flex;animation:pop .28s ease-out;}
-    .become-admin-card{width:100%;max-width:420px;border-radius:28px;overflow:hidden;background:linear-gradient(135deg,#111827 0%,#1e1b4b 50%,#312e81 100%);box-shadow:0 30px 80px rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.14);position:relative;animation:pop .3s ease-out;}
-    .become-admin-card::before{content:'';position:absolute;inset:-3px;background:conic-gradient(from 90deg,#6C5CE7,#A29BFE,#00cec9,#f6b04a,#e84393,#6C5CE7);filter:blur(14px);opacity:.55;animation:ring 4s linear infinite;pointer-events:none;}
-    .ba-body{position:relative;padding:32px 24px 24px;color:#e5e7eb;text-align:center;background:inherit;border-radius:28px;z-index:1;}
-    .ba-icon-wrap{width:82px;height:82px;margin:0 auto 18px;border-radius:24px;background:linear-gradient(135deg,#f6b04a,#e84393);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#fff;box-shadow:0 20px 45px rgba(232,67,147,.5);animation:floaty 3s ease-in-out infinite;}
-    .ba-title{font-size:1.35rem;font-weight:900;color:#fff;margin-bottom:8px;letter-spacing:-.3px;}
-    .ba-sub{font-size:.85rem;opacity:.85;margin-bottom:18px;line-height:1.5;font-weight:600;}
-    .ba-benefits{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:14px;margin-bottom:20px;text-align:left;}
-    .ba-benefit{display:flex;align-items:center;gap:10px;font-size:.82rem;font-weight:700;padding:6px 4px;color:rgba(255,255,255,.9);}
-    .ba-benefit i{color:#00cec9;font-size:1rem;}
-    .ba-actions{display:flex;flex-direction:column;gap:10px;}
-    .ba-btn{width:100%;border:none;border-radius:16px;padding:15px;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;font-family:inherit;}
-    .ba-btn:active{transform:scale(0.97);}
-    .ba-btn-primary{background:linear-gradient(135deg,#f6b04a,#e84393);color:#fff;box-shadow:0 12px 30px rgba(232,67,147,.5);}
-    .ba-btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 36px rgba(232,67,147,.65);}
-    .ba-btn-cancel{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.14);}
-    .ba-btn-cancel:hover{background:rgba(255,255,255,.14);}
+    /* ═══════════════════════════════════════════════════
+       ✅ ADMIN SLIDER (replaces Become Admin Popup)
+       ═══════════════════════════════════════════════════ */
+    .admin-slider{
+        position:fixed;
+        top:-160px;
+        left:50%;
+        transform:translateX(-50%);
+        width:94%;
+        max-width:460px;
+        z-index:1500;
+        transition:top 0.75s cubic-bezier(0.34,1.56,0.64,1);
+        pointer-events:none;
+        background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);
+        border-radius:20px;
+        padding:13px 15px;
+        display:flex;
+        align-items:center;
+        gap:12px;
+        box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);
+        overflow:hidden;
+    }
+    .admin-slider.show{
+        top:14px;
+        pointer-events:auto;
+    }
+    .admin-slider::before{
+        content:'';
+        position:absolute;
+        inset:-2px;
+        background:conic-gradient(from 90deg,#6C5CE7,#A29BFE,#00cec9,#f6b04a,#e84393,#6C5CE7);
+        opacity:.18;
+        animation:ring 6s linear infinite;
+        pointer-events:none;
+    }
+    .as-icon{
+        position:relative;
+        width:44px;height:44px;
+        border-radius:14px;
+        background:linear-gradient(135deg,#f6b04a,#e84393);
+        display:flex;align-items:center;justify-content:center;
+        color:#fff;font-size:1.15rem;
+        box-shadow:0 8px 20px rgba(232,67,147,.5);
+        flex-shrink:0;
+        animation:floaty 3s ease-in-out infinite;
+    }
+    .as-content{flex:1;min-width:0;position:relative;z-index:1;}
+    .as-title{color:#fff;font-weight:800;font-size:0.88rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .as-sub{color:rgba(255,255,255,.72);font-size:0.7rem;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .as-btn{
+        position:relative;
+        z-index:1;
+        background:linear-gradient(135deg,#f6b04a,#e84393);
+        color:#fff;
+        border:none;
+        padding:9px 15px;
+        border-radius:12px;
+        font-weight:800;
+        font-size:0.76rem;
+        cursor:pointer;
+        display:inline-flex;align-items:center;gap:6px;
+        box-shadow:0 8px 20px rgba(232,67,147,.45);
+        font-family:inherit;
+        white-space:nowrap;
+        flex-shrink:0;
+        transition:transform .15s;
+    }
+    .as-btn:active{transform:scale(0.95);}
 
     #joinModal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;}
     #joinModal.active{display:flex;}
@@ -396,6 +445,18 @@
 </head>
 <body>
 
+<!-- ✅ ADMIN SLIDER (replaces Become Admin Popup) -->
+<div id="adminSlider" class="admin-slider">
+    <div class="as-icon"><i class="fas fa-crown"></i></div>
+    <div class="as-content">
+        <div class="as-title">🎉 এডমিন হতে চান?</div>
+        <div class="as-sub">Apply now to become an admin</div>
+    </div>
+    <button class="as-btn" onclick="handleBecomeAdmin()">
+        Apply <i class="fas fa-arrow-right"></i>
+    </button>
+</div>
+
 <div id="loader" class="loader-overlay">
     <div class="loader-bg-orb orb1"></div><div class="loader-bg-orb orb2"></div><div class="loader-bg-orb orb3"></div>
     <div class="loader-card">
@@ -429,30 +490,6 @@
             <button id="btnCancelBonus" class="bonus-btn bonus-close" onclick="hideBonus()"><i class="fas fa-times"></i> Cancel (Later)</button>
         </div>
     </div></div>
-</div>
-
-<!-- ✅ Become Admin Popup -->
-<div id="becomeAdminOverlay" class="become-admin-overlay">
-    <div class="become-admin-card">
-        <div class="ba-body">
-            <div class="ba-icon-wrap"><i class="fas fa-crown"></i></div>
-            <h2 class="ba-title">🎉 এডমিন হতে চান?</h2>
-            <p class="ba-sub">আপনি যদি এই অ্যাপে এডমিন হিসেবে কাজ করতে চান, তাহলে নিচের বাটনে ক্লিক করে আবেদন করুন।</p>
-            <div class="ba-benefits">
-                <div class="ba-benefit"><i class="fas fa-check-circle"></i> নিজের Task বানাতে পারবেন</div>
-                <div class="ba-benefit"><i class="fas fa-check-circle"></i> Wallet System ব্যবহার করতে পারবেন</div>
-                <div class="ba-benefit"><i class="fas fa-check-circle"></i> Deposit সহ সব সুবিধা</div>
-            </div>
-            <div class="ba-actions">
-                <button class="ba-btn ba-btn-primary" onclick="handleBecomeAdmin()">
-                    <i class="fas fa-crown"></i> Become Admin
-                </button>
-                <button class="ba-btn ba-btn-cancel" onclick="dismissBecomeAdmin()">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <div id="adTimerOverlay"><div class="timer-card">
@@ -641,7 +678,7 @@ const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 const MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
-const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -672,9 +709,11 @@ let MIN_AD_WATCH_TIME = 15;
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
 
-// ✅ Admin check cache
 let isUserAdmin = false;
-let becomeAdminPopupChecked = false;
+
+// ✅ Admin slider state
+let adminSliderInterval = null;
+let adminSliderTimeout = null;
 
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
@@ -689,12 +728,11 @@ function hasCooldown(type) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ BECOME ADMIN POPUP LOGIC
+// ✅ ADMIN SLIDER (replaces popup)
 // ═══════════════════════════════════════════════════════
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     try {
-        // Check admins node for user's telegram ID
         const adminsSnap = await db.ref('admins').once('value');
         let found = false;
         adminsSnap.forEach(child => {
@@ -707,37 +745,46 @@ async function checkIfUserIsAdmin() {
     } catch(e) { return false; }
 }
 
-async function showBecomeAdminPopupIfNeeded() {
-    if (becomeAdminPopupChecked) return;
-    becomeAdminPopupChecked = true;
-    if (!tgUser || tgUser.id === '123456') return;
-    // Config check
-    const enabled = appState.config.becomeAdminEnabled !== false;
-    const link = appState.config.becomeAdminLink || '';
-    if (!enabled || !link) return;
-    // Already dismissed?
+async function startAdminSlider() {
+    if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
     if (appState.user.becomeAdminDismissed === true) return;
-    // Already admin?
+    if (!tgUser || tgUser.id === '123456') return;
+
     isUserAdmin = await checkIfUserIsAdmin();
     if (isUserAdmin) {
-        // Mark dismissed so never shows again
         try { await db.ref('users/' + tgUser.id + '/becomeAdminDismissed').set(true); } catch(e) {}
         appState.user.becomeAdminDismissed = true;
         return;
     }
-    // Show popup after a small delay
-    setTimeout(() => {
-        document.getElementById('becomeAdminOverlay').classList.add('show');
-    }, 800);
+
+    const slider = document.getElementById('adminSlider');
+    if (!slider) return;
+
+    const showSlider = () => {
+        slider.classList.add('show');
+        adminSliderTimeout = setTimeout(() => {
+            slider.classList.remove('show');
+        }, 6000);
+    };
+
+    setTimeout(showSlider, 2500);
+    if (adminSliderInterval) clearInterval(adminSliderInterval);
+    adminSliderInterval = setInterval(showSlider, 25000);
+}
+
+function stopAdminSlider() {
+    if (adminSliderInterval) { clearInterval(adminSliderInterval); adminSliderInterval = null; }
+    if (adminSliderTimeout) { clearTimeout(adminSliderTimeout); adminSliderTimeout = null; }
+    const slider = document.getElementById('adminSlider');
+    if (slider) slider.classList.remove('show');
 }
 
 function handleBecomeAdmin() {
     const link = appState.config.becomeAdminLink || '';
     if (!link) { toast('⚠️ No admin application link set'); return; }
-    // Mark dismissed so no re-show
     try { db.ref('users/' + tgUser.id + '/becomeAdminDismissed').set(true); } catch(e) {}
     appState.user.becomeAdminDismissed = true;
-    // Open link
+    stopAdminSlider();
     try {
         if (tg && typeof tg.openLink === 'function') {
             tg.openLink(link);
@@ -747,14 +794,7 @@ function handleBecomeAdmin() {
             window.open(link, '_blank');
         }
     } catch(e) { window.open(link, '_blank'); }
-    document.getElementById('becomeAdminOverlay').classList.remove('show');
     toast('🎉 Opening application form...');
-}
-
-function dismissBecomeAdmin() {
-    document.getElementById('becomeAdminOverlay').classList.remove('show');
-    try { db.ref('users/' + tgUser.id + '/becomeAdminDismissed').set(true); } catch(e) {}
-    appState.user.becomeAdminDismissed = true;
 }
 
 // ═══════════════════════════════════════════════════════
@@ -779,7 +819,6 @@ function startCooldownTicker() {
     cooldownTimerInterval = setInterval(() => {
         const els = document.querySelectorAll('[data-cooldown-task]');
         if (!els.length) return;
-        let anyActive = false;
         els.forEach(el => {
             const tid = el.getAttribute('data-cooldown-task');
             const remain = getCooldownRemaining(tid);
@@ -787,14 +826,11 @@ function startCooldownTicker() {
             if (timeEl) {
                 if (remain > 0) {
                     timeEl.textContent = fmtCountdown(remain);
-                    anyActive = true;
                 } else {
-                    // Cooldown finished → re-render
                     renderNewTasks();
                 }
             }
         });
-        if (!anyActive && !els.length) {}
     }, 1000);
 }
 
@@ -953,9 +989,6 @@ async function uploadToLitterbox(file) { const fd = new FormData(); fd.append('r
 async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[]', file); const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
 async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP'); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
 
-// ═══════════════════════════════════════════════════════
-// ✅ EXTERNAL TASK RETURN REWARDS (Survey + YouTube)
-// ═══════════════════════════════════════════════════════
 function checkPendingSurveyReward() {
     const done = localStorage.getItem('survey_done_task');
     const pendingRaw = localStorage.getItem('pending_survey');
@@ -1008,7 +1041,6 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
             fileUrl: null, status: 'approved', autoApproved: true,
             createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
         });
-        // ✅ Set cooldown for survey & youtube
         await db.ref('users/' + tgUser.id).update({
             balance: newBal, totalEarned: newEarn,
             ['taskStatuses/' + taskId]: 'approved',
@@ -1481,7 +1513,7 @@ function isTaskAutoDeleted(task) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ RENDER NEW TASKS — colorful + count + cooldown
+// ✅ RENDER NEW TASKS — ribbon is now INLINE (no overlap w/ reward badge)
 // ═══════════════════════════════════════════════════════
 function renderNewTasks() {
     const el = document.getElementById('task-area');
@@ -1497,7 +1529,7 @@ function renderNewTasks() {
         const task = tasks[taskId];
         if (isTaskAutoDeleted(task)) return;
         if (task.status === 'closed') return;
-        if (task.status === 'pending') return; // hidden by super admin
+        if (task.status === 'pending') return;
         if (task.status === 'cancelled') return;
         hasVisibleTask = true;
         visibleCount++;
@@ -1515,21 +1547,19 @@ function renderNewTasks() {
         const isCool = hasCooldown(task.type);
         const cooldownRemain = isCool ? getCooldownRemaining(taskId) : 0;
 
-        // slot progress %
         const slotProgress = totalSlots > 0 ? Math.min(100, (submittedCount / totalSlots) * 100) : 0;
         const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
 
-        // Ribbon
+        // Ribbon — now inline (span), placed next to category
         let ribbon = '';
-        if (isCool && cooldownRemain > 0) ribbon = '<div class="task-ribbon cooldown">⏱️ 24hr Cooldown</div>';
-        else if (isDone) ribbon = '<div class="task-ribbon hot">✓ Done</div>';
-        else if (slotsLeft <= 5 && slotsLeft > 0) ribbon = '<div class="task-ribbon">🔥 Almost Full</div>';
-        else if (submittedCount === 0) ribbon = '<div class="task-ribbon new">✨ New</div>';
+        if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
+        else if (isDone) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
+        else if (slotsLeft <= 5 && slotsLeft > 0) ribbon = '<span class="task-ribbon">🔥 Almost Full</span>';
+        else if (submittedCount === 0) ribbon = '<span class="task-ribbon new">✨ New</span>';
 
         let actionHtml = '';
         let gradCls = gradClass;
 
-        // Cooldown check FIRST for survey & youtube
         if (isCool && cooldownRemain > 0) {
             actionHtml = `
                 <div class="task-countdown" data-cooldown-task="${taskId}">
@@ -1552,12 +1582,14 @@ function renderNewTasks() {
         renderedHtml += `
             <div class="task-item ${gradCls}">
                 <div class="task-inner">
-                    ${ribbon}
                     <div class="task-head-row">
                         <div class="task-title-wrap">
                             <span class="task-emoji">${typeIcon}</span>
                             <span class="task-name">${esc(task.title)}</span>
-                            <div class="task-cat"><i class="fas fa-tag"></i> ${esc(task.category || typeLabel)}</div>
+                            <div class="task-cat-row">
+                                <div class="task-cat"><i class="fas fa-tag"></i> ${esc(task.category || typeLabel)}</div>
+                                ${ribbon}
+                            </div>
                         </div>
                         <div class="task-reward-badge"><i class="fas fa-coins"></i> +${task.reward} ${sym}</div>
                     </div>
@@ -1583,17 +1615,12 @@ function renderNewTasks() {
         el.innerHTML = renderedHtml;
     }
 
-    // Update task count badge
     const badge = document.getElementById('taskCountBadge');
     if (badge) badge.textContent = visibleCount;
 
-    // Start ticker for countdowns
     if (visibleCount > 0) startCooldownTicker();
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ OPEN TASK SUBMIT
-// ═══════════════════════════════════════════════════════
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
     if (!task) { toast('Task not found'); return; }
@@ -1604,7 +1631,6 @@ function openTaskSubmit(taskId) {
     const resubmitCount = userState.resubmitCount;
 
     if (status === 'approved') {
-        // Cooldown check for survey/youtube
         const type = (task.type || '').toLowerCase();
         if (hasCooldown(type)) {
             const remain = getCooldownRemaining(taskId);
@@ -1872,7 +1898,6 @@ async function loadTaskHistory() {
             const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div></div>` : '';
             const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl && sub.content.indexOf('Auto-completed') !== 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div></div>` : '';
             let actionHtml = '';
-            // Cooldown info for survey/youtube
             if (taskMeta.type && hasCooldown(taskMeta.type) && status === 'approved') {
                 const remain = getCooldownRemaining(tid);
                 if (remain > 0) {
@@ -2052,14 +2077,10 @@ function setLoading(isLoading) {
     else { loader.style.display = 'none'; app.style.display = 'block'; }
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ LEADERBOARD — merges custom admin entries with real users
-// ═══════════════════════════════════════════════════════
 async function loadLeaderboard() {
     if (!isOnline) return;
     const sym = appState.config.currencySymbol || 'TK';
 
-    // Fetch real top users
     const snap = await db.ref('users').orderByChild('balance').limitToLast(30).once('value');
     let realUsers = [];
     snap.forEach(child => {
@@ -2076,18 +2097,15 @@ async function loadLeaderboard() {
         }
     });
 
-    // Fetch custom admin entries
     const custom = appState.config.leaderboardCustom || [];
     custom.forEach(c => {
         const cBalance = Number(c.balance || 0);
         const cRefs = Number(c.refs || 0);
-        // Try to find matching real user
         let matched = false;
         if (c.userId) {
             const idx = realUsers.findIndex(u => String(u._id) === String(c.userId));
             if (idx >= 0) {
                 matched = true;
-                // Take the max between real and custom
                 realUsers[idx].balance = Math.max(realUsers[idx].balance, cBalance);
                 realUsers[idx].referrals = Math.max(realUsers[idx].referrals, cRefs);
                 realUsers[idx]._isCustom = true;
@@ -2105,10 +2123,7 @@ async function loadLeaderboard() {
         }
     });
 
-    // Sort by balance descending (highest first)
     realUsers.sort((a, b) => b.balance - a.balance);
-
-    // Take top 10
     const top10 = realUsers.slice(0, 10);
 
     let p1 = '', p2 = '', p3 = '', listHtml = '';
@@ -2185,8 +2200,8 @@ async function showAppAfterVerify() {
     setLoading(false);
     startPeriodicRecheck();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
-    // ✅ Show become admin popup
-    showBecomeAdminPopupIfNeeded();
+    // ✅ Start admin slider instead of popup
+    startAdminSlider();
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
@@ -2202,11 +2217,12 @@ window.onload = () => {
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { stopPeriodicRecheck(); }
+        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); }
         else if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
             const resetTime = Number(appState.user.adsResetTime || 0);
             if (resetTime > 0 && resetTime <= Date.now()) { forceCycleReset(); } else { updateCycleUI(); }
             startPeriodicRecheck();
+            startAdminSlider();
             if (channelVerified) {
                 needsVerification().then(needs => {
                     if (needs) {
@@ -2222,7 +2238,7 @@ window.onload = () => {
         }
     });
 
-    window.addEventListener('beforeunload', () => { stopPeriodicRecheck(); if (verifyInterval) clearInterval(verifyInterval); });
+    window.addEventListener('beforeunload', () => { stopPeriodicRecheck(); stopAdminSlider(); if (verifyInterval) clearInterval(verifyInterval); });
 
     db.ref('config').on('value', snap => {
         if (snap.exists()) {
@@ -2388,8 +2404,8 @@ window.onload = () => {
                             setLoading(false);
                             startPeriodicRecheck();
                             if (appState.user.dailyBonusDate !== today) showBonus();
-                            // ✅ Show become admin popup
-                            showBecomeAdminPopupIfNeeded();
+                            // ✅ Start admin slider instead of popup
+                            startAdminSlider();
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
 
