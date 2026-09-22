@@ -115,11 +115,17 @@
     .task-ribbon.new{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 3px 8px rgba(0,184,148,.35);}
     .task-ribbon.hot{background:linear-gradient(135deg,#f39c12,#f6b04a);box-shadow:0 3px 8px rgba(243,156,18,.35);}
     .task-ribbon.cooldown{background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 3px 8px rgba(99,102,241,.35);}
+    .task-ribbon.expired{background:linear-gradient(135deg,#94a3b8,#cbd5e1);box-shadow:0 3px 8px rgba(148,163,184,.35);}
+    .task-ribbon.deleting{background:linear-gradient(135deg,#dc2626,#f87171);box-shadow:0 3px 8px rgba(220,38,38,.4);animation:pulseText 1.5s ease-in-out infinite;}
     .task-countdown{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;padding:10px 16px;border-radius:14px;min-width:120px;box-shadow:0 6px 16px rgba(30,27,75,.4);}
     .task-countdown .cd-label{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-bottom:3px;}
     .task-countdown .cd-time{font-size:1.05rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;color:#00cec9;text-shadow:0 0 12px rgba(0,206,201,.5);}
     .task-progress-mini{margin-top:10px;height:6px;background:rgba(108,92,231,.12);border-radius:20px;overflow:hidden;position:relative;z-index:1;}
     .task-progress-mini .bar{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .4s ease;}
+    /* ✅ Task expiry live countdown styles */
+    .task-expiry-live{color:#6366f1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.3px;}
+    .task-expiry-live.expired{color:#ff4757;font-weight:900;}
+    .task-delete-live{color:#dc2626;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.3px;animation:pulseText 1.8s ease-in-out infinite;}
     .empty-state{text-align:center;padding:30px 15px;color:#999;}
     .empty-state i{font-size:2.5rem;color:#ccc;margin-bottom:10px;display:block;}
     .empty-state p{font-size:0.85rem;font-weight:600;}
@@ -186,9 +192,6 @@
     .bonus-claim{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
 
-    /* ═══════════════════════════════════════════════════
-       ✅ ADMIN SLIDER — FIXED: icon no animation, smooth slide (no overshoot)
-       ═══════════════════════════════════════════════════ */
     .admin-slider{
         position:fixed;
         top:-160px;
@@ -197,7 +200,7 @@
         width:94%;
         max-width:460px;
         z-index:1500;
-        transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1); /* ✅ smooth, no bounce/overshoot */
+        transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1);
         pointer-events:none;
         background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);
         border-radius:20px;
@@ -208,10 +211,7 @@
         box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);
         overflow:hidden;
     }
-    .admin-slider.show{
-        top:14px;
-        pointer-events:auto;
-    }
+    .admin-slider.show{ top:14px; pointer-events:auto; }
     .admin-slider::before{
         content:'';
         position:absolute;
@@ -230,7 +230,6 @@
         color:#fff;font-size:1.15rem;
         box-shadow:0 8px 20px rgba(232,67,147,.5);
         flex-shrink:0;
-        /* ✅ FIX: animation removed so icon stays still */
     }
     .as-content{flex:1;min-width:0;position:relative;z-index:1;}
     .as-title{color:#fff;font-weight:800;font-size:0.88rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -435,7 +434,7 @@
 </head>
 <body>
 
-<!-- ✅ ADMIN SLIDER -->
+<!-- ADMIN SLIDER -->
 <div id="adminSlider" class="admin-slider">
     <div class="as-icon"><i class="fas fa-crown"></i></div>
     <div class="as-content">
@@ -694,6 +693,7 @@ let periodicRecheckInterval = null;
 let isRechecking = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
+let taskExpiryTickerInterval = null; /* ✅ NEW: task expiry live ticker */
 let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: null, adSlotIndex: null, paused: false, wasCancelled: false };
 let MIN_AD_WATCH_TIME = 15;
 
@@ -718,8 +718,91 @@ function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
 
+/* ═══════════════════════════════════════════════════════
+   ✅ NEW: TASK EXPIRY HELPERS (live countdown + auto delete)
+   ═══════════════════════════════════════════════════════ */
+function getTaskDaysFromLimit(task) {
+    const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
+    return daysMatch ? parseInt(daysMatch[1]) : 7;
+}
+function getTaskTimeRemaining(task) {
+    if (!task || !task.createdAt) return null;
+    const days = getTaskDaysFromLimit(task);
+    return (task.createdAt + days * 24 * 60 * 60 * 1000) - Date.now();
+}
+function getTaskAutoDeleteRemaining(task) {
+    if (!task || !task.createdAt) return null;
+    const days = getTaskDaysFromLimit(task);
+    return (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000) - Date.now();
+}
+function fmtTaskTime(ms) {
+    if (ms == null || ms <= 0) return '00:00:00';
+    const totalSec = Math.floor(ms / 1000);
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (d > 0) return d + 'd ' + String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm';
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function startTaskExpiryTicker() {
+    stopTaskExpiryTicker();
+    taskExpiryTickerInterval = setInterval(() => {
+        if (!isBooted || !isOnline) return;
+        const tasks = appState.config.newTasks || {};
+        let needsRerender = false;
+
+        Object.keys(tasks).forEach(taskId => {
+            const task = tasks[taskId];
+            if (!task) return;
+            if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
+
+            /* If auto-delete time reached, mark re-render */
+            const deleteRemain = getTaskAutoDeleteRemaining(task);
+            if (deleteRemain !== null && deleteRemain <= 0) {
+                needsRerender = true;
+                return;
+            }
+
+            /* Update expiry countdown text */
+            const expiryWrap = document.querySelector('[data-expiry-task="' + taskId + '"]');
+            if (expiryWrap) {
+                const remain = getTaskTimeRemaining(task);
+                const wasExpired = expiryWrap.dataset.expired === '1';
+                const isNowExpired = remain <= 0;
+
+                if (isNowExpired && !wasExpired) {
+                    /* Just became expired → full re-render for state change */
+                    needsRerender = true;
+                } else if (!isNowExpired && !wasExpired) {
+                    const textEl = expiryWrap.querySelector('.expiry-text');
+                    if (textEl) textEl.textContent = '⏳ ' + fmtTaskTime(remain);
+                }
+            }
+
+            /* Update delete countdown text (only shown for expired tasks) */
+            const deleteWrap = document.querySelector('[data-delete-task="' + taskId + '"]');
+            if (deleteWrap) {
+                const textEl = deleteWrap.querySelector('.delete-text');
+                if (textEl && deleteRemain > 0) {
+                    textEl.textContent = fmtTaskTime(deleteRemain);
+                }
+            }
+        });
+
+        if (needsRerender) renderNewTasks();
+    }, 1000);
+}
+function stopTaskExpiryTicker() {
+    if (taskExpiryTickerInterval) {
+        clearInterval(taskExpiryTickerInterval);
+        taskExpiryTickerInterval = null;
+    }
+}
+
 // ═══════════════════════════════════════════════════════
-// ✅ ANTI-HACK PROTECTION SYSTEM
+// ANTI-HACK PROTECTION
 // ═══════════════════════════════════════════════════════
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
@@ -734,7 +817,6 @@ function hasCooldown(type) {
     }, true);
     document.addEventListener('selectstart', (e) => { e.preventDefault(); });
     document.addEventListener('dragstart', (e) => e.preventDefault());
-
     let devtoolsAlertShown = false;
     setInterval(() => {
         const wDiff = window.outerWidth - window.innerWidth;
@@ -743,31 +825,24 @@ function hasCooldown(type) {
             if (!devtoolsAlertShown) { devtoolsAlertShown = true; try { console.clear(); } catch(e) {} document.title = '🔒 Secure'; }
         } else { devtoolsAlertShown = false; }
     }, 1200);
-
     setInterval(() => {
         const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
         if (realId && String(realId) !== String(tgUser.id)) { location.reload(); }
     }, 5000);
-
     try { Object.freeze(firebaseConfig); } catch(e) {}
-
     window.__integrityCheck = function() {
         if (!tgUser || !tgUser.id) return false;
         if (tgUser.id === '123456') return true;
         const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
         return String(realId) === String(tgUser.id);
     };
-
-    try {
-        Object.defineProperty(window, 'appState', { configurable: false, writable: false, value: appState });
-    } catch(e) {}
-
+    try { Object.defineProperty(window, 'appState', { configurable: false, writable: false, value: appState }); } catch(e) {}
     const _secrets = { BOT_TOKEN, ADMIN_ID, IMGBB_API_KEY };
     Object.freeze(_secrets);
 })();
 
 // ═══════════════════════════════════════════════════════
-// ✅ ADMIN SLIDER — Shows 10s, hides 7s, cycles
+// ADMIN SLIDER
 // ═══════════════════════════════════════════════════════
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
@@ -781,7 +856,6 @@ async function checkIfUserIsAdmin() {
         return found;
     } catch(e) { return false; }
 }
-
 async function startAdminSlider() {
     if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
     if (!tgUser || tgUser.id === '123456') return;
@@ -801,7 +875,6 @@ async function startAdminSlider() {
     };
     adminSliderShowTimer = setTimeout(runCycle, 2000);
 }
-
 function stopAdminSlider() {
     if (adminSliderShowTimer) { clearTimeout(adminSliderShowTimer); adminSliderShowTimer = null; }
     if (adminSliderHideTimer) { clearTimeout(adminSliderHideTimer); adminSliderHideTimer = null; }
@@ -809,7 +882,6 @@ function stopAdminSlider() {
     const slider = document.getElementById('adminSlider');
     if (slider) slider.classList.remove('show');
 }
-
 function handleBecomeAdmin() {
     const link = appState.config.becomeAdminLink || '';
     if (!link) { toast('⚠️ No admin application link set'); return; }
@@ -820,7 +892,6 @@ function handleBecomeAdmin() {
         openAdminLink(finalLink);
     }).catch(() => { if (link && /^https?:\/\//i.test(link)) openAdminLink(link); });
 }
-
 function openAdminLink(link) {
     try {
         if (tg && typeof tg.openLink === 'function') { tg.openLink(link); }
@@ -831,7 +902,7 @@ function openAdminLink(link) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ COOLDOWN HELPERS
+// COOLDOWN HELPERS
 // ═══════════════════════════════════════════════════════
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
@@ -901,7 +972,6 @@ function switchTasksInnerTab(which) {
     }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
-
 function setupUserSubmissionsListener() {
     db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).on('value', snap => {
         userSubmissionsCache = {};
@@ -1026,7 +1096,6 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     if (!taskId) return;
     const userState = getTaskUserState(taskId);
     if (userState.status === 'approved') return;
-
     const baseReward = Number(p.reward || 0);
     const split = computeCommissionSplit(baseReward);
     const userReward = split.userReward;
@@ -1034,7 +1103,6 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     const newBal = (appState.user.balance || 0) + userReward;
     const newEarn = (appState.user.totalEarned || 0) + userReward;
     const taskTimestamp = Date.now();
-
     try {
         const subId = 'sub_' + Date.now() + '_' + tgUser.id;
         await db.ref('taskSubmissions/' + subId).set({
@@ -1054,15 +1122,12 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
         appState.user.taskCooldowns[taskId] = taskTimestamp;
         await db.ref('config/newTasks/' + taskId + '/submittedCount').transaction(c => (c || 0) + 1);
-
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
         if (!appState.user.taskHistory) appState.user.taskHistory = {};
         appState.user.taskStatuses[taskId] = 'approved';
         appState.user.taskHistory[taskId] = taskTimestamp;
-
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
-
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
         renderNewTasks(); loadTaskHistory();
@@ -1191,6 +1256,7 @@ function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer();
     startCooldownTicker();
+    startTaskExpiryTicker(); /* ✅ NEW: start expiry ticker */
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -1211,7 +1277,12 @@ function startPeriodicRecheck() {
         } catch(e) {} finally { isRechecking = false; }
     }, 30000);
 }
-function stopPeriodicRecheck() { if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; } stopCycleTimer(); if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; } }
+function stopPeriodicRecheck() {
+    if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
+    stopCycleTimer();
+    if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
+    stopTaskExpiryTicker(); /* ✅ NEW: stop expiry ticker */
+}
 
 function showAdTimer(slotIndex) {
     if (!isOnline) { toast('No internet connection!'); return; }
@@ -1504,16 +1575,14 @@ function getTaskTypeLabel(type) {
     return m[(type || '').toLowerCase()] || 'Task';
 }
 function isTaskExpired(task) {
-    if (!task.createdAt) return false;
-    const daysMatch = (task.timeLimit || '7 days').match(/(\d+)/);
-    const days = daysMatch ? parseInt(daysMatch[1]) : 7;
-    return Date.now() > (task.createdAt + days * 24 * 60 * 60 * 1000);
+    const remain = getTaskTimeRemaining(task);
+    if (remain === null) return false;
+    return remain <= 0;
 }
 function isTaskAutoDeleted(task) {
-    if (!task.createdAt) return false;
-    const daysMatch = (task.timeLimit || '7 days').match(/(\d+)/);
-    const days = daysMatch ? parseInt(daysMatch[1]) : 7;
-    return Date.now() > (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000);
+    const remain = getTaskAutoDeleteRemaining(task);
+    if (remain === null) return false;
+    return remain <= 0;
 }
 
 function renderNewTasks() {
@@ -1536,6 +1605,8 @@ function renderNewTasks() {
         visibleCount++;
 
         const isExpired = isTaskExpired(task);
+        const expiryRemain = getTaskTimeRemaining(task);
+        const deleteRemain = getTaskAutoDeleteRemaining(task);
         const userState = getTaskUserState(taskId);
         const status = userState.status;
         const submittedCount = task.submittedCount || 0;
@@ -1552,7 +1623,9 @@ function renderNewTasks() {
         const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
 
         let ribbon = '';
-        if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
+        if (isExpired && deleteRemain > 0) ribbon = '<span class="task-ribbon deleting">🗑️ Deleting Soon</span>';
+        else if (isExpired) ribbon = '<span class="task-ribbon expired">⛔ Expired</span>';
+        else if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
         else if (isDone) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
         else if (slotsLeft <= 5 && slotsLeft > 0) ribbon = '<span class="task-ribbon">🔥 Almost Full</span>';
         else if (submittedCount === 0) ribbon = '<span class="task-ribbon new">✨ New</span>';
@@ -1560,15 +1633,15 @@ function renderNewTasks() {
         let actionHtml = '';
         let gradCls = gradClass;
 
-        if (isCool && cooldownRemain > 0) {
+        if (isExpired) {
+            actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
+            gradCls += ' grad-disabled';
+        } else if (isCool && cooldownRemain > 0) {
             actionHtml = `
                 <div class="task-countdown" data-cooldown-task="${taskId}">
                     <div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div>
                     <div class="cd-time">${fmtCountdown(cooldownRemain)}</div>
                 </div>`;
-            gradCls += ' grad-disabled';
-        } else if (isExpired) {
-            actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
             gradCls += ' grad-disabled';
         } else if (isDone) {
             actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`;
@@ -1578,6 +1651,16 @@ function renderNewTasks() {
         } else {
             actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
         }
+
+        /* ✅ Time display with live countdown + delete countdown */
+        const expiryTextHtml = isExpired
+            ? '⛔ Expired'
+            : '⏳ ' + fmtTaskTime(expiryRemain);
+        const deleteHtml = (isExpired && deleteRemain > 0)
+            ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${taskId}">
+                   <i class="fas fa-trash-alt"></i> Auto-delete in <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span>
+               </div>`
+            : '';
 
         renderedHtml += `
             <div class="task-item ${gradCls}">
@@ -1596,7 +1679,11 @@ function renderNewTasks() {
                     <div class="task-info-row">
                         <div class="task-meta">
                             <div class="meta-item"><i class="fas fa-users"></i> <span class="${slotClass}">${slotsLeft} slots left</span></div>
-                            <div class="meta-item"><i class="fas fa-clock"></i> ${isExpired ? 'Expired' : esc(task.timeLimit || '7 days')}</div>
+                            <div class="meta-item" data-expiry-task="${taskId}" data-expired="${isExpired ? '1' : '0'}">
+                                <i class="fas fa-clock"></i>
+                                <span class="expiry-text task-expiry-live ${isExpired ? 'expired' : ''}">${expiryTextHtml}</span>
+                            </div>
+                            ${deleteHtml}
                             ${isCool ? '<div class="meta-item" style="color:#6366f1;"><i class="fas fa-sync-alt"></i> 24hr repeatable</div>' : ''}
                         </div>
                         ${actionHtml}
@@ -1649,30 +1736,15 @@ function openTaskSubmit(taskId) {
 
     if (type === 'survey') {
         if (status === 'new' || (status === 'rejected' || status === 'cancelled') && resubmitCount === 0 || (status === 'approved' && getCooldownRemaining(taskId) === 0)) {
-            const pending = {
-                taskId: taskId,
-                taskTitle: task.title || 'Survey',
-                reward: task.reward || 0,
-                url: task.url || task.link || '',
-                timer: parseInt(task.timer) || 60,
-                startedAt: Date.now()
-            };
+            const pending = { taskId: taskId, taskTitle: task.title || 'Survey', reward: task.reward || 0, url: task.url || task.link || '', timer: parseInt(task.timer) || 60, startedAt: Date.now() };
             localStorage.setItem('pending_survey', JSON.stringify(pending));
             window.location.href = 'survey.html';
             return;
         }
     }
-
     if (type === 'youtube_video_view') {
         if (status === 'new' || ((status === 'rejected' || status === 'cancelled') && resubmitCount === 0) || (status === 'approved' && getCooldownRemaining(taskId) === 0)) {
-            const pending = {
-                taskId: taskId,
-                taskTitle: task.title || 'YouTube Video View',
-                reward: task.reward || 0,
-                url: task.url || task.link || '',
-                timer: parseInt(task.timer) || 60,
-                startedAt: Date.now()
-            };
+            const pending = { taskId: taskId, taskTitle: task.title || 'YouTube Video View', reward: task.reward || 0, url: task.url || task.link || '', timer: parseInt(task.timer) || 60, startedAt: Date.now() };
             localStorage.setItem('pending_youtube', JSON.stringify(pending));
             window.location.href = 'youtube.html';
             return;
@@ -1771,10 +1843,7 @@ async function submitGenericTask() {
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
-    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') {
-        toast('⚠️ এই টাস্ক modal এ সাবমিট হয় না');
-        return;
-    }
+    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ এই টাস্ক modal এ সাবমিট হয় না'); return; }
     if (!canSubmitTask(taskId)) {
         const s = getTaskUserState(taskId);
         if (s.status === 'pending') toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে');
@@ -1824,7 +1893,6 @@ async function submitGenericTask() {
             content: content, fileUrl: fileUrl,
             status: 'pending', createdAt: Date.now()
         });
-
         await db.ref('users/' + tgUser.id).update({
             ['taskStatuses/' + taskId]: 'pending',
             ['taskHistory/' + taskId]: Date.now()
@@ -1859,11 +1927,7 @@ async function loadTaskHistory() {
     try {
         const snap = await db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).once('value');
         const subs = [];
-        snap.forEach(child => {
-            const v = child.val();
-            v._id = child.key;
-            subs.push(v);
-        });
+        snap.forEach(child => { const v = child.val(); v._id = child.key; subs.push(v); });
         if (subs.length === 0) {
             container.innerHTML = `<div class="empty-state" style="padding:50px 20px;"><i class="fas fa-clipboard-list"></i><p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p><p style="font-size:0.75rem; margin-top:8px; color:#bbb;">Available Tasks ট্যাব থেকে টাস্ক শুরু করুন</p></div>`;
             return;
@@ -2080,23 +2144,14 @@ function setLoading(isLoading) {
 async function loadLeaderboard() {
     if (!isOnline) return;
     const sym = appState.config.currencySymbol || 'TK';
-
     const snap = await db.ref('users').orderByChild('balance').limitToLast(30).once('value');
     let realUsers = [];
     snap.forEach(child => {
         const u = child.val();
         if (Number(u.balance || 0) > 0) {
-            realUsers.push({
-                _id: child.key,
-                name: u.name || 'User',
-                photo: u.photo || '',
-                balance: Number(u.balance || 0),
-                referrals: Number(u.referrals || 0),
-                _isCustom: false
-            });
+            realUsers.push({ _id: child.key, name: u.name || 'User', photo: u.photo || '', balance: Number(u.balance || 0), referrals: Number(u.referrals || 0), _isCustom: false });
         }
     });
-
     const custom = appState.config.leaderboardCustom || [];
     custom.forEach(c => {
         const cBalance = Number(c.balance || 0);
@@ -2104,28 +2159,14 @@ async function loadLeaderboard() {
         let matched = false;
         if (c.userId) {
             const idx = realUsers.findIndex(u => String(u._id) === String(c.userId));
-            if (idx >= 0) {
-                matched = true;
-                realUsers[idx].balance = Math.max(realUsers[idx].balance, cBalance);
-                realUsers[idx].referrals = Math.max(realUsers[idx].referrals, cRefs);
-                realUsers[idx]._isCustom = true;
-            }
+            if (idx >= 0) { matched = true; realUsers[idx].balance = Math.max(realUsers[idx].balance, cBalance); realUsers[idx].referrals = Math.max(realUsers[idx].referrals, cRefs); realUsers[idx]._isCustom = true; }
         }
         if (!matched) {
-            realUsers.push({
-                _id: 'custom_' + Math.random().toString(36).substr(2, 8),
-                name: c.name || 'Admin Added',
-                photo: c.photo || '',
-                balance: cBalance,
-                referrals: cRefs,
-                _isCustom: true
-            });
+            realUsers.push({ _id: 'custom_' + Math.random().toString(36).substr(2, 8), name: c.name || 'Admin Added', photo: c.photo || '', balance: cBalance, referrals: cRefs, _isCustom: true });
         }
     });
-
     realUsers.sort((a, b) => b.balance - a.balance);
     const top10 = realUsers.slice(0, 10);
-
     let p1 = '', p2 = '', p3 = '', listHtml = '';
     top10.forEach((u, i) => {
         const pic = u.photo || 'https://via.placeholder.com/100';
@@ -2135,21 +2176,15 @@ async function loadLeaderboard() {
         const safeImg = 'onerror="this.src=\'https://via.placeholder.com/100\'"';
         const statsHtml = '<div class="rank-stats-col"><div class="rank-badge badge-bal">' + bal + ' ' + sym + '</div><div class="rank-badge badge-ref"><i class="fas fa-users"></i> ' + refs + ' Refs</div></div>';
         const crownIcon = u._isCustom ? '👑' : '';
-
         if (i === 0) p1 = '<div class="podium-item rank-1"><i class="fas fa-crown crown"></i><img src="' + pic + '" class="podium-img" ' + safeImg + '><div class="rank-name">' + esc(name) + ' ' + crownIcon + '</div>' + statsHtml + '</div>';
         else if (i === 1) p2 = '<div class="podium-item rank-2"><i class="fas fa-crown crown"></i><img src="' + pic + '" class="podium-img" ' + safeImg + '><div class="rank-name">' + esc(name) + ' ' + crownIcon + '</div>' + statsHtml + '</div>';
         else if (i === 2) p3 = '<div class="podium-item rank-3"><i class="fas fa-crown crown"></i><img src="' + pic + '" class="podium-img" ' + safeImg + '><div class="rank-name">' + esc(name) + ' ' + crownIcon + '</div>' + statsHtml + '</div>';
         else listHtml += '<div class="leader-row ' + (u._isCustom ? 'is-custom' : '') + '"><div class="leader-left"><div class="rank-num">#' + (i+1) + '</div><img src="' + pic + '" ' + safeImg + '><span>' + esc(name) + ' ' + crownIcon + '</span></div><div class="leader-right-stats"><span class="leader-right-bal">' + bal + ' ' + sym + '</span><span class="leader-right-ref"><i class="fas fa-users"></i> ' + refs + ' Refs</span></div></div>';
     });
-
     document.getElementById('podium-area').innerHTML = p2 + p1 + p3;
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet.</p>';
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ FIXED: Channel membership check with retries + no-cache
-// Works for BOTH groups and channels. Bot must be admin of the chat.
-// ═══════════════════════════════════════════════════════
 async function checkChannelMembership(userId, chatId, retries = 2) {
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
@@ -2158,17 +2193,11 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
                 { cache: 'no-store' }
             );
             const data = await response.json();
-
             if (data.ok && data.result) {
                 const status = data.result.status;
-                // 'restricted' is common when a user joins a channel with limits
                 return ['member', 'administrator', 'creator', 'restricted'].includes(status);
             }
-
-            // 400 = bad request (wrong chat id, bot not in chat). Retrying won't help.
             if (data.error_code === 400) return false;
-
-            // Other errors (429 rate-limit, 5xx, network) — retry with backoff
             if (attempt < retries) {
                 await new Promise(r => setTimeout(r, 700 * (attempt + 1)));
                 continue;
@@ -2241,7 +2270,7 @@ async function showAppAfterVerify() {
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
 // ═══════════════════════════════════════════════════════
-// ✅ INIT
+// INIT
 // ═══════════════════════════════════════════════════════
 window.onload = () => {
     setLoading(true);
@@ -2323,9 +2352,7 @@ window.onload = () => {
                 botUsername: BOT_USERNAME, botToken: BOT_TOKEN,
                 paymentMethods: ['bKash', 'Nagad', 'Rocket'],
                 adSlots: [], newTasks: {},
-                becomeAdminLink: '',
-                becomeAdminEnabled: false,
-                leaderboardCustom: [],
+                becomeAdminLink: '', becomeAdminEnabled: false, leaderboardCustom: [],
                 channelLinks: [
                     { label: 'NexEarn Channel', chatId: 'nexearn2' },
                     { label: 'NexEarn Adda', chatId: 'nexearn2_adda' },
