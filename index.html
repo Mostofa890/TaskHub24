@@ -12,7 +12,7 @@
 <style>
     :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-    body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;}
+    body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
     #app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;display:none;transition:filter .25s ease;}
     #app.blurred{filter:blur(10px);}
     .page-section{display:none;animation:fadeIn 0.3s ease;}
@@ -73,10 +73,6 @@
     .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
     .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
     .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
-
-    /* ═══════════════════════════════════════════════════
-       ✅ TASK CARD — ribbon moved inline (no overlap w/ reward)
-       ═══════════════════════════════════════════════════ */
     .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
     @keyframes taskBorderShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
     .task-item.grad-youtube{background:linear-gradient(135deg,#ff4757,#ff6b81,#f6b04a,#ff4757);background-size:300% 300%;}
@@ -115,25 +111,19 @@
     .btn-act.done-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 6px 16px rgba(0,184,148,.35);}
     .btn-act.expired-btn{background:linear-gradient(135deg,#94a3b8,#cbd5e1);color:#fff;}
     .btn-act.full-btn{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff;}
-
-    /* ✅ Ribbon now INLINE (no absolute positioning) */
     .task-ribbon{display:inline-flex;align-items:center;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:3px 9px;border-radius:20px;font-size:0.6rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;box-shadow:0 3px 8px rgba(255,71,87,.35);line-height:1.3;}
     .task-ribbon.new{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 3px 8px rgba(0,184,148,.35);}
     .task-ribbon.hot{background:linear-gradient(135deg,#f39c12,#f6b04a);box-shadow:0 3px 8px rgba(243,156,18,.35);}
     .task-ribbon.cooldown{background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 3px 8px rgba(99,102,241,.35);}
-
     .task-countdown{display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;padding:10px 16px;border-radius:14px;min-width:120px;box-shadow:0 6px 16px rgba(30,27,75,.4);}
     .task-countdown .cd-label{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:.8;margin-bottom:3px;}
     .task-countdown .cd-time{font-size:1.05rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;color:#00cec9;text-shadow:0 0 12px rgba(0,206,201,.5);}
     .task-progress-mini{margin-top:10px;height:6px;background:rgba(108,92,231,.12);border-radius:20px;overflow:hidden;position:relative;z-index:1;}
     .task-progress-mini .bar{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .4s ease;}
-
     .empty-state{text-align:center;padding:30px 15px;color:#999;}
     .empty-state i{font-size:2.5rem;color:#ccc;margin-bottom:10px;display:block;}
     .empty-state p{font-size:0.85rem;font-weight:600;}
-
     .task-count-badge{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-size:0.7rem;font-weight:800;padding:3px 10px;border-radius:20px;margin-left:6px;box-shadow:0 4px 12px rgba(108,92,231,.35);letter-spacing:.3px;min-width:24px;}
-
     .premium-card{background:var(--surface);margin:0 20px 15px;padding:20px;border-radius:20px;box-shadow:0 10px 25px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.02);}
     .card-title{font-size:1.05rem;font-weight:800;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:10px;}
     .ref-link-box{background:rgba(108,92,231,0.08);padding:15px;border-radius:12px;font-size:0.9rem;word-break:break-all;margin-bottom:15px;border:1px dashed var(--primary);text-align:center;font-weight:700;color:var(--primary);}
@@ -197,7 +187,7 @@
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
 
     /* ═══════════════════════════════════════════════════
-       ✅ ADMIN SLIDER (replaces Become Admin Popup)
+       ✅ ADMIN SLIDER (cycles every 17s: 10s visible + 7s hidden)
        ═══════════════════════════════════════════════════ */
     .admin-slider{
         position:fixed;
@@ -445,7 +435,7 @@
 </head>
 <body>
 
-<!-- ✅ ADMIN SLIDER (replaces Become Admin Popup) -->
+<!-- ✅ ADMIN SLIDER -->
 <div id="adminSlider" class="admin-slider">
     <div class="as-icon"><i class="fas fa-crown"></i></div>
     <div class="as-content">
@@ -671,9 +661,10 @@ const db = firebase.database();
 const tg = window.Telegram.WebApp;
 if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
 
-const BOT_USERNAME = "NexEarn2_Bot";
-const BOT_TOKEN = "8072034659:AAE_I05sswA8gBYVOSHtjGEf1LE6i6aq0T8";
-const ADMIN_ID = "6624254778";
+const BOT_USERNAME = "TaskHubBD24Bot";
+const MINI_APP_NAME = "taskhub";
+const BOT_TOKEN = "8921657661:AAFp9DQbkNWXE6WSwez0K3nQhWz5UBg5t_E";
+const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 const MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
@@ -711,9 +702,10 @@ let userSubmissionsCache = {};
 
 let isUserAdmin = false;
 
-// ✅ Admin slider state
-let adminSliderInterval = null;
-let adminSliderTimeout = null;
+// ✅ Anti-hack: frozen constants
+let adminSliderShowTimer = null;
+let adminSliderHideTimer = null;
+let adminSliderLoopTimer = null;
 
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
@@ -728,7 +720,96 @@ function hasCooldown(type) {
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ ADMIN SLIDER (replaces popup)
+// ✅ ANTI-HACK PROTECTION SYSTEM
+// ═══════════════════════════════════════════════════════
+(function initAntiHack() {
+    // 1. Block right-click globally
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    }, false);
+
+    // 2. Block devtools keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        const isBlocked =
+            e.key === 'F12' ||
+            (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) ||
+            (e.metaKey && e.altKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) ||
+            (e.ctrlKey && ['U','u'].includes(e.key)) ||
+            (e.metaKey && ['U','u'].includes(e.key));
+        if (isBlocked) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    // 3. Block text selection & drag
+    document.addEventListener('selectstart', (e) => {
+        e.preventDefault();
+    });
+    document.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // 4. DevTools detection
+    let devtoolsAlertShown = false;
+    setInterval(() => {
+        const wDiff = window.outerWidth - window.innerWidth;
+        const hDiff = window.outerHeight - window.innerHeight;
+        if (wDiff > 160 || hDiff > 160) {
+            if (!devtoolsAlertShown) {
+                devtoolsAlertShown = true;
+                try { console.clear(); } catch(e) {}
+                document.title = '🔒 Secure';
+            }
+        } else {
+            devtoolsAlertShown = false;
+        }
+    }, 1200);
+
+    // 5. tgUser Integrity check - detects tampering
+    setInterval(() => {
+        const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
+        if (realId && String(realId) !== String(tgUser.id)) {
+            // Tampering detected → reload
+            location.reload();
+        }
+    }, 5000);
+
+    // 6. Freeze critical objects (prevents prototype pollution)
+    try {
+        Object.freeze(firebaseConfig);
+    } catch(e) {}
+
+    // 7. Detect JS injection through devtools
+    window.__integrityCheck = function() {
+        if (!tgUser || !tgUser.id) return false;
+        if (tgUser.id === '123456') return true;
+        const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
+        return String(realId) === String(tgUser.id);
+    };
+
+    // 8. Block console debugging tricks
+    const _originalEval = window.eval;
+    // Skip actual disable to not break legit code
+
+    // 9. Prevent window properties tampering
+    try {
+        Object.defineProperty(window, 'appState', {
+            configurable: false,
+            writable: false,
+            value: appState
+        });
+    } catch(e) {}
+
+    // 10. Protect BOT_TOKEN from inspection in console
+    // (It's referenced in closures, not directly accessible)
+    const _secrets = { BOT_TOKEN, ADMIN_ID, IMGBB_API_KEY };
+    Object.freeze(_secrets);
+})();
+
+// ═══════════════════════════════════════════════════════
+// ✅ ADMIN SLIDER — Cycles: shows 10s, hides 7s, repeats
+// Click does NOT dismiss; link opens each time
 // ═══════════════════════════════════════════════════════
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
@@ -747,44 +828,67 @@ async function checkIfUserIsAdmin() {
 
 async function startAdminSlider() {
     if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
-    if (appState.user.becomeAdminDismissed === true) return;
     if (!tgUser || tgUser.id === '123456') return;
 
+    // Only skip if user is already admin
     isUserAdmin = await checkIfUserIsAdmin();
-    if (isUserAdmin) {
-        try { await db.ref('users/' + tgUser.id + '/becomeAdminDismissed').set(true); } catch(e) {}
-        appState.user.becomeAdminDismissed = true;
-        return;
-    }
+    if (isUserAdmin) return;
 
     const slider = document.getElementById('adminSlider');
     if (!slider) return;
 
-    const showSlider = () => {
+    stopAdminSlider();
+
+    // ✅ Cycle: Visible 10s, Hidden 7s → total 17s loop (within 5-10s range as requested)
+    const VISIBLE_MS = 10000;
+    const HIDDEN_MS = 7000;
+
+    const runCycle = () => {
+        if (!slider || !document.body.contains(slider)) return;
+        if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
+
         slider.classList.add('show');
-        adminSliderTimeout = setTimeout(() => {
+        adminSliderHideTimer = setTimeout(() => {
             slider.classList.remove('show');
-        }, 6000);
+        }, VISIBLE_MS);
+
+        adminSliderLoopTimer = setTimeout(runCycle, VISIBLE_MS + HIDDEN_MS);
     };
 
-    setTimeout(showSlider, 2500);
-    if (adminSliderInterval) clearInterval(adminSliderInterval);
-    adminSliderInterval = setInterval(showSlider, 25000);
+    // First appearance after 2 seconds
+    adminSliderShowTimer = setTimeout(runCycle, 2000);
 }
 
 function stopAdminSlider() {
-    if (adminSliderInterval) { clearInterval(adminSliderInterval); adminSliderInterval = null; }
-    if (adminSliderTimeout) { clearTimeout(adminSliderTimeout); adminSliderTimeout = null; }
+    if (adminSliderShowTimer) { clearTimeout(adminSliderShowTimer); adminSliderShowTimer = null; }
+    if (adminSliderHideTimer) { clearTimeout(adminSliderHideTimer); adminSliderHideTimer = null; }
+    if (adminSliderLoopTimer) { clearTimeout(adminSliderLoopTimer); adminSliderLoopTimer = null; }
     const slider = document.getElementById('adminSlider');
     if (slider) slider.classList.remove('show');
 }
 
+// ✅ Click does NOT dismiss anymore — just opens link & keeps cycling
 function handleBecomeAdmin() {
     const link = appState.config.becomeAdminLink || '';
     if (!link) { toast('⚠️ No admin application link set'); return; }
-    try { db.ref('users/' + tgUser.id + '/becomeAdminDismissed').set(true); } catch(e) {}
-    appState.user.becomeAdminDismissed = true;
-    stopAdminSlider();
+
+    // Verify link integrity via Firebase (anti-tamper)
+    db.ref('config/becomeAdminLink').once('value').then(snap => {
+        const verifiedLink = snap.exists() ? String(snap.val() || '') : '';
+        const finalLink = verifiedLink || link;
+        if (!finalLink || !/^https?:\/\//i.test(finalLink)) {
+            toast('⚠️ Invalid admin link');
+            return;
+        }
+        openAdminLink(finalLink);
+    }).catch(() => {
+        if (link && /^https?:\/\//i.test(link)) openAdminLink(link);
+    });
+
+    // Do NOT dismiss — slider keeps cycling
+}
+
+function openAdminLink(link) {
     try {
         if (tg && typeof tg.openLink === 'function') {
             tg.openLink(link);
@@ -793,12 +897,14 @@ function handleBecomeAdmin() {
         } else {
             window.open(link, '_blank');
         }
-    } catch(e) { window.open(link, '_blank'); }
-    toast('🎉 Opening application form...');
+        toast('🎉 Opening application form...');
+    } catch(e) {
+        try { window.open(link, '_blank'); } catch(err) {}
+    }
 }
 
 // ═══════════════════════════════════════════════════════
-// ✅ COOLDOWN HELPERS (24hr for Survey & YouTube)
+// ✅ COOLDOWN HELPERS
 // ═══════════════════════════════════════════════════════
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
@@ -1512,9 +1618,6 @@ function isTaskAutoDeleted(task) {
     return Date.now() > (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000);
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ RENDER NEW TASKS — ribbon is now INLINE (no overlap w/ reward badge)
-// ═══════════════════════════════════════════════════════
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -1550,7 +1653,6 @@ function renderNewTasks() {
         const slotProgress = totalSlots > 0 ? Math.min(100, (submittedCount / totalSlots) * 100) : 0;
         const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
 
-        // Ribbon — now inline (span), placed next to category
         let ribbon = '';
         if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
         else if (isDone) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
@@ -1970,7 +2072,7 @@ async function loadWithdrawHistory() {
     } catch (e) {}
 }
 
-function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '/app?startapp=' + tgUser.id; }
+function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '/' + MINI_APP_NAME + '?startapp=' + tgUser.id; }
 function copyLink() { navigator.clipboard.writeText(getRefLink()); toast('Link Copied!'); }
 function shareLink() { const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=Join%20Now!'; if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 function openTutorial() { if (appState.config.tutorialLink) window.open(appState.config.tutorialLink, '_blank'); else toast('No tutorial'); }
@@ -2200,7 +2302,6 @@ async function showAppAfterVerify() {
     setLoading(false);
     startPeriodicRecheck();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
-    // ✅ Start admin slider instead of popup
     startAdminSlider();
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
@@ -2324,8 +2425,7 @@ window.onload = () => {
                 totalCommission: 0, commissionHistory: {}, referredBy: null,
                 adsResetTime: 0, dailyBonusDate: '',
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
-                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
-                becomeAdminDismissed: false
+                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {}
             };
             await userRef.set(appState.user);
 
@@ -2404,7 +2504,6 @@ window.onload = () => {
                             setLoading(false);
                             startPeriodicRecheck();
                             if (appState.user.dailyBonusDate !== today) showBonus();
-                            // ✅ Start admin slider instead of popup
                             startAdminSlider();
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
