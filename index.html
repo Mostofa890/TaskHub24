@@ -46,7 +46,9 @@
     .user-pill img{width:45px;height:45px;border-radius:50%;border:2px solid #fff;object-fit:cover;}
     .user-info h3{font-size:.95rem;font-weight:700;line-height:1.1;}
     .user-info p{font-size:.7rem;opacity:.8;}
+    .header-right-btns{display:flex;align-items:center;gap:8px;}
     .support-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+    .dots-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
     .balance-card{background:linear-gradient(135deg,#f7f3ff,#e3d6ff);width:88%;margin:-70px auto 25px;padding:25px;border-radius:25px;box-shadow:0 18px 35px rgba(76,62,224,.35);text-align:center;position:relative;z-index:10;color:#3b2b6b;border:2px solid rgba(255,255,255,.9);overflow:hidden;}
     .balance-card::before{content:"";position:absolute;width:150px;height:150px;background:rgba(255,255,255,.6);border-radius:50%;top:-70px;right:-40px;}
     .balance-card::after{content:"";position:absolute;width:110px;height:110px;background:rgba(255,255,255,.4);border-radius:50%;bottom:-50px;left:-30px;}
@@ -122,7 +124,6 @@
     .task-countdown .cd-time{font-size:1.05rem;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:1px;color:#00cec9;text-shadow:0 0 12px rgba(0,206,201,.5);}
     .task-progress-mini{margin-top:10px;height:6px;background:rgba(108,92,231,.12);border-radius:20px;overflow:hidden;position:relative;z-index:1;}
     .task-progress-mini .bar{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .4s ease;}
-    /* ✅ Task expiry live countdown styles */
     .task-expiry-live{color:#6366f1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.3px;}
     .task-expiry-live.expired{color:#ff4757;font-weight:900;}
     .task-delete-live{color:#dc2626;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:.3px;animation:pulseText 1.8s ease-in-out infinite;}
@@ -430,6 +431,144 @@
     .th-resubmit-btn{margin-top:12px;width:100%;padding:11px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:0.85rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(108,92,231,.3);}
     .th-resubmit-btn:active{transform:scale(0.98);}
     .th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
+
+    /* ═══════════════════════════════════════════════════════
+       ✅ THREE-DOT MENU + LEGAL MODAL STYLES
+       ═══════════════════════════════════════════════════════ */
+    .dots-btn{position:relative;}
+    .menu-popup{
+        display:none;
+        position:fixed;
+        top:70px;
+        right:16px;
+        z-index:11000;
+        width:200px;
+        background:#fff;
+        border-radius:18px;
+        box-shadow:0 18px 50px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.04);
+        overflow:hidden;
+        animation:menuPop .22s ease-out;
+    }
+    .menu-popup.show{display:block;}
+    @keyframes menuPop{from{opacity:0;transform:translateY(-10px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
+    .menu-popup::before{
+        content:'';
+        position:absolute;
+        top:-8px;right:18px;
+        width:16px;height:16px;
+        background:#fff;
+        transform:rotate(45deg);
+        box-shadow:-2px -2px 4px rgba(0,0,0,.03);
+    }
+    .menu-item{
+        display:flex;align-items:center;gap:12px;
+        padding:14px 16px;
+        font-weight:700;font-size:.85rem;color:var(--text);
+        cursor:pointer;transition:background .15s;
+        border-bottom:1px solid #f1f5f9;
+    }
+    .menu-item:last-child{border-bottom:none;}
+    .menu-item:hover{background:#f8fafc;}
+    .menu-item:active{background:#f1f5f9;}
+    .menu-item i{
+        width:34px;height:34px;border-radius:10px;
+        display:flex;align-items:center;justify-content:center;
+        font-size:.95rem;color:#fff;
+        flex-shrink:0;
+    }
+    .menu-item i.mi-privacy{background:linear-gradient(135deg,#6366f1,#818cf8);}
+    .menu-item i.mi-disclaimer{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
+    .menu-item i.mi-support{background:linear-gradient(135deg,#10b981,#34d399);}
+    .menu-item .mi-text{flex:1;min-width:0;}
+    .menu-item .mi-text small{display:block;font-size:.68rem;font-weight:600;color:#94a3b8;margin-top:2px;}
+
+    /* LEGAL MODAL */
+    .legal-modal-overlay{
+        display:none;
+        position:fixed;inset:0;z-index:12000;
+        background:rgba(5,6,10,.88);
+        backdrop-filter:blur(10px);
+        align-items:flex-start;justify-content:center;
+        padding:16px;overflow-y:auto;
+    }
+    .legal-modal-overlay.active{display:flex;}
+    .legal-modal{
+        background:#fff;width:100%;max-width:680px;
+        border-radius:22px;
+        box-shadow:0 40px 100px rgba(0,0,0,.7);
+        margin:auto;
+        overflow:hidden;
+        animation:legalPop .35s;
+    }
+    @keyframes legalPop{from{opacity:0;transform:scale(.95) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    .legal-header{
+        background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);
+        color:#fff;padding:20px 22px;
+        display:flex;align-items:center;justify-content:space-between;
+        position:sticky;top:0;z-index:10;
+    }
+    .legal-header h2{font-size:1.05rem;font-weight:900;display:flex;align-items:center;gap:10px;}
+    .legal-header h2 i{font-size:1.1rem;}
+    .legal-close{
+        width:38px;height:38px;border-radius:50%;
+        background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+        color:#fff;font-size:1rem;cursor:pointer;
+        display:flex;align-items:center;justify-content:center;transition:all .2s;
+    }
+    .legal-close:hover{background:rgba(239,68,68,.6);}
+    .legal-body{
+        padding:24px 26px 30px;
+        color:#0f172a;font-size:.86rem;line-height:1.85;
+        max-height:calc(100vh - 110px);overflow-y:auto;
+    }
+    .legal-body h1{font-size:1.45rem;font-weight:900;color:#4c1d95;margin:0 0 6px;letter-spacing:-.02em;}
+    .legal-body h2{font-size:1.05rem;font-weight:800;color:#4c1d95;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #ede9fe;}
+    .legal-body h3{font-size:.95rem;font-weight:800;color:#5b21b6;margin:16px 0 8px;}
+    .legal-body p{margin:0 0 12px;font-weight:500;color:#334155;}
+    .legal-body ul{margin:0 0 14px 20px;padding:0;}
+    .legal-body li{margin-bottom:6px;font-weight:500;color:#334155;}
+    .legal-body strong{color:#0f172a;font-weight:800;}
+    .legal-body hr{border:none;height:1px;background:linear-gradient(90deg,transparent,#c4b5fd,transparent);margin:22px 0;}
+    .legal-body .last-updated{
+        display:inline-block;background:linear-gradient(135deg,#ede9fe,#ddd6fe);
+        color:#5b21b6;font-weight:800;font-size:.72rem;
+        padding:6px 14px;border-radius:999px;margin-bottom:14px;
+        border:1px solid rgba(139,92,246,.3);
+    }
+    .legal-body .consent-box{
+        background:linear-gradient(135deg,#eef2ff,#e0e7ff);
+        border:2px solid rgba(99,102,241,.3);
+        border-radius:16px;padding:16px 18px;margin-top:18px;
+    }
+    .legal-body .consent-box h3{color:#4338ca;margin-top:0;}
+    .legal-body .summary-table{width:100%;border-collapse:separate;border-spacing:0 6px;margin:14px 0;font-size:.78rem;}
+    .legal-body .summary-table td{padding:10px 12px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);font-weight:600;color:#334155;}
+    .legal-body .summary-table td:first-child{border-radius:10px 0 0 10px;font-weight:800;color:#4c1d95;width:34%;}
+    .legal-body .summary-table td:last-child{border-radius:0 10px 10px 0;}
+    .legal-body .danger-box{
+        background:linear-gradient(135deg,#fef2f2,#fee2e2);
+        border-left:4px solid #ef4444;
+        padding:14px 16px;border-radius:12px;margin:14px 0;
+        font-weight:600;color:#991b1b;font-size:.82rem;
+    }
+    .legal-body .warn-box{
+        background:linear-gradient(135deg,#fffbeb,#fef3c7);
+        border-left:4px solid #f59e0b;
+        padding:14px 16px;border-radius:12px;margin:14px 0;
+        font-weight:600;color:#92400e;font-size:.82rem;
+    }
+    .legal-body a{color:#6366f1;font-weight:700;text-decoration:none;word-break:break-all;}
+    .legal-body a:hover{text-decoration:underline;}
+    .legal-footer{
+        padding:14px 26px 20px;text-align:center;
+        color:#94a3b8;font-size:.7rem;font-weight:700;
+        border-top:1px solid #f1f5f9;
+    }
+    @media (max-width:400px){
+        .legal-body{padding:20px 18px 24px;}
+        .legal-header{padding:18px 18px;}
+        .menu-popup{width:190px;}
+    }
 </style>
 </head>
 <body>
@@ -457,6 +596,49 @@
 </div>
 
 <div id="toast" class="toast">Alert</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ✅ THREE-DOT MENU POPUP
+     ═══════════════════════════════════════════════════════ -->
+<div id="menuPopup" class="menu-popup">
+    <div class="menu-item" onclick="openLegalModal('privacy'); closeMenuPopup();">
+        <i class="mi-privacy fas fa-shield-halved"></i>
+        <div class="mi-text">
+            Privacy Policy
+            <small>আমাদের ডেটা নীতি</small>
+        </div>
+    </div>
+    <div class="menu-item" onclick="openLegalModal('disclaimer'); closeMenuPopup();">
+        <i class="mi-disclaimer fas fa-triangle-exclamation"></i>
+        <div class="mi-text">
+            Disclaimer
+            <small>দাবিত্যাগ ও শর্তাবলী</small>
+        </div>
+    </div>
+    <div class="menu-item" onclick="openSupport(); closeMenuPopup();">
+        <i class="mi-support fas fa-headset"></i>
+        <div class="mi-text">
+            Support
+            <small>সাপোর্টে যোগাযোগ</small>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     ✅ LEGAL MODAL (Privacy Policy & Disclaimer)
+     ═══════════════════════════════════════════════════════ -->
+<div class="legal-modal-overlay" id="legalModal">
+  <div class="legal-modal">
+    <div class="legal-header">
+      <h2 id="legalModalTitle"><i class="fas fa-shield-halved"></i> Privacy Policy</h2>
+      <button class="legal-close" onclick="closeLegalModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="legal-body" id="legalModalBody"></div>
+    <div class="legal-footer">
+      © 2025 Earn Wallet / NexEarn. All rights reserved.
+    </div>
+  </div>
+</div>
 
 <div id="adErrorPopup"><div class="box"><div class="icon"><i class="fas fa-exclamation-triangle"></i></div><h3 id="adErrorTitle">⚠️ Ad Not Completed!</h3><p id="adErrorMsg">You must watch the full ad to earn the reward. Please do not close the ad early!</p><button class="btn-main" onclick="closeAdError()" style="max-width:200px;margin:0 auto;padding:12px;font-size:0.9rem;">I Understand</button></div></div>
 
@@ -520,7 +702,10 @@
 <div id="app">
     <div class="header"><div class="top-bar">
         <div class="user-pill"><img id="u-img" src="https://via.placeholder.com/45" /><div class="user-info"><h3 id="u-name">...</h3><p id="u-id">...</p></div></div>
-        <button class="support-btn" onclick="openSupport()"><i class="fas fa-headset"></i></button>
+        <div class="header-right-btns">
+            <button class="support-btn" onclick="openSupport()"><i class="fas fa-headset"></i></button>
+            <button class="dots-btn" onclick="toggleMenuPopup(event)"><i class="fas fa-ellipsis-vertical"></i></button>
+        </div>
     </div></div>
 
     <div class="balance-card">
@@ -693,7 +878,7 @@ let periodicRecheckInterval = null;
 let isRechecking = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
-let taskExpiryTickerInterval = null; /* ✅ NEW: task expiry live ticker */
+let taskExpiryTickerInterval = null;
 let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: null, adSlotIndex: null, paused: false, wasCancelled: false };
 let MIN_AD_WATCH_TIME = 15;
 
@@ -719,7 +904,7 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   ✅ NEW: TASK EXPIRY HELPERS (live countdown + auto delete)
+   TASK EXPIRY HELPERS
    ═══════════════════════════════════════════════════════ */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
@@ -758,14 +943,12 @@ function startTaskExpiryTicker() {
             if (!task) return;
             if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
 
-            /* If auto-delete time reached, mark re-render */
             const deleteRemain = getTaskAutoDeleteRemaining(task);
             if (deleteRemain !== null && deleteRemain <= 0) {
                 needsRerender = true;
                 return;
             }
 
-            /* Update expiry countdown text */
             const expiryWrap = document.querySelector('[data-expiry-task="' + taskId + '"]');
             if (expiryWrap) {
                 const remain = getTaskTimeRemaining(task);
@@ -773,7 +956,6 @@ function startTaskExpiryTicker() {
                 const isNowExpired = remain <= 0;
 
                 if (isNowExpired && !wasExpired) {
-                    /* Just became expired → full re-render for state change */
                     needsRerender = true;
                 } else if (!isNowExpired && !wasExpired) {
                     const textEl = expiryWrap.querySelector('.expiry-text');
@@ -781,7 +963,6 @@ function startTaskExpiryTicker() {
                 }
             }
 
-            /* Update delete countdown text (only shown for expired tasks) */
             const deleteWrap = document.querySelector('[data-delete-task="' + taskId + '"]');
             if (deleteWrap) {
                 const textEl = deleteWrap.querySelector('.delete-text');
@@ -840,6 +1021,357 @@ function stopTaskExpiryTicker() {
     const _secrets = { BOT_TOKEN, ADMIN_ID, IMGBB_API_KEY };
     Object.freeze(_secrets);
 })();
+
+// ═══════════════════════════════════════════════════════
+// ✅ THREE-DOT MENU + LEGAL MODAL LOGIC
+// ═══════════════════════════════════════════════════════
+function toggleMenuPopup(e) {
+    if (e) e.stopPropagation();
+    const popup = document.getElementById('menuPopup');
+    if (popup.classList.contains('show')) {
+        popup.classList.remove('show');
+    } else {
+        popup.classList.add('show');
+    }
+}
+function closeMenuPopup() {
+    const popup = document.getElementById('menuPopup');
+    if (popup) popup.classList.remove('show');
+}
+document.addEventListener('click', function(e) {
+    const popup = document.getElementById('menuPopup');
+    const dotsBtn = document.querySelector('.dots-btn');
+    if (popup && popup.classList.contains('show')) {
+        if (!popup.contains(e.target) && (!dotsBtn || !dotsBtn.contains(e.target))) {
+            popup.classList.remove('show');
+        }
+    }
+});
+
+const LEGAL_CONTENT = {
+    privacy: `
+        <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
+        <h1>📄 PRIVACY POLICY</h1>
+
+        <h2>১. ভূমিকা (Introduction)</h2>
+        <p><strong>Earn Wallet / NexEarn</strong> ("আমরা", "আমাদের", "প্ল্যাটফর্ম") একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম। এই Privacy Policy ব্যাখ্যা করে যে আমরা কী ধরনের তথ্য সংগ্রহ করি, কীভাবে ব্যবহার করি, কোথায় সংরক্ষণ করি এবং আপনার কী কী অধিকার রয়েছে।</p>
+        <p>আমাদের প্ল্যাটফর্ম ব্যবহার করার মাধ্যমে আপনি এই Privacy Policy-তে সম্মতি প্রদান করছেন। আপনি যদি সম্মত না হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার বন্ধ করুন।</p>
+        <hr>
+
+        <h2>২. আমরা কী কী তথ্য সংগ্রহ করি (Information We Collect)</h2>
+        <h3>২.১ Telegram অ্যাকাউন্ট তথ্য (স্বয়ংক্রিয়ভাবে সংগ্রহ)</h3>
+        <p>আপনি Telegram Web App-এর মাধ্যমে লগইন করলে আমরা নিম্নলিখিত তথ্য পাই:</p>
+        <ul>
+            <li>Telegram User ID</li>
+            <li>প্রথম নাম (First Name)</li>
+            <li>Username (যদি থাকে)</li>
+            <li>প্রোফাইল ছবি URL</li>
+            <li>Language preference</li>
+            <li>Web App start parameter (referral ID)</li>
+        </ul>
+        <h3>২.২ প্ল্যাটফর্ম কার্যক্রমের তথ্য</h3>
+        <ul>
+            <li>Balance, Total Earned, Referral Count</li>
+            <li>Ad watching history (adHistory)</li>
+            <li>Task submission history (taskSubmissions, taskHistory)</li>
+            <li>Withdraw request history</li>
+            <li>Commission history</li>
+            <li>Device ID (localStorage-এ সংরক্ষিত nexearn_device_id)</li>
+            <li>Referral relationships (কে কাকে রেফার করেছে)</li>
+            <li>Ad click count, last active date</li>
+            <li>Verified channels status</li>
+            <li>Task cooldowns এবং statuses</li>
+        </ul>
+        <h3>২.৩ Task Submission-এ আপলোড করা কনটেন্ট</h3>
+        <ul>
+            <li>ছবি / স্ক্রিনশট → ImgBB (third-party) সার্ভারে আপলোড হয়</li>
+            <li>ভয়েস / অডিও ফাইল → Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st (third-party) সার্ভারে আপলোড হয়</li>
+            <li>টেক্সট উত্তর → Firebase Realtime Database-এ সংরক্ষিত</li>
+            <li>লিংক/Task URL → Firebase-এ সংরক্ষিত</li>
+        </ul>
+        <h3>২.৪ অ্যাড নেটওয়ার্ক ডেটা</h3>
+        <p>Adsgram, Monetag, GigaPub-এর মতো থার্ড-পার্টি অ্যাড নেটওয়ার্ক ব্যবহার করা হলে তারা নিজেদের Privacy Policy অনুযায়ী ডেটা সংগ্রহ করতে পারে (IP, Device info, Ad interaction)।</p>
+        <h3>২.৫ Admin Panel ডেটা</h3>
+        <p>Admin ব্যবহারকারীদের ক্ষেত্রে অতিরিক্তভাবে: Username (hashed password সহ), Balance, Deposited, Spent, Refunded amounts, Contact info (Telegram/WhatsApp/Phone/Email), Ban/Suspend reason, Deposit request info (Txn ID, Account Number), Admin action logs।</p>
+        <hr>
+
+        <h2>৩. তথ্য কীভাবে ব্যবহার করা হয় (How We Use Information)</h2>
+        <table class="summary-table">
+            <tr><td>উদ্দেশ্য</td><td>বাবহৃত ডেটা</td></tr>
+            <tr><td>অ্যাকাউন্ট তৈরি ও লগইন</td><td>Telegram ID, Name</td></tr>
+            <tr><td>রিওয়ার্ড প্রদান</td><td>Balance, Task History, Ad History</td></tr>
+            <tr><td>রেফারেল কমিশন হিসাব</td><td>Referral relationships</td></tr>
+            <tr><td>Task যাচাই</td><td>Submission content, File URL</td></tr>
+            <tr><td>Withdraw প্রসেসিং</td><td>Account number, Method, Amount</td></tr>
+            <tr><td>সিস্টেম সুরক্ষা</td><td>Device ID, Ad clicks, Anti-fraud check</td></tr>
+            <tr><td>নোটিফিকেশন পাঠানো</td><td>Telegram ID</td></tr>
+            <tr><td>Admin management</td><td>Username, Password hash, Activity logs</td></tr>
+        </table>
+        <hr>
+
+        <h2>৪. ডেটা কোথায় সংরক্ষিত হয় (Data Storage)</h2>
+        <p>আমরা <strong>Google Firebase Realtime Database</strong> ব্যবহার করি ডেটা সংরক্ষণের জন্য।</p>
+        <div class="warn-box">
+            <strong>⚠️ গুরুত্বপূর্ণ:</strong> Firebase Realtime Database-এ সংরক্ষিত ডেটা এনক্রিপ্টেড নয় (at-rest encryption ছাড়া)। Admin Password SHA-256 hash আকারে সংরক্ষিত। User-দের জন্য পাসওয়ার্ড নেই; শুধু Telegram authentication।
+        </div>
+        <hr>
+
+        <h2>৫. ডেটা শেয়ারিং (Data Sharing / Third Parties)</h2>
+        <p>আমরা আপনার ব্যক্তিগত তথ্য বিক্রি করি না। তবে নিম্নলিখিত ক্ষেত্রে ডেটা শেয়ার হয়:</p>
+        <ul>
+            <li><strong>Telegram</strong> — Bot API-এর মাধ্যমে আপনার Telegram ID ব্যবহার করে channel membership check ও notification পাঠানো হয়।</li>
+            <li><strong>File Hosting Services</strong> — ImgBB (ছবি), Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st (অডিও/ভয়েস)। এই সার্ভিসগুলো তাদের নিজস্ব Privacy Policy অনুযায়ী ফাইল সংরক্ষণ করে।</li>
+            <li><strong>Ad Networks</strong> — Adsgram, Monetag, GigaPub — অ্যাড দেখানোর জন্য।</li>
+            <li><strong>Firebase (Google)</strong> — ডেটা হোস্টিং সার্ভিস।</li>
+        </ul>
+        <hr>
+
+        <h2>৬. ডেটা সংরক্ষণ সময় (Data Retention)</h2>
+        <table class="summary-table">
+            <tr><td>ডেটার ধরন</td><td>সংরক্ষণ সময়</td></tr>
+            <tr><td>Ad History</td><td>সর্বশেষ ১০০টি এন্ট্রি</td></tr>
+            <tr><td>Commission History</td><td>সর্বশেষ ১০০টি এন্ট্রি</td></tr>
+            <tr><td>Task History</td><td>অনির্দিষ্টকাল</td></tr>
+            <tr><td>Task Submissions</td><td>অনির্দিষ্টকাল</td></tr>
+            <tr><td>Uploaded Files</td><td>থার্ড-পার্টি সার্ভার অনুযায়ী (24–72 ঘণ্টা বা স্থায়ী)</td></tr>
+            <tr><td>Withdraw History</td><td>অনির্দিষ্টকাল</td></tr>
+            <tr><td>Session (Admin)</td><td>২৪ ঘণ্টা</td></tr>
+            <tr><td>Device ID</td><td>localStorage-এ স্থায়ী</td></tr>
+        </table>
+        <hr>
+
+        <h2>৭. আপনার অধিকার (Your Rights)</h2>
+        <ul>
+            <li>✅ আপনার সংরক্ষিত ডেটা দেখার অধিকার</li>
+            <li>✅ ভুল ডেটা সংশোধনের অনুরোধ</li>
+            <li>✅ অ্যাকাউন্ট মুছে ফেলার অনুরোধ (Telegram ID সহ সমস্ত ডেটা)</li>
+            <li>✅ Data processing বন্ধ করার অনুরোধ</li>
+        </ul>
+        <p>অনুরোধ পাঠান: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></p>
+        <hr>
+
+        <h2>৮. শিশুদের Privacy (Children's Privacy)</h2>
+        <p>আমাদের প্ল্যাটফর্ম ১৩ বছরের কম বয়সী শিশুদের জন্য নয়। যদি আপনি ১৩ বছরের কম হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার করবেন না। যদি আমরা জানতে পারি যে ১৩ বছরের কম বয়সী কেউ অ্যাকাউন্ট খুলেছে, আমরা সেই অ্যাকাউন্ট এবং সংশ্লিষ্ট ডেটা মুছে ফেলব।</p>
+        <hr>
+
+        <h2>৯. নিরাপত্তা (Security)</h2>
+        <p>আমরা যুক্তিসঙ্গত নিরাপত্তা ব্যবস্থা গ্রহণ করি: Admin Password SHA-256 Hash, Telegram Web App authentication, Anti-tamper protection (Developer tools block, context menu block), Session expiry (24 ঘণ্টা), User ID verification।</p>
+        <div class="danger-box">
+            <strong>⚠️ মনে রাখবেন:</strong> কোনো ইন্টারনেট-ভিত্তিক সিস্টেম ১০০% নিরাপদ নয়। আমরা ডেটা লঙ্ঘনের জন্য দায়ী নই।
+        </div>
+        <hr>
+
+        <h2>১০. Cookies ও Local Storage</h2>
+        <p>আমরা নিম্নলিখিত Local Storage ব্যবহার করি: nexearn_device_id (ডিভাইস শনাক্তকরণ), nexearn_admin_session (Admin session), pending_survey, pending_youtube, survey_done_task, youtube_done_task। আপনি ব্রাউজার সেটিংস থেকে Local Storage মুছে ফেলতে পারেন, তবে এতে অ্যাকাউন্ট কার্যক্রম প্রভাবিত হতে পারে।</p>
+        <hr>
+
+        <h2>১১. Privacy Policy-তে পরিবর্তন</h2>
+        <p>আমরা এই Privacy Policy যেকোনো সময় পরিবর্তন করার অধিকার সংরক্ষণ করি। বড় পরিবর্তন হলে প্ল্যাটফর্মে নোটিশ দেওয়া হবে। পরিবর্তনের পরও প্ল্যাটফর্ম ব্যবহার চালিয়ে গেলে আপনি নতুন Policy-তে সম্মতি দিয়েছেন বলে ধরে নেওয়া হবে।</p>
+        <hr>
+
+        <h2>১২. যোগাযোগ (Contact)</h2>
+        <ul>
+            <li>📧 Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></li>
+            <li>👤 Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
+        </ul>
+
+        <div class="consent-box">
+            <h3>✅ সম্মতি (Consent)</h3>
+            <p>উপরোক্ত Privacy Policy পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
+            <ul>
+                <li>✅ ডেটা সংগ্রহে সম্মতি</li>
+                <li>✅ Third-party শেয়ারিং-এ সম্মতি</li>
+                <li>✅ Disclaimer-এ সম্মতি</li>
+                <li>✅ Terms violation-এ account ban মানতে সম্মতি</li>
+            </ul>
+        </div>
+        <hr>
+        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet / NexEarn. All rights reserved.</p>
+    `,
+
+    disclaimer: `
+        <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
+        <h1>⚠️ DISCLAIMER (দাবিত্যাগ)</h1>
+
+        <h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2>
+        <p>Earn Wallet / NexEarn একটি মাইক্রো-টাস্ক প্ল্যাটফর্ম যা ব্যবহারকারীদের ছোট ছোট টাস্ক (অ্যাড দেখা, সার্ভে, অ্যাড আপলোড) সম্পন্ন করে রিওয়ার্ড (টাকা) অর্জন করতে দেয়। এই রিওয়ার্ড real money হিসেবে Telegram Bot-এর মাধ্যমে withdraw করা যায়।</p>
+        <hr>
+
+        <h2>২. আয়ের নিশ্চয়তা নেই (No Guarantee of Income)</h2>
+        <ul>
+            <li>আমরা কোনো নির্দিষ্ট আয়ের নিশ্চয়তা দিই না।</li>
+            <li>আপনার উপার্জন সম্পূর্ণ নির্ভর করে আপনি কত টাস্ক সম্পন্ন করবেন, কত অ্যাড দেখবেন, কত রেফারেল আনবেন তার উপর।</li>
+            <li>কোনো দিন আয় কম হলে বা একেবারেই না হলে আমরা দায়ী নই।</li>
+        </ul>
+        <hr>
+
+        <h2>৩. তৃতীয় পক্ষের সেবা (Third-Party Services)</h2>
+        <ul>
+            <li><strong>Adsgram, Monetag, GigaPub</strong> — এই অ্যাড নেটওয়ার্কগুলোর কোনো সমস্যা, ফ্রড, অথবা অ্যাড না দেখানোর জন্য আমরা দায়ী নই।</li>
+            <li><strong>ImgBB, Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st</strong> — আপলোড করা ফাইল মুছে গেলে, লিক হলে, অথবা ভুলভাবে সংরক্ষিত হলে আমরা দায়ী নই।</li>
+            <li><strong>Telegram</strong> — Telegram-এর service disruption, ban, বা policy change-এর জন্য আমরা দায়ী নই।</li>
+            <li><strong>Firebase</strong> — Firebase-এর downtime বা data loss-এর জন্য আমরা দায়ী নই।</li>
+        </ul>
+        <hr>
+
+        <h2>৪. অ্যাকাউন্ট বন্ধ বা স্থগিত (Account Termination)</h2>
+        <p>নিম্নলিখিত কারণে আমরা যেকোনো অ্যাকাউন্ট বিনা নোটিশে বন্ধ/স্থগিত করতে পারি:</p>
+        <div class="danger-box">
+            🚫 একাধিক অ্যাকাউন্ট খোলা (multi-accounting)<br>
+            🚫 Fake referral তৈরি<br>
+            🚫 Bot, Script, বা Automation ব্যবহার<br>
+            🚫 ভুয়া task submission (নকল স্ক্রিনশট, কপি-পেস্ট)<br>
+            🚫 Device ID manipulation<br>
+            🚫 Bug exploit বা vulnerability abuse<br>
+            🚫 Developer tool ব্যবহার করে database access<br>
+            🚫 যে কোনো ধরনের প্রতারণা
+        </div>
+        <p><strong>বন্ধ অ্যাকাউন্টের balance ফেরত দেওয়া হবে না।</strong></p>
+        <hr>
+
+        <h2>৫. Task এবং অ্যাড সংক্রান্ত</h2>
+        <ul>
+            <li>Task-এর সংখ্যা, রিওয়ার্ড, শর্তাবলী আগে নোটিশ ছাড়াই পরিবর্তন করার অধিকার আমরা সংরক্ষণ করি।</li>
+            <li>কোনো Task cancel হলে, rejected হলে, বা expire হলে আমরা কোনো ক্ষতিপূরণ দেব না।</li>
+            <li>Admin approve না করলে task-এর জন্য টাকা পাবেন না।</li>
+            <li>একই task-এর জন্য multiple submission করলে account ban হতে পারে।</li>
+        </ul>
+        <hr>
+
+        <h2>৬. Withdrawal সংক্রান্ত</h2>
+        <ul>
+            <li>Minimum এবং Maximum withdraw limit পরিবর্তনযোগ্য।</li>
+            <li>Service charge / processing fee কাটা হবে।</li>
+            <li>Qualified referral ছাড়া withdraw করা যাবে না (level অনুযায়ী)।</li>
+            <li>ভুল account number দিলে টাকা ফেরত পাওয়ার নিশ্চয়তা নেই।</li>
+            <li>Withdraw request reject হলে refund সংক্রান্ত সমস্যা হলে আমরা দায়ী নই।</li>
+        </ul>
+        <hr>
+
+        <h2>৭. Anti-Hack এবং Anti-Fraud System</h2>
+        <p>আমাদের প্ল্যাটফর্মে নিম্নলিখিত security system রয়েছে:</p>
+        <ul>
+            <li>Developer Tools (F12) block</li>
+            <li>Right-click / context menu block</li>
+            <li>Text selection block</li>
+            <li>Session monitoring</li>
+            <li>Device fingerprinting</li>
+            <li>User ID verification</li>
+            <li>Multiple account detection</li>
+        </ul>
+        <div class="warn-box">
+            এই সিস্টেম সক্রিয় থাকায় কিছু legitimate ব্যবহারও বাধাগ্রস্ত হতে পারে। এর জন্য আমরা দায়ী নই।
+        </div>
+        <hr>
+
+        <h2>৮. Balance এবং Payment</h2>
+        <ul>
+            <li>আপনার balance Telegram user ID-এর সাথে যুক্ত। Telegram account হারালে balance হারাতে পারেন।</li>
+            <li>আমরা কোনো interest বা bonus প্রদান করি না।</li>
+            <li>Currency conversion-এ fluctuation থাকতে পারে।</li>
+            <li>ট্যাক্স বা legal obligation আপনার নিজের দায়িত্ব।</li>
+        </ul>
+        <hr>
+
+        <h2>৯. প্ল্যাটফর্ম বন্ধ / পরিবর্তন (Service Discontinuation)</h2>
+        <p>আমরা যেকোনো সময়: প্ল্যাটফর্ম বন্ধ করতে পারি, Feature পরিবর্তন করতে পারি, Policy পরিবর্তন করতে পারি, Server migrate করতে পারি।</p>
+        <div class="warn-box">
+            এই ধরনের পরিবর্তনে আপনার অসম্পূর্ণ balance বাতিল হতে পারে। বড় পরিবর্তনের আগে আমরা নোটিশ দেওয়ার চেষ্টা করব, তবে নিশ্চয়তা দিই না।
+        </div>
+        <hr>
+
+        <h2>১০. আইনি সীমাবদ্ধতা (Limitation of Liability)</h2>
+        <p>যেকোনো পরোক্ষ, আকস্মিক, বিশেষ, ফলস্বরূপ, বা শাস্তিমূলক ক্ষতির জন্য আমরা দায়ী নই, যার মধ্যে রয়েছে: ডেটা হারানো, আয় হারানো, প্রোফাইল ক্ষতি, তৃতীয় পক্ষের দাবি, সেবা ব্যাঘাত।</p>
+        <div class="danger-box">
+            <strong>আমাদের সর্বোচ্চ দায় সীমাবদ্ধ আপনার শেষ ৩০ দিনের আয়ের মধ্যে।</strong>
+        </div>
+        <hr>
+
+        <h2>১১. ব্যবহারকারীর দায়িত্ব (User Responsibility)</h2>
+        <ul>
+            <li>আপনার Telegram account-এর নিরাপত্তা আপনার দায়িত্ব</li>
+            <li>সঠিক তথ্য প্রদান করুন</li>
+            <li>একটি ডিভাইসে একটি অ্যাকাউন্ট রাখুন</li>
+            <li>Fraud এড়িয়ে চলুন</li>
+            <li>Admin-এর নির্দেশনা মেনে চলুন</li>
+        </ul>
+        <hr>
+
+        <h2>১২. তৃতীয় পক্ষের লিংক</h2>
+        <p>আমাদের প্ল্যাটফর্মে তৃতীয় পক্ষের লিংক থাকতে পারে (যেমন task URL, tutorial video, contact link)। সেই লিংকে গেলে তাদের Privacy Policy প্রযোজ্য হবে। আমরা তাদের কনটেন্ট বা সেবার জন্য দায়ী নই।</p>
+        <hr>
+
+        <h2>১৩. Legal Compliance</h2>
+        <p>আপনি সম্মত যে আপনি আপনার দেশের/অঞ্চলের সব প্রযোজ্য আইন মেনে প্ল্যাটফর্ম ব্যবহার করবেন। Pornography, gambling, illegal activity, বা child exploitation সংক্রান্ত কোনো কাজে প্ল্যাটফর্ম ব্যবহার করলে account ban এবং আইনি ব্যবস্থা নেওয়া হবে।</p>
+        <hr>
+
+        <h2>১৪. Admin যোগাযোগ</h2>
+        <p>Admin-এর সাথে যোগাযোগের জন্য শুধুমাত্র প্ল্যাটফর্মের Contact সেকশন বা Support Channel ব্যবহার করুন। কোনো ব্যক্তিগত message, call, বা third-party চ্যানেলে আমরা দায়ী নই।</p>
+        <hr>
+
+        <h2>১৫. Scholarship / Educational Purpose</h2>
+        <p>এই প্ল্যাটফর্ম educational এবং micro-earning উদ্দেশ্যে তৈরি। এটি full-time job নয়, investment platform নয়, বা financial planning টুল নয়।</p>
+
+        <div class="consent-box">
+            <h3>✅ সম্মতি (Consent)</h3>
+            <p>উপরোক্ত Disclaimer পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
+            <ul>
+                <li>✅ ডেটা সংগ্রহে সম্মতি</li>
+                <li>✅ Third-party শেয়ারিং-এ সম্মতি</li>
+                <li>✅ Disclaimer-এ সম্মতি</li>
+                <li>✅ Terms violation-এ account ban মানতে সম্মতি</li>
+            </ul>
+        </div>
+
+        <h2>📞 যোগাযোগ</h2>
+        <ul>
+            <li>Support Channel: <a href="https://t.me/nexearn2" target="_blank">https://t.me/nexearn2</a></li>
+            <li>Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
+            <li>Telegram Bot: @TaskHubBD24Bot</li>
+        </ul>
+
+        <h2>📝 দ্রুত সারাংশ (Quick Summary)</h2>
+        <table class="summary-table">
+            <tr><td>বিষয়</td><td>সারাংশ</td></tr>
+            <tr><td>কী সংগ্রহ করি</td><td>Telegram ID, Balance, Tasks, Uploads, Device ID</td></tr>
+            <tr><td>কেন সংগ্রহ করি</td><td>Payment, Security, Referral, Anti-fraud</td></tr>
+            <tr><td>কোথায় রাখি</td><td>Firebase, ImgBB, Audio servers, Telegram</td></tr>
+            <tr><td>কতদিন রাখি</td><td>Last 100 entries (ad/commission), Permanent (tasks)</td></tr>
+            <tr><td>শেয়ার করি কাদের</td><td>Telegram, Ad Networks, File Hosts, Firebase</td></tr>
+            <tr><td>আপনার অধিকার</td><td>Data view, Correct, Delete</td></tr>
+            <tr><td>আয়ের নিশ্চয়তা</td><td>❌ নেই</td></tr>
+            <tr><td>তৃতীয় পক্ষ</td><td>✅ দায়ী নয়</td></tr>
+            <tr><td>Fraud করলে</td><td>🚫 Account ban, balance বাতিল</td></tr>
+        </table>
+
+        <hr>
+        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet / NexEarn. All rights reserved.</p>
+    `
+};
+
+function openLegalModal(type) {
+    const modal = document.getElementById('legalModal');
+    const title = document.getElementById('legalModalTitle');
+    const body = document.getElementById('legalModalBody');
+    if (type === 'privacy') {
+        title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy';
+        body.innerHTML = LEGAL_CONTENT.privacy;
+    } else {
+        title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer';
+        body.innerHTML = LEGAL_CONTENT.disclaimer;
+    }
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLegalModal() {
+    document.getElementById('legalModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+document.getElementById('legalModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLegalModal();
+});
 
 // ═══════════════════════════════════════════════════════
 // ADMIN SLIDER
@@ -1256,7 +1788,7 @@ function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer();
     startCooldownTicker();
-    startTaskExpiryTicker(); /* ✅ NEW: start expiry ticker */
+    startTaskExpiryTicker();
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -1281,7 +1813,7 @@ function stopPeriodicRecheck() {
     if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
     stopCycleTimer();
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
-    stopTaskExpiryTicker(); /* ✅ NEW: stop expiry ticker */
+    stopTaskExpiryTicker();
 }
 
 function showAdTimer(slotIndex) {
@@ -1652,7 +2184,6 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
         }
 
-        /* ✅ Time display with live countdown + delete countdown */
         const expiryTextHtml = isExpired
             ? '⛔ Expired'
             : '⏳ ' + fmtTaskTime(expiryRemain);
@@ -2281,7 +2812,7 @@ window.onload = () => {
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); }
+        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
         else if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
             const resetTime = Number(appState.user.adsResetTime || 0);
             if (resetTime > 0 && resetTime <= Date.now()) { forceCycleReset(); } else { updateCycleUI(); }
