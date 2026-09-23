@@ -569,6 +569,33 @@
         .legal-header{padding:18px 18px;}
         .menu-popup{width:190px;}
     }
+
+    /* ✅ NEW: Referral Inner Tabs Styles */
+    .ref-inner-tabs{display:flex;gap:6px;padding:0 0 14px;margin-bottom:10px;border-bottom:2px solid #f1f5f9;}
+    .ref-inner-tab{flex:1;padding:10px 8px;border-radius:12px;background:#f8fafc;color:#6b7280;font-weight:800;font-size:0.76rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;font-family:inherit;position:relative;}
+    .ref-inner-tab .tab-count{font-size:0.68rem;font-weight:800;background:rgba(108,92,231,0.15);color:var(--primary);padding:2px 8px;border-radius:20px;line-height:1.2;}
+    .ref-inner-tab.active{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(108,92,231,.28);}
+    .ref-inner-tab.active .tab-count{background:rgba(255,255,255,.3);color:#fff;}
+    .ref-inner-tab.tab-qualified.active{background:linear-gradient(135deg,#00b894,#00cec9);box-shadow:0 8px 20px rgba(0,184,148,.28);}
+    .ref-inner-tab.tab-income.active{background:linear-gradient(135deg,#f39c12,#fbbf24);box-shadow:0 8px 20px rgba(243,156,18,.28);}
+    .ref-inner-pane{display:none;}
+    .ref-inner-pane.active{display:block;animation:fadeIn .25s ease;}
+
+    /* ✅ NEW: Referral Income Balance Card */
+    .ref-income-balance-card{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;padding:18px 20px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(243,156,18,.35);}
+    .ref-income-balance-card::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.18);border-radius:50%;top:-50px;right:-40px;}
+    .ref-income-balance-card::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.12);border-radius:50%;bottom:-40px;left:-20px;}
+    .ref-income-balance-card .rib-label{font-size:.72rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.95;position:relative;z-index:1;}
+    .ref-income-balance-card .rib-amt{font-size:2rem;font-weight:900;margin:4px 0 8px;position:relative;z-index:1;text-shadow:0 3px 10px rgba(0,0,0,.15);}
+    .ref-income-balance-card .rib-info{font-size:.72rem;font-weight:700;opacity:.95;position:relative;z-index:1;background:rgba(0,0,0,.15);padding:6px 12px;border-radius:10px;display:inline-block;}
+    .ref-claim-btn{width:100%;padding:13px;border-radius:12px;border:none;font-weight:800;font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:all .2s;margin-top:10px;position:relative;z-index:1;}
+    .ref-claim-btn.ready{background:#fff;color:#e67e22;box-shadow:0 8px 20px rgba(255,255,255,.3);}
+    .ref-claim-btn.ready:active{transform:scale(0.97);}
+    .ref-claim-btn.locked{background:rgba(255,255,255,.25);color:rgba(255,255,255,.75);cursor:not-allowed;border:1px dashed rgba(255,255,255,.4);}
+    .ref-claim-note{margin-top:10px;font-size:.72rem;font-weight:700;color:#92400e;background:linear-gradient(135deg,#fef3c7,#fde68a);padding:9px 12px;border-radius:10px;border-left:3px solid #f59e0b;line-height:1.45;}
+    .ref-claim-note.success{color:#065f46;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-left-color:#10b981;}
+    .ref-qualified-info{background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:12px 14px;border-radius:12px;margin-bottom:14px;border-left:3px solid #f97316;font-size:.76rem;font-weight:700;color:#9a3412;line-height:1.5;}
+    .ref-qualified-info i{color:#ea580c;margin-right:5px;}
 </style>
 </head>
 <body>
@@ -762,18 +789,60 @@
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
             <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার করুন</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
+        
+        <!-- ✅ UPDATED: Referral List with 3 Tabs -->
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
-            <div class="stat-mini-grid">
-                <div class="stat-mini"><div class="num" id="refTotalCount">0</div><div class="lbl">Total Refs</div></div>
-                <div class="stat-mini"><div class="num green" id="refQualifiedCount">0</div><div class="lbl">Qualified (20+)</div></div>
+            
+            <!-- Inner Tabs -->
+            <div class="ref-inner-tabs">
+                <button class="ref-inner-tab active" id="refTabTotal" onclick="switchRefTab('total')">
+                    <i class="fas fa-user-friends"></i>
+                    <span>টোটাল রেফার</span>
+                    <span class="tab-count" id="refTabTotalCount">0</span>
+                </button>
+                <button class="ref-inner-tab tab-qualified" id="refTabQualified" onclick="switchRefTab('qualified')">
+                    <i class="fas fa-circle-check"></i>
+                    <span>কোয়ালিফাই</span>
+                    <span class="tab-count" id="refTabQualifiedCount">0</span>
+                </button>
+                <button class="ref-inner-tab tab-income" id="refTabIncome" onclick="switchRefTab('income')">
+                    <i class="fas fa-coins"></i>
+                    <span>রেফার ইনকাম</span>
+                    <span class="tab-count" id="refTabIncomeCount">0.00</span>
+                </button>
             </div>
-            <div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div>
+
+            <!-- Pane: Total Referrals -->
+            <div class="ref-inner-pane active" id="refPaneTotal">
+                <div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div>
+            </div>
+
+            <!-- Pane: Qualified Referrals -->
+            <div class="ref-inner-pane" id="refPaneQualified">
+                <div class="ref-qualified-info">
+                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b>২০ টাকা বা তার বেশি</b>। শুধু Qualified ইউজারের ইনকাম থেকে আপনি কমিশন পাবেন।
+                </div>
+                <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div></div>
+            </div>
+
+            <!-- Pane: Referral Income -->
+            <div class="ref-inner-pane" id="refPaneIncome">
+                <div class="ref-income-balance-card">
+                    <div class="rib-label">💰 Referral Income Balance</div>
+                    <div class="rib-amt"><span id="refIncomeBalance">0.00</span> <span style="font-size:1.2rem;">টাকা</span></div>
+                    <div class="rib-info"><i class="fas fa-gift"></i> Minimum <b>১০ টাকা</b> হলে ক্লেইম করা যাবে</div>
+                </div>
+                <div id="refClaimNoteWrap"></div>
+                <button id="refClaimBtn" class="ref-claim-btn locked" onclick="claimReferralIncome()" disabled>
+                    <i class="fas fa-lock"></i> <span id="refClaimBtnText">ক্লেইম করতে ১০ টাকা প্রয়োজন</span>
+                </button>
+
+                <div class="card-title" style="margin-top:22px; font-size:.95rem;"><i class="fas fa-coins" style="color:#f39c12;"></i> কমিশন হিস্ট্রি</div>
+                <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div></div>
+            </div>
         </div>
-        <div class="premium-card">
-            <div class="card-title"><i class="fas fa-coins" style="color:#f39c12;"></i> কমিশন হিস্ট্রি</div>
-            <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div></div>
-        </div>
+
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-video" style="color:#ff4757;"></i> টিউটোরিয়াল</div>
             <p style="font-size:0.85rem;color:#555;">কাজ বুঝতে ভিডিওটি দেখে নিন।</p>
@@ -854,13 +923,14 @@ const MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const REFERRAL_CLAIM_MIN = 10; // Minimum amount to claim referral income
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 
 let withdrawLevels = [];
 let appState = {
-    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {} },
+    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, qualifiedReferrals: {} },
     config: { adSlots: [], newTasks: {} }
 };
 let isBooted = false;
@@ -884,6 +954,8 @@ let MIN_AD_WATCH_TIME = 15;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
+let currentRefTab = 'total';
+let allReferralDataCache = { all: [], qualified: [] };
 
 let isUserAdmin = false;
 
@@ -901,6 +973,126 @@ function isScreenshotTask(type) {
 }
 function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
+}
+
+/* ═══════════════════════════════════════════════════════
+   ✅ REFERRAL TAB HELPERS
+   ═══════════════════════════════════════════════════════ */
+function switchRefTab(tab) {
+    currentRefTab = tab;
+    const tabTotal = document.getElementById('refTabTotal');
+    const tabQual = document.getElementById('refTabQualified');
+    const tabInc = document.getElementById('refTabIncome');
+    const paneTotal = document.getElementById('refPaneTotal');
+    const paneQual = document.getElementById('refPaneQualified');
+    const paneInc = document.getElementById('refPaneIncome');
+    [tabTotal, tabQual, tabInc].forEach(t => t.classList.remove('active'));
+    [paneTotal, paneQual, paneInc].forEach(p => p.classList.remove('active'));
+    if (tab === 'total') { tabTotal.classList.add('active'); paneTotal.classList.add('active'); }
+    else if (tab === 'qualified') { tabQual.classList.add('active'); paneQual.classList.add('active'); }
+    else { tabInc.classList.add('active'); paneInc.classList.add('active'); }
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+function updateRefTabCounts() {
+    const totalEl = document.getElementById('refTabTotalCount');
+    const qualEl = document.getElementById('refTabQualifiedCount');
+    const incEl = document.getElementById('refTabIncomeCount');
+    if (totalEl) totalEl.textContent = allReferralDataCache.all.length;
+    if (qualEl) qualEl.textContent = allReferralDataCache.qualified.length;
+    if (incEl) incEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
+}
+
+function renderReferralList() {
+    // Update counts
+    updateRefTabCounts();
+
+    // Total Referrals List
+    const totalContainer = document.getElementById('myReferralsList');
+    if (allReferralDataCache.all.length === 0) {
+        totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
+    } else {
+        let html = '';
+        allReferralDataCache.all.forEach(u => {
+            const initial = (u.name || 'U').charAt(0).toUpperCase();
+            const balClass = u.qualified ? 'qualified' : 'not-qualified';
+            const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
+            const isIncomeActive = u.qualified ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Commission Active</span>' : '<span style="font-size:0.65rem;color:#ff4757;font-weight:800;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">⏳ Need 20TK</span>';
+            html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${initial}</div><div class="ref-user-info"><h5>${esc(u.name)} ${isIncomeActive}</h5><p>ID: ${u.id}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK ${checkMark}</div></div>`;
+        });
+        totalContainer.innerHTML = html;
+    }
+
+    // Qualified Referrals List
+    const qualContainer = document.getElementById('myQualifiedReferralsList');
+    if (allReferralDataCache.qualified.length === 0) {
+        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div>';
+    } else {
+        let html = '';
+        allReferralDataCache.qualified.forEach(u => {
+            const initial = (u.name || 'U').charAt(0).toUpperCase();
+            html += `<div class="ref-user-item" style="background:linear-gradient(135deg,#f0fff9,#e6fff5);border-color:rgba(0,184,148,.3);"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${initial}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} <span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.15);padding:2px 6px;border-radius:6px;margin-left:5px;">✅ Qualified</span></h5><p style="color:#10b981;">ID: ${u.id} • Commission Active</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
+        });
+        qualContainer.innerHTML = html;
+    }
+
+    // Referral Income Balance
+    const ribEl = document.getElementById('refIncomeBalance');
+    if (ribEl) ribEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
+    updateRefClaimButton();
+    loadCommissionHistory();
+}
+
+function updateRefClaimButton() {
+    const bal = Number(appState.user.referralBalance || 0);
+    const btn = document.getElementById('refClaimBtn');
+    const btnText = document.getElementById('refClaimBtnText');
+    const noteWrap = document.getElementById('refClaimNoteWrap');
+    if (!btn || !btnText) return;
+    if (bal >= REFERRAL_CLAIM_MIN) {
+        btn.classList.remove('locked');
+        btn.classList.add('ready');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম করুন (' + bal.toFixed(2) + ' টাকা)</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> আপনি ক্লেইম করার জন্য যোগ্য! ক্লেইম করলে সম্পূর্ণ ব্যালেন্স মেইন ওয়ালেটে যোগ হবে।</div>';
+    } else {
+        btn.classList.add('locked');
+        btn.classList.remove('ready');
+        btn.disabled = true;
+        const need = (REFERRAL_CLAIM_MIN - bal).toFixed(2);
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>ক্লেইম করতে আরও ' + need + ' টাকা প্রয়োজন</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> রেফারেল ইনকাম ব্যালেন্স <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> বা তার বেশি হলে ক্লেইম বাটন সক্রিয় হবে।</div>';
+    }
+}
+
+async function claimReferralIncome() {
+    const bal = Number(appState.user.referralBalance || 0);
+    if (bal < REFERRAL_CLAIM_MIN) {
+        toast('❌ কমপক্ষে ' + REFERRAL_CLAIM_MIN + ' টাকা প্রয়োজন');
+        return;
+    }
+    if (!isOnline) { toast('No internet connection!'); return; }
+    const btn = document.getElementById('refClaimBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ক্লেইম হচ্ছে...'; }
+    try {
+        const newMainBal = Number(appState.user.balance || 0) + bal;
+        const newRefBal = 0;
+        await db.ref('users/' + appState.user.id).update({
+            balance: newMainBal,
+            referralBalance: newRefBal
+        });
+        appState.user.balance = newMainBal;
+        appState.user.referralBalance = newRefBal;
+        await updateTextElements();
+        renderReferralList();
+        toast('✅ ' + bal.toFixed(2) + ' টাকা সফলভাবে মেইন ওয়ালেটে যোগ হয়েছে!');
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    } catch (e) {
+        console.error(e);
+        toast('❌ ক্লেইম ব্যর্থ: ' + e.message);
+    } finally {
+        updateRefClaimButton();
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1719,6 +1911,9 @@ async function claimDailyBonus() {
     }
 }
 
+// ═══════════════════════════════════════════════════════
+// ✅ UPDATED: creditReferrerCommission now adds to referralBalance
+// ═══════════════════════════════════════════════════════
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
@@ -1726,16 +1921,47 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const refSnap = await db.ref('users/' + referrerId).once('value');
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
-        const newBal = Number(refData.balance || 0) + commissionAmount;
-        const newEarn = Number(refData.totalEarned || 0) + commissionAmount;
+        
+        // ✅ Check if referrer's balance is >= 20 (qualified check based on referrer's own balance)
+        // Actually, the rule is: referrer gets commission only when the REFERRED USER has >= 20 TK
+        // So we need to check: if the current user (appState.user) has balance >= 20, then commission goes to referrer
+        
+        // The rule: "কমিশন যতক্ষণ না ওই রেফার ইউজার ২০ টাকা ব্যালেন্স হবে ততক্ষণ কমিশন পাবোনা"
+        // Translation: "You won't get commission until that referred user's balance is 20 TK"
+        // So: check appState.user.balance (the referred user) >= 20
+        
+        const referredUserBalance = Number(appState.user.balance || 0);
+        if (referredUserBalance < MIN_REFERRAL_BALANCE) {
+            // Don't credit commission yet - referred user needs 20+ TK
+            return false;
+        }
+        
+        // ✅ Add commission to referralBalance (not main balance)
+        const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
         const histId = 'com_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        commHist[histId] = { fromId: String(appState.user.id), fromName: appState.user.name || 'User', earnedAmount: Number(originalEarned), commission: commissionAmount, source: String(source || 'Earning'), rate: REF_COMMISSION_RATE, mode: REF_COMMISSION_MODE, timestamp: Date.now() };
+        commHist[histId] = { 
+            fromId: String(appState.user.id), 
+            fromName: appState.user.name || 'User', 
+            earnedAmount: Number(originalEarned), 
+            commission: commissionAmount, 
+            source: String(source || 'Earning'), 
+            rate: REF_COMMISSION_RATE, 
+            mode: REF_COMMISSION_MODE, 
+            timestamp: Date.now() 
+        };
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
-        await db.ref('users/' + referrerId).update({ balance: newBal, totalEarned: newEarn, totalCommission: newTotalComm, commissionHistory: commHist });
-        try { await sendNotification(referrerId, '💰 নতুন কমিশন পেয়েছেন! +' + commissionAmount.toFixed(4) + ' TK'); } catch(e) {}
+        
+        // ✅ Update referralBalance, totalCommission, commissionHistory (NOT balance)
+        await db.ref('users/' + referrerId).update({ 
+            referralBalance: newRefBal, 
+            totalCommission: newTotalComm, 
+            commissionHistory: commHist 
+        });
+        
+        try { await sendNotification(referrerId, '💰 নতুন কমিশন পেয়েছেন! +' + commissionAmount.toFixed(4) + ' TK (Referral Income)'); } catch(e) {}
         return true;
     } catch(e) { return false; }
 }
@@ -1958,16 +2184,27 @@ async function calculateValidReferrals() {
     try {
         const refs = appState.user.referredUsers || {};
         const keys = Object.keys(refs);
-        if (keys.length === 0) { validReferralCount = 0; return 0; }
+        if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
         let count = 0;
-        const promises = keys.map(async (rid) => {
-            const bSnap = await db.ref('users/' + rid + '/balance').once('value');
-            const bal = bSnap.exists() ? Number(bSnap.val() || 0) : 0;
-            if (bal >= MIN_REFERRAL_BALANCE) count++;
-        });
-        await Promise.all(promises);
-        validReferralCount = count; return count;
-    } catch(e) { validReferralCount = 0; return 0; }
+        const allData = [];
+        const qualifiedData = [];
+        await Promise.all(keys.map(async (rid) => {
+            const uSnap = await db.ref('users/' + rid).once('value');
+            const u = uSnap.exists() ? uSnap.val() : {};
+            const bal = Number(u.balance || 0);
+            const qualified = bal >= MIN_REFERRAL_BALANCE;
+            if (qualified) count++;
+            const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
+            allData.push(entry);
+            if (qualified) qualifiedData.push(entry);
+        }));
+        allData.sort((a, b) => b.joinedAt - a.joinedAt);
+        qualifiedData.sort((a, b) => b.balance - a.balance);
+        validReferralCount = count;
+        allReferralDataCache.all = allData;
+        allReferralDataCache.qualified = qualifiedData;
+        return count;
+    } catch(e) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
 }
 function getWithdrawLevel() {
     if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
@@ -2573,33 +2810,18 @@ function openSupport() { if (appState.config.supportLink) window.open(appState.c
 
 async function loadMyReferrals() {
     const container = document.getElementById('myReferralsList');
-    container.innerHTML = '<p style="text-align:center;color:#999;padding:15px;">Loading...</p>';
+    if (container) container.innerHTML = '<p style="text-align:center;color:#999;padding:15px;">Loading...</p>';
     try {
-        const refs = appState.user.referredUsers || {};
-        const keys = Object.keys(refs);
-        if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>'; document.getElementById('refTotalCount').textContent = '0'; document.getElementById('refQualifiedCount').textContent = '0'; return; }
-        const userData = await Promise.all(keys.map(async (rid) => {
-            const uSnap = await db.ref('users/' + rid).once('value');
-            const u = uSnap.exists() ? uSnap.val() : {};
-            const balance = Number(u.balance || 0);
-            return { id: rid, name: u.name || refs[rid].name || 'User', balance, qualified: balance >= MIN_REFERRAL_BALANCE, joinedAt: refs[rid].joinedAt || 0 };
-        }));
-        userData.sort((a, b) => b.joinedAt - a.joinedAt);
-        let qualifiedCount = 0; let html = '';
-        userData.forEach(u => {
-            if (u.qualified) qualifiedCount++;
-            const initial = (u.name || 'U').charAt(0).toUpperCase();
-            const balClass = u.qualified ? 'qualified' : 'not-qualified';
-            const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
-            html += '<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">' + initial + '</div><div class="ref-user-info"><h5>' + esc(u.name) + '</h5><p>ID: ' + u.id + '</p></div></div><div class="ref-user-bal ' + balClass + '">💰 ' + u.balance.toFixed(2) + ' TK ' + checkMark + '</div></div>';
-        });
-        container.innerHTML = html;
-        document.getElementById('refTotalCount').textContent = userData.length;
-        document.getElementById('refQualifiedCount').textContent = qualifiedCount;
-    } catch (e) {}
+        await calculateValidReferrals();
+        renderReferralList();
+    } catch (e) {
+        console.error(e);
+        if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>Load failed</p></div>';
+    }
 }
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
+    if (!container) return;
     const hist = appState.user.commissionHistory || {};
     const keys = Object.keys(hist);
     if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div>'; return; }
@@ -2664,6 +2886,8 @@ async function updateTextElements() {
     ]; }
     await calculateValidReferrals();
     updateWithdrawInfo();
+    updateRefClaimButton();
+    updateRefTabCounts();
 }
 
 function setLoading(isLoading) {
@@ -2917,7 +3141,8 @@ window.onload = () => {
                 totalCommission: 0, commissionHistory: {}, referredBy: null,
                 adsResetTime: 0, dailyBonusDate: '',
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
-                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {}
+                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
+                referralBalance: 0
             };
             await userRef.set(appState.user);
 
@@ -2961,6 +3186,7 @@ window.onload = () => {
                 if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
                 if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
                 if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
+                if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
