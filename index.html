@@ -58,22 +58,50 @@
     .stats{position:relative;display:flex;justify-content:space-between;margin-top:20px;padding-top:20px;border-top:2px dashed rgba(93,71,163,.3);}
     .stat-box h4{font-size:1.1rem;color:#3b2b6b;margin-bottom:2px;}
     .stat-box p{font-size:.75rem;color:rgba(59,43,107,.8);font-weight:600;}
-    .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;}
+    .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
     .sec-head i{color:var(--primary);font-size:1.2rem;}
+    
+    /* ✅ COMPACT AD RESET TIMER (top-right corner) */
+    .ad-reset-compact{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:6px 12px;border-radius:20px;font-size:0.68rem;font-weight:800;display:flex;align-items:center;gap:6px;box-shadow:0 6px 14px rgba(108,92,231,.35);font-variant-numeric:tabular-nums;}
+    .ad-reset-compact i{font-size:0.7rem;opacity:0.9;}
+    .ad-reset-compact.expired{background:linear-gradient(135deg,#00b894,#00cec9);}
+    .ad-reset-compact .rst-label{opacity:0.85;font-size:0.6rem;letter-spacing:0.3px;}
+    .ad-reset-compact .rst-time{font-weight:900;font-size:0.72rem;}
+    
+    /* ✅ 2 Ad Slots grid */
     .ad-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;}
-    .ad-card{position:relative;padding:3px;border-radius:22px;background:conic-gradient(from 0deg,#ff9a3d,#ff5e7a,#4f8cff,#38d6ff,#ff9a3d);animation:spinBorder 6s linear infinite;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.08);height:122px;}
+    .ad-card{position:relative;padding:3px;border-radius:22px;background:conic-gradient(from 0deg,#ff9a3d,#ff5e7a,#4f8cff,#38d6ff,#ff9a3d);animation:spinBorder 6s linear infinite;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.08);height:135px;}
     @keyframes spinBorder{0%{background-position:0 0;}100%{background-position:360px 0;}}
-    .ad-inner{border-radius:19px;padding:12px 10px;text-align:center;position:relative;background:#fff;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;}
-    .ad-inner i{font-size:1.75rem;margin:0;display:block;}
-    .ad-inner h4{font-size:.88rem;font-weight:800;margin:0;color:#111827;line-height:1.1;}
-    .ad-inner .reward-pill{font-size:.72rem;font-weight:800;color:#111827;background:rgba(15,23,42,.05);padding:5px 10px;border-radius:999px;display:inline-flex;gap:6px;align-items:center;}
-    .ad-inner .progress-pill{font-size:.72rem;color:#4b5563;background:rgba(15,23,42,.04);padding:4px 10px;border-radius:999px;display:inline-block;}
+    .ad-inner{border-radius:19px;padding:14px 10px;text-align:center;position:relative;background:#fff;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;}
+    .ad-inner i{font-size:2rem;margin:0;display:block;}
+    .ad-inner h4{font-size:.95rem;font-weight:800;margin:0;color:#111827;line-height:1.1;}
+    .ad-inner .progress-pill{font-size:.72rem;color:#4b5563;background:rgba(15,23,42,.06);padding:5px 12px;border-radius:999px;display:inline-block;font-weight:700;}
     .slot-1 .ad-inner{background:linear-gradient(145deg,#fff7f0,#ffe5d0);}.slot-1 .ad-inner i{color:#ff8b3d;}
     .slot-2 .ad-inner{background:linear-gradient(145deg,#edf5ff,#dde6ff);}.slot-2 .ad-inner i{color:#4f8cff;}
-    .slot-3 .ad-inner{background:linear-gradient(145deg,#f2fffa,#dcfff2);}.slot-3 .ad-inner i{color:#00b894;}
-    .slot-4 .ad-inner{background:linear-gradient(145deg,#fff2fb,#ffe0f3);}.slot-4 .ad-inner i{color:#e84393;}
     .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
     .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
+    
+    /* ✅ AD TOTAL CLAIM BOX */
+    .ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(0,184,148,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+    .ad-claim-box::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;top:-50px;right:-30px;}
+    .ad-claim-box::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.1);border-radius:50%;bottom:-40px;left:-20px;}
+    .ad-claim-box .ac-left{flex:1;min-width:0;position:relative;z-index:1;}
+    .ad-claim-box .ac-label{font-size:0.68rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
+    .ad-claim-box .ac-amt{font-size:1.85rem;font-weight:900;margin-top:3px;text-shadow:0 3px 10px rgba(0,0,0,.15);}
+    .ad-claim-box .ac-amt small{font-size:0.9rem;font-weight:700;opacity:0.9;}
+    .ad-claim-btn{position:relative;z-index:1;background:#fff;color:#00b894;border:none;padding:12px 20px;border-radius:14px;font-weight:900;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;box-shadow:0 8px 20px rgba(0,0,0,.15);transition:transform .15s;white-space:nowrap;flex-shrink:0;}
+    .ad-claim-btn:active{transform:scale(0.96);}
+    .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
+    .ad-claim-btn:disabled:active{transform:none;}
+    
+    /* Progress bar for ad completion */
+    .ad-progress-wrap{margin:0 20px 12px;background:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.04);}
+    .ad-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.78rem;font-weight:800;}
+    .ad-progress-header .aph-left{color:#334155;}
+    .ad-progress-header .aph-right{color:#00b894;}
+    .ad-progress-bar{height:8px;background:#f1f5f9;border-radius:20px;overflow:hidden;position:relative;}
+    .ad-progress-bar-fill{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .5s ease;box-shadow:0 0 12px rgba(0,206,201,.4);}
+    
     .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
     .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
     @keyframes taskBorderShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
@@ -745,24 +773,44 @@
     </div>
 
     <div id="page-home" class="page-section active">
-        <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
+        <div class="sec-head">
+            <i class="fas fa-gift"></i> Daily Rewards
+        </div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
-        <div class="sec-head"><i class="fas fa-play-circle"></i> Daily Ads</div>
-        <div style="padding:0 20px 14px;">
-            <div id="cycleInfoBar" style="background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:20px 22px;border-radius:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 14px 32px rgba(108,92,231,0.4);position:relative;overflow:hidden;">
-                <div style="position:absolute;width:140px;height:140px;background:rgba(255,255,255,0.12);border-radius:50%;top:-60px;right:-40px;pointer-events:none;"></div>
-                <div style="position:absolute;width:100px;height:100px;background:rgba(255,255,255,0.08);border-radius:50%;bottom:-50px;left:-30px;pointer-events:none;"></div>
-                <div style="flex:1;min-width:0;position:relative;z-index:1;">
-                    <div style="font-size:0.72rem;opacity:0.9;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;">AD TIMER</div>
-                    <div id="cycleLabel" style="font-size:1.25rem;font-weight:900;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">⏸️ Not Started</div>
-                </div>
-                <div style="text-align:right;flex-shrink:0;position:relative;z-index:1;">
-                    <div style="font-size:0.72rem;opacity:0.9;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;">RESET IN</div>
-                    <div id="cycleResetTimer" style="font-size:1.6rem;font-weight:900;margin-top:3px;font-variant-numeric:tabular-nums;">Watch All Ads</div>
+        
+        <!-- ✅ NEW: Ads section with compact reset timer in corner -->
+        <div class="sec-head">
+            <i class="fas fa-play-circle"></i> Daily Ads
+            <div class="ad-reset-compact" id="adResetCompact">
+                <i class="fas fa-clock"></i>
+                <div>
+                    <div class="rst-label">RESET IN</div>
+                    <div class="rst-time" id="cycleResetTimer">Watch All</div>
                 </div>
             </div>
         </div>
+        
         <div id="ad-area" class="ad-grid"></div>
+        
+        <!-- ✅ NEW: Ad progress bar -->
+        <div class="ad-progress-wrap">
+            <div class="ad-progress-header">
+                <span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span>
+                <span class="aph-right" id="adProgressText">0 / 0 Watched</span>
+            </div>
+            <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
+        </div>
+        
+        <!-- ✅ NEW: Total Ad Earnings Claim Box -->
+        <div class="ad-claim-box">
+            <div class="ac-left">
+                <div class="ac-label">💰 Total Ad Earnings</div>
+                <div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>টাকা</small></div>
+            </div>
+            <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled>
+                <i class="fas fa-lock"></i> <span id="adClaimBtnText">All Ads Must be Watched</span>
+            </button>
+        </div>
     </div>
 
     <div id="page-tasks" class="page-section">
@@ -790,11 +838,10 @@
             <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার করুন</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
         
-        <!-- ✅ UPDATED: Referral List with 3 Tabs -->
+        <!-- Referral List with 3 Tabs -->
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
             
-            <!-- Inner Tabs -->
             <div class="ref-inner-tabs">
                 <button class="ref-inner-tab active" id="refTabTotal" onclick="switchRefTab('total')">
                     <i class="fas fa-user-friends"></i>
@@ -813,12 +860,10 @@
                 </button>
             </div>
 
-            <!-- Pane: Total Referrals -->
             <div class="ref-inner-pane active" id="refPaneTotal">
                 <div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div>
             </div>
 
-            <!-- Pane: Qualified Referrals -->
             <div class="ref-inner-pane" id="refPaneQualified">
                 <div class="ref-qualified-info">
                     <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b>২০ টাকা বা তার বেশি</b>। শুধু Qualified ইউজারের ইনকাম থেকে আপনি কমিশন পাবেন।
@@ -826,7 +871,6 @@
                 <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div></div>
             </div>
 
-            <!-- Pane: Referral Income -->
             <div class="ref-inner-pane" id="refPaneIncome">
                 <div class="ref-income-balance-card">
                     <div class="rib-label">💰 Referral Income Balance</div>
@@ -923,14 +967,15 @@ const MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
-const REFERRAL_CLAIM_MIN = 10; // Minimum amount to claim referral income
+const REFERRAL_CLAIM_MIN = 10;
+const AD_DISPLAY_SLOTS = 2; // ✅ Only 2 ad slots shown
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 
 let withdrawLevels = [];
 let appState = {
-    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, qualifiedReferrals: {} },
+    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0 },
     config: { adSlots: [], newTasks: {} }
 };
 let isBooted = false;
@@ -976,6 +1021,130 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════
+   ✅ AD CLAIM LOGIC (new)
+   ═══════════════════════════════════════════════════════ */
+function calculateAdTotalEarnings() {
+    // Total possible earnings = number of configured slots × daily limit × reward
+    const slots = appState.config.adSlots || [];
+    let totalSlots = 0;
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (slot && slot.network && slot.network !== 'none') totalSlots++;
+    }
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    const reward = Number(appState.config.adReward || 0.5);
+    return totalSlots * limit * reward;
+}
+function calculateAdEarnedSoFar() {
+    const slots = appState.config.adSlots || [];
+    let watchedCount = 0;
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot || !slot.network || slot.network === 'none') continue;
+        watchedCount += Number((appState.user.dailyAds || {})[i] || 0);
+    }
+    const reward = Number(appState.config.adReward || 0.5);
+    return watchedCount * reward;
+}
+function calculateAdRemaining() {
+    return Math.max(0, calculateAdTotalEarnings() - calculateAdEarnedSoFar());
+}
+function isAllDisplayAdsWatched() {
+    const slots = appState.config.adSlots || [];
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    let hasConfigured = false;
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot || !slot.network || slot.network === 'none') continue;
+        hasConfigured = true;
+        if (Number((appState.user.dailyAds || {})[i] || 0) < limit) return false;
+    }
+    return hasConfigured;
+}
+function updateAdClaimUI() {
+    const total = calculateAdTotalEarnings();
+    const earned = calculateAdEarnedSoFar();
+    const remaining = calculateAdRemaining();
+    const allWatched = isAllDisplayAdsWatched();
+    
+    // ✅ Show total possible earnings (not what's earned so far)
+    const adTotalEl = document.getElementById('adTotalEarnings');
+    if (adTotalEl) adTotalEl.textContent = total.toFixed(2);
+    
+    // Progress bar
+    let watchedCount = 0, totalPossible = 0;
+    const slots = appState.config.adSlots || [];
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot || !slot.network || slot.network === 'none') continue;
+        totalPossible += limit;
+        watchedCount += Number((appState.user.dailyAds || {})[i] || 0);
+    }
+    const progressText = document.getElementById('adProgressText');
+    const progressFill = document.getElementById('adProgressFill');
+    if (progressText) progressText.textContent = watchedCount + ' / ' + totalPossible + ' Watched';
+    if (progressFill) progressFill.style.width = (totalPossible > 0 ? (watchedCount / totalPossible) * 100 : 0) + '%';
+    
+    // Claim button
+    const btn = document.getElementById('adClaimBtn');
+    const btnText = document.getElementById('adClaimBtnText');
+    if (!btn) return;
+    if (allWatched) {
+        btn.disabled = false;
+        if (btnText) btnText.textContent = 'Claim ' + total.toFixed(2) + ' TK';
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span id="adClaimBtnText">Claim ' + total.toFixed(2) + ' TK</span>';
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All Ads</span>';
+    }
+}
+async function claimAdEarnings() {
+    if (!isOnline) { toast('No internet connection!'); return; }
+    if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন আগে!'); return; }
+    const total = calculateAdTotalEarnings();
+    if (total <= 0) { toast('❌ কোনো এড কনফিগার করা নেই'); return; }
+    
+    const btn = document.getElementById('adClaimBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
+    try {
+        const newBal = Number(appState.user.balance || 0) + total;
+        const newEarn = Number(appState.user.totalEarned || 0) + total;
+        const newClaimed = Number(appState.user.adClaimedTotal || 0) + total;
+        
+        // Add to adHistory
+        let adHist = appState.user.adHistory || {};
+        adHist['claim_' + Date.now()] = { slot: 'Claim', amount: total, timestamp: Date.now(), type: 'adclaim' };
+        const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
+        if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
+        
+        await db.ref('users/' + appState.user.id).update({
+            balance: newBal,
+            totalEarned: newEarn,
+            adClaimedTotal: newClaimed,
+            adHistory: adHist
+        });
+        appState.user.balance = newBal;
+        appState.user.totalEarned = newEarn;
+        appState.user.adClaimedTotal = newClaimed;
+        appState.user.adHistory = adHist;
+        
+        // ✅ Referrer commission on ad claim
+        const split = computeCommissionSplit(total);
+        if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
+        
+        await updateTextElements();
+        renderAds();
+        toast('✅ ' + total.toFixed(2) + ' টাকা সফলভাবে ক্লেইম হয়েছে!');
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    } catch (e) {
+        console.error(e);
+        toast('❌ ক্লেইম ব্যর্থ: ' + e.message);
+        updateAdClaimUI();
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
    ✅ REFERRAL TAB HELPERS
    ═══════════════════════════════════════════════════════ */
 function switchRefTab(tab) {
@@ -1004,10 +1173,8 @@ function updateRefTabCounts() {
 }
 
 function renderReferralList() {
-    // Update counts
     updateRefTabCounts();
 
-    // Total Referrals List
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
@@ -1023,7 +1190,6 @@ function renderReferralList() {
         totalContainer.innerHTML = html;
     }
 
-    // Qualified Referrals List
     const qualContainer = document.getElementById('myQualifiedReferralsList');
     if (allReferralDataCache.qualified.length === 0) {
         qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div>';
@@ -1036,7 +1202,6 @@ function renderReferralList() {
         qualContainer.innerHTML = html;
     }
 
-    // Referral Income Balance
     const ribEl = document.getElementById('refIncomeBalance');
     if (ribEl) ribEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
     updateRefClaimButton();
@@ -1719,19 +1884,7 @@ function setupUserSubmissionsListener() {
 }
 
 function isAllAdsCompleted() {
-    const slots = appState.config.adSlots || [];
-    if (slots.length === 0) return false;
-    const limit = Number(appState.config.dailyAdLimit || 10);
-    const dailyAds = appState.user.dailyAds || {};
-    let hasConfigured = false;
-    for (let i = 0; i < slots.length; i++) {
-        const slot = slots[i];
-        const configured = slot && slot.network && slot.network !== 'none';
-        if (!configured) continue;
-        hasConfigured = true;
-        if (Number(dailyAds[i] || 0) < limit) return false;
-    }
-    return hasConfigured;
+    return isAllDisplayAdsWatched();
 }
 async function startAdsResetCountdown() {
     if (appState.user.adsResetTime && appState.user.adsResetTime > Date.now()) return;
@@ -1757,17 +1910,24 @@ function formatTimeUntil(targetMs) {
     return String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's';
 }
 function updateCycleUI() {
-    const label = document.getElementById('cycleLabel');
-    const timer = document.getElementById('cycleResetTimer');
-    if (!label || !timer) return;
+    const compactEl = document.getElementById('adResetCompact');
+    const timeEl = document.getElementById('cycleResetTimer');
+    if (!compactEl || !timeEl) return;
     const resetTime = Number(appState.user.adsResetTime || 0);
     if (resetTime > 0) {
         const remaining = resetTime - Date.now();
-        if (remaining <= 0) { label.textContent = '🔄 Resetting...'; timer.textContent = '00h 00m 00s'; forceCycleReset(); return; }
-        label.textContent = '⏳ Next Reset In'; timer.textContent = formatTimeUntil(resetTime); return;
+        if (remaining <= 0) { timeEl.textContent = 'Resetting...'; compactEl.classList.remove('expired'); forceCycleReset(); return; }
+        timeEl.textContent = formatTimeUntil(resetTime);
+        compactEl.classList.remove('expired');
+        return;
     }
-    if (isAllAdsCompleted()) { startAdsResetCountdown(); return; }
-    label.textContent = '⏸️ Not Started'; timer.textContent = 'Watch All Ads';
+    if (isAllDisplayAdsWatched()) { 
+        startAdsResetCountdown(); 
+        return; 
+    }
+    // Show short "Watch All" text
+    timeEl.textContent = 'Watch All';
+    compactEl.classList.add('expired');
 }
 function getDeviceId() {
     let deviceId = localStorage.getItem('nexearn_device_id');
@@ -1911,9 +2071,6 @@ async function claimDailyBonus() {
     }
 }
 
-// ═══════════════════════════════════════════════════════
-// ✅ UPDATED: creditReferrerCommission now adds to referralBalance
-// ═══════════════════════════════════════════════════════
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
@@ -1922,21 +2079,11 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
         
-        // ✅ Check if referrer's balance is >= 20 (qualified check based on referrer's own balance)
-        // Actually, the rule is: referrer gets commission only when the REFERRED USER has >= 20 TK
-        // So we need to check: if the current user (appState.user) has balance >= 20, then commission goes to referrer
-        
-        // The rule: "কমিশন যতক্ষণ না ওই রেফার ইউজার ২০ টাকা ব্যালেন্স হবে ততক্ষণ কমিশন পাবোনা"
-        // Translation: "You won't get commission until that referred user's balance is 20 TK"
-        // So: check appState.user.balance (the referred user) >= 20
-        
         const referredUserBalance = Number(appState.user.balance || 0);
         if (referredUserBalance < MIN_REFERRAL_BALANCE) {
-            // Don't credit commission yet - referred user needs 20+ TK
             return false;
         }
         
-        // ✅ Add commission to referralBalance (not main balance)
         const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
@@ -1954,7 +2101,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
         
-        // ✅ Update referralBalance, totalCommission, commissionHistory (NOT balance)
         await db.ref('users/' + referrerId).update({ 
             referralBalance: newRefBal, 
             totalCommission: newTotalComm, 
@@ -2129,24 +2275,16 @@ async function watchAd(i) {
         const requiredTime = MIN_AD_WATCH_TIME || 15;
         if (!success) throw new Error('Ad not completed');
         if (watchDuration < requiredTime * 0.6) { showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's.'); slotLocks[i] = false; isAdWatching = false; return; }
-        const baseReward = Number(appState.config.adReward || 0.5);
-        const split = computeCommissionSplit(baseReward);
-        const userReward = split.userReward;
-        const referrerCommission = split.referrerCommission;
-        let newBal = (appState.user.balance || 0) + userReward;
-        let newEarn = (appState.user.totalEarned || 0) + userReward;
+        
+        // ✅ Do NOT add reward directly - just track view count
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
-        let adHist = appState.user.adHistory || {};
-        const histId = 'ad_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-        adHist[histId] = { slot: i + 1, amount: userReward, timestamp: Date.now(), type: 'ad' };
-        const histKeys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp || 0) - (adHist[a].timestamp || 0));
-        if (histKeys.length > 100) histKeys.slice(100).forEach(k => delete adHist[k]);
-        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, dailyAds: newAds, adHistory: adHist, lastActive: todayStr() });
-        appState.user.balance = newBal; appState.user.totalEarned = newEarn; appState.user.dailyAds = newAds; appState.user.adHistory = adHist;
-        if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Ad Slot ' + (i+1));
-        toast('✅ Success! +' + userReward.toFixed(2) + ' TK earned!');
-        setTimeout(() => { renderAds(); if (isAllAdsCompleted()) startAdsResetCountdown(); else updateCycleUI(); }, 500);
+        
+        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds, lastActive: todayStr() });
+        appState.user.dailyAds = newAds;
+        
+        toast('✅ Ad watched! ' + (Number((appState.config.dailyAdLimit||10)) - newAds[i]) + ' more to go for Slot ' + (i+1));
+        setTimeout(() => { renderAds(); updateAdClaimUI(); if (isAllDisplayAdsWatched()) startAdsResetCountdown(); else updateCycleUI(); }, 500);
     } catch (e) {
         if (e.message === 'Ad Closed' || e.message === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
         else showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
@@ -2258,23 +2396,25 @@ function checkBan() {
         return true;
     } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
 }
+
+// ✅ UPDATED renderAds: only show 2 slots, NO per-ad reward text
 function renderAds() {
     const el = document.getElementById('ad-area');
     if (!el) return;
     el.innerHTML = '';
     const slots = appState.config.adSlots || [];
-    const totalSlots = slots.length > 0 ? slots.length : 4;
     const limit = Number(appState.config.dailyAdLimit || 10);
-    const reward = Number(appState.config.adReward || 0.5);
     const sym = appState.config.currencySymbol || 'TK';
-    for (let i = 0; i < totalSlots; i++) {
+    
+    // ✅ Only show 2 slots (AD_DISPLAY_SLOTS)
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i] || { network: 'none', id: '' };
         const configured = slot && slot.network && slot.network !== 'none';
         const done = (appState.user.dailyAds && appState.user.dailyAds[i]) ? appState.user.dailyAds[i] : 0;
         const max = done >= limit;
         const cardClass = !configured ? 'not-set disabled' : (max ? 'disabled' : '');
-        const extraClass = `slot-${(i % 4) + 1}`;
-        const icon = (i === 0 ? 'fa-play' : i === 1 ? 'fa-circle-play' : i === 2 ? 'fa-bolt' : 'fa-gem');
+        const extraClass = `slot-${(i % 2) + 1}`;
+        const icon = (i === 0 ? 'fa-play' : 'fa-circle-play');
         const clickAttr = (!configured || max) ? '' : `onclick="startAdWatch(${i})"`;
         const cursorStyle = (!configured || max) ? '' : 'cursor:pointer;';
         el.innerHTML += `
@@ -2283,12 +2423,12 @@ function renderAds() {
                 <div class="ad-inner">
                     <i class="fas ${icon}"></i>
                     <h4>Ad Slot ${i+1}</h4>
-                    <div class="reward-pill"><i class="fas fa-coins"></i> +${reward} ${sym}</div>
                     ${configured ? `<div class="progress-pill">${done}/${limit} Watched</div>` : '<div class="progress-pill">Not Configured</div>'}
                 </div>
             </div>
         `;
     }
+    updateAdClaimUI();
 }
 
 function getTaskTypeIcon(type) {
@@ -2845,8 +2985,9 @@ function loadAdHistory() {
     let html = '';
     items.slice(0, 50).forEach(it => {
         const isBonus = it.type === 'bonus';
-        const icon = isBonus ? 'fa-gift' : 'fa-play-circle';
-        const title = isBonus ? 'Daily Bonus' : 'Ad Slot ' + it.slot;
+        const isClaim = it.type === 'adclaim';
+        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : 'fa-play-circle');
+        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : 'Ad Slot ' + it.slot);
         html += '<div class="history-item"><div class="history-item-left" style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ' + icon + '"></i></div><div class="history-info"><h5>' + title + '</h5><p>' + shortDate(it.timestamp) + '</p></div></div><div class="history-amount">+' + Number(it.amount || 0).toFixed(2) + ' TK</div></div>';
     });
     container.innerHTML = html;
@@ -2872,22 +3013,28 @@ async function updateTextElements() {
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
     const infoRateEl = document.getElementById('commInfoRate');
     if (infoRateEl) infoRateEl.innerText = REF_COMMISSION_RATE + '%';
+    
+    // ✅ Dynamically populate withdraw methods from config
     const wdSel = document.getElementById('wd-method');
     let currentVal = wdSel.value;
     wdSel.innerHTML = '<option value="">Select Method</option>';
-    if (appState.config.paymentMethods) { appState.config.paymentMethods.forEach(m => { wdSel.innerHTML += '<option value="' + m + '" ' + (currentVal === m ? 'selected' : '') + '>' + m + '</option>'; }); }
-    if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) { withdrawLevels = appState.config.withdrawLevels; }
-    else { withdrawLevels = [
-        { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' },
-        { level: 2, requiredRefs: 7, fee: 4, minAmount: 10, maxAmount: 200, time: '30 Min-1 Hours' },
-        { level: 3, requiredRefs: 7, fee: 3, minAmount: 10, maxAmount: 300, time: '30 Min-1 Hours' },
-        { level: 4, requiredRefs: 7, fee: 2, minAmount: 10, maxAmount: 400, time: '30 Min-1 Hours' },
-        { level: 5, requiredRefs: 7, fee: 1, minAmount: 10, maxAmount: 500, time: '30 Min-1 Hours' }
-    ]; }
+    if (appState.config.paymentMethods && Array.isArray(appState.config.paymentMethods)) {
+        appState.config.paymentMethods.forEach(m => {
+            if (m && String(m).trim()) {
+                wdSel.innerHTML += '<option value="' + esc(m) + '" ' + (currentVal === m ? 'selected' : '') + '>' + esc(m) + '</option>';
+            }
+        });
+    }
+    
+    // ✅ Dynamically update withdraw levels from config
+    if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) {
+        withdrawLevels = appState.config.withdrawLevels;
+    }
     await calculateValidReferrals();
     updateWithdrawInfo();
     updateRefClaimButton();
     updateRefTabCounts();
+    updateAdClaimUI();
 }
 
 function setLoading(isLoading) {
@@ -3142,7 +3289,7 @@ window.onload = () => {
                 adsResetTime: 0, dailyBonusDate: '',
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
                 withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
-                referralBalance: 0
+                referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0
             };
             await userRef.set(appState.user);
 
@@ -3187,6 +3334,7 @@ window.onload = () => {
                 if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
                 if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
                 if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
+                if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
