@@ -9,10 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<!-- ═══════════════════════════════════════════════════════════
-     MONETAG HIGH-CPM SDK — DIRECT LOAD (Zone: 11878844)
-     ═══════════════════════════════════════════════════════════ -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 
 <style>
@@ -66,13 +62,11 @@
     .stat-box p{font-size:.75rem;color:rgba(59,43,107,.8);font-weight:600;}
     .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
     .sec-head i{color:var(--primary);font-size:1.2rem;}
-    
     .ad-reset-compact{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:6px 12px;border-radius:20px;font-size:0.68rem;font-weight:800;display:flex;align-items:center;gap:6px;box-shadow:0 6px 14px rgba(108,92,231,.35);font-variant-numeric:tabular-nums;}
     .ad-reset-compact i{font-size:0.7rem;opacity:0.9;}
     .ad-reset-compact.expired{background:linear-gradient(135deg,#00b894,#00cec9);}
     .ad-reset-compact .rst-label{opacity:0.85;font-size:0.6rem;letter-spacing:0.3px;}
     .ad-reset-compact .rst-time{font-weight:900;font-size:0.72rem;}
-    
     .ad-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;}
     .ad-card{position:relative;padding:3px;border-radius:22px;background:conic-gradient(from 0deg,#ff9a3d,#ff5e7a,#4f8cff,#38d6ff,#ff9a3d);animation:spinBorder 6s linear infinite;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.08);height:135px;}
     @keyframes spinBorder{0%{background-position:0 0;}100%{background-position:360px 0;}}
@@ -84,7 +78,6 @@
     .slot-2 .ad-inner{background:linear-gradient(145deg,#edf5ff,#dde6ff);}.slot-2 .ad-inner i{color:#4f8cff;}
     .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
     .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
-    
     .ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(0,184,148,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
     .ad-claim-box::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;top:-50px;right:-30px;}
     .ad-claim-box::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.1);border-radius:50%;bottom:-40px;left:-20px;}
@@ -96,7 +89,6 @@
     .ad-claim-btn:active{transform:scale(0.96);}
     .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
     .ad-claim-btn:disabled:active{transform:none;}
-    
     .claim-window-timer{display:none;margin:0 20px 10px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:14px;padding:10px 14px;position:relative;overflow:hidden;box-shadow:0 6px 16px rgba(245,158,11,.25);}
     .claim-window-timer.active{display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeIn .3s ease;}
     .claim-window-timer.expired{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#ef4444;box-shadow:0 6px 16px rgba(239,68,68,.25);}
@@ -105,43 +97,15 @@
     .claim-window-timer .cwt-left i{font-size:0.95rem;animation:pulseText 1.5s ease-in-out infinite;}
     .claim-window-timer .cwt-time{font-size:1.15rem;font-weight:900;color:#b45309;font-variant-numeric:tabular-nums;letter-spacing:1px;text-shadow:0 2px 6px rgba(180,83,9,.2);}
     .claim-window-timer.expired .cwt-time{color:#dc2626;animation:pulseText 1.2s ease-in-out infinite;}
-    
     .ad-progress-wrap{margin:0 20px 12px;background:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.04);}
     .ad-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.78rem;font-weight:800;}
     .ad-progress-header .aph-left{color:#334155;}
     .ad-progress-header .aph-right{color:#00b894;}
     .ad-progress-bar{height:8px;background:#f1f5f9;border-radius:20px;overflow:hidden;position:relative;}
     .ad-progress-bar-fill{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .5s ease;box-shadow:0 0 12px rgba(0,206,201,.4);}
-    
-    /* ═══════════════════════════════════════════════════════
-       ✅ EXTRA REWARDS — Monetag Pop-up Ad Section
-       ═══════════════════════════════════════════════════════ */
-    .extra-rewards-card{
-        margin:16px 20px 20px;
-        background:linear-gradient(135deg,#f39c12,#e84393);
-        color:#fff;
-        padding:18px 20px;
-        border-radius:18px;
-        box-shadow:0 14px 32px rgba(232,67,147,.4);
-        position:relative;
-        overflow:hidden;
-    }
-    .extra-rewards-card::before{
-        content:'';
-        position:absolute;
-        width:150px;height:150px;
-        background:rgba(255,255,255,.15);
-        border-radius:50%;
-        top:-70px;right:-50px;
-    }
-    .extra-rewards-card::after{
-        content:'';
-        position:absolute;
-        width:90px;height:90px;
-        background:rgba(255,255,255,.1);
-        border-radius:50%;
-        bottom:-40px;left:-20px;
-    }
+    .extra-rewards-card{margin:16px 20px 20px;background:linear-gradient(135deg,#f39c12,#e84393);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(232,67,147,.4);position:relative;overflow:hidden;}
+    .extra-rewards-card::before{content:'';position:absolute;width:150px;height:150px;background:rgba(255,255,255,.15);border-radius:50%;top:-70px;right:-50px;}
+    .extra-rewards-card::after{content:'';position:absolute;width:90px;height:90px;background:rgba(255,255,255,.1);border-radius:50%;bottom:-40px;left:-20px;}
     .er-header{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;margin-bottom:8px;}
     .er-label{font-size:0.7rem;font-weight:900;letter-spacing:1.3px;text-transform:uppercase;opacity:0.95;display:flex;align-items:center;gap:6px;}
     .er-count{background:rgba(255,255,255,.25);padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:900;letter-spacing:0.3px;}
@@ -155,7 +119,6 @@
     .extra-rewards-btn:disabled{background:rgba(255,255,255,.3);color:rgba(255,255,255,.8);cursor:not-allowed;border:1px dashed rgba(255,255,255,.5);box-shadow:none;}
     .extra-rewards-btn i{font-size:1.05rem;}
     .er-loading{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin 0.8s linear infinite;}
-    
     .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
     .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
     @keyframes taskBorderShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
@@ -274,14 +237,7 @@
     .bonus-btn:disabled{opacity:0.7;cursor:not-allowed;}
     .bonus-claim{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
-
-    .admin-slider{
-        position:fixed;top:-160px;left:50%;transform:translateX(-50%);width:94%;max-width:460px;z-index:1500;
-        transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none;
-        background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);
-        border-radius:20px;padding:13px 15px;display:flex;align-items:center;gap:12px;
-        box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);overflow:hidden;
-    }
+    .admin-slider{position:fixed;top:-160px;left:50%;transform:translateX(-50%);width:94%;max-width:460px;z-index:1500;transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);border-radius:20px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);overflow:hidden;}
     .admin-slider.show{ top:14px; pointer-events:auto; }
     .admin-slider::before{content:'';position:absolute;inset:-2px;background:conic-gradient(from 90deg,#6C5CE7,#A29BFE,#00cec9,#f6b04a,#e84393,#6C5CE7);opacity:.18;animation:ring 6s linear infinite;pointer-events:none;}
     .as-icon{position:relative;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f6b04a,#e84393);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;box-shadow:0 8px 20px rgba(232,67,147,.5);flex-shrink:0;}
@@ -290,7 +246,6 @@
     .as-sub{color:rgba(255,255,255,.72);font-size:0.7rem;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .as-btn{position:relative;z-index:1;background:linear-gradient(135deg,#f6b04a,#e84393);color:#fff;border:none;padding:9px 15px;border-radius:12px;font-weight:800;font-size:0.76rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 8px 20px rgba(232,67,147,.45);font-family:inherit;white-space:nowrap;flex-shrink:0;transition:transform .15s;}
     .as-btn:active{transform:scale(0.95);}
-
     #joinModal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;}
     #joinModal.active{display:flex;}
     #joinModal .box{background:var(--surface);max-width:400px;width:100%;padding:32px 24px;border-radius:24px;text-align:center;border:1px solid rgba(108,92,231,0.1);box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:pop 0.3s ease-out;max-height:90vh;overflow-y:auto;}
@@ -323,14 +278,12 @@
     #adErrorPopup .box .icon{font-size:48px;color:var(--danger);margin-bottom:12px;}
     #adErrorPopup .box h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;}
     #adErrorPopup .box p{font-size:14px;color:var(--text-light);line-height:1.6;margin-bottom:16px;}
-
     #adLoadingOverlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;flex-direction:column;}
     #adLoadingOverlay.active{display:flex;}
     .ad-loading-card{background:linear-gradient(145deg,#1a1f2e,#131724);border-radius:24px;padding:28px 24px;text-align:center;max-width:320px;width:100%;border:1px solid rgba(255,255,255,0.08);box-shadow:0 30px 80px rgba(0,0,0,0.6);}
     .ad-loading-spinner{width:56px;height:56px;border-radius:50%;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--primary);border-right-color:var(--secondary);margin:0 auto 16px;animation:spin 1s linear infinite;}
     .ad-loading-title{color:#fff;font-weight:800;font-size:1rem;margin-bottom:6px;}
     .ad-loading-sub{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:600;}
-
     .ref-user-item{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#f9f9ff,#f2f4ff);padding:12px 15px;border-radius:14px;margin-bottom:10px;border:1px solid rgba(108,92,231,0.1);}
     .ref-user-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
     .ref-user-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;}
@@ -442,7 +395,6 @@
     .th-resubmit-btn{margin-top:12px;width:100%;padding:11px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:0.85rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(108,92,231,.3);}
     .th-resubmit-btn:active{transform:scale(0.98);}
     .th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
-
     .dots-btn{position:relative;}
     .menu-popup{display:none;position:fixed;top:70px;right:16px;z-index:11000;width:200px;background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.04);overflow:hidden;animation:menuPop .22s ease-out;}
     .menu-popup.show{display:block;}
@@ -458,7 +410,6 @@
     .menu-item i.mi-support{background:linear-gradient(135deg,#10b981,#34d399);}
     .menu-item .mi-text{flex:1;min-width:0;}
     .menu-item .mi-text small{display:block;font-size:.68rem;font-weight:600;color:#94a3b8;margin-top:2px;}
-
     .legal-modal-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(5,6,10,.88);backdrop-filter:blur(10px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
     .legal-modal-overlay.active{display:flex;}
     .legal-modal{background:#fff;width:100%;max-width:680px;border-radius:22px;box-shadow:0 40px 100px rgba(0,0,0,.7);margin:auto;overflow:hidden;animation:legalPop .35s;}
@@ -489,12 +440,7 @@
     .legal-body a{color:#6366f1;font-weight:700;text-decoration:none;word-break:break-all;}
     .legal-body a:hover{text-decoration:underline;}
     .legal-footer{padding:14px 26px 20px;text-align:center;color:#94a3b8;font-size:.7rem;font-weight:700;border-top:1px solid #f1f5f9;}
-    @media (max-width:400px){
-        .legal-body{padding:20px 18px 24px;}
-        .legal-header{padding:18px 18px;}
-        .menu-popup{width:190px;}
-    }
-
+    @media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
     .ref-inner-tabs{display:flex;gap:6px;padding:0 0 14px;margin-bottom:10px;border-bottom:2px solid #f1f5f9;}
     .ref-inner-tab{flex:1;padding:10px 8px;border-radius:12px;background:#f8fafc;color:#6b7280;font-weight:800;font-size:0.76rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;font-family:inherit;position:relative;}
     .ref-inner-tab .tab-count{font-size:0.68rem;font-weight:800;background:rgba(108,92,231,0.15);color:var(--primary);padding:2px 8px;border-radius:20px;line-height:1.2;}
@@ -504,7 +450,6 @@
     .ref-inner-tab.tab-income.active{background:linear-gradient(135deg,#f39c12,#fbbf24);box-shadow:0 8px 20px rgba(243,156,18,.28);}
     .ref-inner-pane{display:none;}
     .ref-inner-pane.active{display:block;animation:fadeIn .25s ease;}
-
     .ref-income-balance-card{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;padding:18px 20px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(243,156,18,.35);}
     .ref-income-balance-card::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.18);border-radius:50%;top:-50px;right:-40px;}
     .ref-income-balance-card::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.12);border-radius:50%;bottom:-40px;left:-20px;}
@@ -519,7 +464,6 @@
     .ref-claim-note.success{color:#065f46;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-left-color:#10b981;}
     .ref-qualified-info{background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:12px 14px;border-radius:12px;margin-bottom:14px;border-left:3px solid #f97316;font-size:.76rem;font-weight:700;color:#9a3412;line-height:1.5;}
     .ref-qualified-info i{color:#ea580c;margin-right:5px;}
-
     .level-progress-card{background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);color:#fff;padding:16px 18px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(76,29,149,.35);}
     .level-progress-card::before{content:'';position:absolute;width:140px;height:140px;background:rgba(255,255,255,.1);border-radius:50%;top:-60px;right:-40px;}
     .level-progress-card .lpc-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1;}
@@ -533,61 +477,33 @@
 </head>
 <body>
 
-<!-- ADMIN SLIDER -->
 <div id="adminSlider" class="admin-slider">
     <div class="as-icon"><i class="fas fa-crown"></i></div>
-    <div class="as-content">
-        <div class="as-title">🎉 এডমিন হতে চান?</div>
-        <div class="as-sub">Apply now to become an admin</div>
-    </div>
-    <button class="as-btn" onclick="handleBecomeAdmin()">
-        Apply <i class="fas fa-arrow-right"></i>
-    </button>
+    <div class="as-content"><div class="as-title">🎉 এডমিন হতে চান?</div><div class="as-sub">Apply now to become an admin</div></div>
+    <button class="as-btn" onclick="handleBecomeAdmin()">Apply <i class="fas fa-arrow-right"></i></button>
 </div>
 
 <div id="loader" class="loader-overlay">
     <div class="loader-bg-orb orb1"></div><div class="loader-bg-orb orb2"></div><div class="loader-bg-orb orb3"></div>
     <div class="loader-card">
         <div class="loader-core"><div class="core-spin"></div><div class="core-spin2"></div><div class="core-ring"></div><div class="core-logo"><i class="fas fa-bolt"></i></div></div>
-        <div class="loader-title">Loading...</div>
-        <div class="loader-sub">আপনার ডেটা প্রস্তুত হচ্ছে… একটু অপেক্ষা করুন</div>
+        <div class="loader-title">Loading...</div><div class="loader-sub">আপনার ডেটা প্রস্তুত হচ্ছে…</div>
         <div class="loader-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
     </div>
 </div>
 
 <div id="toast" class="toast">Alert</div>
+<div id="adLoadingOverlay"><div class="ad-loading-card"><div class="ad-loading-spinner"></div><div class="ad-loading-title">Opening Ad…</div><div class="ad-loading-sub">Please wait, do not close</div></div></div>
 
-<div id="adLoadingOverlay">
-    <div class="ad-loading-card">
-        <div class="ad-loading-spinner"></div>
-        <div class="ad-loading-title">Opening Ad…</div>
-        <div class="ad-loading-sub">Please wait, do not close</div>
-    </div>
-</div>
-
-<!-- THREE-DOT MENU -->
 <div id="menuPopup" class="menu-popup">
-    <div class="menu-item" onclick="openLegalModal('privacy'); closeMenuPopup();">
-        <i class="mi-privacy fas fa-shield-halved"></i>
-        <div class="mi-text">Privacy Policy<small>আমাদের ডেটা নীতি</small></div>
-    </div>
-    <div class="menu-item" onclick="openLegalModal('disclaimer'); closeMenuPopup();">
-        <i class="mi-disclaimer fas fa-triangle-exclamation"></i>
-        <div class="mi-text">Disclaimer<small>দাবিত্যাগ ও শর্তাবলী</small></div>
-    </div>
-    <div class="menu-item" onclick="openSupport(); closeMenuPopup();">
-        <i class="mi-support fas fa-headset"></i>
-        <div class="mi-text">Support<small>সাপোর্টে যোগাযোগ</small></div>
-    </div>
+    <div class="menu-item" onclick="openLegalModal('privacy'); closeMenuPopup();"><i class="mi-privacy fas fa-shield-halved"></i><div class="mi-text">Privacy Policy<small>আমাদের ডেটা নীতি</small></div></div>
+    <div class="menu-item" onclick="openLegalModal('disclaimer'); closeMenuPopup();"><i class="mi-disclaimer fas fa-triangle-exclamation"></i><div class="mi-text">Disclaimer<small>দাবিত্যাগ</small></div></div>
+    <div class="menu-item" onclick="openSupport(); closeMenuPopup();"><i class="mi-support fas fa-headset"></i><div class="mi-text">Support<small>সাপোর্ট</small></div></div>
 </div>
 
-<!-- LEGAL MODAL -->
 <div class="legal-modal-overlay" id="legalModal">
   <div class="legal-modal">
-    <div class="legal-header">
-      <h2 id="legalModalTitle"><i class="fas fa-shield-halved"></i> Privacy Policy</h2>
-      <button class="legal-close" onclick="closeLegalModal()"><i class="fas fa-times"></i></button>
-    </div>
+    <div class="legal-header"><h2 id="legalModalTitle"><i class="fas fa-shield-halved"></i> Privacy Policy</h2><button class="legal-close" onclick="closeLegalModal()"><i class="fas fa-times"></i></button></div>
     <div class="legal-body" id="legalModalBody"></div>
     <div class="legal-footer">© 2025 Earn Wallet / NexEarn. All rights reserved.</div>
   </div>
@@ -595,11 +511,9 @@
 
 <div id="adErrorPopup"><div class="box"><div class="icon"><i class="fas fa-exclamation-triangle"></i></div><h3 id="adErrorTitle">⚠️ Ad Not Completed!</h3><p id="adErrorMsg">You must watch the full ad to earn the reward.</p><button class="btn-main" onclick="closeAdError()" style="max-width:200px;margin:0 auto;padding:12px;font-size:0.9rem;">I Understand</button></div></div>
 
-<div id="maintenanceOverlay"><div class="icon"><i class="fas fa-tools"></i></div><h2>🔧 Under Maintenance</h2><p id="maintenanceMsg">We're currently updating our system. Please check back later.</p><div class="time" id="maintenanceTime">⏳ Estimated time: 30 minutes</div></div>
-
-<div id="bannedOverlay"><div class="icon"><i class="fas fa-ban"></i></div><h2>🚫 Account Banned</h2><p id="banReason">Your account has been suspended.</p><button class="btn-main" onclick="openSupport()" style="max-width:280px;margin:0 auto;"><i class="fas fa-headset"></i> Contact Support</button></div>
-
-<div id="offlineOverlay"><div class="icon"><i class="fas fa-wifi-slash"></i></div><h2>No Internet Connection</h2><p>Please check your internet connection and try again.</p></div>
+<div id="maintenanceOverlay"><div class="icon"><i class="fas fa-tools"></i></div><h2>🔧 Under Maintenance</h2><p id="maintenanceMsg">We're updating.</p><div class="time" id="maintenanceTime">⏳ 30 minutes</div></div>
+<div id="bannedOverlay"><div class="icon"><i class="fas fa-ban"></i></div><h2>🚫 Account Banned</h2><p id="banReason">Suspended.</p><button class="btn-main" onclick="openSupport()" style="max-width:280px;margin:0 auto;"><i class="fas fa-headset"></i> Contact Support</button></div>
+<div id="offlineOverlay"><div class="icon"><i class="fas fa-wifi-slash"></i></div><h2>No Internet Connection</h2><p>Check your internet and try again.</p></div>
 
 <div id="joinModal"><div class="box"><div class="icon">📢</div><h2>Join Our Channels</h2><p>Please join all Telegram channels below to access the dashboard.</p><div id="channelLinks"></div><div class="verify-status" id="verifyStatus"></div></div></div>
 
@@ -607,7 +521,7 @@
     <div class="bonus-card"><div class="bonus-glow"></div><div class="bonus-body">
         <div class="bonus-badge"><i class="fas fa-gift"></i> DAILY BONUS</div>
         <div class="bonus-title">আজকের বোনাস নিন!</div>
-        <div class="bonus-sub" id="bonusSubText">বোনাস নিতে হলে আপনাকে প্রথমে ২টি ছোট অ্যাড সম্পূর্ণ দেখতে হবে।</div>
+        <div class="bonus-sub" id="bonusSubText">বোনাস নিতে হলে ২টি ছোট অ্যাড দেখতে হবে।</div>
         <div class="bonus-amt"><span id="bonusAmt">20</span> <span class="currency">টাকা</span></div>
         <div class="bonus-actions">
             <button id="btnClaimBonus" class="bonus-btn bonus-claim" onclick="claimDailyBonus()"><i class="fas fa-play-circle"></i> Watch Ads & Claim</button>
@@ -618,123 +532,72 @@
 
 <div id="taskSubmitModal">
     <div class="task-shell">
-        <div class="task-head">
-            <span class="task-head-icon" id="taskHeadIcon">📋</span>
-            <h2 id="taskSubmitTitle">Task</h2>
-            <p id="taskSubmitCategory">Category</p>
-        </div>
-        <div class="task-info-strip">
-            <div class="reward-box"><i class="fas fa-coins"></i><strong id="taskSubmitReward">5 TK</strong></div>
-            <span class="cat-box" id="taskSubmitTimeLeft"></span>
-        </div>
+        <div class="task-head"><span class="task-head-icon" id="taskHeadIcon">📋</span><h2 id="taskSubmitTitle">Task</h2><p id="taskSubmitCategory">Category</p></div>
+        <div class="task-info-strip"><div class="reward-box"><i class="fas fa-coins"></i><strong id="taskSubmitReward">5 TK</strong></div><span class="cat-box" id="taskSubmitTimeLeft"></span></div>
         <div class="task-desc-box" id="taskSubmitDesc"></div>
         <div id="taskStatusBannerWrap" style="padding:14px 18px 0;"></div>
         <div class="task-content" id="taskContentArea"></div>
-        <div class="task-actions">
-            <button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button>
-            <button class="task-btn task-btn-submit" id="taskSubmitActionBtn" onclick="submitGenericTask()"><i class="fas fa-paper-plane"></i> জমা দিন</button>
-        </div>
+        <div class="task-actions"><button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button><button class="task-btn task-btn-submit" id="taskSubmitActionBtn" onclick="submitGenericTask()"><i class="fas fa-paper-plane"></i> জমা দিন</button></div>
     </div>
 </div>
 
 <div id="app">
     <div class="header"><div class="top-bar">
         <div class="user-pill"><img id="u-img" src="https://via.placeholder.com/45" /><div class="user-info"><h3 id="u-name">...</h3><p id="u-id">...</p></div></div>
-        <div class="header-right-btns">
-            <button class="support-btn" onclick="openSupport()"><i class="fas fa-headset"></i></button>
-            <button class="dots-btn" onclick="toggleMenuPopup(event)"><i class="fas fa-ellipsis-vertical"></i></button>
-        </div>
+        <div class="header-right-btns"><button class="support-btn" onclick="openSupport()"><i class="fas fa-headset"></i></button><button class="dots-btn" onclick="toggleMenuPopup(event)"><i class="fas fa-ellipsis-vertical"></i></button></div>
     </div></div>
 
     <div class="balance-card">
         <div class="bal-title">Total Balance <span class="offline-indicator" id="offlineIndicator"><i class="fas fa-wifi-slash"></i> Offline</span></div>
         <div class="bal-amt"><span id="u-bal">0.00</span> <span class="currency">টাকা</span></div>
-        <div class="stats">
-            <div class="stat-box"><h4 id="u-earn">0.00</h4><p>Earned</p></div>
-            <div class="stat-box"><h4 id="u-ref">0</h4><p>Referrals</p></div>
-        </div>
+        <div class="stats"><div class="stat-box"><h4 id="u-earn">0.00</h4><p>Earned</p></div><div class="stat-box"><h4 id="u-ref">0</h4><p>Referrals</p></div></div>
     </div>
 
     <div id="page-home" class="page-section active">
-        <!-- ✅ EXTRA REWARDS — Monetag Pop-up Ad (Admin Controlled) -->
         <div id="extraRewardsCard" class="extra-rewards-card" style="display:none;">
-            <div class="er-header">
-                <div class="er-label"><i class="fas fa-bolt"></i> EXTRA REWARDS</div>
-                <div class="er-count" id="erCount">0/0</div>
-            </div>
+            <div class="er-header"><div class="er-label"><i class="fas fa-bolt"></i> EXTRA REWARDS</div><div class="er-count" id="erCount">0/0</div></div>
             <div class="er-title" id="erTitle">Pop-up Ad দেখে আয় করুন</div>
             <div class="er-amt"><span id="erAmount">0.00</span> <small>TK / view</small></div>
-            <div class="er-info">
-                <i class="fas fa-info-circle"></i>
-                <span id="erInfoText">Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।</span>
-            </div>
-            <button class="extra-rewards-btn" id="erBtn" onclick="watchExtraRewardAd()">
-                <i class="fas fa-play-circle"></i>
-                <span id="erBtnText">Watch Ad & Earn</span>
-            </button>
+            <div class="er-info"><i class="fas fa-info-circle"></i><span id="erInfoText">Pop-up Ad দেখলেই রিওয়ার্ড।</span></div>
+            <button class="extra-rewards-btn" id="erBtn" onclick="watchExtraRewardAd()"><i class="fas fa-play-circle"></i><span id="erBtnText">Watch Ad & Earn</span></button>
         </div>
 
         <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
         
-        <div class="sec-head">
-            <i class="fas fa-play-circle"></i> Daily Ads
-            <div class="ad-reset-compact" id="adResetCompact">
-                <i class="fas fa-clock"></i>
-                <div>
-                    <div class="rst-label">RESET IN</div>
-                    <div class="rst-time" id="cycleResetTimer">Watch All</div>
-                </div>
-            </div>
+        <div class="sec-head"><i class="fas fa-play-circle"></i> Daily Ads
+            <div class="ad-reset-compact" id="adResetCompact"><i class="fas fa-clock"></i><div><div class="rst-label">RESET IN</div><div class="rst-time" id="cycleResetTimer">Watch All</div></div></div>
         </div>
         
         <div id="ad-area" class="ad-grid"></div>
         
         <div class="ad-progress-wrap">
-            <div class="ad-progress-header">
-                <span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span>
-                <span class="aph-right" id="adProgressText">0 / 0 Watched</span>
-            </div>
+            <div class="ad-progress-header"><span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span><span class="aph-right" id="adProgressText">0 / 0 Watched</span></div>
             <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
         </div>
         
-        <div class="claim-window-timer" id="claimWindowTimer">
-            <div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div>
-            <div class="cwt-time" id="cwtTime">01:00:00</div>
-        </div>
+        <div class="claim-window-timer" id="claimWindowTimer"><div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div><div class="cwt-time" id="cwtTime">01:00:00</div></div>
         
         <div class="ad-claim-box">
-            <div class="ac-left">
-                <div class="ac-label">💰 Total Ad Earnings</div>
-                <div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>টাকা</small></div>
-            </div>
-            <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled>
-                <i class="fas fa-lock"></i> <span id="adClaimBtnText">All Ads Must be Watched</span>
-            </button>
+            <div class="ac-left"><div class="ac-label">💰 Total Ad Earnings</div><div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>টাকা</small></div></div>
+            <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled><i class="fas fa-lock"></i> <span id="adClaimBtnText">All Ads Must be Watched</span></button>
         </div>
     </div>
 
     <div id="page-tasks" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-tasks"></i> Tasks <span id="taskCountBadge" class="task-count-badge">0</span></div>
-        <div class="tasks-inner-tabs">
-            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available</button>
-            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
-        </div>
+        <div class="tasks-inner-tabs"><button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available</button><button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button></div>
         <div id="tasksPaneAvailable" class="tasks-inner-pane active"><div id="task-area" class="task-list"></div></div>
         <div id="tasksPaneHistory" class="tasks-inner-pane"><div id="taskHistoryArea"></div></div>
     </div>
 
     <div id="page-referral" class="page-section">
         <div style="padding: 0 20px 15px;">
-            <div class="commission-hero">
-                <div class="comm-label">💰 Total Commission Earned</div>
-                <div class="comm-amt"><span id="commTotalAmt">0.00</span> <span class="currency">টাকা</span></div>
-                <div class="comm-sub">প্রতি রেফারেল থেকে <b id="commRateTxt">2%</b> কমিশন পাবেন</div>
-            </div>
+            <div class="commission-hero"><div class="comm-label">💰 Total Commission Earned</div><div class="comm-amt"><span id="commTotalAmt">0.00</span> <span class="currency">টাকা</span></div><div class="comm-sub">প্রতি রেফারেল থেকে <b id="commRateTxt">2%</b> কমিশন</div></div>
         </div>
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-link" style="color:#0984e3;"></i> Your Referral Link</div>
-            <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">এই লিংকটি শেয়ার করুন। বন্ধুরা যোগ দিলে আপনি <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
+            <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">শেয়ার করুন। যোগ দিলে <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
             <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
@@ -746,47 +609,27 @@
                 <button class="ref-inner-tab tab-qualified" id="refTabQualified" onclick="switchRefTab('qualified')"><i class="fas fa-circle-check"></i><span>কোয়ালিফাই</span><span class="tab-count" id="refTabQualifiedCount">0</span></button>
                 <button class="ref-inner-tab tab-income" id="refTabIncome" onclick="switchRefTab('income')"><i class="fas fa-coins"></i><span>ইনকাম</span><span class="tab-count" id="refTabIncomeCount">0.00</span></button>
             </div>
-
-            <div class="ref-inner-pane active" id="refPaneTotal">
-                <div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div>
-            </div>
-
+            <div class="ref-inner-pane active" id="refPaneTotal"><div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div></div>
             <div class="ref-inner-pane" id="refPaneQualified">
-                <div class="ref-qualified-info" id="refQualifiedInfo">
-                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b id="refQualifiedMinText">২০ টাকা বা তার বেশি</b>।
-                </div>
-                <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div></div>
+                <div class="ref-qualified-info"><i class="fas fa-info-circle"></i> Qualified মানে ব্যালেন্স <b id="refQualifiedMinText">২০ টাকা বা তার বেশি</b>।</div>
+                <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো Qualified নেই</p></div></div>
             </div>
-
             <div class="ref-inner-pane" id="refPaneIncome">
-                <div class="ref-income-balance-card">
-                    <div class="rib-label">💰 Referral Income Balance</div>
-                    <div class="rib-amt"><span id="refIncomeBalance">0.00</span> <span style="font-size:1.2rem;">টাকা</span></div>
-                    <div class="rib-info"><i class="fas fa-gift"></i> Minimum <b>১০ টাকা</b> হলে ক্লেইম</div>
-                </div>
+                <div class="ref-income-balance-card"><div class="rib-label">💰 Referral Income Balance</div><div class="rib-amt"><span id="refIncomeBalance">0.00</span> <span style="font-size:1.2rem;">টাকা</span></div><div class="rib-info"><i class="fas fa-gift"></i> Min <b>১০ টাকা</b> হলে ক্লেইম</div></div>
                 <div id="refClaimNoteWrap"></div>
-                <button id="refClaimBtn" class="ref-claim-btn locked" onclick="claimReferralIncome()" disabled>
-                    <i class="fas fa-lock"></i> <span id="refClaimBtnText">ক্লেইম করতে ১০ টাকা প্রয়োজন</span>
-                </button>
+                <button id="refClaimBtn" class="ref-claim-btn locked" onclick="claimReferralIncome()" disabled><i class="fas fa-lock"></i> <span id="refClaimBtnText">ক্লেইম করতে ১০ টাকা প্রয়োজন</span></button>
                 <div class="card-title" style="margin-top:22px; font-size:.95rem;"><i class="fas fa-coins" style="color:#f39c12;"></i> কমিশন হিস্ট্রি</div>
-                <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div></div>
+                <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কমিশন পাইনি</p></div></div>
             </div>
         </div>
 
-        <div class="premium-card">
-            <div class="card-title"><i class="fas fa-video" style="color:#ff4757;"></i> টিউটোরিয়াল</div>
-            <p style="font-size:0.85rem;color:#555;">কাজ বুঝতে ভিডিওটি দেখে নিন।</p>
-            <button class="btn-red" onclick="openTutorial()"><i class="fab fa-youtube"></i> টিউটোরিয়াল ভিডিও দেখুন</button>
-        </div>
+        <div class="premium-card"><div class="card-title"><i class="fas fa-video" style="color:#ff4757;"></i> টিউটোরিয়াল</div><p style="font-size:0.85rem;color:#555;">কাজ বুঝতে ভিডিও দেখুন।</p><button class="btn-red" onclick="openTutorial()"><i class="fab fa-youtube"></i> টিউটোরিয়াল দেখুন</button></div>
     </div>
 
     <div id="page-history" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-history" style="color:var(--primary);"></i> Ad Earning History</div>
-            <div class="stat-mini-grid">
-                <div class="stat-mini"><div class="num" id="histAdCount">0</div><div class="lbl">Ads Watched</div></div>
-                <div class="stat-mini"><div class="num green" id="histAdTotal">0</div><div class="lbl">Total Earned</div></div>
-            </div>
+            <div class="stat-mini-grid"><div class="stat-mini"><div class="num" id="histAdCount">0</div><div class="lbl">Ads Watched</div></div><div class="stat-mini"><div class="num green" id="histAdTotal">0</div><div class="lbl">Total Earned</div></div></div>
             <div id="adHistoryList"><div class="empty-state"><i class="fas fa-play-circle"></i><p>এখনো কোনো অ্যাড দেখা হয়নি</p></div></div>
         </div>
     </div>
@@ -800,12 +643,7 @@
     <div id="page-withdraw" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-wallet" style="color:var(--primary);"></i> Withdraw Funds</div>
-            <div class="level-progress-card" id="levelProgressCard">
-                <div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div>
-                <div class="lpc-title" id="lpcTitle">Level 1</div>
-                <div class="lpc-track" id="lpcTrack"></div>
-                <div class="lpc-count" id="lpcCount">Complete this level to unlock the next</div>
-            </div>
+            <div class="level-progress-card" id="levelProgressCard"><div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div><div class="lpc-title" id="lpcTitle">Level 1</div><div class="lpc-track" id="lpcTrack"></div><div class="lpc-count" id="lpcCount">Complete this level</div></div>
             <div id="withdrawInfo" style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:15px;border:1px solid var(--border);">
                 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">📋 Level</span><span style="font-weight:700;color:var(--primary);" id="wdLevel">Level 1</span></div>
                 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">👥 Qualified Refs</span><span style="font-weight:700;color:var(--warning);" id="wdQualifiedRefs">0/5</span></div>
@@ -819,10 +657,7 @@
             <button class="btn-main" onclick="requestWithdraw()"><i class="fas fa-paper-plane"></i> Request Withdraw</button>
             <div style="font-size:0.8rem;text-align:center;margin-top:15px;font-weight:700;" id="wd-notice">Minimum withdraw: ...</div>
         </div>
-        <div class="premium-card" style="margin-top:20px;">
-            <div class="card-title"><i class="fas fa-history" style="color:#f39c12;"></i> Withdraw History</div>
-            <div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading...</p></div>
-        </div>
+        <div class="premium-card" style="margin-top:20px;"><div class="card-title"><i class="fas fa-history" style="color:#f39c12;"></i> Withdraw History</div><div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading...</p></div></div>
     </div>
 </div>
 
@@ -857,7 +692,6 @@ const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
 let MIN_REFERRAL_BALANCE = 20;
-
 const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -867,9 +701,6 @@ const MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ MONETAG HIGH-CPM CONFIG
-   ═══════════════════════════════════════════════════════════ */
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
 let monetagSDKReady = false;
@@ -877,10 +708,6 @@ let monetagInAppStarted = false;
 let lastMonetagShowTime = 0;
 const MONETAG_MIN_INTERVAL = 5000;
 
-/* ═══════════════════════════════════════════════════════
-   ✅ EXTRA REWARDS CONFIG (Admin Panel থেকে control হবে)
-   Firebase path: config/extraReward
-   ═══════════════════════════════════════════════════════ */
 let extraRewardConfig = {
     enabled: false,
     amount: 0.5,
@@ -891,14 +718,12 @@ let extraRewardConfig = {
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
-
 let withdrawLevels = [];
+
 let appState = {
     user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-        adClaimedCurrentCycle: false,
-        claimWindowStartTime: 0,
-        extraRewardDate: '',
-        extraRewardCount: 0
+        adClaimedCurrentCycle: false, claimWindowStartTime: 0,
+        extraRewardDate: '', extraRewardCount: 0
     },
     config: { adSlots: [], newTasks: {} }
 };
@@ -924,12 +749,8 @@ let taskState = { taskId: null, task: null, type: 'text', completed: false, subm
 let userSubmissionsCache = {};
 let currentRefTab = 'total';
 let allReferralDataCache = { all: [], qualified: [] };
-
 let isUserAdmin = false;
-
-let adminSliderShowTimer = null;
-let adminSliderHideTimer = null;
-let adminSliderLoopTimer = null;
+let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
 
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
@@ -944,19 +765,16 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ MONETAG HIGH-CPM HELPERS
+   ✅ MONETAG HELPERS
    ═══════════════════════════════════════════════════════════ */
 function isMonetagSDKReady(zoneId) {
-    const fnName = 'show_' + String(zoneId);
-    return typeof window[fnName] === 'function';
+    return typeof window['show_' + String(zoneId)] === 'function';
 }
 
 function reloadMonetagSDK(zoneId) {
     zoneId = String(zoneId || '').trim();
     if (!zoneId) return;
-    document.querySelectorAll('script[data-zone]').forEach(s => {
-        if (s.dataset.zone !== zoneId) s.remove();
-    });
+    document.querySelectorAll('script[data-zone]').forEach(s => { if (s.dataset.zone !== zoneId) s.remove(); });
     if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
         const sc = document.createElement('script');
         sc.src = '//libtl.com/sdk.js';
@@ -982,27 +800,17 @@ async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
 async function showMonetagRewardedPopup(zoneId) {
     zoneId = String(zoneId || MONETAG_ZONE);
     const fnName = 'show_' + zoneId;
-    
     const now = Date.now();
-    if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) {
-        throw new Error('Please wait a few seconds before next ad');
-    }
-    
+    if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) throw new Error('Please wait a few seconds');
     if (!isMonetagSDKReady(zoneId)) {
         const ok = await waitForMonetagSDK(zoneId, 4000);
         if (!ok) throw new Error('Ad Network Not Ready');
     }
-    
     lastMonetagShowTime = now;
-    
     return new Promise((resolve, reject) => {
         try {
-            window[fnName]('pop')
-                .then(() => resolve({ done: true }))
-                .catch(() => reject(new Error('Ad Closed')));
-        } catch (e) {
-            reject(new Error(e.message || 'Ad Error'));
-        }
+            window[fnName]('pop').then(() => resolve({ done: true })).catch(() => reject(new Error('Ad Closed')));
+        } catch (e) { reject(new Error(e.message || 'Ad Error')); }
     });
 }
 
@@ -1010,27 +818,165 @@ function startMonetagInAppInterstitial(zoneId, settings) {
     zoneId = String(zoneId || MONETAG_ZONE);
     const fnName = 'show_' + zoneId;
     if (monetagInAppStarted) return;
-    
-    settings = settings || {
-        frequency: 2, capping: 0.1, interval: 100, timeout: 5, everyPage: false
-    };
-    
+    settings = settings || { frequency: 2, capping: 0.1, interval: 100, timeout: 5, everyPage: false };
     const start = () => {
         if (isMonetagSDKReady(zoneId)) {
-            try {
-                window[fnName]({ type: 'inApp', inAppSettings: settings });
-                monetagInAppStarted = true;
-            } catch(e) {}
-        } else {
-            setTimeout(start, 500);
-        }
+            try { window[fnName]({ type: 'inApp', inAppSettings: settings }); monetagInAppStarted = true; } catch(e) {}
+        } else setTimeout(start, 500);
     };
     start();
 }
 
-/* ═══════════════════════════════════════════════════════
-   ✅ EXTRA REWARDS FUNCTIONS
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   ✅ CUSTOM AD CODE EXECUTOR
+   Admin Panel থেকে যেকোনো কোড দিলেই execute হবে
+   Code-এ ব্যবহারযোগ্য helpers:
+   - resolve() / adResolve()      → Ad completed
+   - reject('msg') / adReject()   → Ad failed
+   - অথবা Promise return করুন
+   ═══════════════════════════════════════════════════════════ */
+async function executeCustomAdCode(code) {
+    if (!code || typeof code !== 'string' || !code.trim()) {
+        throw new Error('No custom code provided');
+    }
+    
+    return new Promise((resolve, reject) => {
+        let done = false;
+        const finish = (ok, msg) => {
+            if (done) return;
+            done = true;
+            if (ok) resolve({ done: true });
+            else reject(new Error(msg || 'Ad failed'));
+        };
+        
+        // Safety timeout (90s)
+        const timer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
+        
+        const wrappedResolve = () => { clearTimeout(timer); finish(true); };
+        const wrappedReject = (msg) => { clearTimeout(timer); finish(false, msg || 'Ad closed'); };
+        
+        // Global helpers for admin code
+        window.resolve = wrappedResolve;
+        window.reject = wrappedReject;
+        window.adResolve = wrappedResolve;
+        window.adReject = wrappedReject;
+        window.__adSuccess = wrappedResolve;
+        window.__adFail = wrappedReject;
+        
+        try {
+            const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', code);
+            const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject);
+            
+            // Auto-detect Promise return
+            if (result && typeof result.then === 'function') {
+                result.then(() => wrappedResolve()).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
+            }
+        } catch(e) {
+            clearTimeout(timer);
+            wrappedReject(e.message || 'Code error');
+        }
+    });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ WATCH AD (CUSTOM CODE PRIORITY)
+   ═══════════════════════════════════════════════════════════ */
+async function watchAd(i) {
+    if (slotLocks[i]) return;
+    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
+    if (!isOnline) { toast('No internet connection!'); return; }
+    
+    slotLocks[i] = true; 
+    isAdWatching = true;
+    trackAdClick();
+    
+    const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
+    const loadingOverlay = document.getElementById('adLoadingOverlay');
+    
+    try {
+        if (!slot || !slot.network || slot.network === 'none') throw new Error('Ad not configured');
+        
+        if (loadingOverlay) loadingOverlay.classList.add('active');
+        toast('Loading Ad...');
+        
+        let success = false;
+        const adStartTime = Date.now();
+        
+        // ✅ CUSTOM CODE EXECUTION — Priority #1
+        if (slot.customCode && String(slot.customCode).trim()) {
+            await executeCustomAdCode(slot.customCode);
+            success = true;
+        }
+        // Legacy network-based fallback
+        else if (slot.network === 'monetag') {
+            const zone = String(slot.id || MONETAG_ZONE);
+            await showMonetagRewardedPopup(zone);
+            success = true;
+        } else if (slot.network === 'gigapub') {
+            if (typeof window.showGiga === 'function') { await window.showGiga(); success = true; }
+            else throw new Error('Ad network not ready');
+        } else if (slot.network === 'adsgram') {
+            if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+            const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+            let res = await adCtrl.show();
+            if (!res || res.done !== true) throw new Error('Ad Closed');
+            success = true;
+        } else {
+            throw new Error('Ad not configured');
+        }
+        
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+        if (!success) throw new Error('Ad not completed');
+        
+        const watchDuration = (Date.now() - adStartTime) / 1000;
+        // Time check only for non-custom networks
+        if (!slot.customCode && watchDuration < MIN_AD_WATCH_SECONDS) {
+            showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's. Minimum ' + MIN_AD_WATCH_SECONDS + 's required.');
+            slotLocks[i] = false; isAdWatching = false; return;
+        }
+        
+        let newAds = appState.user.dailyAds || {};
+        newAds[i] = (newAds[i] || 0) + 1;
+        
+        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds, lastActive: todayStr() });
+        appState.user.dailyAds = newAds;
+        
+        const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
+        toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
+        
+        setTimeout(async () => { 
+            renderAds(); 
+            updateAdClaimUI(); 
+            if (isAllDisplayAdsWatched()) {
+                await startClaimWindowIfNeeded();
+                startAdsResetCountdown();
+            } else updateCycleUI();
+            updateClaimWindowUI();
+        }, 500);
+        
+    } catch (e) {
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+        const em = e.message || '';
+        if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed') {
+            showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
+        } else if (em === 'Ad timeout') {
+            showAdError('⚠️ Ad Timeout!', 'Ad took too long. Please try again.');
+        } else {
+            showAdError('⚠️ Ad Error', em || 'Error loading ad.');
+        }
+    } finally { 
+        slotLocks[i] = false; 
+        isAdWatching = false; 
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+        try { delete window.resolve; delete window.reject; delete window.adResolve; delete window.adReject; delete window.__adSuccess; delete window.__adFail; } catch(err) {}
+    }
+}
+
+function startAdWatch(i) { watchAd(i); }
+
+/* ═══════════════════════════════════════════════════════════
+   EXTRA REWARDS FUNCTIONS
+   ═══════════════════════════════════════════════════════════ */
 function getTodayExtraRewardCount() {
     const today = todayStr();
     if (appState.user.extraRewardDate !== today) return 0;
@@ -1040,29 +986,21 @@ function getTodayExtraRewardCount() {
 function updateExtraRewardUI() {
     const card = document.getElementById('extraRewardsCard');
     if (!card) return;
-
-    if (!extraRewardConfig.enabled) {
-        card.style.display = 'none';
-        return;
-    }
+    if (!extraRewardConfig.enabled) { card.style.display = 'none'; return; }
     card.style.display = 'block';
-
     const count = getTodayExtraRewardCount();
     const limit = extraRewardConfig.dailyLimit;
     const remaining = Math.max(0, limit - count);
-
     const countEl = document.getElementById('erCount');
     const titleEl = document.getElementById('erTitle');
     const amountEl = document.getElementById('erAmount');
     const infoEl = document.getElementById('erInfoText');
     const btn = document.getElementById('erBtn');
     const btnText = document.getElementById('erBtnText');
-
     if (countEl) countEl.textContent = count + '/' + limit;
     if (titleEl) titleEl.textContent = extraRewardConfig.title;
     if (amountEl) amountEl.textContent = extraRewardConfig.amount.toFixed(2);
     if (infoEl) infoEl.textContent = extraRewardConfig.infoText;
-
     if (remaining <= 0) {
         if (btn) btn.disabled = true;
         if (btnText) btnText.textContent = 'আজকের লিমিট শেষ ✓';
@@ -1074,87 +1012,46 @@ function updateExtraRewardUI() {
 
 async function watchExtraRewardAd() {
     if (!isOnline) { toast('No internet connection!'); return; }
-    if (!extraRewardConfig.enabled) { toast('❌ এই ফিচার এখনো চালু হয়নি'); return; }
-
+    if (!extraRewardConfig.enabled) { toast('❌ এই ফিচার চালু হয়নি'); return; }
     const today = todayStr();
     const count = getTodayExtraRewardCount();
-    if (count >= extraRewardConfig.dailyLimit) {
-        toast('❌ আজকের লিমিট শেষ! আগামীকাল আবার আসুন।');
-        updateExtraRewardUI();
-        return;
-    }
-
-    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
-
+    if (count >= extraRewardConfig.dailyLimit) { toast('❌ আজকের লিমিট শেষ!'); updateExtraRewardUI(); return; }
+    if (isAdWatching) { toast('Please wait!'); return; }
     const btn = document.getElementById('erBtn');
     const btnText = document.getElementById('erBtnText');
     isAdWatching = true;
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading Ad...';
-
     try {
         await showMonetagRewardedPopup(MONETAG_ZONE);
-
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
         const userReward = split.userReward;
         const referrerCommission = split.referrerCommission;
         const newCount = count + 1;
-
         const newBal = Number(appState.user.balance || 0) + userReward;
         const newEarn = Number(appState.user.totalEarned || 0) + userReward;
-
         let adHist = appState.user.adHistory || {};
-        adHist['extra_' + Date.now()] = {
-            slot: 'Extra Reward',
-            amount: userReward,
-            timestamp: Date.now(),
-            type: 'extra'
-        };
+        adHist['extra_' + Date.now()] = { slot: 'Extra Reward', amount: userReward, timestamp: Date.now(), type: 'extra' };
         const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
-
-        await db.ref('users/' + appState.user.id).update({
-            balance: newBal,
-            totalEarned: newEarn,
-            extraRewardDate: today,
-            extraRewardCount: newCount,
-            adHistory: adHist
-        });
-
-        appState.user.balance = newBal;
-        appState.user.totalEarned = newEarn;
-        appState.user.extraRewardDate = today;
-        appState.user.extraRewardCount = newCount;
-        appState.user.adHistory = adHist;
-
-        if (referrerCommission > 0) {
-            await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
-        }
-
-        await updateTextElements();
-        updateExtraRewardUI();
-
-        toast('✅ +' + userReward.toFixed(2) + ' TK আয় হয়েছে! (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
+        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, extraRewardDate: today, extraRewardCount: newCount, adHistory: adHist });
+        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
+        appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount; appState.user.adHistory = adHist;
+        if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
+        await updateTextElements(); updateExtraRewardUI();
+        toast('✅ +' + userReward.toFixed(2) + ' TK আয়! (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-
     } catch (e) {
-        console.error('Extra Reward Error:', e);
-        if (e.message === 'Ad Closed' || e.message === 'Ad not completed') {
-            showAdError('⚠️ Ad Not Completed!', 'Pop-up Ad সম্পূর্ণ দেখতে হবে। আবার চেষ্টা করুন।');
-        } else if (e.message && e.message.includes('wait')) {
-            toast('⏱️ ' + e.message);
-        } else {
-            showAdError('⚠️ Ad Error', e.message || 'Ad লোড করা যায়নি। আবার চেষ্টা করুন।');
-        }
-    } finally {
-        isAdWatching = false;
-        updateExtraRewardUI();
-    }
+        const em = e.message || '';
+        if (em === 'Ad Closed' || em === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'সম্পূর্ণ দেখতে হবে।');
+        else if (em.includes('wait')) toast('⏱️ ' + em);
+        else showAdError('⚠️ Ad Error', em || 'Ad লোড করা যায়নি।');
+    } finally { isAdWatching = false; updateExtraRewardUI(); }
 }
 
 /* ═══════════════════════════════════════════════════════
-   AD CLAIM LOGIC + 1-HOUR CLAIM WINDOW
+   AD CLAIM LOGIC
    ═══════════════════════════════════════════════════════ */
 function calculateAdTotalEarnings() {
     const slots = appState.config.adSlots || [];
@@ -1167,6 +1064,7 @@ function calculateAdTotalEarnings() {
     const reward = Number(appState.config.adReward || 0.5);
     return totalSlots * limit * reward;
 }
+
 function isAllDisplayAdsWatched() {
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
@@ -1192,12 +1090,9 @@ async function startClaimWindowIfNeeded() {
     if (!isAllDisplayAdsWatched()) return;
     if (appState.user.adClaimedCurrentCycle === true) return;
     if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return;
-    
     const now = Date.now();
     appState.user.claimWindowStartTime = now;
-    try {
-        await db.ref('users/' + appState.user.id + '/claimWindowStartTime').set(now);
-    } catch(e) {}
+    try { await db.ref('users/' + appState.user.id + '/claimWindowStartTime').set(now); } catch(e) {}
     startClaimWindowTicker();
     updateClaimWindowUI();
 }
@@ -1207,16 +1102,11 @@ function startClaimWindowTicker() {
     claimWindowTimerInterval = setInterval(() => {
         updateClaimWindowUI();
         const remain = getClaimWindowRemaining();
-        if (remain <= 0) {
-            updateAdClaimUI();
-        }
+        if (remain <= 0) updateAdClaimUI();
     }, 1000);
 }
 function stopClaimWindowTicker() {
-    if (claimWindowTimerInterval) {
-        clearInterval(claimWindowTimerInterval);
-        claimWindowTimerInterval = null;
-    }
+    if (claimWindowTimerInterval) { clearInterval(claimWindowTimerInterval); claimWindowTimerInterval = null; }
 }
 
 function fmtHHMMSS(ms) {
@@ -1232,26 +1122,17 @@ function updateClaimWindowUI() {
     const timeEl = document.getElementById('cwtTime');
     const labelEl = document.getElementById('cwtLabel');
     if (!timerEl || !timeEl) return;
-    
     const allWatched = isAllDisplayAdsWatched();
     const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
-    
-    if (!allWatched || alreadyClaimed) {
-        timerEl.classList.remove('active');
-        return;
-    }
-    
+    if (!allWatched || alreadyClaimed) { timerEl.classList.remove('active'); return; }
     const remain = getClaimWindowRemaining();
     if (remain <= 0) {
-        timerEl.classList.add('active');
-        timerEl.classList.add('expired');
+        timerEl.classList.add('active'); timerEl.classList.add('expired');
         if (labelEl) labelEl.textContent = 'Claim window expired!';
         timeEl.textContent = '00:00:00';
         return;
     }
-    
-    timerEl.classList.add('active');
-    timerEl.classList.remove('expired');
+    timerEl.classList.add('active'); timerEl.classList.remove('expired');
     if (labelEl) labelEl.textContent = 'Claim Window:';
     timeEl.textContent = fmtHHMMSS(remain);
 }
@@ -1262,10 +1143,8 @@ function updateAdClaimUI() {
     const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
     const windowRemain = getClaimWindowRemaining();
     const windowExpired = allWatched && !alreadyClaimed && appState.user.claimWindowStartTime > 0 && windowRemain <= 0;
-    
     const adTotalEl = document.getElementById('adTotalEarnings');
     if (adTotalEl) adTotalEl.textContent = total.toFixed(2);
-    
     let watchedCount = 0, totalPossible = 0;
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
@@ -1279,10 +1158,8 @@ function updateAdClaimUI() {
     const progressFill = document.getElementById('adProgressFill');
     if (progressText) progressText.textContent = watchedCount + ' / ' + totalPossible + ' Watched';
     if (progressFill) progressFill.style.width = (totalPossible > 0 ? (watchedCount / totalPossible) * 100 : 0) + '%';
-    
     const btn = document.getElementById('adClaimBtn');
     if (!btn) return;
-    
     if (!allWatched) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All Ads</span>';
@@ -1301,23 +1178,11 @@ function updateAdClaimUI() {
 async function claimAdEarnings() {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন আগে!'); return; }
-    
-    if (appState.user.adClaimedCurrentCycle === true) {
-        toast('❌ এই সাইকেলে ইতিমধ্যে ক্লেইম করা হয়েছে!');
-        updateAdClaimUI();
-        return;
-    }
-    
+    if (appState.user.adClaimedCurrentCycle === true) { toast('❌ ইতিমধ্যে ক্লেইম করা হয়েছে!'); updateAdClaimUI(); return; }
     const windowRemain = getClaimWindowRemaining();
-    if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) {
-        toast('⏰ ক্লেইম উইন্ডো (১ ঘন্টা) শেষ!');
-        updateAdClaimUI();
-        return;
-    }
-    
+    if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) { toast('⏰ ক্লেইম উইন্ডো শেষ!'); updateAdClaimUI(); return; }
     const total = calculateAdTotalEarnings();
-    if (total <= 0) { toast('❌ কোনো এড কনফিগার করা নেই'); return; }
-    
+    if (total <= 0) { toast('❌ কোনো এড কনফিগার নেই'); return; }
     const btn = document.getElementById('adClaimBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
     try {
@@ -1325,36 +1190,19 @@ async function claimAdEarnings() {
         const newEarn = Number(appState.user.totalEarned || 0) + total;
         const newClaimed = Number(appState.user.adClaimedTotal || 0) + total;
         const claimTime = Date.now();
-        
         let adHist = appState.user.adHistory || {};
         adHist['claim_' + claimTime] = { slot: 'Claim', amount: total, timestamp: claimTime, type: 'adclaim' };
         const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
-        
-        await db.ref('users/' + appState.user.id).update({
-            balance: newBal, totalEarned: newEarn, adClaimedTotal: newClaimed,
-            adHistory: adHist, adClaimedCurrentCycle: true
-        });
-        
-        appState.user.balance = newBal;
-        appState.user.totalEarned = newEarn;
-        appState.user.adClaimedTotal = newClaimed;
-        appState.user.adHistory = adHist;
-        appState.user.adClaimedCurrentCycle = true;
-        
+        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, adClaimedTotal: newClaimed, adHistory: adHist, adClaimedCurrentCycle: true });
+        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
+        appState.user.adClaimedTotal = newClaimed; appState.user.adHistory = adHist; appState.user.adClaimedCurrentCycle = true;
         const split = computeCommissionSplit(total);
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
-        
-        await updateTextElements();
-        renderAds();
-        updateClaimWindowUI();
-        toast('✅ ' + total.toFixed(2) + ' টাকা সফলভাবে ক্লেইম হয়েছে!');
+        await updateTextElements(); renderAds(); updateClaimWindowUI();
+        toast('✅ ' + total.toFixed(2) + ' টাকা ক্লেইম!');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-    } catch (e) {
-        console.error(e);
-        toast('❌ ক্লেইম ব্যর্থ: ' + e.message);
-        updateAdClaimUI();
-    }
+    } catch (e) { toast('❌ ক্লেইম ব্যর্থ: ' + e.message); updateAdClaimUI(); }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1409,7 +1257,7 @@ function renderReferralList() {
 
     const qualContainer = document.getElementById('myQualifiedReferralsList');
     if (allReferralDataCache.qualified.length === 0) {
-        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified নেই</p></div>';
+        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো Qualified নেই</p></div>';
     } else {
         let html = '';
         allReferralDataCache.qualified.slice(0, HISTORY_LIMIT).forEach(u => {
@@ -1431,39 +1279,32 @@ function updateRefClaimButton() {
     const noteWrap = document.getElementById('refClaimNoteWrap');
     if (!btn) return;
     if (bal >= REFERRAL_CLAIM_MIN) {
-        btn.classList.remove('locked');
-        btn.classList.add('ready');
-        btn.disabled = false;
+        btn.classList.remove('locked'); btn.classList.add('ready'); btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম (' + bal.toFixed(2) + ' টাকা)</span>';
-        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> আপনি ক্লেইম করার জন্য যোগ্য!</div>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> যোগ্য!</div>';
     } else {
-        btn.classList.add('locked');
-        btn.classList.remove('ready');
-        btn.disabled = true;
+        btn.classList.add('locked'); btn.classList.remove('ready'); btn.disabled = true;
         const need = (REFERRAL_CLAIM_MIN - bal).toFixed(2);
         btn.innerHTML = '<i class="fas fa-lock"></i> <span>আরও ' + need + ' টাকা প্রয়োজন</span>';
-        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> হলে ক্লেইম সক্রিয় হবে।</div>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> হলে সক্রিয় হবে।</div>';
     }
 }
 
 async function claimReferralIncome() {
     const bal = Number(appState.user.referralBalance || 0);
-    if (bal < REFERRAL_CLAIM_MIN) { toast('❌ কমপক্ষে ' + REFERRAL_CLAIM_MIN + ' টাকা প্রয়োজন'); return; }
-    if (!isOnline) { toast('No internet connection!'); return; }
+    if (bal < REFERRAL_CLAIM_MIN) { toast('❌ কমপক্ষে ' + REFERRAL_CLAIM_MIN + ' টাকা'); return; }
+    if (!isOnline) { toast('No internet!'); return; }
     const btn = document.getElementById('refClaimBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ক্লেইম হচ্ছে...'; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ক্লেইম...'; }
     try {
         const newMainBal = Number(appState.user.balance || 0) + bal;
         await db.ref('users/' + appState.user.id).update({ balance: newMainBal, referralBalance: 0 });
-        appState.user.balance = newMainBal;
-        appState.user.referralBalance = 0;
-        await updateTextElements();
-        renderReferralList();
-        toast('✅ ' + bal.toFixed(2) + ' টাকা মেইন ওয়ালেটে যোগ হয়েছে!');
+        appState.user.balance = newMainBal; appState.user.referralBalance = 0;
+        await updateTextElements(); renderReferralList();
+        toast('✅ ' + bal.toFixed(2) + ' টাকা যোগ!');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-    } catch (e) {
-        toast('❌ ক্লেইম ব্যর্থ: ' + e.message);
-    } finally { updateRefClaimButton(); }
+    } catch (e) { toast('❌ ' + e.message); }
+    finally { updateRefClaimButton(); }
 }
 
 /* TASK EXPIRY HELPERS */
@@ -1491,7 +1332,6 @@ function fmtTaskTime(ms) {
     if (d > 0) return d + 'd ' + String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm';
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
-
 function startTaskExpiryTicker() {
     stopTaskExpiryTicker();
     taskExpiryTickerInterval = setInterval(() => {
@@ -1519,9 +1359,7 @@ function startTaskExpiryTicker() {
         if (needsRerender) renderNewTasks();
     }, 1000);
 }
-function stopTaskExpiryTicker() {
-    if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; }
-}
+function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
 // ANTI-HACK
 (function initAntiHack() {
@@ -1544,10 +1382,7 @@ function toggleMenuPopup(e) {
     if (popup.classList.contains('show')) popup.classList.remove('show');
     else popup.classList.add('show');
 }
-function closeMenuPopup() {
-    const popup = document.getElementById('menuPopup');
-    if (popup) popup.classList.remove('show');
-}
+function closeMenuPopup() { const popup = document.getElementById('menuPopup'); if (popup) popup.classList.remove('show'); }
 document.addEventListener('click', function(e) {
     const popup = document.getElementById('menuPopup');
     const dotsBtn = document.querySelector('.dots-btn');
@@ -1567,13 +1402,9 @@ function openLegalModal(type) {
     const body = document.getElementById('legalModalBody');
     if (type === 'privacy') { title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy'; body.innerHTML = LEGAL_CONTENT.privacy; }
     else { title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer'; body.innerHTML = LEGAL_CONTENT.disclaimer; }
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
+    modal.classList.add('active'); document.body.style.overflow = 'hidden';
 }
-function closeLegalModal() {
-    document.getElementById('legalModal').classList.remove('active');
-    document.body.style.overflow = '';
-}
+function closeLegalModal() { document.getElementById('legalModal').classList.remove('active'); document.body.style.overflow = ''; }
 document.getElementById('legalModal').addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
 
 // ADMIN SLIDER
@@ -1616,24 +1447,23 @@ function stopAdminSlider() {
 }
 function handleBecomeAdmin() {
     const link = appState.config.becomeAdminLink || '';
-    if (!link) { toast('⚠️ No admin application link set'); return; }
+    if (!link) { toast('⚠️ No link set'); return; }
     db.ref('config/becomeAdminLink').once('value').then(snap => {
         const verifiedLink = snap.exists() ? String(snap.val() || '') : '';
         const finalLink = verifiedLink || link;
-        if (!finalLink || !/^https?:\/\//i.test(finalLink)) { toast('⚠️ Invalid admin link'); return; }
+        if (!finalLink || !/^https?:\/\//i.test(finalLink)) { toast('⚠️ Invalid'); return; }
         openAdminLink(finalLink);
     }).catch(() => { if (link && /^https?:\/\//i.test(link)) openAdminLink(link); });
 }
 function openAdminLink(link) {
     try {
-        if (tg && typeof tg.openLink === 'function') { tg.openLink(link); }
-        else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(link)) { tg.openTelegramLink(link); }
-        else { window.open(link, '_blank'); }
-        toast('🎉 Opening application form...');
+        if (tg && typeof tg.openLink === 'function') tg.openLink(link);
+        else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(link)) tg.openTelegramLink(link);
+        else window.open(link, '_blank');
+        toast('🎉 Opening...');
     } catch(e) { try { window.open(link, '_blank'); } catch(err) {} }
 }
 
-// COOLDOWN HELPERS
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -1658,17 +1488,14 @@ function startCooldownTicker() {
             const tid = el.getAttribute('data-cooldown-task');
             const remain = getCooldownRemaining(tid);
             const timeEl = el.querySelector('.cd-time');
-            if (timeEl) { 
-                if (remain > 0) timeEl.textContent = fmtCountdown(remain);
-                else needsRerender = true;
-            }
+            if (timeEl) { if (remain > 0) timeEl.textContent = fmtCountdown(remain); else needsRerender = true; }
         });
         if (needsRerender) renderNewTasks();
     }, 1000);
 }
 
 function openTaskLink(url) {
-    if (!url || url === '#' || url === 'undefined') { toast('⚠️ এই টাস্কে কোনো লিংক নেই'); return; }
+    if (!url || url === '#' || url === 'undefined') { toast('⚠️ কোনো লিংক নেই'); return; }
     try {
         if (tg && typeof tg.openLink === 'function') { tg.openLink(url, { try_instant_view: false }); return; }
         if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) { tg.openTelegramLink(url); return; }
@@ -1735,7 +1562,7 @@ async function startAdsResetCountdown() {
     appState.user.adsResetTime = resetTime;
     updateCycleUI();
     try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
-    toast('🎉 সব অ্যাড দেখা শেষ! ' + AD_RESET_HOURS + ' ঘন্টা পর আবার।');
+    toast('🎉 সব অ্যাড শেষ! ' + AD_RESET_HOURS + ' ঘন্টা পর আবার।');
 }
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
@@ -1745,12 +1572,9 @@ async function forceCycleReset() {
     appState.user.claimWindowStartTime = 0;
     stopClaimWindowTicker();
     renderAds(); updateCycleUI(); updateClaimWindowUI();
-    toast('🔄 অ্যাড রিসেট হয়েছে!');
+    toast('🔄 অ্যাড রিসেট!');
     try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0 }); } catch (e) {}
-    if (appState.user.extraRewardDate !== todayStr()) {
-        appState.user.extraRewardDate = '';
-        appState.user.extraRewardCount = 0;
-    }
+    if (appState.user.extraRewardDate !== todayStr()) { appState.user.extraRewardDate = ''; appState.user.extraRewardCount = 0; }
 }
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
@@ -1784,20 +1608,20 @@ function toast(msg) { const t = document.getElementById('toast'); t.innerText = 
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function shortDate(ts) { const d = new Date(ts); return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
 function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c])); }
-function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Not Completed!'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
+function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
 async function uploadToImgBB(file) {
     const fd = new FormData(); fd.append('image', file);
     const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
     const data = await res.json();
-    if (!data.success) throw new Error(data.error?.message || 'ImgBB upload failed');
+    if (!data.success) throw new Error(data.error?.message || 'ImgBB failed');
     return data.data.url;
 }
 async function uploadAudio(file) {
     const services = [ uploadToBashupload, uploadToTempSh, uploadToLitterbox, uploadToUguu, uploadToZeroXZero ];
     for (const fn of services) { try { return await fn(file); } catch (err) {} }
-    throw new Error('সব সার্ভার ব্যর্থ।');
+    throw new Error('সব সার্ভার ব্যর্থ');
 }
 async function uploadToBashupload(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd }); const text = await res.text(); const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/); if (!match) throw new Error('fail'); return match[0] + '?download=1'; }
 async function uploadToTempSh(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd }); const text = (await res.text()).trim(); if (!text.startsWith('http')) throw new Error('fail'); return text; }
@@ -1826,25 +1650,18 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
     const userState = getTaskUserState(taskId);
-    
     let taskType = '';
     const task = (appState.config.newTasks || {})[taskId];
     if (task) taskType = String(task.type || '').toLowerCase();
     else {
-        try {
-            const snap = await db.ref('config/newTasks/' + taskId + '/type').once('value');
-            taskType = String(snap.val() || '').toLowerCase();
-        } catch(e) {}
+        try { const snap = await db.ref('config/newTasks/' + taskId + '/type').once('value'); taskType = String(snap.val() || '').toLowerCase(); } catch(e) {}
     }
     const isCool = hasCooldown(taskType);
-    
     if (userState.status === 'approved') {
         if (!isCool) return;
         const remain = getCooldownRemaining(taskId);
         if (remain > 0) return;
-    } else if (userState.status === 'pending') {
-        return;
-    }
+    } else if (userState.status === 'pending') return;
     
     const baseReward = Number(p.reward || 0);
     const split = computeCommissionSplit(baseReward);
@@ -1886,15 +1703,15 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
 }
 
 function showBonus() {
-    if (!isOnline) { toast('No internet connection!'); return; }
-    if (appState.user.dailyBonusDate === todayStr()) { toast('আজকের বোনাস আগেই নেওয়া হয়েছে!'); return; }
+    if (!isOnline) { toast('No internet!'); return; }
+    if (appState.user.dailyBonusDate === todayStr()) { toast('আজকের বোনাস আগেই নেওয়া!'); return; }
     document.getElementById('bonusOverlay').classList.add('show');
     document.getElementById('app').classList.add('blurred');
 }
 function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
 
 async function claimDailyBonus() {
-    if (!isOnline) { toast('No internet connection!'); return; }
+    if (!isOnline) { toast('No internet!'); return; }
     const btn = document.getElementById('btnClaimBonus');
     const btnCancel = document.getElementById('btnCancelBonus');
     const subText = document.getElementById('bonusSubText');
@@ -1903,22 +1720,19 @@ async function claimDailyBonus() {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
         const mtSlot = slots.find(s => s.network === 'monetag');
-        
         if (agSlot && agSlot.id) {
-            subText.innerText = '১ম অ্যাড লোড হচ্ছে (Adsgram)...';
+            subText.innerText = '১ম অ্যাড লোড...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 1...';
             if (typeof window.Adsgram === 'undefined') throw new Error('Ad Network Not Ready');
             const adCtrl = window.Adsgram.init({ blockId: String(agSlot.id) });
             let res = await adCtrl.show();
             if (!res || res.done !== true) throw new Error('Ad Closed');
         }
-        
         if (mtSlot && mtSlot.id) {
-            subText.innerText = '২য় অ্যাড লোড হচ্ছে (Monetag)...';
+            subText.innerText = '২য় অ্যাড লোড...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
             await showMonetagRewardedPopup(mtSlot.id);
         }
-        
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -1931,13 +1745,13 @@ async function claimDailyBonus() {
         appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus');
         await updateTextElements(); hideBonus();
-        toast('✅ বোনাস ক্লেইম সফল! +' + split.userReward.toFixed(2) + ' TK');
+        toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
-        toast(e.message === 'Ad Closed' ? '❌ অ্যাডটি সম্পূর্ণ দেখেননি!' : '❌ অ্যাড সমস্যা: ' + e.message);
+        toast(e.message === 'Ad Closed' ? '❌ সম্পূর্ণ দেখেননি!' : '❌ সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
         btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
-        subText.innerText = 'বোনাস নিতে হলে আপনাকে প্রথমে ২টি ছোট অ্যাড সম্পূর্ণ দেখতে হবে।';
+        subText.innerText = 'বোনাস নিতে ২টি ছোট অ্যাড দেখুন।';
     }
 }
 
@@ -1950,7 +1764,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const refData = refSnap.val();
         const referredUserBalance = Number(appState.user.balance || 0);
         if (referredUserBalance < MIN_REFERRAL_BALANCE) return false;
-        
         const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
@@ -1963,7 +1776,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         };
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
-        
         await db.ref('users/' + referrerId).update({ referralBalance: newRefBal, totalCommission: newTotalComm, commissionHistory: commHist });
         try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK'); } catch(e) {}
         return true;
@@ -2005,8 +1817,7 @@ async function markVerified() {
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
-    updateClaimWindowUI();
-    updateExtraRewardUI();
+    updateClaimWindowUI(); updateExtraRewardUI();
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -2034,93 +1845,10 @@ function stopPeriodicRecheck() {
     stopTaskExpiryTicker();
     stopClaimWindowTicker();
 }
-
 function trackAdClick() {
     db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
-
-async function watchAd(i) {
-    if (slotLocks[i]) return;
-    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
-    if (!isOnline) { toast('No internet connection!'); return; }
-    
-    slotLocks[i] = true; 
-    isAdWatching = true;
-    trackAdClick();
-    
-    const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
-    const loadingOverlay = document.getElementById('adLoadingOverlay');
-    
-    try {
-        if (!slot || !slot.network || slot.network === 'none') throw new Error('Ad not configured');
-        
-        if (loadingOverlay) loadingOverlay.classList.add('active');
-        toast('Loading Ad...');
-        
-        let success = false;
-        const adStartTime = Date.now();
-        
-        if (slot.network === 'monetag') {
-            const zone = String(slot.id || MONETAG_ZONE);
-            await showMonetagRewardedPopup(zone);
-            success = true;
-        } else if (slot.network === 'gigapub') {
-            if (typeof window.showGiga === 'function') { await window.showGiga(); success = true; }
-            else throw new Error('Ad network not ready');
-        } else if (slot.network === 'adsgram') {
-            if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-            const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-            let res = await adCtrl.show();
-            if (!res || res.done !== true) throw new Error('Ad Closed');
-            success = true;
-        } else {
-            throw new Error('Unknown ad network');
-        }
-        
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-        if (!success) throw new Error('Ad not completed');
-        
-        const watchDuration = (Date.now() - adStartTime) / 1000;
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's. Minimum ' + MIN_AD_WATCH_SECONDS + 's required.');
-            slotLocks[i] = false; isAdWatching = false; return;
-        }
-        
-        let newAds = appState.user.dailyAds || {};
-        newAds[i] = (newAds[i] || 0) + 1;
-        
-        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds, lastActive: todayStr() });
-        appState.user.dailyAds = newAds;
-        
-        const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
-        toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
-        
-        setTimeout(async () => { 
-            renderAds(); 
-            updateAdClaimUI(); 
-            if (isAllDisplayAdsWatched()) {
-                await startClaimWindowIfNeeded();
-                startAdsResetCountdown();
-            } else updateCycleUI();
-            updateClaimWindowUI();
-        }, 500);
-        
-    } catch (e) {
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-        if (e.message === 'Ad Closed' || e.message === 'Ad not completed') {
-            showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
-        } else {
-            showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
-        }
-    } finally { 
-        slotLocks[i] = false; 
-        isAdWatching = false; 
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-    }
-}
-
-function startAdWatch(i) { watchAd(i); }
 
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
@@ -2130,10 +1858,10 @@ function updateNetworkStatus() {
     else { offlineOverlay.classList.remove('active'); indicator.classList.remove('show'); if (isBooted && !document.getElementById('joinModal').classList.contains('active')) document.getElementById('app').style.display = 'block'; }
 }
 window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Internet reconnected!'); });
-window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet connection!'); });
+window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
 
 function switchTab(tabId, el) {
-    if (!isOnline) { toast('No internet connection!'); return; }
+    if (!isOnline) { toast('No internet!'); return; }
     document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('page-' + tabId).classList.add('active');
@@ -2174,9 +1902,7 @@ async function calculateValidReferrals() {
 }
 
 function getWithdrawLevel() {
-    if (!withdrawLevels || withdrawLevels.length === 0) {
-        return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
-    }
+    if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
     const completedWithdraws = Number(appState.user.withdrawCount || 0);
     const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
     const currentLevel = withdrawLevels[levelIndex];
@@ -2188,25 +1914,21 @@ function updateWithdrawInfo() {
     const reqRefs = level.requiredRefs || 5;
     const currentLevelNum = level.level || 1;
     const totalLevels = withdrawLevels.length || 1;
-    
     document.getElementById('wdLevel').textContent = 'Level ' + currentLevelNum + ' / ' + totalLevels;
     document.getElementById('wdQualifiedRefs').textContent = validReferralCount + '/' + reqRefs;
     document.getElementById('wdFee').textContent = (level.fee || 5) + '%';
     document.getElementById('wdTime').textContent = level.time || '30 Min-1 Hours';
     document.getElementById('wdRange').textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
-    
     updateLevelProgressCard(currentLevelNum, totalLevels);
-    
     const canWithdraw = validReferralCount >= reqRefs;
     const notice = document.getElementById('wd-notice');
-    
     if (!canWithdraw) {
         notice.textContent = '⚠️ Level ' + currentLevelNum + ' এর জন্য ' + (reqRefs - validReferralCount) + ' জন Qualified দরকার';
         notice.style.color = '#ff4757';
     } else {
         const remainingLevels = totalLevels - currentLevelNum;
-        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' যোগ্য! (আরও ' + remainingLevels + ' টি লেভেল বাকি)';
-        else notice.textContent = '🏆 সর্বোচ্চ লেভেল! Withdraw যোগ্য';
+        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' যোগ্য! (আরও ' + remainingLevels + ' টি বাকি)';
+        else notice.textContent = '🏆 সর্বোচ্চ লেভেল!';
         notice.style.color = '#00b894';
     }
 }
@@ -2226,8 +1948,8 @@ function updateLevelProgressCard(currentLevelNum, totalLevels) {
     }
     trackEl.innerHTML = trackHtml;
     const completedCount = currentLevelNum - 1;
-    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 সর্বোচ্চ লেভেল Complete!';
-    else countEl.innerHTML = '✅ সম্পূর্ণ: ' + completedCount + ' / ' + totalLevels + ' • পরবর্তী: Level ' + (currentLevelNum + 1);
+    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 সর্বোচ্চ লেভেল!';
+    else countEl.innerHTML = '✅ ' + completedCount + ' / ' + totalLevels + ' • পরবর্তী: Level ' + (currentLevelNum + 1);
 }
 function checkMaintenance() {
     if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
@@ -2254,7 +1976,7 @@ function updateMaintenanceTimer() {
 function checkBan() {
     if (appState.user && appState.user.isBanned) {
         document.getElementById('bannedOverlay').classList.add('active');
-        document.getElementById('banReason').textContent = appState.user.banReason || 'Account suspended.';
+        document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
         document.getElementById('app').style.display = 'none';
         return true;
     } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
@@ -2266,10 +1988,11 @@ function renderAds() {
     el.innerHTML = '';
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
-    
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i] || { network: 'none', id: '' };
-        const configured = slot && slot.network && slot.network !== 'none';
+        // ✅ A slot is configured if it has network OR customCode
+        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+        const configured = slot && (hasCustomCode || (slot.network && slot.network !== 'none'));
         const done = (appState.user.dailyAds && appState.user.dailyAds[i]) ? appState.user.dailyAds[i] : 0;
         const max = done >= limit;
         const cardClass = !configured ? 'not-set disabled' : (max ? 'disabled' : '');
@@ -2345,16 +2068,8 @@ function getTaskTypeLabel(type) {
     };
     return m[(type || '').toLowerCase()] || 'Task';
 }
-function isTaskExpired(task) {
-    const remain = getTaskTimeRemaining(task);
-    if (remain === null) return false;
-    return remain <= 0;
-}
-function isTaskAutoDeleted(task) {
-    const remain = getTaskAutoDeleteRemaining(task);
-    if (remain === null) return false;
-    return remain <= 0;
-}
+function isTaskExpired(task) { const remain = getTaskTimeRemaining(task); if (remain === null) return false; return remain <= 0; }
+function isTaskAutoDeleted(task) { const remain = getTaskAutoDeleteRemaining(task); if (remain === null) return false; return remain <= 0; }
 
 function renderNewTasks() {
     const el = document.getElementById('task-area');
@@ -2362,16 +2077,12 @@ function renderNewTasks() {
     el.innerHTML = '';
     const tasks = appState.config.newTasks || {};
     const sym = appState.config.currencySymbol || 'TK';
-    let hasVisibleTask = false;
-    let visibleCount = 0;
-    let renderedHtml = '';
+    let hasVisibleTask = false, visibleCount = 0, renderedHtml = '';
 
     Object.keys(tasks).forEach(taskId => {
         const task = tasks[taskId];
         if (isTaskAutoDeleted(task)) return;
-        if (task.status === 'closed') return;
-        if (task.status === 'pending') return;
-        if (task.status === 'cancelled') return;
+        if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
         hasVisibleTask = true;
         visibleCount++;
 
@@ -2403,21 +2114,11 @@ function renderNewTasks() {
 
         let actionHtml = '';
         let gradCls = gradClass;
-
-        if (isExpired) {
-            actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
-            gradCls += ' grad-disabled';
-        } else if (isCool && cooldownRemain > 0) {
-            actionHtml = `<div class="task-countdown" data-cooldown-task="${taskId}"><div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`;
-            gradCls += ' grad-disabled';
-        } else if (isDone && !isCool) {
-            actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`;
-        } else if (slotsLeft <= 0) {
-            actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`;
-            gradCls += ' grad-disabled';
-        } else {
-            actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
-        }
+        if (isExpired) { actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`; gradCls += ' grad-disabled'; }
+        else if (isCool && cooldownRemain > 0) { actionHtml = `<div class="task-countdown" data-cooldown-task="${taskId}"><div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`; gradCls += ' grad-disabled'; }
+        else if (isDone && !isCool) { actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`; }
+        else if (slotsLeft <= 0) { actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`; gradCls += ' grad-disabled'; }
+        else { actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`; }
 
         const expiryTextHtml = isExpired ? '⛔ Expired' : '⏳ ' + fmtTaskTime(expiryRemain);
         const deleteHtml = (isExpired && deleteRemain > 0) ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${taskId}"><i class="fas fa-trash-alt"></i> Auto-delete in <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span></div>` : '';
@@ -2465,20 +2166,17 @@ function renderNewTasks() {
 function openTaskSubmit(taskId) {
     const task = appState.config.newTasks[taskId];
     if (!task) { toast('Task not found'); return; }
-    if (isTaskExpired(task)) { toast('This task has expired'); return; }
-
+    if (isTaskExpired(task)) { toast('Task expired'); return; }
     const userState = getTaskUserState(taskId);
     const status = userState.status;
     const resubmitCount = userState.resubmitCount;
-
     if (status === 'approved') {
         const type = (task.type || '').toLowerCase();
         if (hasCooldown(type)) {
             const remain = getCooldownRemaining(taskId);
-            if (remain > 0) { toast('⏱️ ' + fmtCountdown(remain) + ' পরে আবার করতে পারবেন'); return; }
-        } else { toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন'); return; }
+            if (remain > 0) { toast('⏱️ ' + fmtCountdown(remain) + ' পরে পারবেন'); return; }
+        } else { toast('✅ সম্পন্ন করেছেন'); return; }
     }
-
     const type = (task.type || 'text').toLowerCase();
     taskState.taskId = taskId;
     taskState.task = task;
@@ -2502,7 +2200,6 @@ function openTaskSubmit(taskId) {
             return;
         }
     }
-
     const sym = appState.config.currencySymbol || 'TK';
     document.getElementById('taskHeadIcon').textContent = getTaskTypeIcon(task.type);
     document.getElementById('taskSubmitTitle').textContent = task.title || 'Task';
@@ -2514,8 +2211,7 @@ function openTaskSubmit(taskId) {
     const contentArea = document.getElementById('taskContentArea');
     const actionBtn = document.getElementById('taskSubmitActionBtn');
     const bannerWrap = document.getElementById('taskStatusBannerWrap');
-    contentArea.innerHTML = '';
-    bannerWrap.innerHTML = '';
+    contentArea.innerHTML = ''; bannerWrap.innerHTML = '';
     actionBtn.disabled = false;
     actionBtn.className = 'task-btn task-btn-submit';
     actionBtn.style.display = 'flex';
@@ -2524,28 +2220,27 @@ function openTaskSubmit(taskId) {
     const isRejected = (status === 'rejected');
     const isCancelled = (status === 'cancelled');
     const isRejectedOrCancelled = isRejected || isCancelled;
-    let canResubmit = false;
-    let lockedOut = false;
+    let canResubmit = false, lockedOut = false;
 
     if (isPending) {
-        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span></div></div>`;
+        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">Admin যাচাই করবে।</span></div></div>`;
         lockedOut = true;
     } else if (isRejectedOrCancelled) {
         if (resubmitCount === 0) {
             canResubmit = true;
-            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 Re-Submit Chance (1/1)</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span></div></div>`;
+            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 Re-Submit (1/1)</b><br><span style="font-weight:600;font-size:0.78rem;">শুধু একবার পারবেন।</span></div></div>`;
         } else {
             lockedOut = true;
-            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ No More Re-Submit</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি re-submit ব্যবহার করে ফেলেছেন।</span></div></div>`;
+            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ No More Re-Submit</b><br><span style="font-weight:600;font-size:0.78rem;">ব্যবহার করে ফেলেছেন।</span></div></div>`;
         }
     }
 
     if (type === 'image' || type === 'image_upload') {
-        contentArea.innerHTML = `<label>📷 ছবি আপলোড করুন *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small><label>📝 বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}`;
+        contentArea.innerHTML = `<label>📷 ছবি আপলোড *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (Max 30 MB)</small><label>📝 বর্ণনা</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}`;
     } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
-        contentArea.innerHTML = `<label>🎤 ভয়েস আপলোড করুন *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small><label>📝 বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}`;
+        contentArea.innerHTML = `<label>🎤 ভয়েস আপলোড *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (Max 500 MB)</small><label>📝 বর্ণনা</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}`;
     } else if (type === 'text' || type === 'text_writing') {
-        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন।</div>`}`;
+        contentArea.innerHTML = `<label>📝 উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন।</div>`}`;
     } else if (isScreenshotTask(type)) {
         const taskUrl = task.url || task.link || '';
         const hasUrl = taskUrl && taskUrl !== '#' && taskUrl !== 'undefined';
@@ -2553,36 +2248,23 @@ function openTaskSubmit(taskId) {
             <div class="task-open-link-box">
                 <div class="task-open-link-label">🔗 টাস্ক লিংক</div>
                 <button class="task-open-link-btn" onclick="openTaskLink('${esc(taskUrl)}')" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;cursor:not-allowed;"' : ''}><i class="fas fa-external-link-alt"></i> Open Link</button>
-                <small>👆 লিংকে কাজ শেষ করে <b>স্ক্রিনশট</b> নিন।</small>
+                <small>👆 কাজ শেষ করে স্ক্রিনশট নিন।</small>
             </div>
-            <label>📷 স্ক্রিনশট আপলোড করুন *</label>
+            <label>📷 স্ক্রিনশট আপলোড *</label>
             <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
-            <small>JPG / PNG / WEBP (সর্বোচ্চ ৩০ MB)</small>
-            <label>📝 বর্ণনা (অপশনাল)</label>
+            <small>JPG / PNG / WEBP (Max 30 MB)</small>
+            <label>📝 বর্ণনা</label>
             <textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>
             ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-camera"></i> লিংকে কাজ শেষ → স্ক্রিনশট → আপলোড → <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}
         `;
     } else {
-        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+        contentArea.innerHTML = `<label>📝 উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     }
 
-    if (isPending) {
-        actionBtn.disabled = true;
-        actionBtn.className = 'task-btn task-btn-pending';
-        actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Pending';
-    } else if (lockedOut) {
-        actionBtn.disabled = true;
-        actionBtn.className = 'task-btn task-btn-locked';
-        actionBtn.innerHTML = '<i class="fas fa-ban"></i> No More Re-Submit';
-    } else if (canResubmit) {
-        actionBtn.disabled = false;
-        actionBtn.className = 'task-btn task-btn-submit';
-        actionBtn.innerHTML = '<i class="fas fa-redo"></i> Re-Submit';
-    } else {
-        actionBtn.disabled = false;
-        actionBtn.className = 'task-btn task-btn-submit';
-        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
-    }
+    if (isPending) { actionBtn.disabled = true; actionBtn.className = 'task-btn task-btn-pending'; actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Pending'; }
+    else if (lockedOut) { actionBtn.disabled = true; actionBtn.className = 'task-btn task-btn-locked'; actionBtn.innerHTML = '<i class="fas fa-ban"></i> No More Re-Submit'; }
+    else if (canResubmit) { actionBtn.disabled = false; actionBtn.className = 'task-btn task-btn-submit'; actionBtn.innerHTML = '<i class="fas fa-redo"></i> Re-Submit'; }
+    else { actionBtn.disabled = false; actionBtn.className = 'task-btn task-btn-submit'; actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন'; }
 
     document.getElementById('taskSubmitModal').classList.add('active');
     document.getElementById('app').classList.add('blurred');
@@ -2593,11 +2275,11 @@ async function submitGenericTask() {
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
-    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ এই টাস্ক modal এ সাবমিট হয় না'); return; }
+    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ Modal এ সাবমিট হয় না'); return; }
     if (!canSubmitTask(taskId)) {
         const s = getTaskUserState(taskId);
-        if (s.status === 'pending') toast('⏳ ইতিমধ্যে জমা দেওয়া হয়েছে');
-        else toast('❌ আর re-submit করা যাবে না');
+        if (s.status === 'pending') toast('⏳ ইতিমধ্যে জমা');
+        else toast('❌ আর re-submit পারবেন না');
         return;
     }
     const type = taskState.type;
@@ -2605,35 +2287,32 @@ async function submitGenericTask() {
     const textInput = document.getElementById('taskTextInput');
     const content = textInput ? textInput.value.trim() : '';
     let fileUrl = null;
-
     try {
         if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
             const input = document.getElementById('taskImageInput');
             const file = input && input.files[0];
             if (!file) { toast('⚠️ ছবি সিলেক্ট করুন'); return; }
-            if (file.size > 30 * 1024 * 1024) { toast('⚠️ ছবি ৩০ MB এর কম হতে হবে'); return; }
+            if (file.size > 30 * 1024 * 1024) { toast('⚠️ ছবি ৩০ MB এর কম'); return; }
             taskState.submitting = true; actionBtn.disabled = true;
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
-            toast('📤 ছবি আপলোড হচ্ছে...');
+            toast('📤 ছবি আপলোড...');
             fileUrl = await uploadToImgBB(file);
         } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
             const input = document.getElementById('taskVoiceInput');
             const file = input && input.files[0];
-            if (!file) { toast('⚠️ অডিও সিলেক্ট করুন'); return; }
-            if (file.size > 500 * 1024 * 1024) { toast('⚠️ ফাইল ৫০০ MB এর কম হতে হবে'); return; }
+            if (!file) { toast('⚠️ অডিও সিলেক্ট'); return; }
+            if (file.size > 500 * 1024 * 1024) { toast('⚠️ ৫০০ MB এর কম'); return; }
             taskState.submitting = true; actionBtn.disabled = true;
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
-            toast('📤 অডিও আপলোড হচ্ছে...');
+            toast('📤 অডিও আপলোড...');
             fileUrl = await uploadAudio(file);
         } else if (type === 'text' || type === 'text_writing') {
             if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
         } else {
             if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
         }
-
         taskState.submitting = true; actionBtn.disabled = true;
-        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> জমা হচ্ছে...';
-
+        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> জমা...';
         const subId = 'sub_' + Date.now() + '_' + tgUser.id;
         await db.ref('taskSubmissions/' + subId).set({
             userId: tgUser.id, userName: tgUser.first_name || 'User',
@@ -2651,9 +2330,8 @@ async function submitGenericTask() {
         if (!appState.user.taskHistory) appState.user.taskHistory = {};
         appState.user.taskStatuses[taskId] = 'pending';
         appState.user.taskHistory[taskId] = Date.now();
-
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        toast('✅ জমা হয়েছে!');
+        toast('✅ জমা!');
         closeTaskSubmit();
     } catch (err) {
         console.error('Submit error:', err);
@@ -2668,7 +2346,7 @@ function closeTaskSubmit() {
     document.getElementById('app').classList.remove('blurred');
     taskState.taskId = null; taskState.task = null; taskState.submitting = false; taskState.currentStatus = 'new';
 }
-function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক বাতিল'); }
+function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ বাতিল'); }
 
 async function loadTaskHistory() {
     const container = document.getElementById('taskHistoryArea');
@@ -2718,8 +2396,8 @@ async function loadTaskHistory() {
                 if (resubmitCount === 0) {
                     const isExpired = isTaskExpired(taskMeta);
                     if (!isExpired) actionHtml = `<button class="th-resubmit-btn" onclick="openTaskSubmit('${tid}')"><i class="fas fa-redo"></i> Re-Submit (1/1)</button>`;
-                    else actionHtml = `<div class="th-locked-note">⏰ Task expired</div>`;
-                } else actionHtml = `<div class="th-locked-note">🔒 One-time re-submit used</div>`;
+                    else actionHtml = `<div class="th-locked-note">⏰ Expired</div>`;
+                } else actionHtml = `<div class="th-locked-note">🔒 Re-submit used</div>`;
             }
             html += `<div class="th-card ${stClass}"><div class="th-card-head"><div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div><span class="th-card-badge ${stClass}">${stLabel}</span></div><div class="th-card-meta"><div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div><div class="row"><i class="fas fa-calendar"></i> ${dateStr}</div>${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;">Auto-approved</span></div>` : ''}</div>${fileHtml}${reasonHtml}${actionHtml}</div>`;
         });
@@ -2731,7 +2409,7 @@ async function loadTaskHistory() {
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
 async function requestWithdraw() {
-    if (!isOnline) { toast('No internet connection!'); return; }
+    if (!isOnline) { toast('No internet!'); return; }
     const method = document.getElementById('wd-method').value;
     const account = document.getElementById('wd-account').value.trim();
     const amount = Number(document.getElementById('wd-amount').value);
@@ -2739,17 +2417,14 @@ async function requestWithdraw() {
     const reqRefs = level.requiredRefs || 5;
     const currentLevelNum = level.level || 1;
     const totalLevels = withdrawLevels.length || 1;
-    
     await calculateValidReferrals();
-    
-    if (validReferralCount < reqRefs) { toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন Qualified দরকার!'); return; }
-    if (!method) return toast('Please select a payment method.');
-    if (!account || account.length < 3) return toast('Please enter a valid account.');
-    if (isNaN(amount) || amount <= 0) return toast('Please enter a valid amount.');
-    if (amount < (level.minAmount || 10)) return toast('Minimum ' + (level.minAmount || 10) + ' TK.');
-    if (amount > (level.maxAmount || 100)) return toast('সর্বোচ্চ ' + (level.maxAmount || 100) + ' TK.');
+    if (validReferralCount < reqRefs) { toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন দরকার!'); return; }
+    if (!method) return toast('Select payment method.');
+    if (!account || account.length < 3) return toast('Valid account.');
+    if (isNaN(amount) || amount <= 0) return toast('Valid amount.');
+    if (amount < (level.minAmount || 10)) return toast('Min ' + (level.minAmount || 10) + ' TK.');
+    if (amount > (level.maxAmount || 100)) return toast('Max ' + (level.maxAmount || 100) + ' TK.');
     if (amount > appState.user.balance) return toast('Insufficient balance.');
-    
     const feeAmount = (amount * (level.fee || 5)) / 100;
     try {
         const wdId = 'WD' + Date.now();
@@ -2760,24 +2435,18 @@ async function requestWithdraw() {
             requiredRefs: reqRefs, validRefsAtRequest: validReferralCount,
             status: 'pending', timestamp: Date.now()
         });
-        
         const newCount = (appState.user.withdrawCount || 0) + 1;
         await db.ref('users/' + appState.user.id).update({ balance: appState.user.balance - amount, withdrawCount: newCount });
         appState.user.balance = appState.user.balance - amount;
         appState.user.withdrawCount = newCount;
-        
         document.getElementById('wd-account').value = '';
         document.getElementById('wd-amount').value = '';
-        
-        toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
+        toast('✅ Withdraw Sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
         await sendNotification(tgUser.id, '✅ Withdraw Request!\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
         await sendNotification(ADMIN_ID, '💰 New Withdraw\nUser: ' + appState.user.name + '\nAmount: ' + amount + ' TK');
-        
         await calculateValidReferrals();
         updateWithdrawInfo();
-    } catch (e) {
-        toast('❌ Error: ' + e.message);
-    }
+    } catch (e) { toast('❌ ' + e.message); }
 }
 async function loadWithdrawHistory() {
     if (!isOnline) { document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No internet.</p>'; return; }
@@ -2811,7 +2480,7 @@ function loadCommissionHistory() {
     if (!container) return;
     const hist = appState.user.commissionHistory || {};
     const keys = Object.keys(hist);
-    if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div>'; return; }
+    if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কমিশন পাইনি</p></div>'; return; }
     const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     let html = '';
     items.slice(0, HISTORY_LIMIT).forEach(it => {
@@ -2859,10 +2528,8 @@ async function updateTextElements() {
     document.getElementById('bonusAmt').innerText = appState.config.dailyBonusAmount || 20;
     document.getElementById('commTotalAmt').innerText = (appState.user.totalCommission || 0).toFixed(2);
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
-    
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
     if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
-    
     const wdSel = document.getElementById('wd-method');
     let currentVal = wdSel.value;
     wdSel.innerHTML = '<option value="">Select Method</option>';
@@ -2871,17 +2538,10 @@ async function updateTextElements() {
             if (m && String(m).trim()) wdSel.innerHTML += '<option value="' + esc(m) + '" ' + (currentVal === m ? 'selected' : '') + '>' + esc(m) + '</option>';
         });
     }
-    
-    if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) {
-        withdrawLevels = appState.config.withdrawLevels;
-    }
+    if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
     await calculateValidReferrals();
-    updateWithdrawInfo();
-    updateRefClaimButton();
-    updateRefTabCounts();
-    updateAdClaimUI();
-    updateClaimWindowUI();
-    updateExtraRewardUI();
+    updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts();
+    updateAdClaimUI(); updateClaimWindowUI(); updateExtraRewardUI();
 }
 
 function setLoading(isLoading) {
@@ -2974,7 +2634,7 @@ async function checkAndUpdateStatus() {
     const userId = tgUser.id;
     const buttons = document.querySelectorAll('.channel-btn');
     const statusEl = document.getElementById('verifyStatus');
-    if (!userId || userId === '123456') { statusEl.textContent = '⚠️ Unable to verify.'; statusEl.className = 'verify-status error'; return; }
+    if (!userId || userId === '123456') { statusEl.textContent = '⚠️ Unable'; statusEl.className = 'verify-status error'; return; }
     let allJoined = true;
     for (const btn of buttons) {
         const joined = await checkChannelMembership(userId, btn.dataset.chatId);
@@ -2982,7 +2642,7 @@ async function checkAndUpdateStatus() {
         else { btn.classList.remove('joined'); allJoined = false; }
     }
     if (allJoined && buttons.length > 0) {
-        statusEl.textContent = '✅ All channels joined!';
+        statusEl.textContent = '✅ All joined!';
         statusEl.className = 'verify-status success';
         if (verifyInterval) clearInterval(verifyInterval);
         verifyInterval = null;
@@ -2991,7 +2651,7 @@ async function checkAndUpdateStatus() {
         setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
     } else {
         const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
-        statusEl.textContent = '❌ Please join ' + remaining + ' more channel(s)';
+        statusEl.textContent = '❌ Join ' + remaining + ' more';
         statusEl.className = 'verify-status error';
     }
 }
@@ -3056,7 +2716,6 @@ window.onload = () => {
             MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
-            // ✅ Extra Rewards config লোড
             if (appState.config.extraReward) {
                 extraRewardConfig = {
                     enabled: appState.config.extraReward.enabled !== false,
@@ -3088,8 +2747,11 @@ window.onload = () => {
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
             
+            // ✅ Auto-inject standard SDK scripts (custom slots handle themselves)
             const slots = appState.config.adSlots || [];
             slots.forEach(slot => {
+                if (!slot) return;
+                if (slot.customCode && String(slot.customCode).trim()) return; // Custom handles itself
                 if (slot.network === 'monetag' && slot.id) {
                     if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
                 } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
@@ -3129,7 +2791,7 @@ window.onload = () => {
             if (refBy && String(refBy) !== String(tgUser.id)) {
                 const deviceId = getDeviceId();
                 const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
-                if (deviceSnap.exists()) toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার করা হয়েছে!');
+                if (deviceSnap.exists()) toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার!');
                 else {
                     const refSnap = await db.ref('users/' + refBy).once('value');
                     if (refSnap.exists()) {
@@ -3172,7 +2834,7 @@ window.onload = () => {
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
-                    document.getElementById('banReason').textContent = appState.user.banReason || 'Account suspended.';
+                    document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
                     document.getElementById('app').style.display = 'none';
                     return;
                 } else document.getElementById('bannedOverlay').classList.remove('active');
