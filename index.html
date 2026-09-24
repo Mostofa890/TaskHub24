@@ -12,7 +12,6 @@
 
 <!-- ═══════════════════════════════════════════════════════════
      MONETAG HIGH-CPM SDK — DIRECT LOAD (Zone: 11878844)
-     এই স্ক্রিপ্টটা সবচেয়ে আগে লোড হবে যাতে high CPM পাওয়া যায়
      ═══════════════════════════════════════════════════════════ -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 
@@ -113,6 +112,49 @@
     .ad-progress-header .aph-right{color:#00b894;}
     .ad-progress-bar{height:8px;background:#f1f5f9;border-radius:20px;overflow:hidden;position:relative;}
     .ad-progress-bar-fill{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .5s ease;box-shadow:0 0 12px rgba(0,206,201,.4);}
+    
+    /* ═══════════════════════════════════════════════════════
+       ✅ EXTRA REWARDS — Monetag Pop-up Ad Section
+       ═══════════════════════════════════════════════════════ */
+    .extra-rewards-card{
+        margin:16px 20px 20px;
+        background:linear-gradient(135deg,#f39c12,#e84393);
+        color:#fff;
+        padding:18px 20px;
+        border-radius:18px;
+        box-shadow:0 14px 32px rgba(232,67,147,.4);
+        position:relative;
+        overflow:hidden;
+    }
+    .extra-rewards-card::before{
+        content:'';
+        position:absolute;
+        width:150px;height:150px;
+        background:rgba(255,255,255,.15);
+        border-radius:50%;
+        top:-70px;right:-50px;
+    }
+    .extra-rewards-card::after{
+        content:'';
+        position:absolute;
+        width:90px;height:90px;
+        background:rgba(255,255,255,.1);
+        border-radius:50%;
+        bottom:-40px;left:-20px;
+    }
+    .er-header{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;margin-bottom:8px;}
+    .er-label{font-size:0.7rem;font-weight:900;letter-spacing:1.3px;text-transform:uppercase;opacity:0.95;display:flex;align-items:center;gap:6px;}
+    .er-count{background:rgba(255,255,255,.25);padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:900;letter-spacing:0.3px;}
+    .er-title{font-size:1.15rem;font-weight:900;margin:2px 0 6px;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.2);}
+    .er-amt{font-size:2rem;font-weight:900;margin:2px 0 6px;text-shadow:0 3px 10px rgba(0,0,0,.2);position:relative;z-index:1;}
+    .er-amt small{font-size:0.9rem;font-weight:700;opacity:0.9;}
+    .er-info{font-size:0.75rem;font-weight:700;opacity:0.95;position:relative;z-index:1;background:rgba(0,0,0,.15);padding:8px 12px;border-radius:10px;display:flex;align-items:center;gap:8px;margin-bottom:12px;line-height:1.4;}
+    .er-info i{font-size:0.9rem;flex-shrink:0;}
+    .extra-rewards-btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;font-family:inherit;transition:all .2s;position:relative;z-index:1;letter-spacing:0.3px;background:#fff;color:#e84393;box-shadow:0 10px 24px rgba(0,0,0,.2);}
+    .extra-rewards-btn:active{transform:scale(0.97);}
+    .extra-rewards-btn:disabled{background:rgba(255,255,255,.3);color:rgba(255,255,255,.8);cursor:not-allowed;border:1px dashed rgba(255,255,255,.5);box-shadow:none;}
+    .extra-rewards-btn i{font-size:1.05rem;}
+    .er-loading{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin 0.8s linear infinite;}
     
     .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
     .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
@@ -234,65 +276,19 @@
     .bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
 
     .admin-slider{
-        position:fixed;
-        top:-160px;
-        left:50%;
-        transform:translateX(-50%);
-        width:94%;
-        max-width:460px;
-        z-index:1500;
-        transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-        pointer-events:none;
+        position:fixed;top:-160px;left:50%;transform:translateX(-50%);width:94%;max-width:460px;z-index:1500;
+        transition: top 0.55s cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none;
         background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);
-        border-radius:20px;
-        padding:13px 15px;
-        display:flex;
-        align-items:center;
-        gap:12px;
-        box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);
-        overflow:hidden;
+        border-radius:20px;padding:13px 15px;display:flex;align-items:center;gap:12px;
+        box-shadow:0 22px 55px rgba(49,46,129,.6), 0 0 0 1px rgba(255,255,255,.14);overflow:hidden;
     }
     .admin-slider.show{ top:14px; pointer-events:auto; }
-    .admin-slider::before{
-        content:'';
-        position:absolute;
-        inset:-2px;
-        background:conic-gradient(from 90deg,#6C5CE7,#A29BFE,#00cec9,#f6b04a,#e84393,#6C5CE7);
-        opacity:.18;
-        animation:ring 6s linear infinite;
-        pointer-events:none;
-    }
-    .as-icon{
-        position:relative;
-        width:44px;height:44px;
-        border-radius:14px;
-        background:linear-gradient(135deg,#f6b04a,#e84393);
-        display:flex;align-items:center;justify-content:center;
-        color:#fff;font-size:1.15rem;
-        box-shadow:0 8px 20px rgba(232,67,147,.5);
-        flex-shrink:0;
-    }
+    .admin-slider::before{content:'';position:absolute;inset:-2px;background:conic-gradient(from 90deg,#6C5CE7,#A29BFE,#00cec9,#f6b04a,#e84393,#6C5CE7);opacity:.18;animation:ring 6s linear infinite;pointer-events:none;}
+    .as-icon{position:relative;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f6b04a,#e84393);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;box-shadow:0 8px 20px rgba(232,67,147,.5);flex-shrink:0;}
     .as-content{flex:1;min-width:0;position:relative;z-index:1;}
     .as-title{color:#fff;font-weight:800;font-size:0.88rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .as-sub{color:rgba(255,255,255,.72);font-size:0.7rem;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .as-btn{
-        position:relative;
-        z-index:1;
-        background:linear-gradient(135deg,#f6b04a,#e84393);
-        color:#fff;
-        border:none;
-        padding:9px 15px;
-        border-radius:12px;
-        font-weight:800;
-        font-size:0.76rem;
-        cursor:pointer;
-        display:inline-flex;align-items:center;gap:6px;
-        box-shadow:0 8px 20px rgba(232,67,147,.45);
-        font-family:inherit;
-        white-space:nowrap;
-        flex-shrink:0;
-        transition:transform .15s;
-    }
+    .as-btn{position:relative;z-index:1;background:linear-gradient(135deg,#f6b04a,#e84393);color:#fff;border:none;padding:9px 15px;border-radius:12px;font-weight:800;font-size:0.76rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;box-shadow:0 8px 20px rgba(232,67,147,.45);font-family:inherit;white-space:nowrap;flex-shrink:0;transition:transform .15s;}
     .as-btn:active{transform:scale(0.95);}
 
     #joinModal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;}
@@ -448,90 +444,31 @@
     .th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
 
     .dots-btn{position:relative;}
-    .menu-popup{
-        display:none;
-        position:fixed;
-        top:70px;
-        right:16px;
-        z-index:11000;
-        width:200px;
-        background:#fff;
-        border-radius:18px;
-        box-shadow:0 18px 50px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.04);
-        overflow:hidden;
-        animation:menuPop .22s ease-out;
-    }
+    .menu-popup{display:none;position:fixed;top:70px;right:16px;z-index:11000;width:200px;background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.04);overflow:hidden;animation:menuPop .22s ease-out;}
     .menu-popup.show{display:block;}
     @keyframes menuPop{from{opacity:0;transform:translateY(-10px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
-    .menu-popup::before{
-        content:'';
-        position:absolute;
-        top:-8px;right:18px;
-        width:16px;height:16px;
-        background:#fff;
-        transform:rotate(45deg);
-        box-shadow:-2px -2px 4px rgba(0,0,0,.03);
-    }
-    .menu-item{
-        display:flex;align-items:center;gap:12px;
-        padding:14px 16px;
-        font-weight:700;font-size:.85rem;color:var(--text);
-        cursor:pointer;transition:background .15s;
-        border-bottom:1px solid #f1f5f9;
-    }
+    .menu-popup::before{content:'';position:absolute;top:-8px;right:18px;width:16px;height:16px;background:#fff;transform:rotate(45deg);box-shadow:-2px -2px 4px rgba(0,0,0,.03);}
+    .menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;font-size:.85rem;color:var(--text);cursor:pointer;transition:background .15s;border-bottom:1px solid #f1f5f9;}
     .menu-item:last-child{border-bottom:none;}
     .menu-item:hover{background:#f8fafc;}
     .menu-item:active{background:#f1f5f9;}
-    .menu-item i{
-        width:34px;height:34px;border-radius:10px;
-        display:flex;align-items:center;justify-content:center;
-        font-size:.95rem;color:#fff;
-        flex-shrink:0;
-    }
+    .menu-item i{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;color:#fff;flex-shrink:0;}
     .menu-item i.mi-privacy{background:linear-gradient(135deg,#6366f1,#818cf8);}
     .menu-item i.mi-disclaimer{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
     .menu-item i.mi-support{background:linear-gradient(135deg,#10b981,#34d399);}
     .menu-item .mi-text{flex:1;min-width:0;}
     .menu-item .mi-text small{display:block;font-size:.68rem;font-weight:600;color:#94a3b8;margin-top:2px;}
 
-    .legal-modal-overlay{
-        display:none;
-        position:fixed;inset:0;z-index:12000;
-        background:rgba(5,6,10,.88);
-        backdrop-filter:blur(10px);
-        align-items:flex-start;justify-content:center;
-        padding:16px;overflow-y:auto;
-    }
+    .legal-modal-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(5,6,10,.88);backdrop-filter:blur(10px);align-items:flex-start;justify-content:center;padding:16px;overflow-y:auto;}
     .legal-modal-overlay.active{display:flex;}
-    .legal-modal{
-        background:#fff;width:100%;max-width:680px;
-        border-radius:22px;
-        box-shadow:0 40px 100px rgba(0,0,0,.7);
-        margin:auto;
-        overflow:hidden;
-        animation:legalPop .35s;
-    }
+    .legal-modal{background:#fff;width:100%;max-width:680px;border-radius:22px;box-shadow:0 40px 100px rgba(0,0,0,.7);margin:auto;overflow:hidden;animation:legalPop .35s;}
     @keyframes legalPop{from{opacity:0;transform:scale(.95) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
-    .legal-header{
-        background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);
-        color:#fff;padding:20px 22px;
-        display:flex;align-items:center;justify-content:space-between;
-        position:sticky;top:0;z-index:10;
-    }
+    .legal-header{background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);color:#fff;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
     .legal-header h2{font-size:1.05rem;font-weight:900;display:flex;align-items:center;gap:10px;}
     .legal-header h2 i{font-size:1.1rem;}
-    .legal-close{
-        width:38px;height:38px;border-radius:50%;
-        background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
-        color:#fff;font-size:1rem;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;transition:all .2s;
-    }
+    .legal-close{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
     .legal-close:hover{background:rgba(239,68,68,.6);}
-    .legal-body{
-        padding:24px 26px 30px;
-        color:#0f172a;font-size:.86rem;line-height:1.85;
-        max-height:calc(100vh - 110px);overflow-y:auto;
-    }
+    .legal-body{padding:24px 26px 30px;color:#0f172a;font-size:.86rem;line-height:1.85;max-height:calc(100vh - 110px);overflow-y:auto;}
     .legal-body h1{font-size:1.45rem;font-weight:900;color:#4c1d95;margin:0 0 6px;letter-spacing:-.02em;}
     .legal-body h2{font-size:1.05rem;font-weight:800;color:#4c1d95;margin:24px 0 10px;padding-bottom:6px;border-bottom:2px solid #ede9fe;}
     .legal-body h3{font-size:.95rem;font-weight:800;color:#5b21b6;margin:16px 0 8px;}
@@ -540,41 +477,18 @@
     .legal-body li{margin-bottom:6px;font-weight:500;color:#334155;}
     .legal-body strong{color:#0f172a;font-weight:800;}
     .legal-body hr{border:none;height:1px;background:linear-gradient(90deg,transparent,#c4b5fd,transparent);margin:22px 0;}
-    .legal-body .last-updated{
-        display:inline-block;background:linear-gradient(135deg,#ede9fe,#ddd6fe);
-        color:#5b21b6;font-weight:800;font-size:.72rem;
-        padding:6px 14px;border-radius:999px;margin-bottom:14px;
-        border:1px solid rgba(139,92,246,.3);
-    }
-    .legal-body .consent-box{
-        background:linear-gradient(135deg,#eef2ff,#e0e7ff);
-        border:2px solid rgba(99,102,241,.3);
-        border-radius:16px;padding:16px 18px;margin-top:18px;
-    }
+    .legal-body .last-updated{display:inline-block;background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#5b21b6;font-weight:800;font-size:.72rem;padding:6px 14px;border-radius:999px;margin-bottom:14px;border:1px solid rgba(139,92,246,.3);}
+    .legal-body .consent-box{background:linear-gradient(135deg,#eef2ff,#e0e7ff);border:2px solid rgba(99,102,241,.3);border-radius:16px;padding:16px 18px;margin-top:18px;}
     .legal-body .consent-box h3{color:#4338ca;margin-top:0;}
     .legal-body .summary-table{width:100%;border-collapse:separate;border-spacing:0 6px;margin:14px 0;font-size:.78rem;}
     .legal-body .summary-table td{padding:10px 12px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);font-weight:600;color:#334155;}
     .legal-body .summary-table td:first-child{border-radius:10px 0 0 10px;font-weight:800;color:#4c1d95;width:34%;}
     .legal-body .summary-table td:last-child{border-radius:0 10px 10px 0;}
-    .legal-body .danger-box{
-        background:linear-gradient(135deg,#fef2f2,#fee2e2);
-        border-left:4px solid #ef4444;
-        padding:14px 16px;border-radius:12px;margin:14px 0;
-        font-weight:600;color:#991b1b;font-size:.82rem;
-    }
-    .legal-body .warn-box{
-        background:linear-gradient(135deg,#fffbeb,#fef3c7);
-        border-left:4px solid #f59e0b;
-        padding:14px 16px;border-radius:12px;margin:14px 0;
-        font-weight:600;color:#92400e;font-size:.82rem;
-    }
+    .legal-body .danger-box{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-left:4px solid #ef4444;padding:14px 16px;border-radius:12px;margin:14px 0;font-weight:600;color:#991b1b;font-size:.82rem;}
+    .legal-body .warn-box{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-left:4px solid #f59e0b;padding:14px 16px;border-radius:12px;margin:14px 0;font-weight:600;color:#92400e;font-size:.82rem;}
     .legal-body a{color:#6366f1;font-weight:700;text-decoration:none;word-break:break-all;}
     .legal-body a:hover{text-decoration:underline;}
-    .legal-footer{
-        padding:14px 26px 20px;text-align:center;
-        color:#94a3b8;font-size:.7rem;font-weight:700;
-        border-top:1px solid #f1f5f9;
-    }
+    .legal-footer{padding:14px 26px 20px;text-align:center;color:#94a3b8;font-size:.7rem;font-weight:700;border-top:1px solid #f1f5f9;}
     @media (max-width:400px){
         .legal-body{padding:20px 18px 24px;}
         .legal-header{padding:18px 18px;}
@@ -742,6 +656,24 @@
     </div>
 
     <div id="page-home" class="page-section active">
+        <!-- ✅ EXTRA REWARDS — Monetag Pop-up Ad (Admin Controlled) -->
+        <div id="extraRewardsCard" class="extra-rewards-card" style="display:none;">
+            <div class="er-header">
+                <div class="er-label"><i class="fas fa-bolt"></i> EXTRA REWARDS</div>
+                <div class="er-count" id="erCount">0/0</div>
+            </div>
+            <div class="er-title" id="erTitle">Pop-up Ad দেখে আয় করুন</div>
+            <div class="er-amt"><span id="erAmount">0.00</span> <small>TK / view</small></div>
+            <div class="er-info">
+                <i class="fas fa-info-circle"></i>
+                <span id="erInfoText">Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।</span>
+            </div>
+            <button class="extra-rewards-btn" id="erBtn" onclick="watchExtraRewardAd()">
+                <i class="fas fa-play-circle"></i>
+                <span id="erBtnText">Watch Ad & Earn</span>
+            </button>
+        </div>
+
         <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
         
@@ -937,15 +869,25 @@ const HISTORY_LIMIT = 25;
 
 /* ═══════════════════════════════════════════════════════════
    ✅ MONETAG HIGH-CPM CONFIG
-   Default Zone: 11878844 (direct HTML SDK load করা হয়েছে)
-   Admin panel থেকে zone id বদলালে dynamic reload হবে
    ═══════════════════════════════════════════════════════════ */
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
 let monetagSDKReady = false;
 let monetagInAppStarted = false;
 let lastMonetagShowTime = 0;
-const MONETAG_MIN_INTERVAL = 5000; // 5 sec capping between ads
+const MONETAG_MIN_INTERVAL = 5000;
+
+/* ═══════════════════════════════════════════════════════
+   ✅ EXTRA REWARDS CONFIG (Admin Panel থেকে control হবে)
+   Firebase path: config/extraReward
+   ═══════════════════════════════════════════════════════ */
+let extraRewardConfig = {
+    enabled: false,
+    amount: 0.5,
+    dailyLimit: 5,
+    title: 'Pop-up Ad দেখে আয় করুন',
+    infoText: 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
+};
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -954,7 +896,9 @@ let withdrawLevels = [];
 let appState = {
     user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
         adClaimedCurrentCycle: false,
-        claimWindowStartTime: 0
+        claimWindowStartTime: 0,
+        extraRewardDate: '',
+        extraRewardCount: 0
     },
     config: { adSlots: [], newTasks: {} }
 };
@@ -1002,22 +946,17 @@ function hasCooldown(type) {
 /* ═══════════════════════════════════════════════════════════
    ✅ MONETAG HIGH-CPM HELPERS
    ═══════════════════════════════════════════════════════════ */
-
-// SDK ready check (direct load + dynamic load উভয় ক্ষেত্রেই কাজ করবে)
 function isMonetagSDKReady(zoneId) {
     const fnName = 'show_' + String(zoneId);
     return typeof window[fnName] === 'function';
 }
 
-// Dynamic SDK reload (admin panel থেকে zone id বদলালে)
 function reloadMonetagSDK(zoneId) {
     zoneId = String(zoneId || '').trim();
     if (!zoneId) return;
-    // পুরাতন SDK script রিমুভ
     document.querySelectorAll('script[data-zone]').forEach(s => {
         if (s.dataset.zone !== zoneId) s.remove();
     });
-    // নতুন SDK inject
     if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
         const sc = document.createElement('script');
         sc.src = '//libtl.com/sdk.js';
@@ -1031,7 +970,6 @@ function reloadMonetagSDK(zoneId) {
     MONETAG_ZONE = zoneId;
 }
 
-// SDK ready হওয়ার জন্য অপেক্ষা
 async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
     const start = Date.now();
     while (Date.now() - start < maxWaitMs) {
@@ -1041,18 +979,15 @@ async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
     return false;
 }
 
-// ✅ HIGH-CPM: Rewarded Popup Ad (User initiated — সবচেয়ে বেশি CPM)
 async function showMonetagRewardedPopup(zoneId) {
     zoneId = String(zoneId || MONETAG_ZONE);
     const fnName = 'show_' + zoneId;
     
-    // Rate limiting (5 sec capping)
     const now = Date.now();
     if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) {
         throw new Error('Please wait a few seconds before next ad');
     }
     
-    // SDK ready check
     if (!isMonetagSDKReady(zoneId)) {
         const ok = await waitForMonetagSDK(zoneId, 4000);
         if (!ok) throw new Error('Ad Network Not Ready');
@@ -1060,45 +995,30 @@ async function showMonetagRewardedPopup(zoneId) {
     
     lastMonetagShowTime = now;
     
-    // ✅ Rewarded Popup — high CPM, promise based
     return new Promise((resolve, reject) => {
         try {
             window[fnName]('pop')
-                .then(() => {
-                    // user watched ad till the end
-                    resolve({ done: true });
-                })
-                .catch((e) => {
-                    // error or user closed early
-                    reject(new Error('Ad Closed'));
-                });
+                .then(() => resolve({ done: true }))
+                .catch(() => reject(new Error('Ad Closed')));
         } catch (e) {
             reject(new Error(e.message || 'Ad Error'));
         }
     });
 }
 
-// ✅ HIGH-CPM: In-App Interstitial (Auto show on page transitions)
 function startMonetagInAppInterstitial(zoneId, settings) {
     zoneId = String(zoneId || MONETAG_ZONE);
     const fnName = 'show_' + zoneId;
     if (monetagInAppStarted) return;
     
     settings = settings || {
-        frequency: 2,       // 2 ads
-        capping: 0.1,       // 0.1 hours = 6 min
-        interval: 100,      // 100 sec
-        timeout: 5,         // 5 sec delay
-        everyPage: false    // session save
+        frequency: 2, capping: 0.1, interval: 100, timeout: 5, everyPage: false
     };
     
     const start = () => {
         if (isMonetagSDKReady(zoneId)) {
             try {
-                window[fnName]({
-                    type: 'inApp',
-                    inAppSettings: settings
-                });
+                window[fnName]({ type: 'inApp', inAppSettings: settings });
                 monetagInAppStarted = true;
             } catch(e) {}
         } else {
@@ -1108,21 +1028,129 @@ function startMonetagInAppInterstitial(zoneId, settings) {
     start();
 }
 
-// ✅ HIGH-CPM: Interstitial format (non-rewarded, backup)
-async function showMonetagInterstitial(zoneId) {
-    zoneId = String(zoneId || MONETAG_ZONE);
-    const fnName = 'show_' + zoneId;
-    if (!isMonetagSDKReady(zoneId)) {
-        const ok = await waitForMonetagSDK(zoneId, 3000);
-        if (!ok) throw new Error('Ad Network Not Ready');
+/* ═══════════════════════════════════════════════════════
+   ✅ EXTRA REWARDS FUNCTIONS
+   ═══════════════════════════════════════════════════════ */
+function getTodayExtraRewardCount() {
+    const today = todayStr();
+    if (appState.user.extraRewardDate !== today) return 0;
+    return Number(appState.user.extraRewardCount || 0);
+}
+
+function updateExtraRewardUI() {
+    const card = document.getElementById('extraRewardsCard');
+    if (!card) return;
+
+    if (!extraRewardConfig.enabled) {
+        card.style.display = 'none';
+        return;
     }
-    return new Promise((resolve, reject) => {
-        try {
-            window[fnName]()
-                .then(() => resolve({ done: true }))
-                .catch(() => reject(new Error('Ad Closed')));
-        } catch (e) { reject(e); }
-    });
+    card.style.display = 'block';
+
+    const count = getTodayExtraRewardCount();
+    const limit = extraRewardConfig.dailyLimit;
+    const remaining = Math.max(0, limit - count);
+
+    const countEl = document.getElementById('erCount');
+    const titleEl = document.getElementById('erTitle');
+    const amountEl = document.getElementById('erAmount');
+    const infoEl = document.getElementById('erInfoText');
+    const btn = document.getElementById('erBtn');
+    const btnText = document.getElementById('erBtnText');
+
+    if (countEl) countEl.textContent = count + '/' + limit;
+    if (titleEl) titleEl.textContent = extraRewardConfig.title;
+    if (amountEl) amountEl.textContent = extraRewardConfig.amount.toFixed(2);
+    if (infoEl) infoEl.textContent = extraRewardConfig.infoText;
+
+    if (remaining <= 0) {
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.textContent = 'আজকের লিমিট শেষ ✓';
+    } else {
+        if (btn) btn.disabled = false;
+        if (btnText) btnText.textContent = 'Watch Ad & Earn +' + extraRewardConfig.amount.toFixed(2) + ' TK';
+    }
+}
+
+async function watchExtraRewardAd() {
+    if (!isOnline) { toast('No internet connection!'); return; }
+    if (!extraRewardConfig.enabled) { toast('❌ এই ফিচার এখনো চালু হয়নি'); return; }
+
+    const today = todayStr();
+    const count = getTodayExtraRewardCount();
+    if (count >= extraRewardConfig.dailyLimit) {
+        toast('❌ আজকের লিমিট শেষ! আগামীকাল আবার আসুন।');
+        updateExtraRewardUI();
+        return;
+    }
+
+    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
+
+    const btn = document.getElementById('erBtn');
+    const btnText = document.getElementById('erBtnText');
+    isAdWatching = true;
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading Ad...';
+
+    try {
+        await showMonetagRewardedPopup(MONETAG_ZONE);
+
+        const rewardAmount = extraRewardConfig.amount;
+        const split = computeCommissionSplit(rewardAmount);
+        const userReward = split.userReward;
+        const referrerCommission = split.referrerCommission;
+        const newCount = count + 1;
+
+        const newBal = Number(appState.user.balance || 0) + userReward;
+        const newEarn = Number(appState.user.totalEarned || 0) + userReward;
+
+        let adHist = appState.user.adHistory || {};
+        adHist['extra_' + Date.now()] = {
+            slot: 'Extra Reward',
+            amount: userReward,
+            timestamp: Date.now(),
+            type: 'extra'
+        };
+        const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
+        if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
+
+        await db.ref('users/' + appState.user.id).update({
+            balance: newBal,
+            totalEarned: newEarn,
+            extraRewardDate: today,
+            extraRewardCount: newCount,
+            adHistory: adHist
+        });
+
+        appState.user.balance = newBal;
+        appState.user.totalEarned = newEarn;
+        appState.user.extraRewardDate = today;
+        appState.user.extraRewardCount = newCount;
+        appState.user.adHistory = adHist;
+
+        if (referrerCommission > 0) {
+            await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
+        }
+
+        await updateTextElements();
+        updateExtraRewardUI();
+
+        toast('✅ +' + userReward.toFixed(2) + ' TK আয় হয়েছে! (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+
+    } catch (e) {
+        console.error('Extra Reward Error:', e);
+        if (e.message === 'Ad Closed' || e.message === 'Ad not completed') {
+            showAdError('⚠️ Ad Not Completed!', 'Pop-up Ad সম্পূর্ণ দেখতে হবে। আবার চেষ্টা করুন।');
+        } else if (e.message && e.message.includes('wait')) {
+            toast('⏱️ ' + e.message);
+        } else {
+            showAdError('⚠️ Ad Error', e.message || 'Ad লোড করা যায়নি। আবার চেষ্টা করুন।');
+        }
+    } finally {
+        isAdWatching = false;
+        updateExtraRewardUI();
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1719,6 +1747,10 @@ async function forceCycleReset() {
     renderAds(); updateCycleUI(); updateClaimWindowUI();
     toast('🔄 অ্যাড রিসেট হয়েছে!');
     try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0 }); } catch (e) {}
+    if (appState.user.extraRewardDate !== todayStr()) {
+        appState.user.extraRewardDate = '';
+        appState.user.extraRewardCount = 0;
+    }
 }
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
@@ -1790,7 +1822,6 @@ function checkPendingYoutubeReward() {
     return null;
 }
 
-/* ✅ FIXED: Cooldown টাস্কের ক্ষেত্রে ২৪ ঘন্টা পর আবার award */
 async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
@@ -1862,7 +1893,6 @@ function showBonus() {
 }
 function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
 
-/* ✅ HIGH-CPM Daily Bonus with Monetag Rewarded Popup */
 async function claimDailyBonus() {
     if (!isOnline) { toast('No internet connection!'); return; }
     const btn = document.getElementById('btnClaimBonus');
@@ -1874,7 +1904,6 @@ async function claimDailyBonus() {
         const agSlot = slots.find(s => s.network === 'adsgram');
         const mtSlot = slots.find(s => s.network === 'monetag');
         
-        // Ad 1: Adsgram
         if (agSlot && agSlot.id) {
             subText.innerText = '১ম অ্যাড লোড হচ্ছে (Adsgram)...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 1...';
@@ -1884,7 +1913,6 @@ async function claimDailyBonus() {
             if (!res || res.done !== true) throw new Error('Ad Closed');
         }
         
-        // Ad 2: Monetag Rewarded Popup (HIGH CPM)
         if (mtSlot && mtSlot.id) {
             subText.innerText = '২য় অ্যাড লোড হচ্ছে (Monetag)...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
@@ -1978,6 +2006,7 @@ function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI();
+    updateExtraRewardUI();
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -2011,12 +2040,6 @@ function trackAdClick() {
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ MAIN AD WATCH FUNCTION — HIGH-CPM MONETAG
-   - Monetag slot এ rewarded popup ব্যবহার করে (সর্বোচ্চ CPM)
-   - Adsgram, Gigapub backup রাখা
-   - Dynamic zone id support
-   ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
@@ -2039,7 +2062,6 @@ async function watchAd(i) {
         const adStartTime = Date.now();
         
         if (slot.network === 'monetag') {
-            // ✅ HIGH-CPM: Rewarded Popup for monetag
             const zone = String(slot.id || MONETAG_ZONE);
             await showMonetagRewardedPopup(zone);
             success = true;
@@ -2121,7 +2143,7 @@ function switchTab(tabId, el) {
     if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
     if (tabId === 'history') { loadAdHistory(); }
-    if (tabId === 'home') { updateClaimWindowUI(); }
+    if (tabId === 'home') { updateClaimWindowUI(); updateExtraRewardUI(); }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
@@ -2268,6 +2290,7 @@ function renderAds() {
     }
     updateAdClaimUI();
     updateClaimWindowUI();
+    updateExtraRewardUI();
 }
 
 function getTaskTypeIcon(type) {
@@ -2810,8 +2833,9 @@ function loadAdHistory() {
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const isBonus = it.type === 'bonus';
         const isClaim = it.type === 'adclaim';
-        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : 'fa-play-circle');
-        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : 'Ad Slot ' + it.slot);
+        const isExtra = it.type === 'extra';
+        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : (isExtra ? 'fa-bolt' : 'fa-play-circle'));
+        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : 'Ad Slot ' + it.slot));
         html += '<div class="history-item"><div class="history-item-left" style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ' + icon + '"></i></div><div class="history-info"><h5>' + title + '</h5><p>' + shortDate(it.timestamp) + '</p></div></div><div class="history-amount">+' + Number(it.amount || 0).toFixed(2) + ' TK</div></div>';
     });
     container.innerHTML = html;
@@ -2857,6 +2881,7 @@ async function updateTextElements() {
     updateRefTabCounts();
     updateAdClaimUI();
     updateClaimWindowUI();
+    updateExtraRewardUI();
 }
 
 function setLoading(isLoading) {
@@ -2979,7 +3004,6 @@ async function showAppAfterVerify() {
     startPeriodicRecheck();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
     startAdminSlider();
-    // ✅ HIGH-CPM: In-App Interstitial auto start after verify
     startMonetagInAppInterstitial(MONETAG_ZONE);
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
@@ -2992,7 +3016,6 @@ window.onload = () => {
     document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
-    // ✅ Monetag SDK ready check (direct load এর জন্য)
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
@@ -3002,6 +3025,7 @@ window.onload = () => {
             const resetTime = Number(appState.user.adsResetTime || 0);
             if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
             else updateCycleUI();
+            updateExtraRewardUI();
             startPeriodicRecheck();
             startAdminSlider();
             if (channelVerified) {
@@ -3032,7 +3056,18 @@ window.onload = () => {
             MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
-            // ✅ HIGH-CPM: Monetag zone id config থেকে লোড
+            // ✅ Extra Rewards config লোড
+            if (appState.config.extraReward) {
+                extraRewardConfig = {
+                    enabled: appState.config.extraReward.enabled !== false,
+                    amount: Number(appState.config.extraReward.amount || 0.5),
+                    dailyLimit: Number(appState.config.extraReward.dailyLimit || 5),
+                    title: appState.config.extraReward.title || 'Pop-up Ad দেখে আয় করুন',
+                    infoText: appState.config.extraReward.infoText || 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
+                };
+                updateExtraRewardUI();
+            }
+            
             if (appState.config.monetagZone) {
                 MONETAG_ZONE = String(appState.config.monetagZone);
                 if (MONETAG_ZONE !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(MONETAG_ZONE);
@@ -3053,12 +3088,9 @@ window.onload = () => {
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
             
-            // ✅ Ad SDK loaders (Direct + Dynamic)
             const slots = appState.config.adSlots || [];
             slots.forEach(slot => {
                 if (slot.network === 'monetag' && slot.id) {
-                    // Direct SDK already loaded with zone 11878844
-                    // If different zone, reload
                     if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
                 } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
                     const sc = document.createElement('script'); sc.id = 'adsg-script'; sc.src = 'https://sad.adsgram.ai/js/sad.min.js'; sc.async = true; document.body.appendChild(sc);
@@ -3068,7 +3100,7 @@ window.onload = () => {
             });
             
             if (isBooted) { 
-                updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI();
+                updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
                 if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
             }
         }
@@ -3086,7 +3118,8 @@ window.onload = () => {
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
                 withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
                 referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-                adClaimedCurrentCycle: false, claimWindowStartTime: 0
+                adClaimedCurrentCycle: false, claimWindowStartTime: 0,
+                extraRewardDate: '', extraRewardCount: 0
             };
             await userRef.set(appState.user);
 
@@ -3134,6 +3167,8 @@ window.onload = () => {
                 if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
                 if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
                 if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
+                if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
+                if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
@@ -3148,7 +3183,7 @@ window.onload = () => {
                 if (appState.user.lastActive !== today) await userRef.update({ lastActive: today });
 
                 await updateTextElements();
-                renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI();
+                renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
 
                 if (!isBooted) {
                     isBooted = true;
@@ -3171,9 +3206,9 @@ window.onload = () => {
                                 startClaimWindowTicker();
                             }
                             updateClaimWindowUI();
+                            updateExtraRewardUI();
                             if (appState.user.dailyBonusDate !== today) showBonus();
                             startAdminSlider();
-                            // ✅ HIGH-CPM: In-App Interstitial auto start
                             startMonetagInAppInterstitial(MONETAG_ZONE);
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
