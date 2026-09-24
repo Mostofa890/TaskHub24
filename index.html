@@ -9,6 +9,13 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MONETAG HIGH-CPM SDK — DIRECT LOAD (Zone: 11878844)
+     এই স্ক্রিপ্টটা সবচেয়ে আগে লোড হবে যাতে high CPM পাওয়া যায়
+     ═══════════════════════════════════════════════════════════ -->
+<script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
+
 <style>
     :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
     *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
@@ -636,7 +643,6 @@
 
 <div id="toast" class="toast">Alert</div>
 
-<!-- SHORT AD LOADING OVERLAY -->
 <div id="adLoadingOverlay">
     <div class="ad-loading-card">
         <div class="ad-loading-spinner"></div>
@@ -645,28 +651,19 @@
     </div>
 </div>
 
-<!-- THREE-DOT MENU POPUP -->
+<!-- THREE-DOT MENU -->
 <div id="menuPopup" class="menu-popup">
     <div class="menu-item" onclick="openLegalModal('privacy'); closeMenuPopup();">
         <i class="mi-privacy fas fa-shield-halved"></i>
-        <div class="mi-text">
-            Privacy Policy
-            <small>আমাদের ডেটা নীতি</small>
-        </div>
+        <div class="mi-text">Privacy Policy<small>আমাদের ডেটা নীতি</small></div>
     </div>
     <div class="menu-item" onclick="openLegalModal('disclaimer'); closeMenuPopup();">
         <i class="mi-disclaimer fas fa-triangle-exclamation"></i>
-        <div class="mi-text">
-            Disclaimer
-            <small>দাবিত্যাগ ও শর্তাবলী</small>
-        </div>
+        <div class="mi-text">Disclaimer<small>দাবিত্যাগ ও শর্তাবলী</small></div>
     </div>
     <div class="menu-item" onclick="openSupport(); closeMenuPopup();">
         <i class="mi-support fas fa-headset"></i>
-        <div class="mi-text">
-            Support
-            <small>সাপোর্টে যোগাযোগ</small>
-        </div>
+        <div class="mi-text">Support<small>সাপোর্টে যোগাযোগ</small></div>
     </div>
 </div>
 
@@ -678,13 +675,11 @@
       <button class="legal-close" onclick="closeLegalModal()"><i class="fas fa-times"></i></button>
     </div>
     <div class="legal-body" id="legalModalBody"></div>
-    <div class="legal-footer">
-      © 2025 Earn Wallet / NexEarn. All rights reserved.
-    </div>
+    <div class="legal-footer">© 2025 Earn Wallet / NexEarn. All rights reserved.</div>
   </div>
 </div>
 
-<div id="adErrorPopup"><div class="box"><div class="icon"><i class="fas fa-exclamation-triangle"></i></div><h3 id="adErrorTitle">⚠️ Ad Not Completed!</h3><p id="adErrorMsg">You must watch the full ad to earn the reward. Please do not close the ad early!</p><button class="btn-main" onclick="closeAdError()" style="max-width:200px;margin:0 auto;padding:12px;font-size:0.9rem;">I Understand</button></div></div>
+<div id="adErrorPopup"><div class="box"><div class="icon"><i class="fas fa-exclamation-triangle"></i></div><h3 id="adErrorTitle">⚠️ Ad Not Completed!</h3><p id="adErrorMsg">You must watch the full ad to earn the reward.</p><button class="btn-main" onclick="closeAdError()" style="max-width:200px;margin:0 auto;padding:12px;font-size:0.9rem;">I Understand</button></div></div>
 
 <div id="maintenanceOverlay"><div class="icon"><i class="fas fa-tools"></i></div><h2>🔧 Under Maintenance</h2><p id="maintenanceMsg">We're currently updating our system. Please check back later.</p><div class="time" id="maintenanceTime">⏳ Estimated time: 30 minutes</div></div>
 
@@ -747,9 +742,7 @@
     </div>
 
     <div id="page-home" class="page-section active">
-        <div class="sec-head">
-            <i class="fas fa-gift"></i> Daily Rewards
-        </div>
+        <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
         
         <div class="sec-head">
@@ -792,8 +785,8 @@
     <div id="page-tasks" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-tasks"></i> Tasks <span id="taskCountBadge" class="task-count-badge">0</span></div>
         <div class="tasks-inner-tabs">
-            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available Tasks</button>
-            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> Task History</button>
+            <button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available</button>
+            <button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
         </div>
         <div id="tasksPaneAvailable" class="tasks-inner-pane active"><div id="task-area" class="task-list"></div></div>
         <div id="tasksPaneHistory" class="tasks-inner-pane"><div id="taskHistoryArea"></div></div>
@@ -811,28 +804,15 @@
             <div class="card-title"><i class="fas fa-link" style="color:#0984e3;"></i> Your Referral Link</div>
             <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">এই লিংকটি শেয়ার করুন। বন্ধুরা যোগ দিলে আপনি <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
-            <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার করুন</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
+            <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
         
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
-            
             <div class="ref-inner-tabs">
-                <button class="ref-inner-tab active" id="refTabTotal" onclick="switchRefTab('total')">
-                    <i class="fas fa-user-friends"></i>
-                    <span>টোটাল রেফার</span>
-                    <span class="tab-count" id="refTabTotalCount">0</span>
-                </button>
-                <button class="ref-inner-tab tab-qualified" id="refTabQualified" onclick="switchRefTab('qualified')">
-                    <i class="fas fa-circle-check"></i>
-                    <span>কোয়ালিফাই</span>
-                    <span class="tab-count" id="refTabQualifiedCount">0</span>
-                </button>
-                <button class="ref-inner-tab tab-income" id="refTabIncome" onclick="switchRefTab('income')">
-                    <i class="fas fa-coins"></i>
-                    <span>রেফার ইনকাম</span>
-                    <span class="tab-count" id="refTabIncomeCount">0.00</span>
-                </button>
+                <button class="ref-inner-tab active" id="refTabTotal" onclick="switchRefTab('total')"><i class="fas fa-user-friends"></i><span>টোটাল</span><span class="tab-count" id="refTabTotalCount">0</span></button>
+                <button class="ref-inner-tab tab-qualified" id="refTabQualified" onclick="switchRefTab('qualified')"><i class="fas fa-circle-check"></i><span>কোয়ালিফাই</span><span class="tab-count" id="refTabQualifiedCount">0</span></button>
+                <button class="ref-inner-tab tab-income" id="refTabIncome" onclick="switchRefTab('income')"><i class="fas fa-coins"></i><span>ইনকাম</span><span class="tab-count" id="refTabIncomeCount">0.00</span></button>
             </div>
 
             <div class="ref-inner-pane active" id="refPaneTotal">
@@ -841,7 +821,7 @@
 
             <div class="ref-inner-pane" id="refPaneQualified">
                 <div class="ref-qualified-info" id="refQualifiedInfo">
-                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b id="refQualifiedMinText">২০ টাকা বা তার বেশি</b>। শুধু Qualified ইউজারের ইনকাম থেকে আপনি কমিশন পাবেন।
+                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b id="refQualifiedMinText">২০ টাকা বা তার বেশি</b>।
                 </div>
                 <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div></div>
             </div>
@@ -850,13 +830,12 @@
                 <div class="ref-income-balance-card">
                     <div class="rib-label">💰 Referral Income Balance</div>
                     <div class="rib-amt"><span id="refIncomeBalance">0.00</span> <span style="font-size:1.2rem;">টাকা</span></div>
-                    <div class="rib-info"><i class="fas fa-gift"></i> Minimum <b>১০ টাকা</b> হলে ক্লেইম করা যাবে</div>
+                    <div class="rib-info"><i class="fas fa-gift"></i> Minimum <b>১০ টাকা</b> হলে ক্লেইম</div>
                 </div>
                 <div id="refClaimNoteWrap"></div>
                 <button id="refClaimBtn" class="ref-claim-btn locked" onclick="claimReferralIncome()" disabled>
                     <i class="fas fa-lock"></i> <span id="refClaimBtnText">ক্লেইম করতে ১০ টাকা প্রয়োজন</span>
                 </button>
-
                 <div class="card-title" style="margin-top:22px; font-size:.95rem;"><i class="fas fa-coins" style="color:#f39c12;"></i> কমিশন হিস্ট্রি</div>
                 <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div></div>
             </div>
@@ -889,22 +868,20 @@
     <div id="page-withdraw" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-wallet" style="color:var(--primary);"></i> Withdraw Funds</div>
-            
             <div class="level-progress-card" id="levelProgressCard">
                 <div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div>
                 <div class="lpc-title" id="lpcTitle">Level 1</div>
                 <div class="lpc-track" id="lpcTrack"></div>
                 <div class="lpc-count" id="lpcCount">Complete this level to unlock the next</div>
             </div>
-            
             <div id="withdrawInfo" style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:15px;border:1px solid var(--border);">
-                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">📋 Withdraw Level</span><span style="font-weight:700;color:var(--primary);" id="wdLevel">Level 1</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">📋 Level</span><span style="font-weight:700;color:var(--primary);" id="wdLevel">Level 1</span></div>
                 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">👥 Qualified Refs</span><span style="font-weight:700;color:var(--warning);" id="wdQualifiedRefs">0/5</span></div>
-                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">💳 Withdraw Fee</span><span style="font-weight:700;color:var(--danger);" id="wdFee">5%</span></div>
-                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">⏱️ Processing Time</span><span style="font-weight:700;color:var(--success);" id="wdTime">30 Min-1 Hours</span></div>
-                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">💵 Amount Range</span><span style="font-weight:700;color:var(--primary);" id="wdRange">10 - 500 TK</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">💳 Fee</span><span style="font-weight:700;color:var(--danger);" id="wdFee">5%</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">⏱️ Time</span><span style="font-weight:700;color:var(--success);" id="wdTime">30 Min-1 Hours</span></div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">💵 Range</span><span style="font-weight:700;color:var(--primary);" id="wdRange">10 - 500 TK</span></div>
             </div>
-            <div class="input-group"><select id="wd-method"><option value="">Loading Methods...</option></select></div>
+            <div class="input-group"><select id="wd-method"><option value="">Loading...</option></select></div>
             <div class="input-group"><input type="text" id="wd-account" placeholder="Account Number" /></div>
             <div class="input-group"><input type="number" id="wd-amount" placeholder="Amount" /></div>
             <button class="btn-main" onclick="requestWithdraw()"><i class="fas fa-paper-plane"></i> Request Withdraw</button>
@@ -912,7 +889,7 @@
         </div>
         <div class="premium-card" style="margin-top:20px;">
             <div class="card-title"><i class="fas fa-history" style="color:#f39c12;"></i> Withdraw History</div>
-            <div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading history...</p></div>
+            <div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading...</p></div>
         </div>
     </div>
 </div>
@@ -957,6 +934,18 @@ const AD_DISPLAY_SLOTS = 2;
 const MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ MONETAG HIGH-CPM CONFIG
+   Default Zone: 11878844 (direct HTML SDK load করা হয়েছে)
+   Admin panel থেকে zone id বদলালে dynamic reload হবে
+   ═══════════════════════════════════════════════════════════ */
+const MONETAG_DEFAULT_ZONE = '11878844';
+let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
+let monetagSDKReady = false;
+let monetagInAppStarted = false;
+let lastMonetagShowTime = 0;
+const MONETAG_MIN_INTERVAL = 5000; // 5 sec capping between ads
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -1008,6 +997,132 @@ function isScreenshotTask(type) {
 }
 function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ MONETAG HIGH-CPM HELPERS
+   ═══════════════════════════════════════════════════════════ */
+
+// SDK ready check (direct load + dynamic load উভয় ক্ষেত্রেই কাজ করবে)
+function isMonetagSDKReady(zoneId) {
+    const fnName = 'show_' + String(zoneId);
+    return typeof window[fnName] === 'function';
+}
+
+// Dynamic SDK reload (admin panel থেকে zone id বদলালে)
+function reloadMonetagSDK(zoneId) {
+    zoneId = String(zoneId || '').trim();
+    if (!zoneId) return;
+    // পুরাতন SDK script রিমুভ
+    document.querySelectorAll('script[data-zone]').forEach(s => {
+        if (s.dataset.zone !== zoneId) s.remove();
+    });
+    // নতুন SDK inject
+    if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
+        const sc = document.createElement('script');
+        sc.src = '//libtl.com/sdk.js';
+        sc.dataset.zone = zoneId;
+        sc.dataset.sdk = 'show_' + zoneId;
+        sc.async = true;
+        sc.onload = () => { monetagSDKReady = true; };
+        sc.onerror = () => { monetagSDKReady = false; };
+        document.head.appendChild(sc);
+    }
+    MONETAG_ZONE = zoneId;
+}
+
+// SDK ready হওয়ার জন্য অপেক্ষা
+async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
+    const start = Date.now();
+    while (Date.now() - start < maxWaitMs) {
+        if (isMonetagSDKReady(zoneId)) return true;
+        await new Promise(r => setTimeout(r, 150));
+    }
+    return false;
+}
+
+// ✅ HIGH-CPM: Rewarded Popup Ad (User initiated — সবচেয়ে বেশি CPM)
+async function showMonetagRewardedPopup(zoneId) {
+    zoneId = String(zoneId || MONETAG_ZONE);
+    const fnName = 'show_' + zoneId;
+    
+    // Rate limiting (5 sec capping)
+    const now = Date.now();
+    if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) {
+        throw new Error('Please wait a few seconds before next ad');
+    }
+    
+    // SDK ready check
+    if (!isMonetagSDKReady(zoneId)) {
+        const ok = await waitForMonetagSDK(zoneId, 4000);
+        if (!ok) throw new Error('Ad Network Not Ready');
+    }
+    
+    lastMonetagShowTime = now;
+    
+    // ✅ Rewarded Popup — high CPM, promise based
+    return new Promise((resolve, reject) => {
+        try {
+            window[fnName]('pop')
+                .then(() => {
+                    // user watched ad till the end
+                    resolve({ done: true });
+                })
+                .catch((e) => {
+                    // error or user closed early
+                    reject(new Error('Ad Closed'));
+                });
+        } catch (e) {
+            reject(new Error(e.message || 'Ad Error'));
+        }
+    });
+}
+
+// ✅ HIGH-CPM: In-App Interstitial (Auto show on page transitions)
+function startMonetagInAppInterstitial(zoneId, settings) {
+    zoneId = String(zoneId || MONETAG_ZONE);
+    const fnName = 'show_' + zoneId;
+    if (monetagInAppStarted) return;
+    
+    settings = settings || {
+        frequency: 2,       // 2 ads
+        capping: 0.1,       // 0.1 hours = 6 min
+        interval: 100,      // 100 sec
+        timeout: 5,         // 5 sec delay
+        everyPage: false    // session save
+    };
+    
+    const start = () => {
+        if (isMonetagSDKReady(zoneId)) {
+            try {
+                window[fnName]({
+                    type: 'inApp',
+                    inAppSettings: settings
+                });
+                monetagInAppStarted = true;
+            } catch(e) {}
+        } else {
+            setTimeout(start, 500);
+        }
+    };
+    start();
+}
+
+// ✅ HIGH-CPM: Interstitial format (non-rewarded, backup)
+async function showMonetagInterstitial(zoneId) {
+    zoneId = String(zoneId || MONETAG_ZONE);
+    const fnName = 'show_' + zoneId;
+    if (!isMonetagSDKReady(zoneId)) {
+        const ok = await waitForMonetagSDK(zoneId, 3000);
+        if (!ok) throw new Error('Ad Network Not Ready');
+    }
+    return new Promise((resolve, reject) => {
+        try {
+            window[fnName]()
+                .then(() => resolve({ done: true }))
+                .catch(() => reject(new Error('Ad Closed')));
+        } catch (e) { reject(e); }
+    });
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1160,14 +1275,14 @@ async function claimAdEarnings() {
     if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন আগে!'); return; }
     
     if (appState.user.adClaimedCurrentCycle === true) {
-        toast('❌ এই সাইকেলে ইতিমধ্যে ক্লেইম করা হয়েছে! পরবর্তী রিসেটের জন্য অপেক্ষা করুন।');
+        toast('❌ এই সাইকেলে ইতিমধ্যে ক্লেইম করা হয়েছে!');
         updateAdClaimUI();
         return;
     }
     
     const windowRemain = getClaimWindowRemaining();
     if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) {
-        toast('⏰ ক্লেইম উইন্ডো (১ ঘন্টা) শেষ হয়ে গেছে! পরবর্তী রিসেটে আবার চেষ্টা করুন।');
+        toast('⏰ ক্লেইম উইন্ডো (১ ঘন্টা) শেষ!');
         updateAdClaimUI();
         return;
     }
@@ -1189,11 +1304,8 @@ async function claimAdEarnings() {
         if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
         
         await db.ref('users/' + appState.user.id).update({
-            balance: newBal,
-            totalEarned: newEarn,
-            adClaimedTotal: newClaimed,
-            adHistory: adHist,
-            adClaimedCurrentCycle: true
+            balance: newBal, totalEarned: newEarn, adClaimedTotal: newClaimed,
+            adHistory: adHist, adClaimedCurrentCycle: true
         });
         
         appState.user.balance = newBal;
@@ -1247,46 +1359,35 @@ function updateRefTabCounts() {
 
 function renderReferralList() {
     updateRefTabCounts();
-
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
-    if (refQualifiedMinText) {
-        refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
-    }
+    if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
 
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
     } else {
         let html = '';
-        const shown = allReferralDataCache.all.slice(0, HISTORY_LIMIT);
-        shown.forEach(u => {
+        allReferralDataCache.all.slice(0, HISTORY_LIMIT).forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
             const balClass = u.qualified ? 'qualified' : 'not-qualified';
             const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
             const isIncomeActive = u.qualified 
-                ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Commission Active</span>' 
+                ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Active</span>' 
                 : `<span style="font-size:0.65rem;color:#ff4757;font-weight:800;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">⏳ Need ${MIN_REFERRAL_BALANCE}TK</span>`;
             html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${initial}</div><div class="ref-user-info"><h5>${esc(u.name)} ${isIncomeActive}</h5><p>ID: ${u.id}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK ${checkMark}</div></div>`;
         });
-        if (allReferralDataCache.all.length > HISTORY_LIMIT) {
-            html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি রেফারেল দেখানো হচ্ছে</div>`;
-        }
         totalContainer.innerHTML = html;
     }
 
     const qualContainer = document.getElementById('myQualifiedReferralsList');
     if (allReferralDataCache.qualified.length === 0) {
-        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div>';
+        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified নেই</p></div>';
     } else {
         let html = '';
-        const shown = allReferralDataCache.qualified.slice(0, HISTORY_LIMIT);
-        shown.forEach(u => {
+        allReferralDataCache.qualified.slice(0, HISTORY_LIMIT).forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
-            html += `<div class="ref-user-item" style="background:linear-gradient(135deg,#f0fff9,#e6fff5);border-color:rgba(0,184,148,.3);"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${initial}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} <span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.15);padding:2px 6px;border-radius:6px;margin-left:5px;">✅ Qualified</span></h5><p style="color:#10b981;">ID: ${u.id} • Commission Active</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
+            html += `<div class="ref-user-item" style="background:linear-gradient(135deg,#f0fff9,#e6fff5);border-color:rgba(0,184,148,.3);"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${initial}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} ✅</h5><p style="color:#10b981;">ID: ${u.id}</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
         });
-        if (allReferralDataCache.qualified.length > HISTORY_LIMIT) {
-            html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি কোয়ালিফাইড রেফারেল দেখানো হচ্ছে</div>`;
-        }
         qualContainer.innerHTML = html;
     }
 
@@ -1305,50 +1406,39 @@ function updateRefClaimButton() {
         btn.classList.remove('locked');
         btn.classList.add('ready');
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম করুন (' + bal.toFixed(2) + ' টাকা)</span>';
-        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> আপনি ক্লেইম করার জন্য যোগ্য! ক্লেইম করলে সম্পূর্ণ ব্যালেন্স মেইন ওয়ালেটে যোগ হবে।</div>';
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম (' + bal.toFixed(2) + ' টাকা)</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> আপনি ক্লেইম করার জন্য যোগ্য!</div>';
     } else {
         btn.classList.add('locked');
         btn.classList.remove('ready');
         btn.disabled = true;
         const need = (REFERRAL_CLAIM_MIN - bal).toFixed(2);
-        btn.innerHTML = '<i class="fas fa-lock"></i> <span>ক্লেইম করতে আরও ' + need + ' টাকা প্রয়োজন</span>';
-        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> রেফারেল ইনকাম ব্যালেন্স <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> বা তার বেশি হলে ক্লেইম বাটন সক্রিয় হবে।</div>';
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>আরও ' + need + ' টাকা প্রয়োজন</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> হলে ক্লেইম সক্রিয় হবে।</div>';
     }
 }
 
 async function claimReferralIncome() {
     const bal = Number(appState.user.referralBalance || 0);
-    if (bal < REFERRAL_CLAIM_MIN) {
-        toast('❌ কমপক্ষে ' + REFERRAL_CLAIM_MIN + ' টাকা প্রয়োজন');
-        return;
-    }
+    if (bal < REFERRAL_CLAIM_MIN) { toast('❌ কমপক্ষে ' + REFERRAL_CLAIM_MIN + ' টাকা প্রয়োজন'); return; }
     if (!isOnline) { toast('No internet connection!'); return; }
     const btn = document.getElementById('refClaimBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ক্লেইম হচ্ছে...'; }
     try {
         const newMainBal = Number(appState.user.balance || 0) + bal;
-        await db.ref('users/' + appState.user.id).update({
-            balance: newMainBal,
-            referralBalance: 0
-        });
+        await db.ref('users/' + appState.user.id).update({ balance: newMainBal, referralBalance: 0 });
         appState.user.balance = newMainBal;
         appState.user.referralBalance = 0;
         await updateTextElements();
         renderReferralList();
-        toast('✅ ' + bal.toFixed(2) + ' টাকা সফলভাবে মেইন ওয়ালেটে যোগ হয়েছে!');
+        toast('✅ ' + bal.toFixed(2) + ' টাকা মেইন ওয়ালেটে যোগ হয়েছে!');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
-        console.error(e);
         toast('❌ ক্লেইম ব্যর্থ: ' + e.message);
-    } finally {
-        updateRefClaimButton();
-    }
+    } finally { updateRefClaimButton(); }
 }
 
-/* ═══════════════════════════════════════════════════════
-   TASK EXPIRY HELPERS
-   ═══════════════════════════════════════════════════════ */
+/* TASK EXPIRY HELPERS */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
     return daysMatch ? parseInt(daysMatch[1]) : 7;
@@ -1380,98 +1470,51 @@ function startTaskExpiryTicker() {
         if (!isBooted || !isOnline) return;
         const tasks = appState.config.newTasks || {};
         let needsRerender = false;
-
         Object.keys(tasks).forEach(taskId => {
             const task = tasks[taskId];
             if (!task) return;
             if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
-
             const deleteRemain = getTaskAutoDeleteRemaining(task);
-            if (deleteRemain !== null && deleteRemain <= 0) {
-                needsRerender = true;
-                return;
-            }
-
+            if (deleteRemain !== null && deleteRemain <= 0) { needsRerender = true; return; }
             const expiryWrap = document.querySelector('[data-expiry-task="' + taskId + '"]');
             if (expiryWrap) {
                 const remain = getTaskTimeRemaining(task);
                 const wasExpired = expiryWrap.dataset.expired === '1';
                 const isNowExpired = remain <= 0;
-
-                if (isNowExpired && !wasExpired) {
-                    needsRerender = true;
-                } else if (!isNowExpired && !wasExpired) {
+                if (isNowExpired && !wasExpired) needsRerender = true;
+                else if (!isNowExpired && !wasExpired) {
                     const textEl = expiryWrap.querySelector('.expiry-text');
                     if (textEl) textEl.textContent = '⏳ ' + fmtTaskTime(remain);
                 }
             }
-
-            const deleteWrap = document.querySelector('[data-delete-task="' + taskId + '"]');
-            if (deleteWrap) {
-                const textEl = deleteWrap.querySelector('.delete-text');
-                if (textEl && deleteRemain > 0) {
-                    textEl.textContent = fmtTaskTime(deleteRemain);
-                }
-            }
         });
-
         if (needsRerender) renderNewTasks();
     }, 1000);
 }
 function stopTaskExpiryTicker() {
-    if (taskExpiryTickerInterval) {
-        clearInterval(taskExpiryTickerInterval);
-        taskExpiryTickerInterval = null;
-    }
+    if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; }
 }
 
-// ANTI-HACK PROTECTION
+// ANTI-HACK
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
-        const isBlocked =
-            e.key === 'F12' ||
+        const isBlocked = e.key === 'F12' ||
             (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) ||
             (e.metaKey && e.altKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) ||
-            (e.ctrlKey && ['U','u'].includes(e.key)) ||
-            (e.metaKey && ['U','u'].includes(e.key));
+            (e.ctrlKey && ['U','u'].includes(e.key)) || (e.metaKey && ['U','u'].includes(e.key));
         if (isBlocked) { e.preventDefault(); e.stopPropagation(); return false; }
     }, true);
     document.addEventListener('selectstart', (e) => { e.preventDefault(); });
     document.addEventListener('dragstart', (e) => e.preventDefault());
-    let devtoolsAlertShown = false;
-    setInterval(() => {
-        const wDiff = window.outerWidth - window.innerWidth;
-        const hDiff = window.outerHeight - window.innerHeight;
-        if (wDiff > 160 || hDiff > 160) {
-            if (!devtoolsAlertShown) { devtoolsAlertShown = true; try { console.clear(); } catch(e) {} document.title = '🔒 Secure'; }
-        } else { devtoolsAlertShown = false; }
-    }, 1200);
-    setInterval(() => {
-        const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
-        if (realId && String(realId) !== String(tgUser.id)) { location.reload(); }
-    }, 5000);
-    try { Object.freeze(firebaseConfig); } catch(e) {}
-    window.__integrityCheck = function() {
-        if (!tgUser || !tgUser.id) return false;
-        if (tgUser.id === '123456') return true;
-        const realId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id;
-        return String(realId) === String(tgUser.id);
-    };
-    try { Object.defineProperty(window, 'appState', { configurable: false, writable: false, value: appState }); } catch(e) {}
-    const _secrets = { BOT_TOKEN, ADMIN_ID, IMGBB_API_KEY };
-    Object.freeze(_secrets);
 })();
 
 // THREE-DOT MENU
 function toggleMenuPopup(e) {
     if (e) e.stopPropagation();
     const popup = document.getElementById('menuPopup');
-    if (popup.classList.contains('show')) {
-        popup.classList.remove('show');
-    } else {
-        popup.classList.add('show');
-    }
+    if (popup.classList.contains('show')) popup.classList.remove('show');
+    else popup.classList.add('show');
 }
 function closeMenuPopup() {
     const popup = document.getElementById('menuPopup');
@@ -1481,43 +1524,21 @@ document.addEventListener('click', function(e) {
     const popup = document.getElementById('menuPopup');
     const dotsBtn = document.querySelector('.dots-btn');
     if (popup && popup.classList.contains('show')) {
-        if (!popup.contains(e.target) && (!dotsBtn || !dotsBtn.contains(e.target))) {
-            popup.classList.remove('show');
-        }
+        if (!popup.contains(e.target) && (!dotsBtn || !dotsBtn.contains(e.target))) popup.classList.remove('show');
     }
 });
 
 const LEGAL_CONTENT = {
-    privacy: `
-        <span class="last-updated">📅 Last Updated: Sep/23/2026</span>
-        <h1>📄 PRIVACY POLICY</h1>
-        <h2>১. ভূমিকা</h2>
-        <p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম।</p>
-        <h2>১২. যোগাযোগ</h2>
-        <ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul>
-        <hr>
-        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>
-    `,
-    disclaimer: `
-        <span class="last-updated">📅 Last Updated: Sep/23/2026</span>
-        <h1>⚠️ DISCLAIMER</h1>
-        <div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div>
-        <hr>
-        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>
-    `
+    privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
+    disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
 };
 
 function openLegalModal(type) {
     const modal = document.getElementById('legalModal');
     const title = document.getElementById('legalModalTitle');
     const body = document.getElementById('legalModalBody');
-    if (type === 'privacy') {
-        title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy';
-        body.innerHTML = LEGAL_CONTENT.privacy;
-    } else {
-        title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer';
-        body.innerHTML = LEGAL_CONTENT.disclaimer;
-    }
+    if (type === 'privacy') { title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy'; body.innerHTML = LEGAL_CONTENT.privacy; }
+    else { title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer'; body.innerHTML = LEGAL_CONTENT.disclaimer; }
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -1525,9 +1546,7 @@ function closeLegalModal() {
     document.getElementById('legalModal').classList.remove('active');
     document.body.style.overflow = '';
 }
-document.getElementById('legalModal').addEventListener('click', function(e) {
-    if (e.target === this) closeLegalModal();
-});
+document.getElementById('legalModal').addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
 
 // ADMIN SLIDER
 async function checkIfUserIsAdmin() {
@@ -1537,7 +1556,7 @@ async function checkIfUserIsAdmin() {
         let found = false;
         adminsSnap.forEach(child => {
             const a = child.val();
-            if (String(a.telegramId) === String(tgUser.id) || String(a.id) === String(tgUser.id) || String(child.key) === String(tgUser.id)) { found = true; }
+            if (String(a.telegramId) === String(tgUser.id) || String(a.id) === String(tgUser.id) || String(child.key) === String(tgUser.id)) found = true;
         });
         return found;
     } catch(e) { return false; }
@@ -1550,8 +1569,7 @@ async function startAdminSlider() {
     const slider = document.getElementById('adminSlider');
     if (!slider) return;
     stopAdminSlider();
-    const VISIBLE_MS = 10000;
-    const HIDDEN_MS = 7000;
+    const VISIBLE_MS = 10000, HIDDEN_MS = 7000;
     const runCycle = () => {
         if (!slider || !document.body.contains(slider)) return;
         if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
@@ -1613,11 +1631,8 @@ function startCooldownTicker() {
             const remain = getCooldownRemaining(tid);
             const timeEl = el.querySelector('.cd-time');
             if (timeEl) { 
-                if (remain > 0) { 
-                    timeEl.textContent = fmtCountdown(remain); 
-                } else { 
-                    needsRerender = true;
-                } 
+                if (remain > 0) timeEl.textContent = fmtCountdown(remain);
+                else needsRerender = true;
             }
         });
         if (needsRerender) renderNewTasks();
@@ -1682,7 +1697,7 @@ function setupUserSubmissionsListener() {
             }
         });
         renderNewTasks();
-        if (document.getElementById('tasksPaneHistory') && document.getElementById('tasksPaneHistory').classList.contains('active')) { loadTaskHistory(); }
+        if (document.getElementById('tasksPaneHistory') && document.getElementById('tasksPaneHistory').classList.contains('active')) loadTaskHistory();
     });
 }
 
@@ -1692,7 +1707,7 @@ async function startAdsResetCountdown() {
     appState.user.adsResetTime = resetTime;
     updateCycleUI();
     try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
-    toast('🎉 সব অ্যাড দেখা শেষ! ' + AD_RESET_HOURS + ' ঘন্টা পর আবার দেখতে পারবেন।');
+    toast('🎉 সব অ্যাড দেখা শেষ! ' + AD_RESET_HOURS + ' ঘন্টা পর আবার।');
 }
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
@@ -1701,18 +1716,9 @@ async function forceCycleReset() {
     appState.user.adClaimedCurrentCycle = false;
     appState.user.claimWindowStartTime = 0;
     stopClaimWindowTicker();
-    renderAds(); 
-    updateCycleUI();
-    updateClaimWindowUI();
-    toast('🔄 অ্যাড রিসেট হয়েছে! আবার অ্যাড দেখে ক্লেইম করতে পারবেন।');
-    try { 
-        await db.ref('users/' + tgUser.id).update({ 
-            dailyAds: {}, 
-            adsResetTime: 0,
-            adClaimedCurrentCycle: false,
-            claimWindowStartTime: 0
-        }); 
-    } catch (e) {}
+    renderAds(); updateCycleUI(); updateClaimWindowUI();
+    toast('🔄 অ্যাড রিসেট হয়েছে!');
+    try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0 }); } catch (e) {}
 }
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
@@ -1733,10 +1739,7 @@ function updateCycleUI() {
         compactEl.classList.remove('expired');
         return;
     }
-    if (isAllDisplayAdsWatched()) { 
-        startAdsResetCountdown(); 
-        return; 
-    }
+    if (isAllDisplayAdsWatched()) { startAdsResetCountdown(); return; }
     timeEl.textContent = 'Watch All';
     compactEl.classList.add('expired');
 }
@@ -1762,7 +1765,7 @@ async function uploadToImgBB(file) {
 async function uploadAudio(file) {
     const services = [ uploadToBashupload, uploadToTempSh, uploadToLitterbox, uploadToUguu, uploadToZeroXZero ];
     for (const fn of services) { try { return await fn(file); } catch (err) {} }
-    throw new Error('সব সার্ভার ব্যর্থ। আবার চেষ্টা করুন।');
+    throw new Error('সব সার্ভার ব্যর্থ।');
 }
 async function uploadToBashupload(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd }); const text = await res.text(); const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/); if (!match) throw new Error('fail'); return match[0] + '?download=1'; }
 async function uploadToTempSh(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd }); const text = (await res.text()).trim(); if (!text.startsWith('http')) throw new Error('fail'); return text; }
@@ -1787,24 +1790,16 @@ function checkPendingYoutubeReward() {
     return null;
 }
 
-/* ═══════════════════════════════════════════════════════
-   ✅ FIXED: awardExternalTaskReward
-   - Cooldown টাস্ক (YouTube / Survey) এর ক্ষেত্রে ২৪ ঘন্টা পর 
-     আবার award করা যাবে। আগে status='approved' থাকলে সাথে সাথে
-     return করে দিত, তাই ২য় সাইকেলে রিওয়ার্ড পাওয়া যেত না।
-   ═══════════════════════════════════════════════════════ */
+/* ✅ FIXED: Cooldown টাস্কের ক্ষেত্রে ২৪ ঘন্টা পর আবার award */
 async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
-    
     const userState = getTaskUserState(taskId);
     
-    // ✅ টাস্কের type বের করুন (appState.config থেকে, না পেলে DB থেকে)
     let taskType = '';
     const task = (appState.config.newTasks || {})[taskId];
-    if (task) {
-        taskType = String(task.type || '').toLowerCase();
-    } else {
+    if (task) taskType = String(task.type || '').toLowerCase();
+    else {
         try {
             const snap = await db.ref('config/newTasks/' + taskId + '/type').once('value');
             taskType = String(snap.val() || '').toLowerCase();
@@ -1812,20 +1807,11 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     }
     const isCool = hasCooldown(taskType);
     
-    // ✅ Cooldown টাস্কের ক্ষেত্রে: status 'approved' হলেও cooldown শেষ হলে আবার award হবে
     if (userState.status === 'approved') {
-        if (!isCool) {
-            // Non-cooldown টাস্ক — একবারই করা যাবে
-            return;
-        }
+        if (!isCool) return;
         const remain = getCooldownRemaining(taskId);
-        if (remain > 0) {
-            // এখনো cooldown শেষ হয়নি
-            return;
-        }
-        // ✅ Cooldown শেষ — award করা যাবে, continue
+        if (remain > 0) return;
     } else if (userState.status === 'pending') {
-        // Pending থাকলে award করব না
         return;
     }
     
@@ -1843,7 +1829,7 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
             userId: tgUser.id, userName: tgUser.first_name || 'User',
             username: tgUser.username || '', telegramId: tgUser.id,
             taskId: taskId, taskTitle: p.taskTitle || taskTypeLabel,
-            reward: baseReward, content: 'Auto-completed ' + taskTypeLabel + ' (external page)',
+            reward: baseReward, content: 'Auto-completed ' + taskTypeLabel,
             fileUrl: null, status: 'approved', autoApproved: true,
             createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
         });
@@ -1864,12 +1850,8 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
-        renderNewTasks(); 
-        loadTaskHistory();
-    } catch (e) { 
-        console.error(e); 
-        toast('❌ রিওয়ার্ড সমস্যা'); 
-    }
+        renderNewTasks(); loadTaskHistory();
+    } catch (e) { console.error(e); toast('❌ রিওয়ার্ড সমস্যা'); }
 }
 
 function showBonus() {
@@ -1879,6 +1861,8 @@ function showBonus() {
     document.getElementById('app').classList.add('blurred');
 }
 function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
+
+/* ✅ HIGH-CPM Daily Bonus with Monetag Rewarded Popup */
 async function claimDailyBonus() {
     if (!isOnline) { toast('No internet connection!'); return; }
     const btn = document.getElementById('btnClaimBonus');
@@ -1889,6 +1873,8 @@ async function claimDailyBonus() {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
         const mtSlot = slots.find(s => s.network === 'monetag');
+        
+        // Ad 1: Adsgram
         if (agSlot && agSlot.id) {
             subText.innerText = '১ম অ্যাড লোড হচ্ছে (Adsgram)...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 1...';
@@ -1897,12 +1883,14 @@ async function claimDailyBonus() {
             let res = await adCtrl.show();
             if (!res || res.done !== true) throw new Error('Ad Closed');
         }
+        
+        // Ad 2: Monetag Rewarded Popup (HIGH CPM)
         if (mtSlot && mtSlot.id) {
             subText.innerText = '২য় অ্যাড লোড হচ্ছে (Monetag)...';
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
-            if (typeof window['show_' + mtSlot.id] === 'function') { await window['show_' + mtSlot.id](); }
-            else throw new Error('Ad Network Not Ready');
+            await showMonetagRewardedPopup(mtSlot.id);
         }
+        
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -1917,7 +1905,7 @@ async function claimDailyBonus() {
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম সফল! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
-        toast(e.message === 'Ad Closed' ? '❌ অ্যাডটি সম্পূর্ণ দেখেননি!' : '❌ অ্যাড লোড সমস্যা: ' + e.message);
+        toast(e.message === 'Ad Closed' ? '❌ অ্যাডটি সম্পূর্ণ দেখেননি!' : '❌ অ্যাড সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
         btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
@@ -1932,36 +1920,24 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const refSnap = await db.ref('users/' + referrerId).once('value');
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
-        
         const referredUserBalance = Number(appState.user.balance || 0);
-        if (referredUserBalance < MIN_REFERRAL_BALANCE) {
-            return false;
-        }
+        if (referredUserBalance < MIN_REFERRAL_BALANCE) return false;
         
         const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
         const histId = 'com_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         commHist[histId] = { 
-            fromId: String(appState.user.id), 
-            fromName: appState.user.name || 'User', 
-            earnedAmount: Number(originalEarned), 
-            commission: commissionAmount, 
-            source: String(source || 'Earning'), 
-            rate: REF_COMMISSION_RATE, 
-            mode: REF_COMMISSION_MODE, 
-            timestamp: Date.now() 
+            fromId: String(appState.user.id), fromName: appState.user.name || 'User',
+            earnedAmount: Number(originalEarned), commission: commissionAmount,
+            source: String(source || 'Earning'), rate: REF_COMMISSION_RATE,
+            mode: REF_COMMISSION_MODE, timestamp: Date.now() 
         };
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
         
-        await db.ref('users/' + referrerId).update({ 
-            referralBalance: newRefBal, 
-            totalCommission: newTotalComm, 
-            commissionHistory: commHist 
-        });
-        
-        try { await sendNotification(referrerId, '💰 নতুন কমিশন পেয়েছেন! +' + commissionAmount.toFixed(4) + ' TK (Referral Income)'); } catch(e) {}
+        await db.ref('users/' + referrerId).update({ referralBalance: newRefBal, totalCommission: newTotalComm, commissionHistory: commHist });
+        try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK'); } catch(e) {}
         return true;
     } catch(e) { return false; }
 }
@@ -2000,10 +1976,7 @@ async function markVerified() {
 }
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
-    startCycleTimer();
-    startCooldownTicker();
-    startTaskExpiryTicker();
-    startClaimWindowTicker();
+    startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI();
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
@@ -2038,6 +2011,12 @@ function trackAdClick() {
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ✅ MAIN AD WATCH FUNCTION — HIGH-CPM MONETAG
+   - Monetag slot এ rewarded popup ব্যবহার করে (সর্বোচ্চ CPM)
+   - Adsgram, Gigapub backup রাখা
+   - Dynamic zone id support
+   ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
@@ -2060,16 +2039,12 @@ async function watchAd(i) {
         const adStartTime = Date.now();
         
         if (slot.network === 'monetag') {
-            if (typeof window['show_' + slot.id] === 'function') { 
-                await window['show_' + slot.id](); 
-                success = true; 
-            }
-            else throw new Error('Ad network not ready');
+            // ✅ HIGH-CPM: Rewarded Popup for monetag
+            const zone = String(slot.id || MONETAG_ZONE);
+            await showMonetagRewardedPopup(zone);
+            success = true;
         } else if (slot.network === 'gigapub') {
-            if (typeof window.showGiga === 'function') { 
-                await window.showGiga(); 
-                success = true; 
-            }
+            if (typeof window.showGiga === 'function') { await window.showGiga(); success = true; }
             else throw new Error('Ad network not ready');
         } else if (slot.network === 'adsgram') {
             if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
@@ -2082,15 +2057,12 @@ async function watchAd(i) {
         }
         
         if (loadingOverlay) loadingOverlay.classList.remove('active');
-        
         if (!success) throw new Error('Ad not completed');
         
         const watchDuration = (Date.now() - adStartTime) / 1000;
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's. Minimum ' + MIN_AD_WATCH_SECONDS + 's required.');
-            slotLocks[i] = false; 
-            isAdWatching = false; 
-            return;
+            slotLocks[i] = false; isAdWatching = false; return;
         }
         
         let newAds = appState.user.dailyAds || {};
@@ -2100,7 +2072,7 @@ async function watchAd(i) {
         appState.user.dailyAds = newAds;
         
         const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
-        toast('✅ Ad watched (' + Math.round(watchDuration) + 's)! ' + remaining + ' more for Slot ' + (i+1));
+        toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
         
         setTimeout(async () => { 
             renderAds(); 
@@ -2108,16 +2080,14 @@ async function watchAd(i) {
             if (isAllDisplayAdsWatched()) {
                 await startClaimWindowIfNeeded();
                 startAdsResetCountdown();
-            } else {
-                updateCycleUI();
-            }
+            } else updateCycleUI();
             updateClaimWindowUI();
         }, 500);
         
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         if (e.message === 'Ad Closed' || e.message === 'Ad not completed') {
-            showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished. Please watch the full ad.');
+            showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
         } else {
             showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
         }
@@ -2135,7 +2105,7 @@ function updateNetworkStatus() {
     const offlineOverlay = document.getElementById('offlineOverlay');
     const indicator = document.getElementById('offlineIndicator');
     if (!isOnline) { offlineOverlay.classList.add('active'); indicator.classList.add('show'); document.getElementById('app').style.display = 'none'; }
-    else { offlineOverlay.classList.remove('active'); indicator.classList.remove('show'); if (isBooted && !document.getElementById('joinModal').classList.contains('active')) { document.getElementById('app').style.display = 'block'; } }
+    else { offlineOverlay.classList.remove('active'); indicator.classList.remove('show'); if (isBooted && !document.getElementById('joinModal').classList.contains('active')) document.getElementById('app').style.display = 'block'; }
 }
 window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Internet reconnected!'); });
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet connection!'); });
@@ -2161,8 +2131,7 @@ async function calculateValidReferrals() {
         const keys = Object.keys(refs);
         if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
         let count = 0;
-        const allData = [];
-        const qualifiedData = [];
+        const allData = [], qualifiedData = [];
         await Promise.all(keys.map(async (rid) => {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
@@ -2189,11 +2158,7 @@ function getWithdrawLevel() {
     const completedWithdraws = Number(appState.user.withdrawCount || 0);
     const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
     const currentLevel = withdrawLevels[levelIndex];
-    return {
-        ...currentLevel,
-        level: currentLevel.level || (levelIndex + 1),
-        _index: levelIndex
-    };
+    return { ...currentLevel, level: currentLevel.level || (levelIndex + 1), _index: levelIndex };
 }
 
 function updateWithdrawInfo() {
@@ -2214,15 +2179,12 @@ function updateWithdrawInfo() {
     const notice = document.getElementById('wd-notice');
     
     if (!canWithdraw) {
-        notice.textContent = '⚠️ Level ' + currentLevelNum + ' এর জন্য ' + (reqRefs - validReferralCount) + ' জন Qualified Referral দরকার';
+        notice.textContent = '⚠️ Level ' + currentLevelNum + ' এর জন্য ' + (reqRefs - validReferralCount) + ' জন Qualified দরকার';
         notice.style.color = '#ff4757';
     } else {
         const remainingLevels = totalLevels - currentLevelNum;
-        if (remainingLevels > 0) {
-            notice.textContent = '✅ Level ' + currentLevelNum + ' এর জন্য যোগ্য! (আরও ' + remainingLevels + ' টি লেভেল বাকি আছে)';
-        } else {
-            notice.textContent = '🏆 সর্বোচ্চ লেভেলে আছেন! Withdraw করার জন্য যোগ্য';
-        }
+        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' যোগ্য! (আরও ' + remainingLevels + ' টি লেভেল বাকি)';
+        else notice.textContent = '🏆 সর্বোচ্চ লেভেল! Withdraw যোগ্য';
         notice.style.color = '#00b894';
     }
 }
@@ -2232,9 +2194,7 @@ function updateLevelProgressCard(currentLevelNum, totalLevels) {
     const trackEl = document.getElementById('lpcTrack');
     const countEl = document.getElementById('lpcCount');
     if (!titleEl || !trackEl || !countEl) return;
-    
     titleEl.textContent = 'Level ' + currentLevelNum;
-    
     let trackHtml = '';
     for (let i = 1; i <= totalLevels; i++) {
         let cls = 'lpc-dot';
@@ -2243,13 +2203,9 @@ function updateLevelProgressCard(currentLevelNum, totalLevels) {
         trackHtml += '<div class="' + cls + '" title="Level ' + i + '"></div>';
     }
     trackEl.innerHTML = trackHtml;
-    
     const completedCount = currentLevelNum - 1;
-    if (currentLevelNum >= totalLevels) {
-        countEl.innerHTML = '🏆 সর্বোচ্চ লেভেল! আপনি All Levels Complete করেছেন।';
-    } else {
-        countEl.innerHTML = '✅ সম্পূর্ণ: ' + completedCount + ' / ' + totalLevels + ' • পরবর্তী: Level ' + (currentLevelNum + 1);
-    }
+    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 সর্বোচ্চ লেভেল Complete!';
+    else countEl.innerHTML = '✅ সম্পূর্ণ: ' + completedCount + ' / ' + totalLevels + ' • পরবর্তী: Level ' + (currentLevelNum + 1);
 }
 function checkMaintenance() {
     if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
@@ -2429,11 +2385,7 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
             gradCls += ' grad-disabled';
         } else if (isCool && cooldownRemain > 0) {
-            actionHtml = `
-                <div class="task-countdown" data-cooldown-task="${taskId}">
-                    <div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div>
-                    <div class="cd-time">${fmtCountdown(cooldownRemain)}</div>
-                </div>`;
+            actionHtml = `<div class="task-countdown" data-cooldown-task="${taskId}"><div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`;
             gradCls += ' grad-disabled';
         } else if (isDone && !isCool) {
             actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`;
@@ -2444,14 +2396,8 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
         }
 
-        const expiryTextHtml = isExpired
-            ? '⛔ Expired'
-            : '⏳ ' + fmtTaskTime(expiryRemain);
-        const deleteHtml = (isExpired && deleteRemain > 0)
-            ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${taskId}">
-                   <i class="fas fa-trash-alt"></i> Auto-delete in <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span>
-               </div>`
-            : '';
+        const expiryTextHtml = isExpired ? '⛔ Expired' : '⏳ ' + fmtTaskTime(expiryRemain);
+        const deleteHtml = (isExpired && deleteRemain > 0) ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${taskId}"><i class="fas fa-trash-alt"></i> Auto-delete in <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span></div>` : '';
 
         renderedHtml += `
             <div class="task-item ${gradCls}">
@@ -2479,23 +2425,17 @@ function renderNewTasks() {
                         </div>
                         ${actionHtml}
                     </div>
-                    ${totalSlots > 0 && totalSlots <= 1000 ? `
-                    <div class="task-progress-mini"><div class="bar" style="width:${slotProgress}%"></div></div>
-                    ` : ''}
+                    ${totalSlots > 0 && totalSlots <= 1000 ? `<div class="task-progress-mini"><div class="bar" style="width:${slotProgress}%"></div></div>` : ''}
                 </div>
             </div>
         `;
     });
 
-    if (!hasVisibleTask) {
-        el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক নেই</p></div>';
-    } else {
-        el.innerHTML = renderedHtml;
-    }
+    if (!hasVisibleTask) el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>এখনো কোনো টাস্ক নেই</p></div>';
+    else el.innerHTML = renderedHtml;
 
     const badge = document.getElementById('taskCountBadge');
     if (badge) badge.textContent = visibleCount;
-
     if (visibleCount > 0) startCooldownTicker();
 }
 
@@ -2513,9 +2453,7 @@ function openTaskSubmit(taskId) {
         if (hasCooldown(type)) {
             const remain = getCooldownRemaining(taskId);
             if (remain > 0) { toast('⏱️ ' + fmtCountdown(remain) + ' পরে আবার করতে পারবেন'); return; }
-        } else {
-            toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন'); return;
-        }
+        } else { toast('✅ এই টাস্কটি আপনি সম্পন্ন করেছেন'); return; }
     }
 
     const type = (task.type || 'text').toLowerCase();
@@ -2567,44 +2505,42 @@ function openTaskSubmit(taskId) {
     let lockedOut = false;
 
     if (isPending) {
-        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি এই টাস্কটি জমা দিয়েছেন। Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span></div></div>`;
+        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">Admin যাচাই করার পর রিওয়ার্ড পাবেন।</span></div></div>`;
         lockedOut = true;
     } else if (isRejectedOrCancelled) {
         if (resubmitCount === 0) {
             canResubmit = true;
-            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 ${isCancelled ? 'Cancelled' : 'Rejected'} — Re-Submit Chance (1/1)</b><br><span style="font-weight:600;font-size:0.78rem;">Admin আপনার submission টি ${isCancelled ? 'cancel' : 'reject'} করেছেন। আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span></div></div>`;
+            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 Re-Submit Chance (1/1)</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি <b>শুধু একবার</b> আবার চেষ্টা করতে পারবেন।</span></div></div>`;
         } else {
             lockedOut = true;
-            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ ${isCancelled ? 'Cancelled' : 'Rejected'} — No More Re-Submit</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি ইতিমধ্যে re-submit ব্যবহার করে ফেলেছেন।</span></div></div>`;
+            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ No More Re-Submit</b><br><span style="font-weight:600;font-size:0.78rem;">আপনি re-submit ব্যবহার করে ফেলেছেন।</span></div></div>`;
         }
     }
 
     if (type === 'image' || type === 'image_upload') {
-        contentArea.innerHTML = `<label>📷 ছবি আপলোড করুন *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
+        contentArea.innerHTML = `<label>📷 ছবি আপলোড করুন *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (সর্বোচ্চ ৩০ MB)</small><label>📝 বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> ছবি আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}`;
     } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
-        contentArea.innerHTML = `<label>🎤 ভয়েস / অডিও আপলোড করুন *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small><label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="অতিরিক্ত তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করার পর <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> বাটনে ক্লিক করুন।</div>`}`;
+        contentArea.innerHTML = `<label>🎤 ভয়েস আপলোড করুন *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (সর্বোচ্চ ৫০০ MB)</small><label>📝 বর্ণনা (অপশনাল)</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> অডিও আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}`;
     } else if (type === 'text' || type === 'text_writing') {
-        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন। ভুল তথ্য দিলে রিজেক্ট হতে পারে।</div>`}`;
+        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন।</div>`}`;
     } else if (isScreenshotTask(type)) {
         const taskUrl = task.url || task.link || '';
         const hasUrl = taskUrl && taskUrl !== '#' && taskUrl !== 'undefined';
         contentArea.innerHTML = `
             <div class="task-open-link-box">
                 <div class="task-open-link-label">🔗 টাস্ক লিংক</div>
-                <button class="task-open-link-btn" onclick="openTaskLink('${esc(taskUrl)}')" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;cursor:not-allowed;"' : ''}>
-                    <i class="fas fa-external-link-alt"></i> Open Link
-                </button>
-                <small>👆 লিংকে ক্লিক করে টাস্কটি সম্পন্ন করুন, তারপর <b>স্ক্রিনশট</b> নিয়ে নিচে আপলোড করুন।</small>
+                <button class="task-open-link-btn" onclick="openTaskLink('${esc(taskUrl)}')" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;cursor:not-allowed;"' : ''}><i class="fas fa-external-link-alt"></i> Open Link</button>
+                <small>👆 লিংকে কাজ শেষ করে <b>স্ক্রিনশট</b> নিন।</small>
             </div>
             <label>📷 স্ক্রিনশট আপলোড করুন *</label>
             <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
             <small>JPG / PNG / WEBP (সর্বোচ্চ ৩০ MB)</small>
-            <label>📝 অতিরিক্ত বর্ণনা (অপশনাল)</label>
-            <textarea id="taskTextInput" rows="2" placeholder="প্রয়োজন হলে কিছু লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>
-            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-camera"></i> টাস্ক লিংকে কাজ শেষ করে <b>স্ক্রিনশট</b> নিন → তারপর ছবি আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b> চাপুন।</div>`}
+            <label>📝 বর্ণনা (অপশনাল)</label>
+            <textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-camera"></i> লিংকে কাজ শেষ → স্ক্রিনশট → আপলোড → <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}
         `;
     } else {
-        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="এখানে আপনার উত্তর / তথ্য লিখুন..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+        contentArea.innerHTML = `<label>📝 আপনার উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     }
 
     if (isPending) {
@@ -2637,8 +2573,8 @@ async function submitGenericTask() {
     if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ এই টাস্ক modal এ সাবমিট হয় না'); return; }
     if (!canSubmitTask(taskId)) {
         const s = getTaskUserState(taskId);
-        if (s.status === 'pending') toast('⏳ এই টাস্কটি ইতিমধ্যে জমা দেওয়া হয়েছে');
-        else toast('❌ এই টাস্কে আর re-submit করা যাবে না');
+        if (s.status === 'pending') toast('⏳ ইতিমধ্যে জমা দেওয়া হয়েছে');
+        else toast('❌ আর re-submit করা যাবে না');
         return;
     }
     const type = taskState.type;
@@ -2651,7 +2587,7 @@ async function submitGenericTask() {
         if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
             const input = document.getElementById('taskImageInput');
             const file = input && input.files[0];
-            if (!file) { toast('⚠️ স্ক্রিনশট / ছবি সিলেক্ট করুন'); return; }
+            if (!file) { toast('⚠️ ছবি সিলেক্ট করুন'); return; }
             if (file.size > 30 * 1024 * 1024) { toast('⚠️ ছবি ৩০ MB এর কম হতে হবে'); return; }
             taskState.submitting = true; actionBtn.disabled = true;
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
@@ -2694,7 +2630,7 @@ async function submitGenericTask() {
         appState.user.taskHistory[taskId] = Date.now();
 
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        toast('✅ জমা হয়েছে! অ্যাডমিন যাচাই করে রিওয়ার্ড দিবে।');
+        toast('✅ জমা হয়েছে!');
         closeTaskSubmit();
     } catch (err) {
         console.error('Submit error:', err);
@@ -2714,13 +2650,13 @@ function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ টাস্ক ব�
 async function loadTaskHistory() {
     const container = document.getElementById('taskHistoryArea');
     if (!container) return;
-    container.innerHTML = '<p style="text-align:center;color:#999;padding:30px 0;font-weight:600;">Loading history...</p>';
+    container.innerHTML = '<p style="text-align:center;color:#999;padding:30px 0;font-weight:600;">Loading...</p>';
     try {
         const snap = await db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).once('value');
         const subs = [];
         snap.forEach(child => { const v = child.val(); v._id = child.key; subs.push(v); });
         if (subs.length === 0) {
-            container.innerHTML = `<div class="empty-state" style="padding:50px 20px;"><i class="fas fa-clipboard-list"></i><p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p><p style="font-size:0.75rem; margin-top:8px; color:#bbb;">Available Tasks ট্যাব থেকে টাস্ক শুরু করুন</p></div>`;
+            container.innerHTML = `<div class="empty-state" style="padding:50px 20px;"><i class="fas fa-clipboard-list"></i><p>এখনো কোনো টাস্ক সম্পন্ন করেননি</p></div>`;
             return;
         }
         const byTask = {};
@@ -2748,36 +2684,25 @@ async function loadTaskHistory() {
             const ts = sub.createdAt || sub.timestamp || 0;
             const dateStr = ts ? new Date(ts).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
             const isAutoApproved = sub.autoApproved === true;
-            const reviewedAt = sub.reviewedAt ? new Date(sub.reviewedAt).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
             const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `<div class="th-reason-box"><i class="fas fa-info-circle"></i><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
-            const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;text-decoration:underline;font-weight:700;">View attached file</a></div></div>` : '';
-            const contentPreview = (sub.content && sub.content.length > 0 && !sub.fileUrl && sub.content.indexOf('Auto-completed') !== 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-align-left"></i><span style="word-break:break-word;">${esc(sub.content.substring(0, 120))}${sub.content.length > 120 ? '...' : ''}</span></div></div>` : '';
+            const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;font-weight:700;">View file</a></div></div>` : '';
             let actionHtml = '';
             if (taskMeta.type && hasCooldown(taskMeta.type) && status === 'approved') {
                 const remain = getCooldownRemaining(tid);
-                if (remain > 0) {
-                    actionHtml = `<div class="th-locked-note" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe); color:#4338ca;"><i class="fas fa-hourglass-half"></i> Next available in ${fmtCountdown(remain)}</div>`;
-                }
+                if (remain > 0) actionHtml = `<div class="th-locked-note" style="background:linear-gradient(135deg,#e0e7ff,#c7d2fe); color:#4338ca;"><i class="fas fa-hourglass-half"></i> Next in ${fmtCountdown(remain)}</div>`;
             }
             if ((status === 'rejected' || status === 'cancelled')) {
                 if (resubmitCount === 0) {
                     const isExpired = isTaskExpired(taskMeta);
-                    if (!isExpired) {
-                        actionHtml = `<button class="th-resubmit-btn" onclick="openTaskSubmit('${tid}')"><i class="fas fa-redo"></i> Re-Submit (1/1)</button>`;
-                    } else {
-                        actionHtml = `<div class="th-locked-note">⏰ Task expired — cannot re-submit</div>`;
-                    }
-                } else {
-                    actionHtml = `<div class="th-locked-note">🔒 You already used your one-time re-submit</div>`;
-                }
+                    if (!isExpired) actionHtml = `<button class="th-resubmit-btn" onclick="openTaskSubmit('${tid}')"><i class="fas fa-redo"></i> Re-Submit (1/1)</button>`;
+                    else actionHtml = `<div class="th-locked-note">⏰ Task expired</div>`;
+                } else actionHtml = `<div class="th-locked-note">🔒 One-time re-submit used</div>`;
             }
-            const historyCountHtml = (resubmitCount > 0) ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-list-ol"></i>Total submissions: <b>${subCount}</b></div></div>` : '';
-            html += `<div class="th-card ${stClass}"><div class="th-card-head"><div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div><span class="th-card-badge ${stClass}">${stLabel}</span></div><div class="th-card-meta"><div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div><div class="row"><i class="fas fa-calendar"></i> Submitted: ${dateStr}</div>${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;font-weight:700;">Auto-approved</span></div>` : (reviewedAt ? `<div class="row"><i class="fas fa-check-double"></i> Reviewed: ${reviewedAt}</div>` : '')}</div>${contentPreview}${fileHtml}${historyCountHtml}${reasonHtml}${actionHtml}</div>`;
+            html += `<div class="th-card ${stClass}"><div class="th-card-head"><div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div><span class="th-card-badge ${stClass}">${stLabel}</span></div><div class="th-card-meta"><div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div><div class="row"><i class="fas fa-calendar"></i> ${dateStr}</div>${isAutoApproved ? `<div class="row"><i class="fas fa-bolt"></i> <span style="color:#00b894;">Auto-approved</span></div>` : ''}</div>${fileHtml}${reasonHtml}${actionHtml}</div>`;
         });
         container.innerHTML = html;
     } catch (e) {
-        console.error('Task history load error:', e);
-        container.innerHTML = '<p style="text-align:center;color:#ef4444;padding:30px 0;font-weight:600;">Failed to load history</p>';
+        container.innerHTML = '<p style="text-align:center;color:#ef4444;padding:30px 0;font-weight:600;">Failed to load</p>';
     }
 }
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
@@ -2794,60 +2719,41 @@ async function requestWithdraw() {
     
     await calculateValidReferrals();
     
-    if (validReferralCount < reqRefs) {
-        toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন Qualified Referral দরকার!');
-        return;
-    }
+    if (validReferralCount < reqRefs) { toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন Qualified দরকার!'); return; }
     if (!method) return toast('Please select a payment method.');
-    if (!account || account.length < 3) return toast('Please enter a valid account number.');
+    if (!account || account.length < 3) return toast('Please enter a valid account.');
     if (isNaN(amount) || amount <= 0) return toast('Please enter a valid amount.');
-    if (amount < (level.minAmount || 10)) return toast('Minimum withdraw is ' + (level.minAmount || 10) + ' TK.');
-    if (amount > (level.maxAmount || 100)) return toast('Level ' + currentLevelNum + ' এর সর্বোচ্চ withdraw ' + (level.maxAmount || 100) + ' TK.');
+    if (amount < (level.minAmount || 10)) return toast('Minimum ' + (level.minAmount || 10) + ' TK.');
+    if (amount > (level.maxAmount || 100)) return toast('সর্বোচ্চ ' + (level.maxAmount || 100) + ' TK.');
     if (amount > appState.user.balance) return toast('Insufficient balance.');
     
     const feeAmount = (amount * (level.fee || 5)) / 100;
     try {
         const wdId = 'WD' + Date.now();
         await db.ref('withdrawals/' + wdId).set({
-            userId: appState.user.id,
-            userName: appState.user.name || 'User',
-            method, account, amount,
-            fee: feeAmount,
-            netAmount: amount - feeAmount,
-            level: currentLevelNum,
-            totalLevels: totalLevels,
-            requiredRefs: reqRefs,
-            validRefsAtRequest: validReferralCount,
-            status: 'pending',
-            timestamp: Date.now()
+            userId: appState.user.id, userName: appState.user.name || 'User',
+            method, account, amount, fee: feeAmount, netAmount: amount - feeAmount,
+            level: currentLevelNum, totalLevels: totalLevels,
+            requiredRefs: reqRefs, validRefsAtRequest: validReferralCount,
+            status: 'pending', timestamp: Date.now()
         });
         
         const newCount = (appState.user.withdrawCount || 0) + 1;
-        await db.ref('users/' + appState.user.id).update({
-            balance: appState.user.balance - amount,
-            withdrawCount: newCount
-        });
-        
+        await db.ref('users/' + appState.user.id).update({ balance: appState.user.balance - amount, withdrawCount: newCount });
         appState.user.balance = appState.user.balance - amount;
         appState.user.withdrawCount = newCount;
         
         document.getElementById('wd-account').value = '';
         document.getElementById('wd-amount').value = '';
         
-        const nextLevelMsg = (currentLevelNum < totalLevels) 
-            ? ' 🎉 Level ' + (currentLevelNum + 1) + ' আনলক হয়েছে!' 
-            : ' 🏆 সর্বোচ্চ লেভেলে পৌঁছেছেন!';
-        
-        toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK' + nextLevelMsg);
-        
-        await sendNotification(tgUser.id, '✅ Withdraw Request Sent!\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
-        await sendNotification(ADMIN_ID, '💰 New Withdraw\nUser: ' + appState.user.name + '\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
+        toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
+        await sendNotification(tgUser.id, '✅ Withdraw Request!\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
+        await sendNotification(ADMIN_ID, '💰 New Withdraw\nUser: ' + appState.user.name + '\nAmount: ' + amount + ' TK');
         
         await calculateValidReferrals();
         updateWithdrawInfo();
     } catch (e) {
-        console.error(e);
-        toast('❌ Error Processing Request: ' + e.message);
+        toast('❌ Error: ' + e.message);
     }
 }
 async function loadWithdrawHistory() {
@@ -2874,13 +2780,8 @@ function openSupport() { if (appState.config.supportLink) window.open(appState.c
 async function loadMyReferrals() {
     const container = document.getElementById('myReferralsList');
     if (container) container.innerHTML = '<p style="text-align:center;color:#999;padding:15px;">Loading...</p>';
-    try {
-        await calculateValidReferrals();
-        renderReferralList();
-    } catch (e) {
-        console.error(e);
-        if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>Load failed</p></div>';
-    }
+    try { await calculateValidReferrals(); renderReferralList(); }
+    catch (e) { if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>Load failed</p></div>'; }
 }
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
@@ -2895,9 +2796,6 @@ function loadCommissionHistory() {
         const rate = it.rate || REF_COMMISSION_RATE;
         html += '<div class="comm-item"><div class="comm-item-left"><div class="comm-item-avatar">' + initial + '</div><div class="comm-item-info"><h5>' + esc(it.fromName) + '</h5><p><i class="fas fa-coins" style="color:#f39c12;"></i> ' + esc(it.source || 'Earning') + ' • ' + rate + '%</p></div></div><div class="comm-item-amt">+' + Number(it.commission || 0).toFixed(4) + '<small>' + shortDate(it.timestamp) + '</small></div></div>';
     });
-    if (items.length > HISTORY_LIMIT) {
-        html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি কমিশন হিস্ট্রি দেখানো হচ্ছে</div>`;
-    }
     container.innerHTML = html;
 }
 function loadAdHistory() {
@@ -2907,7 +2805,7 @@ function loadAdHistory() {
     if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-play-circle"></i><p>এখনো কোনো অ্যাড দেখা হয়নি</p></div>'; document.getElementById('histAdCount').textContent = '0'; document.getElementById('histAdTotal').textContent = '0'; return; }
     const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     let adCount = 0, totalEarned = 0;
-    items.forEach(it => { if (it.type !== 'bonus') { adCount++; totalEarned += Number(it.amount || 0); } else { totalEarned += Number(it.amount || 0); } });
+    items.forEach(it => { if (it.type !== 'bonus') adCount++; totalEarned += Number(it.amount || 0); });
     let html = '';
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const isBonus = it.type === 'bonus';
@@ -2916,9 +2814,6 @@ function loadAdHistory() {
         const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : 'Ad Slot ' + it.slot);
         html += '<div class="history-item"><div class="history-item-left" style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ' + icon + '"></i></div><div class="history-info"><h5>' + title + '</h5><p>' + shortDate(it.timestamp) + '</p></div></div><div class="history-amount">+' + Number(it.amount || 0).toFixed(2) + ' TK</div></div>';
     });
-    if (items.length > HISTORY_LIMIT) {
-        html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি অ্যাড হিস্ট্রি দেখানো হচ্ছে</div>`;
-    }
     container.innerHTML = html;
     document.getElementById('histAdCount').textContent = adCount;
     document.getElementById('histAdTotal').textContent = totalEarned.toFixed(2);
@@ -2942,18 +2837,14 @@ async function updateTextElements() {
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
     
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
-    if (refQualifiedMinText) {
-        refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
-    }
+    if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
     
     const wdSel = document.getElementById('wd-method');
     let currentVal = wdSel.value;
     wdSel.innerHTML = '<option value="">Select Method</option>';
     if (appState.config.paymentMethods && Array.isArray(appState.config.paymentMethods)) {
         appState.config.paymentMethods.forEach(m => {
-            if (m && String(m).trim()) {
-                wdSel.innerHTML += '<option value="' + esc(m) + '" ' + (currentVal === m ? 'selected' : '') + '>' + esc(m) + '</option>';
-            }
+            if (m && String(m).trim()) wdSel.innerHTML += '<option value="' + esc(m) + '" ' + (currentVal === m ? 'selected' : '') + '>' + esc(m) + '</option>';
         });
     }
     
@@ -2994,9 +2885,7 @@ async function loadLeaderboard() {
             const idx = realUsers.findIndex(u => String(u._id) === String(c.userId));
             if (idx >= 0) { matched = true; realUsers[idx].balance = Math.max(realUsers[idx].balance, cBalance); realUsers[idx].referrals = Math.max(realUsers[idx].referrals, cRefs); realUsers[idx]._isCustom = true; }
         }
-        if (!matched) {
-            realUsers.push({ _id: 'custom_' + Math.random().toString(36).substr(2, 8), name: c.name || 'Admin Added', photo: c.photo || '', balance: cBalance, referrals: cRefs, _isCustom: true });
-        }
+        if (!matched) realUsers.push({ _id: 'custom_' + Math.random().toString(36).substr(2, 8), name: c.name || 'Admin Added', photo: c.photo || '', balance: cBalance, referrals: cRefs, _isCustom: true });
     });
     realUsers.sort((a, b) => b.balance - a.balance);
     const top10 = realUsers.slice(0, 10);
@@ -3021,26 +2910,17 @@ async function loadLeaderboard() {
 async function checkChannelMembership(userId, chatId, retries = 2) {
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const response = await fetch(
-                'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=@' + chatId + '&user_id=' + userId,
-                { cache: 'no-store' }
-            );
+            const response = await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=@' + chatId + '&user_id=' + userId, { cache: 'no-store' });
             const data = await response.json();
             if (data.ok && data.result) {
                 const status = data.result.status;
                 return ['member', 'administrator', 'creator', 'restricted'].includes(status);
             }
             if (data.error_code === 400) return false;
-            if (attempt < retries) {
-                await new Promise(r => setTimeout(r, 700 * (attempt + 1)));
-                continue;
-            }
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return false;
         } catch (e) {
-            if (attempt < retries) {
-                await new Promise(r => setTimeout(r, 700 * (attempt + 1)));
-                continue;
-            }
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return false;
         }
     }
@@ -3059,7 +2939,7 @@ function renderChannelButtons() {
         container.appendChild(btn);
     });
     const statusEl = document.getElementById('verifyStatus');
-    statusEl.textContent = '⏳ Checking channel membership...';
+    statusEl.textContent = '⏳ Checking...';
     statusEl.className = 'verify-status loading';
     if (verifyInterval) clearInterval(verifyInterval);
     verifyInterval = setInterval(checkAndUpdateStatus, 3000);
@@ -3099,6 +2979,8 @@ async function showAppAfterVerify() {
     startPeriodicRecheck();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
     startAdminSlider();
+    // ✅ HIGH-CPM: In-App Interstitial auto start after verify
+    startMonetagInAppInterstitial(MONETAG_ZONE);
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
@@ -3110,11 +2992,16 @@ window.onload = () => {
     document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
+    // ✅ Monetag SDK ready check (direct load এর জন্য)
+    if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
+    else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
+
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
         else if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
             const resetTime = Number(appState.user.adsResetTime || 0);
-            if (resetTime > 0 && resetTime <= Date.now()) { forceCycleReset(); } else { updateCycleUI(); }
+            if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
+            else updateCycleUI();
             startPeriodicRecheck();
             startAdminSlider();
             if (channelVerified) {
@@ -3144,6 +3031,13 @@ window.onload = () => {
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
             MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
+            
+            // ✅ HIGH-CPM: Monetag zone id config থেকে লোড
+            if (appState.config.monetagZone) {
+                MONETAG_ZONE = String(appState.config.monetagZone);
+                if (MONETAG_ZONE !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(MONETAG_ZONE);
+            }
+            
             if (appState.config.maintenance && appState.config.maintenance.active) {
                 document.getElementById('maintenanceOverlay').classList.add('active');
                 document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "We're updating.";
@@ -3158,25 +3052,24 @@ window.onload = () => {
                 document.getElementById('maintenanceOverlay').classList.remove('active');
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
+            
+            // ✅ Ad SDK loaders (Direct + Dynamic)
             const slots = appState.config.adSlots || [];
             slots.forEach(slot => {
-                if (slot.network === 'monetag' && slot.id && !document.querySelector('script[data-zone="' + slot.id + '"]')) {
-                    const sc = document.createElement('script'); sc.src = '//libtl.com/sdk.js'; sc.dataset.zone = slot.id; sc.dataset.sdk = 'show_' + slot.id; document.body.appendChild(sc);
+                if (slot.network === 'monetag' && slot.id) {
+                    // Direct SDK already loaded with zone 11878844
+                    // If different zone, reload
+                    if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
                 } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
-                    const sc = document.createElement('script'); sc.id = 'adsg-script'; sc.src = 'https://sad.adsgram.ai/js/sad.min.js'; document.body.appendChild(sc);
+                    const sc = document.createElement('script'); sc.id = 'adsg-script'; sc.src = 'https://sad.adsgram.ai/js/sad.min.js'; sc.async = true; document.body.appendChild(sc);
                 } else if (slot.network === 'gigapub' && !document.getElementById('giga-script')) {
-                    const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; document.body.appendChild(sc);
+                    const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; sc.async = true; document.body.appendChild(sc);
                 }
             });
+            
             if (isBooted) { 
-                updateTextElements(); 
-                renderAds(); 
-                renderNewTasks(); 
-                updateCycleUI(); 
-                updateClaimWindowUI();
-                if (document.getElementById('page-referral').classList.contains('active')) {
-                    renderReferralList();
-                }
+                updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI();
+                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
             }
         }
     });
@@ -3193,8 +3086,7 @@ window.onload = () => {
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
                 withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
                 referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-                adClaimedCurrentCycle: false,
-                claimWindowStartTime: 0
+                adClaimedCurrentCycle: false, claimWindowStartTime: 0
             };
             await userRef.set(appState.user);
 
@@ -3204,7 +3096,7 @@ window.onload = () => {
             if (refBy && String(refBy) !== String(tgUser.id)) {
                 const deviceId = getDeviceId();
                 const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
-                if (deviceSnap.exists()) { toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার করা হয়েছে!'); }
+                if (deviceSnap.exists()) toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার করা হয়েছে!');
                 else {
                     const refSnap = await db.ref('users/' + refBy).once('value');
                     if (refSnap.exists()) {
@@ -3251,15 +3143,12 @@ window.onload = () => {
                 } else document.getElementById('bannedOverlay').classList.remove('active');
 
                 const resetTime = Number(appState.user.adsResetTime || 0);
-                if (resetTime > 0 && resetTime <= Date.now()) { await forceCycleReset(); }
+                if (resetTime > 0 && resetTime <= Date.now()) await forceCycleReset();
 
-                if (appState.user.lastActive !== today) { await userRef.update({ lastActive: today }); }
+                if (appState.user.lastActive !== today) await userRef.update({ lastActive: today });
 
                 await updateTextElements();
-                renderAds();
-                renderNewTasks();
-                updateCycleUI();
-                updateClaimWindowUI();
+                renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI();
 
                 if (!isBooted) {
                     isBooted = true;
@@ -3278,21 +3167,21 @@ window.onload = () => {
                             setLoading(false);
                             startPeriodicRecheck();
                             if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
-                                if (!appState.user.claimWindowStartTime) {
-                                    await startClaimWindowIfNeeded();
-                                }
+                                if (!appState.user.claimWindowStartTime) await startClaimWindowIfNeeded();
                                 startClaimWindowTicker();
                             }
                             updateClaimWindowUI();
                             if (appState.user.dailyBonusDate !== today) showBonus();
                             startAdminSlider();
+                            // ✅ HIGH-CPM: In-App Interstitial auto start
+                            startMonetagInAppInterstitial(MONETAG_ZONE);
                         } else document.getElementById('offlineOverlay').classList.add('active');
                     }
 
                     const pendingSurvey = checkPendingSurveyReward();
-                    if (pendingSurvey) { setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500); }
+                    if (pendingSurvey) setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500);
                     const pendingYoutube = checkPendingYoutubeReward();
-                    if (pendingYoutube) { setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500); }
+                    if (pendingYoutube) setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500);
                 }
             }
         });
