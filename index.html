@@ -956,7 +956,7 @@ const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
 const MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
-const HISTORY_LIMIT = 25; // ✅ নতুন: হিস্টোরি লিমিট ২৫
+const HISTORY_LIMIT = 25;
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -1245,7 +1245,6 @@ function updateRefTabCounts() {
     if (incEl) incEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
 }
 
-// ✅ নতুন: রেফারেল লিস্ট রেন্ডার (সর্বোচ্চ ২৫টি)
 function renderReferralList() {
     updateRefTabCounts();
 
@@ -1254,7 +1253,6 @@ function renderReferralList() {
         refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
     }
 
-    // ✅ টোটাল রেফারেল (২৫টি লিমিট)
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
@@ -1276,7 +1274,6 @@ function renderReferralList() {
         totalContainer.innerHTML = html;
     }
 
-    // ✅ কোয়ালিফাই রেফারেল (২৫টি লিমিট)
     const qualContainer = document.getElementById('myQualifiedReferralsList');
     if (allReferralDataCache.qualified.length === 0) {
         qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div>';
@@ -1590,7 +1587,7 @@ function openAdminLink(link) {
     } catch(e) { try { window.open(link, '_blank'); } catch(err) {} }
 }
 
-// ✅ COOLDOWN HELPERS
+// COOLDOWN HELPERS
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -1789,11 +1786,49 @@ function checkPendingYoutubeReward() {
     localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube');
     return null;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ✅ FIXED: awardExternalTaskReward
+   - Cooldown টাস্ক (YouTube / Survey) এর ক্ষেত্রে ২৪ ঘন্টা পর 
+     আবার award করা যাবে। আগে status='approved' থাকলে সাথে সাথে
+     return করে দিত, তাই ২য় সাইকেলে রিওয়ার্ড পাওয়া যেত না।
+   ═══════════════════════════════════════════════════════ */
 async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
+    
     const userState = getTaskUserState(taskId);
-    if (userState.status === 'approved') return;
+    
+    // ✅ টাস্কের type বের করুন (appState.config থেকে, না পেলে DB থেকে)
+    let taskType = '';
+    const task = (appState.config.newTasks || {})[taskId];
+    if (task) {
+        taskType = String(task.type || '').toLowerCase();
+    } else {
+        try {
+            const snap = await db.ref('config/newTasks/' + taskId + '/type').once('value');
+            taskType = String(snap.val() || '').toLowerCase();
+        } catch(e) {}
+    }
+    const isCool = hasCooldown(taskType);
+    
+    // ✅ Cooldown টাস্কের ক্ষেত্রে: status 'approved' হলেও cooldown শেষ হলে আবার award হবে
+    if (userState.status === 'approved') {
+        if (!isCool) {
+            // Non-cooldown টাস্ক — একবারই করা যাবে
+            return;
+        }
+        const remain = getCooldownRemaining(taskId);
+        if (remain > 0) {
+            // এখনো cooldown শেষ হয়নি
+            return;
+        }
+        // ✅ Cooldown শেষ — award করা যাবে, continue
+    } else if (userState.status === 'pending') {
+        // Pending থাকলে award করব না
+        return;
+    }
+    
     const baseReward = Number(p.reward || 0);
     const split = computeCommissionSplit(baseReward);
     const userReward = split.userReward;
@@ -1801,8 +1836,9 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     const newBal = (appState.user.balance || 0) + userReward;
     const newEarn = (appState.user.totalEarned || 0) + userReward;
     const taskTimestamp = Date.now();
+    
     try {
-        const subId = 'sub_' + Date.now() + '_' + tgUser.id;
+        const subId = 'sub_' + Date.now() + '_' + tgUser.id + '_' + Math.random().toString(36).substr(2, 5);
         await db.ref('taskSubmissions/' + subId).set({
             userId: tgUser.id, userName: tgUser.first_name || 'User',
             username: tgUser.username || '', telegramId: tgUser.id,
@@ -1828,8 +1864,12 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
-        renderNewTasks(); loadTaskHistory();
-    } catch (e) { console.error(e); toast('❌ রিওয়ার্ড সমস্যা'); }
+        renderNewTasks(); 
+        loadTaskHistory();
+    } catch (e) { 
+        console.error(e); 
+        toast('❌ রিওয়ার্ড সমস্যা'); 
+    }
 }
 
 function showBonus() {
@@ -2337,7 +2377,6 @@ function isTaskAutoDeleted(task) {
     return remain <= 0;
 }
 
-// ✅ নতুন টাস্ক রেন্ডারিং: Cooldown টাস্কের ক্ষেত্রে ২৪ ঘন্টা পর পর Start Now বাটন দেখাবে
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -2390,7 +2429,6 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
             gradCls += ' grad-disabled';
         } else if (isCool && cooldownRemain > 0) {
-            // ✅ কুলডাউন টাস্ক: টাইমার শেষ হলে Start Now দেখাবে
             actionHtml = `
                 <div class="task-countdown" data-cooldown-task="${taskId}">
                     <div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div>
@@ -2403,7 +2441,6 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`;
             gradCls += ' grad-disabled';
         } else {
-            // ✅ কুলডাউন টাস্ক বা নতুন টাস্ক — Start Now সক্রিয়
             actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
         }
 
@@ -2471,7 +2508,6 @@ function openTaskSubmit(taskId) {
     const status = userState.status;
     const resubmitCount = userState.resubmitCount;
 
-    // ✅ কুলডাউন টাস্কের জন্য ২৪ ঘন্টা পর পর আবার শুরু করা যাবে
     if (status === 'approved') {
         const type = (task.type || '').toLowerCase();
         if (hasCooldown(type)) {
@@ -2846,7 +2882,6 @@ async function loadMyReferrals() {
         if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>Load failed</p></div>';
     }
 }
-// ✅ কমিশন হিস্ট্রি (২৫টি লিমিট)
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
     if (!container) return;
@@ -2865,7 +2900,6 @@ function loadCommissionHistory() {
     }
     container.innerHTML = html;
 }
-// ✅ অ্যাড আর্নিং হিস্ট্রি (২৫টি লিমিট)
 function loadAdHistory() {
     const container = document.getElementById('adHistoryList');
     const hist = appState.user.adHistory || {};
