@@ -61,14 +61,12 @@
     .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
     .sec-head i{color:var(--primary);font-size:1.2rem;}
     
-    /* ✅ COMPACT AD RESET TIMER (top-right corner) */
     .ad-reset-compact{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:6px 12px;border-radius:20px;font-size:0.68rem;font-weight:800;display:flex;align-items:center;gap:6px;box-shadow:0 6px 14px rgba(108,92,231,.35);font-variant-numeric:tabular-nums;}
     .ad-reset-compact i{font-size:0.7rem;opacity:0.9;}
     .ad-reset-compact.expired{background:linear-gradient(135deg,#00b894,#00cec9);}
     .ad-reset-compact .rst-label{opacity:0.85;font-size:0.6rem;letter-spacing:0.3px;}
     .ad-reset-compact .rst-time{font-weight:900;font-size:0.72rem;}
     
-    /* ✅ 2 Ad Slots grid */
     .ad-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;}
     .ad-card{position:relative;padding:3px;border-radius:22px;background:conic-gradient(from 0deg,#ff9a3d,#ff5e7a,#4f8cff,#38d6ff,#ff9a3d);animation:spinBorder 6s linear infinite;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.08);height:135px;}
     @keyframes spinBorder{0%{background-position:0 0;}100%{background-position:360px 0;}}
@@ -81,7 +79,6 @@
     .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
     .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
     
-    /* ✅ AD TOTAL CLAIM BOX */
     .ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(0,184,148,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
     .ad-claim-box::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;top:-50px;right:-30px;}
     .ad-claim-box::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.1);border-radius:50%;bottom:-40px;left:-20px;}
@@ -94,7 +91,6 @@
     .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
     .ad-claim-btn:disabled:active{transform:none;}
     
-    /* Progress bar for ad completion */
     .ad-progress-wrap{margin:0 20px 12px;background:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.04);}
     .ad-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.78rem;font-weight:800;}
     .ad-progress-header .aph-left{color:#334155;}
@@ -315,39 +311,15 @@
     #adErrorPopup .box .icon{font-size:48px;color:var(--danger);margin-bottom:12px;}
     #adErrorPopup .box h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;}
     #adErrorPopup .box p{font-size:14px;color:var(--text-light);line-height:1.6;margin-bottom:16px;}
-    #adTimerOverlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.78);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:24px;flex-direction:column;}
-    #adTimerOverlay.active{display:flex;}
-    .timer-card{width:100%;max-width:400px;background:linear-gradient(145deg,#1a1f2e,#131724);border-radius:32px;padding:32px 24px 28px;border:1px solid rgba(255,255,255,0.07);box-shadow:0 30px 80px rgba(0,0,0,0.7);text-align:center;position:relative;overflow:hidden;animation:pop 0.35s ease-out;}
-    .timer-card::before{content:'';position:absolute;inset:-2px;background:conic-gradient(from 0deg,rgba(108,92,231,0.2),rgba(0,184,148,0.2),rgba(250,204,21,0.15),rgba(108,92,231,0.2));filter:blur(20px);opacity:0.5;animation:ring 4s linear infinite;pointer-events:none;}
-    .timer-glow{position:absolute;width:200px;height:200px;background:radial-gradient(circle at 30% 20%,rgba(108,92,231,0.25),transparent 60%);top:-80px;right:-60px;pointer-events:none;}
-    .timer-glow2{position:absolute;width:180px;height:180px;background:radial-gradient(circle at 70% 80%,rgba(0,184,148,0.2),transparent 55%);bottom:-60px;left:-50px;pointer-events:none;}
-    .timer-card>*{position:relative;z-index:2;}
-    .timer-icon-wrap{display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;background:rgba(108,92,231,0.15);border-radius:50%;margin-bottom:12px;border:1px solid rgba(108,92,231,0.2);animation:floaty 2.8s ease-in-out infinite;}
-    .timer-icon-wrap i{font-size:32px;color:var(--secondary);}
-    .timer-title{font-size:1.3rem;font-weight:800;color:#fff;margin-bottom:2px;letter-spacing:0.3px;}
-    .timer-sub{font-size:0.85rem;color:rgba(255,255,255,0.55);font-weight:500;margin-bottom:20px;}
-    .timer-circle-wrap{position:relative;width:140px;height:140px;margin:8px auto 16px;}
-    .timer-circle-wrap svg{transform:rotate(-90deg);width:140px;height:140px;}
-    .timer-circle-bg{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:6;}
-    .timer-circle-progress{fill:none;stroke:url(#timerGrad);stroke-width:6;stroke-linecap:round;stroke-dasharray:377;stroke-dashoffset:377;transition:stroke-dashoffset 0.4s ease;}
-    .timer-number{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;}
-    .timer-number .big{font-size:3rem;font-weight:900;line-height:1;letter-spacing:1px;background:linear-gradient(135deg,#fff,#c8d0e0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-    .timer-number .label{font-size:0.65rem;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:2px;-webkit-text-fill-color:rgba(255,255,255,0.4);}
-    .timer-bar-wrap{background:rgba(255,255,255,0.06);border-radius:20px;height:6px;overflow:hidden;margin:8px 0 16px;position:relative;}
-    .timer-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--secondary),#00cec9);border-radius:20px;transition:width 0.35s ease;box-shadow:0 0 20px rgba(108,92,231,0.3);}
-    .timer-network{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.5);margin-bottom:6px;}
-    .timer-network .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
-    .timer-network .status-dot.good{background:var(--success);box-shadow:0 0 12px rgba(0,184,148,0.4);}
-    .timer-network .status-dot.slow{background:var(--warning);box-shadow:0 0 12px rgba(243,156,18,0.4);}
-    .timer-network .status-dot.poor{background:var(--danger);box-shadow:0 0 12px rgba(255,71,87,0.4);}
-    .timer-extra{display:flex;justify-content:center;gap:20px;font-size:0.7rem;color:rgba(255,255,255,0.35);font-weight:500;margin-bottom:18px;}
-    .timer-extra span i{margin-right:4px;}
-    .timer-actions{display:flex;gap:12px;}
-    .timer-actions button{flex:1;padding:12px 16px;border-radius:16px;border:none;font-weight:700;font-size:0.9rem;cursor:pointer;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;}
-    .timer-actions button:active{transform:scale(0.96);}
-    .timer-actions .btn-cancel{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6);border:1px solid rgba(255,255,255,0.06);}
-    .timer-actions .btn-waiting{background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.3);cursor:not-allowed;border:1px solid rgba(255,255,255,0.03);}
-    .timer-actions .btn-waiting i{animation:spin 1s linear infinite;}
+
+    /* ✅ Ad loading overlay (short) */
+    #adLoadingOverlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;flex-direction:column;}
+    #adLoadingOverlay.active{display:flex;}
+    .ad-loading-card{background:linear-gradient(145deg,#1a1f2e,#131724);border-radius:24px;padding:28px 24px;text-align:center;max-width:320px;width:100%;border:1px solid rgba(255,255,255,0.08);box-shadow:0 30px 80px rgba(0,0,0,0.6);}
+    .ad-loading-spinner{width:56px;height:56px;border-radius:50%;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--primary);border-right-color:var(--secondary);margin:0 auto 16px;animation:spin 1s linear infinite;}
+    .ad-loading-title{color:#fff;font-weight:800;font-size:1rem;margin-bottom:6px;}
+    .ad-loading-sub{color:rgba(255,255,255,0.6);font-size:0.8rem;font-weight:600;}
+
     .ref-user-item{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#f9f9ff,#f2f4ff);padding:12px 15px;border-radius:14px;margin-bottom:10px;border:1px solid rgba(108,92,231,0.1);}
     .ref-user-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
     .ref-user-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0;}
@@ -460,9 +432,6 @@
     .th-resubmit-btn:active{transform:scale(0.98);}
     .th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
 
-    /* ═══════════════════════════════════════════════════════
-       ✅ THREE-DOT MENU + LEGAL MODAL STYLES
-       ═══════════════════════════════════════════════════════ */
     .dots-btn{position:relative;}
     .menu-popup{
         display:none;
@@ -510,7 +479,6 @@
     .menu-item .mi-text{flex:1;min-width:0;}
     .menu-item .mi-text small{display:block;font-size:.68rem;font-weight:600;color:#94a3b8;margin-top:2px;}
 
-    /* LEGAL MODAL */
     .legal-modal-overlay{
         display:none;
         position:fixed;inset:0;z-index:12000;
@@ -598,7 +566,6 @@
         .menu-popup{width:190px;}
     }
 
-    /* ✅ NEW: Referral Inner Tabs Styles */
     .ref-inner-tabs{display:flex;gap:6px;padding:0 0 14px;margin-bottom:10px;border-bottom:2px solid #f1f5f9;}
     .ref-inner-tab{flex:1;padding:10px 8px;border-radius:12px;background:#f8fafc;color:#6b7280;font-weight:800;font-size:0.76rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:all .2s;font-family:inherit;position:relative;}
     .ref-inner-tab .tab-count{font-size:0.68rem;font-weight:800;background:rgba(108,92,231,0.15);color:var(--primary);padding:2px 8px;border-radius:20px;line-height:1.2;}
@@ -609,7 +576,6 @@
     .ref-inner-pane{display:none;}
     .ref-inner-pane.active{display:block;animation:fadeIn .25s ease;}
 
-    /* ✅ NEW: Referral Income Balance Card */
     .ref-income-balance-card{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;padding:18px 20px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(243,156,18,.35);}
     .ref-income-balance-card::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.18);border-radius:50%;top:-50px;right:-40px;}
     .ref-income-balance-card::after{content:'';position:absolute;width:80px;height:80px;background:rgba(255,255,255,.12);border-radius:50%;bottom:-40px;left:-20px;}
@@ -652,9 +618,16 @@
 
 <div id="toast" class="toast">Alert</div>
 
-<!-- ═══════════════════════════════════════════════════════
-     ✅ THREE-DOT MENU POPUP
-     ═══════════════════════════════════════════════════════ -->
+<!-- ✅ SHORT AD LOADING OVERLAY (not a timer, just a loader while ad network opens) -->
+<div id="adLoadingOverlay">
+    <div class="ad-loading-card">
+        <div class="ad-loading-spinner"></div>
+        <div class="ad-loading-title">Opening Ad…</div>
+        <div class="ad-loading-sub">Please wait, do not close</div>
+    </div>
+</div>
+
+<!-- THREE-DOT MENU POPUP -->
 <div id="menuPopup" class="menu-popup">
     <div class="menu-item" onclick="openLegalModal('privacy'); closeMenuPopup();">
         <i class="mi-privacy fas fa-shield-halved"></i>
@@ -679,9 +652,7 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     ✅ LEGAL MODAL (Privacy Policy & Disclaimer)
-     ═══════════════════════════════════════════════════════ -->
+<!-- LEGAL MODAL -->
 <div class="legal-modal-overlay" id="legalModal">
   <div class="legal-modal">
     <div class="legal-header">
@@ -717,21 +688,6 @@
         </div>
     </div></div>
 </div>
-
-<div id="adTimerOverlay"><div class="timer-card">
-    <div class="timer-glow"></div><div class="timer-glow2"></div>
-    <div class="timer-icon-wrap"><i class="fas fa-hourglass-half"></i></div>
-    <div class="timer-title" id="timerTitle">⏳ Preparing Ad</div>
-    <div class="timer-sub" id="timerSub">Please wait while we load your ad…</div>
-    <div class="timer-circle-wrap">
-        <svg viewBox="0 0 140 140"><defs><linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#6C5CE7" /><stop offset="50%" stop-color="#A29BFE" /><stop offset="100%" stop-color="#00cec9" /></linearGradient></defs><circle class="timer-circle-bg" cx="70" cy="70" r="60" /><circle class="timer-circle-progress" id="timerCircle" cx="70" cy="70" r="60" /></svg>
-        <div class="timer-number"><span class="big" id="timerCountdown">15</span><span class="label">seconds</span></div>
-    </div>
-    <div class="timer-bar-wrap"><div class="timer-bar-fill" id="timerBarFill"></div></div>
-    <div class="timer-network"><span class="status-dot good" id="netDot"></span><span id="netLabel">Network: Good</span><span style="margin-left:8px;opacity:0.5;">|</span><span id="netSpeed">4G</span></div>
-    <div class="timer-extra"><span><i class="fas fa-clock"></i> <span id="timerExtraTime">15s</span></span><span><i class="fas fa-wifi"></i> <span id="timerExtraAdapt">Standard</span></span></div>
-    <div class="timer-actions"><button class="btn-cancel" onclick="cancelAdTimer()"><i class="fas fa-times"></i> Cancel</button><button class="btn-waiting" id="timerWaitBtn" disabled><i class="fas fa-spinner"></i> Waiting…</button></div>
-</div></div>
 
 <div id="taskSubmitModal">
     <div class="task-shell">
@@ -778,7 +734,6 @@
         </div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
         
-        <!-- ✅ NEW: Ads section with compact reset timer in corner -->
         <div class="sec-head">
             <i class="fas fa-play-circle"></i> Daily Ads
             <div class="ad-reset-compact" id="adResetCompact">
@@ -792,7 +747,6 @@
         
         <div id="ad-area" class="ad-grid"></div>
         
-        <!-- ✅ NEW: Ad progress bar -->
         <div class="ad-progress-wrap">
             <div class="ad-progress-header">
                 <span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span>
@@ -801,7 +755,6 @@
             <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
         </div>
         
-        <!-- ✅ NEW: Total Ad Earnings Claim Box -->
         <div class="ad-claim-box">
             <div class="ac-left">
                 <div class="ac-label">💰 Total Ad Earnings</div>
@@ -838,7 +791,6 @@
             <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার করুন</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
         
-        <!-- Referral List with 3 Tabs -->
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
             
@@ -968,7 +920,8 @@ const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
-const AD_DISPLAY_SLOTS = 2; // ✅ Only 2 ad slots shown
+const AD_DISPLAY_SLOTS = 2;
+const MIN_AD_WATCH_SECONDS = 10; // ✅ Minimum 10 seconds ad must be watched
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -994,8 +947,6 @@ let isRechecking = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
-let adTimerState = { running: false, totalSeconds: 15, remaining: 15, timerId: null, adSlotIndex: null, paused: false, wasCancelled: false };
-let MIN_AD_WATCH_TIME = 15;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
@@ -1021,10 +972,9 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   ✅ AD CLAIM LOGIC (new)
+   AD CLAIM LOGIC
    ═══════════════════════════════════════════════════════ */
 function calculateAdTotalEarnings() {
-    // Total possible earnings = number of configured slots × daily limit × reward
     const slots = appState.config.adSlots || [];
     let totalSlots = 0;
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
@@ -1046,9 +996,6 @@ function calculateAdEarnedSoFar() {
     const reward = Number(appState.config.adReward || 0.5);
     return watchedCount * reward;
 }
-function calculateAdRemaining() {
-    return Math.max(0, calculateAdTotalEarnings() - calculateAdEarnedSoFar());
-}
 function isAllDisplayAdsWatched() {
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
@@ -1063,15 +1010,11 @@ function isAllDisplayAdsWatched() {
 }
 function updateAdClaimUI() {
     const total = calculateAdTotalEarnings();
-    const earned = calculateAdEarnedSoFar();
-    const remaining = calculateAdRemaining();
     const allWatched = isAllDisplayAdsWatched();
     
-    // ✅ Show total possible earnings (not what's earned so far)
     const adTotalEl = document.getElementById('adTotalEarnings');
     if (adTotalEl) adTotalEl.textContent = total.toFixed(2);
     
-    // Progress bar
     let watchedCount = 0, totalPossible = 0;
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
@@ -1086,13 +1029,10 @@ function updateAdClaimUI() {
     if (progressText) progressText.textContent = watchedCount + ' / ' + totalPossible + ' Watched';
     if (progressFill) progressFill.style.width = (totalPossible > 0 ? (watchedCount / totalPossible) * 100 : 0) + '%';
     
-    // Claim button
     const btn = document.getElementById('adClaimBtn');
-    const btnText = document.getElementById('adClaimBtnText');
     if (!btn) return;
     if (allWatched) {
         btn.disabled = false;
-        if (btnText) btnText.textContent = 'Claim ' + total.toFixed(2) + ' TK';
         btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span id="adClaimBtnText">Claim ' + total.toFixed(2) + ' TK</span>';
     } else {
         btn.disabled = true;
@@ -1112,7 +1052,6 @@ async function claimAdEarnings() {
         const newEarn = Number(appState.user.totalEarned || 0) + total;
         const newClaimed = Number(appState.user.adClaimedTotal || 0) + total;
         
-        // Add to adHistory
         let adHist = appState.user.adHistory || {};
         adHist['claim_' + Date.now()] = { slot: 'Claim', amount: total, timestamp: Date.now(), type: 'adclaim' };
         const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
@@ -1129,7 +1068,6 @@ async function claimAdEarnings() {
         appState.user.adClaimedTotal = newClaimed;
         appState.user.adHistory = adHist;
         
-        // ✅ Referrer commission on ad claim
         const split = computeCommissionSplit(total);
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
         
@@ -1145,7 +1083,7 @@ async function claimAdEarnings() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   ✅ REFERRAL TAB HELPERS
+   REFERRAL TAB HELPERS
    ═══════════════════════════════════════════════════════ */
 function switchRefTab(tab) {
     currentRefTab = tab;
@@ -1211,9 +1149,8 @@ function renderReferralList() {
 function updateRefClaimButton() {
     const bal = Number(appState.user.referralBalance || 0);
     const btn = document.getElementById('refClaimBtn');
-    const btnText = document.getElementById('refClaimBtnText');
     const noteWrap = document.getElementById('refClaimNoteWrap');
-    if (!btn || !btnText) return;
+    if (!btn) return;
     if (bal >= REFERRAL_CLAIM_MIN) {
         btn.classList.remove('locked');
         btn.classList.add('ready');
@@ -1241,13 +1178,12 @@ async function claimReferralIncome() {
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ক্লেইম হচ্ছে...'; }
     try {
         const newMainBal = Number(appState.user.balance || 0) + bal;
-        const newRefBal = 0;
         await db.ref('users/' + appState.user.id).update({
             balance: newMainBal,
-            referralBalance: newRefBal
+            referralBalance: 0
         });
         appState.user.balance = newMainBal;
-        appState.user.referralBalance = newRefBal;
+        appState.user.referralBalance = 0;
         await updateTextElements();
         renderReferralList();
         toast('✅ ' + bal.toFixed(2) + ' টাকা সফলভাবে মেইন ওয়ালেটে যোগ হয়েছে!');
@@ -1339,9 +1275,7 @@ function stopTaskExpiryTicker() {
     }
 }
 
-// ═══════════════════════════════════════════════════════
 // ANTI-HACK PROTECTION
-// ═══════════════════════════════════════════════════════
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
@@ -1379,9 +1313,7 @@ function stopTaskExpiryTicker() {
     Object.freeze(_secrets);
 })();
 
-// ═══════════════════════════════════════════════════════
-// ✅ THREE-DOT MENU + LEGAL MODAL LOGIC
-// ═══════════════════════════════════════════════════════
+// THREE-DOT MENU
 function toggleMenuPopup(e) {
     if (e) e.stopPropagation();
     const popup = document.getElementById('menuPopup');
@@ -1409,12 +1341,10 @@ const LEGAL_CONTENT = {
     privacy: `
         <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
         <h1>📄 PRIVACY POLICY</h1>
-
         <h2>১. ভূমিকা (Introduction)</h2>
         <p><strong>Earn Wallet / NexEarn</strong> ("আমরা", "আমাদের", "প্ল্যাটফর্ম") একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম। এই Privacy Policy ব্যাখ্যা করে যে আমরা কী ধরনের তথ্য সংগ্রহ করি, কীভাবে ব্যবহার করি, কোথায় সংরক্ষণ করি এবং আপনার কী কী অধিকার রয়েছে।</p>
         <p>আমাদের প্ল্যাটফর্ম ব্যবহার করার মাধ্যমে আপনি এই Privacy Policy-তে সম্মতি প্রদান করছেন। আপনি যদি সম্মত না হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার বন্ধ করুন।</p>
         <hr>
-
         <h2>২. আমরা কী কী তথ্য সংগ্রহ করি (Information We Collect)</h2>
         <h3>২.১ Telegram অ্যাকাউন্ট তথ্য (স্বয়ংক্রিয়ভাবে সংগ্রহ)</h3>
         <p>আপনি Telegram Web App-এর মাধ্যমে লগইন করলে আমরা নিম্নলিখিত তথ্য পাই:</p>
@@ -1448,10 +1378,7 @@ const LEGAL_CONTENT = {
         </ul>
         <h3>২.৪ অ্যাড নেটওয়ার্ক ডেটা</h3>
         <p>Adsgram, Monetag, GigaPub-এর মতো থার্ড-পার্টি অ্যাড নেটওয়ার্ক ব্যবহার করা হলে তারা নিজেদের Privacy Policy অনুযায়ী ডেটা সংগ্রহ করতে পারে (IP, Device info, Ad interaction)।</p>
-        <h3>২.৫ Admin Panel ডেটা</h3>
-        <p>Admin ব্যবহারকারীদের ক্ষেত্রে অতিরিক্তভাবে: Username (hashed password সহ), Balance, Deposited, Spent, Refunded amounts, Contact info (Telegram/WhatsApp/Phone/Email), Ban/Suspend reason, Deposit request info (Txn ID, Account Number), Admin action logs।</p>
         <hr>
-
         <h2>৩. তথ্য কীভাবে ব্যবহার করা হয় (How We Use Information)</h2>
         <table class="summary-table">
             <tr><td>উদ্দেশ্য</td><td>বাবহৃত ডেটা</td></tr>
@@ -1462,17 +1389,14 @@ const LEGAL_CONTENT = {
             <tr><td>Withdraw প্রসেসিং</td><td>Account number, Method, Amount</td></tr>
             <tr><td>সিস্টেম সুরক্ষা</td><td>Device ID, Ad clicks, Anti-fraud check</td></tr>
             <tr><td>নোটিফিকেশন পাঠানো</td><td>Telegram ID</td></tr>
-            <tr><td>Admin management</td><td>Username, Password hash, Activity logs</td></tr>
         </table>
         <hr>
-
         <h2>৪. ডেটা কোথায় সংরক্ষিত হয় (Data Storage)</h2>
         <p>আমরা <strong>Google Firebase Realtime Database</strong> ব্যবহার করি ডেটা সংরক্ষণের জন্য।</p>
         <div class="warn-box">
             <strong>⚠️ গুরুত্বপূর্ণ:</strong> Firebase Realtime Database-এ সংরক্ষিত ডেটা এনক্রিপ্টেড নয় (at-rest encryption ছাড়া)। Admin Password SHA-256 hash আকারে সংরক্ষিত। User-দের জন্য পাসওয়ার্ড নেই; শুধু Telegram authentication।
         </div>
         <hr>
-
         <h2>৫. ডেটা শেয়ারিং (Data Sharing / Third Parties)</h2>
         <p>আমরা আপনার ব্যক্তিগত তথ্য বিক্রি করি না। তবে নিম্নলিখিত ক্ষেত্রে ডেটা শেয়ার হয়:</p>
         <ul>
@@ -1482,7 +1406,6 @@ const LEGAL_CONTENT = {
             <li><strong>Firebase (Google)</strong> — ডেটা হোস্টিং সার্ভিস।</li>
         </ul>
         <hr>
-
         <h2>৬. ডেটা সংরক্ষণ সময় (Data Retention)</h2>
         <table class="summary-table">
             <tr><td>ডেটার ধরন</td><td>সংরক্ষণ সময়</td></tr>
@@ -1492,11 +1415,8 @@ const LEGAL_CONTENT = {
             <tr><td>Task Submissions</td><td>অনির্দিষ্টকাল</td></tr>
             <tr><td>Uploaded Files</td><td>থার্ড-পার্টি সার্ভার অনুযায়ী (24–72 ঘণ্টা বা স্থায়ী)</td></tr>
             <tr><td>Withdraw History</td><td>অনির্দিষ্টকাল</td></tr>
-            <tr><td>Session (Admin)</td><td>২৪ ঘণ্টা</td></tr>
-            <tr><td>Device ID</td><td>localStorage-এ স্থায়ী</td></tr>
         </table>
         <hr>
-
         <h2>৭. আপনার অধিকার (Your Rights)</h2>
         <ul>
             <li>✅ আপনার সংরক্ষিত ডেটা দেখার অধিকার</li>
@@ -1506,32 +1426,26 @@ const LEGAL_CONTENT = {
         </ul>
         <p>অনুরোধ পাঠান: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></p>
         <hr>
-
         <h2>৮. শিশুদের Privacy (Children's Privacy)</h2>
         <p>আমাদের প্ল্যাটফর্ম ১৩ বছরের কম বয়সী শিশুদের জন্য নয়। যদি আপনি ১৩ বছরের কম হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার করবেন না। যদি আমরা জানতে পারি যে ১৩ বছরের কম বয়সী কেউ অ্যাকাউন্ট খুলেছে, আমরা সেই অ্যাকাউন্ট এবং সংশ্লিষ্ট ডেটা মুছে ফেলব।</p>
         <hr>
-
         <h2>৯. নিরাপত্তা (Security)</h2>
         <p>আমরা যুক্তিসঙ্গত নিরাপত্তা ব্যবস্থা গ্রহণ করি: Admin Password SHA-256 Hash, Telegram Web App authentication, Anti-tamper protection (Developer tools block, context menu block), Session expiry (24 ঘণ্টা), User ID verification।</p>
         <div class="danger-box">
             <strong>⚠️ মনে রাখবেন:</strong> কোনো ইন্টারনেট-ভিত্তিক সিস্টেম ১০০% নিরাপদ নয়। আমরা ডেটা লঙ্ঘনের জন্য দায়ী নই।
         </div>
         <hr>
-
         <h2>১০. Cookies ও Local Storage</h2>
         <p>আমরা নিম্নলিখিত Local Storage ব্যবহার করি: nexearn_device_id (ডিভাইস শনাক্তকরণ), nexearn_admin_session (Admin session), pending_survey, pending_youtube, survey_done_task, youtube_done_task। আপনি ব্রাউজার সেটিংস থেকে Local Storage মুছে ফেলতে পারেন, তবে এতে অ্যাকাউন্ট কার্যক্রম প্রভাবিত হতে পারে।</p>
         <hr>
-
         <h2>১১. Privacy Policy-তে পরিবর্তন</h2>
         <p>আমরা এই Privacy Policy যেকোনো সময় পরিবর্তন করার অধিকার সংরক্ষণ করি। বড় পরিবর্তন হলে প্ল্যাটফর্মে নোটিশ দেওয়া হবে। পরিবর্তনের পরও প্ল্যাটফর্ম ব্যবহার চালিয়ে গেলে আপনি নতুন Policy-তে সম্মতি দিয়েছেন বলে ধরে নেওয়া হবে।</p>
         <hr>
-
         <h2>১২. যোগাযোগ (Contact)</h2>
         <ul>
             <li>📧 Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></li>
             <li>👤 Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
         </ul>
-
         <div class="consent-box">
             <h3>✅ সম্মতি (Consent)</h3>
             <p>উপরোক্ত Privacy Policy পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
@@ -1549,11 +1463,9 @@ const LEGAL_CONTENT = {
     disclaimer: `
         <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
         <h1>⚠️ DISCLAIMER (দাবিত্যাগ)</h1>
-
         <h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2>
         <p>Earn Wallet / NexEarn একটি মাইক্রো-টাস্ক প্ল্যাটফর্ম যা ব্যবহারকারীদের ছোট ছোট টাস্ক (অ্যাড দেখা, সার্ভে, অ্যাড আপলোড) সম্পন্ন করে রিওয়ার্ড (টাকা) অর্জন করতে দেয়। এই রিওয়ার্ড real money হিসেবে Telegram Bot-এর মাধ্যমে withdraw করা যায়।</p>
         <hr>
-
         <h2>২. আয়ের নিশ্চয়তা নেই (No Guarantee of Income)</h2>
         <ul>
             <li>আমরা কোনো নির্দিষ্ট আয়ের নিশ্চয়তা দিই না।</li>
@@ -1561,7 +1473,6 @@ const LEGAL_CONTENT = {
             <li>কোনো দিন আয় কম হলে বা একেবারেই না হলে আমরা দায়ী নই।</li>
         </ul>
         <hr>
-
         <h2>৩. তৃতীয় পক্ষের সেবা (Third-Party Services)</h2>
         <ul>
             <li><strong>Adsgram, Monetag, GigaPub</strong> — এই অ্যাড নেটওয়ার্কগুলোর কোনো সমস্যা, ফ্রড, অথবা অ্যাড না দেখানোর জন্য আমরা দায়ী নই।</li>
@@ -1570,7 +1481,6 @@ const LEGAL_CONTENT = {
             <li><strong>Firebase</strong> — Firebase-এর downtime বা data loss-এর জন্য আমরা দায়ী নই।</li>
         </ul>
         <hr>
-
         <h2>৪. অ্যাকাউন্ট বন্ধ বা স্থগিত (Account Termination)</h2>
         <p>নিম্নলিখিত কারণে আমরা যেকোনো অ্যাকাউন্ট বিনা নোটিশে বন্ধ/স্থগিত করতে পারি:</p>
         <div class="danger-box">
@@ -1585,7 +1495,6 @@ const LEGAL_CONTENT = {
         </div>
         <p><strong>বন্ধ অ্যাকাউন্টের balance ফেরত দেওয়া হবে না।</strong></p>
         <hr>
-
         <h2>৫. Task এবং অ্যাড সংক্রান্ত</h2>
         <ul>
             <li>Task-এর সংখ্যা, রিওয়ার্ড, শর্তাবলী আগে নোটিশ ছাড়াই পরিবর্তন করার অধিকার আমরা সংরক্ষণ করি।</li>
@@ -1594,7 +1503,6 @@ const LEGAL_CONTENT = {
             <li>একই task-এর জন্য multiple submission করলে account ban হতে পারে।</li>
         </ul>
         <hr>
-
         <h2>৬. Withdrawal সংক্রান্ত</h2>
         <ul>
             <li>Minimum এবং Maximum withdraw limit পরিবর্তনযোগ্য।</li>
@@ -1604,7 +1512,6 @@ const LEGAL_CONTENT = {
             <li>Withdraw request reject হলে refund সংক্রান্ত সমস্যা হলে আমরা দায়ী নই।</li>
         </ul>
         <hr>
-
         <h2>৭. Anti-Hack এবং Anti-Fraud System</h2>
         <p>আমাদের প্ল্যাটফর্মে নিম্নলিখিত security system রয়েছে:</p>
         <ul>
@@ -1620,7 +1527,6 @@ const LEGAL_CONTENT = {
             এই সিস্টেম সক্রিয় থাকায় কিছু legitimate ব্যবহারও বাধাগ্রস্ত হতে পারে। এর জন্য আমরা দায়ী নই।
         </div>
         <hr>
-
         <h2>৮. Balance এবং Payment</h2>
         <ul>
             <li>আপনার balance Telegram user ID-এর সাথে যুক্ত। Telegram account হারালে balance হারাতে পারেন।</li>
@@ -1629,21 +1535,18 @@ const LEGAL_CONTENT = {
             <li>ট্যাক্স বা legal obligation আপনার নিজের দায়িত্ব।</li>
         </ul>
         <hr>
-
         <h2>৯. প্ল্যাটফর্ম বন্ধ / পরিবর্তন (Service Discontinuation)</h2>
         <p>আমরা যেকোনো সময়: প্ল্যাটফর্ম বন্ধ করতে পারি, Feature পরিবর্তন করতে পারি, Policy পরিবর্তন করতে পারি, Server migrate করতে পারি।</p>
         <div class="warn-box">
             এই ধরনের পরিবর্তনে আপনার অসম্পূর্ণ balance বাতিল হতে পারে। বড় পরিবর্তনের আগে আমরা নোটিশ দেওয়ার চেষ্টা করব, তবে নিশ্চয়তা দিই না।
         </div>
         <hr>
-
         <h2>১০. আইনি সীমাবদ্ধতা (Limitation of Liability)</h2>
         <p>যেকোনো পরোক্ষ, আকস্মিক, বিশেষ, ফলস্বরূপ, বা শাস্তিমূলক ক্ষতির জন্য আমরা দায়ী নই, যার মধ্যে রয়েছে: ডেটা হারানো, আয় হারানো, প্রোফাইল ক্ষতি, তৃতীয় পক্ষের দাবি, সেবা ব্যাঘাত।</p>
         <div class="danger-box">
             <strong>আমাদের সর্বোচ্চ দায় সীমাবদ্ধ আপনার শেষ ৩০ দিনের আয়ের মধ্যে।</strong>
         </div>
         <hr>
-
         <h2>১১. ব্যবহারকারীর দায়িত্ব (User Responsibility)</h2>
         <ul>
             <li>আপনার Telegram account-এর নিরাপত্তা আপনার দায়িত্ব</li>
@@ -1653,22 +1556,17 @@ const LEGAL_CONTENT = {
             <li>Admin-এর নির্দেশনা মেনে চলুন</li>
         </ul>
         <hr>
-
         <h2>১২. তৃতীয় পক্ষের লিংক</h2>
         <p>আমাদের প্ল্যাটফর্মে তৃতীয় পক্ষের লিংক থাকতে পারে (যেমন task URL, tutorial video, contact link)। সেই লিংকে গেলে তাদের Privacy Policy প্রযোজ্য হবে। আমরা তাদের কনটেন্ট বা সেবার জন্য দায়ী নই।</p>
         <hr>
-
         <h2>১৩. Legal Compliance</h2>
         <p>আপনি সম্মত যে আপনি আপনার দেশের/অঞ্চলের সব প্রযোজ্য আইন মেনে প্ল্যাটফর্ম ব্যবহার করবেন। Pornography, gambling, illegal activity, বা child exploitation সংক্রান্ত কোনো কাজে প্ল্যাটফর্ম ব্যবহার করলে account ban এবং আইনি ব্যবস্থা নেওয়া হবে।</p>
         <hr>
-
         <h2>১৪. Admin যোগাযোগ</h2>
         <p>Admin-এর সাথে যোগাযোগের জন্য শুধুমাত্র প্ল্যাটফর্মের Contact সেকশন বা Support Channel ব্যবহার করুন। কোনো ব্যক্তিগত message, call, বা third-party চ্যানেলে আমরা দায়ী নই।</p>
         <hr>
-
         <h2>১৫. Scholarship / Educational Purpose</h2>
         <p>এই প্ল্যাটফর্ম educational এবং micro-earning উদ্দেশ্যে তৈরি। এটি full-time job নয়, investment platform নয়, বা financial planning টুল নয়।</p>
-
         <div class="consent-box">
             <h3>✅ সম্মতি (Consent)</h3>
             <p>উপরোক্ত Disclaimer পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
@@ -1679,14 +1577,12 @@ const LEGAL_CONTENT = {
                 <li>✅ Terms violation-এ account ban মানতে সম্মতি</li>
             </ul>
         </div>
-
         <h2>📞 যোগাযোগ</h2>
         <ul>
             <li>Support Channel: <a href="https://t.me/nexearn2" target="_blank">https://t.me/nexearn2</a></li>
             <li>Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
             <li>Telegram Bot: @TaskHubBD24Bot</li>
         </ul>
-
         <h2>📝 দ্রুত সারাংশ (Quick Summary)</h2>
         <table class="summary-table">
             <tr><td>বিষয়</td><td>সারাংশ</td></tr>
@@ -1700,7 +1596,6 @@ const LEGAL_CONTENT = {
             <tr><td>তৃতীয় পক্ষ</td><td>✅ দায়ী নয়</td></tr>
             <tr><td>Fraud করলে</td><td>🚫 Account ban, balance বাতিল</td></tr>
         </table>
-
         <hr>
         <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet / NexEarn. All rights reserved.</p>
     `
@@ -1730,9 +1625,7 @@ document.getElementById('legalModal').addEventListener('click', function(e) {
     if (e.target === this) closeLegalModal();
 });
 
-// ═══════════════════════════════════════════════════════
 // ADMIN SLIDER
-// ═══════════════════════════════════════════════════════
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     try {
@@ -1790,9 +1683,7 @@ function openAdminLink(link) {
     } catch(e) { try { window.open(link, '_blank'); } catch(err) {} }
 }
 
-// ═══════════════════════════════════════════════════════
 // COOLDOWN HELPERS
-// ═══════════════════════════════════════════════════════
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -1883,9 +1774,6 @@ function setupUserSubmissionsListener() {
     });
 }
 
-function isAllAdsCompleted() {
-    return isAllDisplayAdsWatched();
-}
 async function startAdsResetCountdown() {
     if (appState.user.adsResetTime && appState.user.adsResetTime > Date.now()) return;
     const resetTime = Date.now() + (AD_RESET_HOURS * 60 * 60 * 1000);
@@ -1925,7 +1813,6 @@ function updateCycleUI() {
         startAdsResetCountdown(); 
         return; 
     }
-    // Show short "Watch All" text
     timeEl.textContent = 'Watch All';
     compactEl.classList.add('expired');
 }
@@ -2121,18 +2008,6 @@ function computeCommissionSplit(earnedAmount) {
     return { userReward: Number(earnedAmount), referrerCommission: commission, mode };
 }
 
-function getNetworkAdjustedTime() {
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!conn) return { seconds: 15, label: 'Unknown', type: 'good', speed: '4G' };
-    const type = conn.effectiveType || '4g';
-    const downlink = conn.downlink || 10;
-    const rtt = conn.rtt || 100;
-    let seconds = 15, label = 'Good', statusType = 'good', speedLabel = type.toUpperCase();
-    if (type === 'slow-2g' || type === '2g' || type === '3g' || downlink < 1.5 || rtt > 400) { seconds = 20; label = 'Slow — +5s'; statusType = 'slow'; }
-    else if (downlink < 3 || rtt > 200) { seconds = 18; label = 'Fair — +3s'; statusType = 'slow'; }
-    if (type === 'slow-2g' || downlink < 0.5) { seconds = 25; label = 'Poor — +10s'; statusType = 'poor'; }
-    return { seconds, label, type: statusType, speed: speedLabel };
-}
 function getCurrentChannelLinks() {
     return channelLinks.length ? channelLinks : [
         { label: 'NexEarn Channel', chatId: 'nexearn2' },
@@ -2188,81 +2063,45 @@ function stopPeriodicRecheck() {
     stopTaskExpiryTicker();
 }
 
-function showAdTimer(slotIndex) {
-    if (!isOnline) { toast('No internet connection!'); return; }
-    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
-    trackAdClick();
-    adTimerState.wasCancelled = false;
-    const net = getNetworkAdjustedTime();
-    adTimerState.totalSeconds = net.seconds; adTimerState.remaining = net.seconds;
-    adTimerState.adSlotIndex = slotIndex; MIN_AD_WATCH_TIME = net.seconds;
-    document.getElementById('timerCountdown').textContent = net.seconds;
-    document.getElementById('timerExtraTime').textContent = net.seconds + 's';
-    document.getElementById('timerExtraAdapt').textContent = net.seconds === 15 ? 'Standard' : 'Adaptive +' + (net.seconds - 15) + 's';
-    const dot = document.getElementById('netDot'); dot.className = 'status-dot ' + net.type;
-    document.getElementById('netLabel').textContent = 'Network: ' + net.label;
-    document.getElementById('netSpeed').textContent = net.speed;
-    document.getElementById('timerCircle').style.strokeDashoffset = 377;
-    document.getElementById('timerBarFill').style.width = '0%';
-    document.getElementById('adTimerOverlay').classList.add('active');
-    document.getElementById('app').classList.add('blurred');
-    startTimerCountdown();
-}
-function startTimerCountdown() {
-    if (adTimerState.timerId) { clearInterval(adTimerState.timerId); adTimerState.timerId = null; }
-    adTimerState.running = true;
-    const total = adTimerState.totalSeconds;
-    const circumference = 377;
-    document.getElementById('timerTitle').textContent = '⏳ Please Wait';
-    document.getElementById('timerSub').textContent = 'Ad is loading… ' + total + 's remaining';
-    adTimerState.timerId = setInterval(() => {
-        if (adTimerState.paused) return;
-        adTimerState.remaining--;
-        const remain = Math.max(0, adTimerState.remaining);
-        document.getElementById('timerCountdown').textContent = remain;
-        const progress = (total - remain) / total;
-        document.getElementById('timerCircle').style.strokeDashoffset = circumference - (progress * circumference);
-        document.getElementById('timerBarFill').style.width = (progress * 100) + '%';
-        document.getElementById('timerSub').textContent = remain > 0 ? remain + ' seconds remaining…' : '✅ Ad is ready!';
-        if (remain <= 0) {
-            clearInterval(adTimerState.timerId); adTimerState.timerId = null; adTimerState.running = false;
-            executeAdWatch(adTimerState.adSlotIndex);
-        }
-    }, 1000);
-}
-function cancelAdTimer() {
-    if (adTimerState.timerId) { clearInterval(adTimerState.timerId); adTimerState.timerId = null; }
-    adTimerState.running = false; adTimerState.wasCancelled = true;
-    document.getElementById('adTimerOverlay').classList.remove('active');
-    document.getElementById('app').classList.remove('blurred');
-    showAdError('⏹️ Ad Cancelled!', 'You cancelled the ad before it finished.');
-}
-async function executeAdWatch(slotIndex) {
-    document.getElementById('adTimerOverlay').classList.remove('active');
-    document.getElementById('app').classList.remove('blurred');
-    if (adTimerState.wasCancelled) return;
-    await watchAd(slotIndex);
-}
-function startAdWatch(i) { showAdTimer(i); }
 function trackAdClick() {
     db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
+
+// ✅ NEW: watchAd - direct ad open, no timer page, but enforce minimum 10s watch
 async function watchAd(i) {
     if (slotLocks[i]) return;
-    slotLocks[i] = true; isAdWatching = true;
-    if (adTimerState.wasCancelled) { slotLocks[i] = false; isAdWatching = false; return; }
+    if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
+    if (!isOnline) { toast('No internet connection!'); return; }
+    
+    slotLocks[i] = true; 
+    isAdWatching = true;
+    trackAdClick();
+    
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
+    const loadingOverlay = document.getElementById('adLoadingOverlay');
+    
     try {
-        toast('Loading Ad...');
-        let success = false;
         if (!slot || !slot.network || slot.network === 'none') throw new Error('Ad not configured');
+        
+        // Show loader while ad network opens
+        if (loadingOverlay) loadingOverlay.classList.add('active');
+        toast('Loading Ad...');
+        
+        let success = false;
         const adStartTime = Date.now();
+        
         if (slot.network === 'monetag') {
-            if (typeof window['show_' + slot.id] === 'function') { await window['show_' + slot.id](); success = true; }
+            if (typeof window['show_' + slot.id] === 'function') { 
+                await window['show_' + slot.id](); 
+                success = true; 
+            }
             else throw new Error('Ad network not ready');
         } else if (slot.network === 'gigapub') {
-            if (typeof window.showGiga === 'function') { await window.showGiga(); success = true; }
+            if (typeof window.showGiga === 'function') { 
+                await window.showGiga(); 
+                success = true; 
+            }
             else throw new Error('Ad network not ready');
         } else if (slot.network === 'adsgram') {
             if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
@@ -2270,30 +2109,57 @@ async function watchAd(i) {
             let res = await adCtrl.show();
             if (!res || res.done !== true) throw new Error('Ad Closed');
             success = true;
-        } else throw new Error('Unknown ad network');
-        const watchDuration = (Date.now() - adStartTime) / 1000;
-        const requiredTime = MIN_AD_WATCH_TIME || 15;
-        if (!success) throw new Error('Ad not completed');
-        if (watchDuration < requiredTime * 0.6) { showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's.'); slotLocks[i] = false; isAdWatching = false; return; }
+        } else {
+            throw new Error('Unknown ad network');
+        }
         
-        // ✅ Do NOT add reward directly - just track view count
+        // Hide loader
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+        
+        if (!success) throw new Error('Ad not completed');
+        
+        // ✅ Check minimum 10 seconds watched
+        const watchDuration = (Date.now() - adStartTime) / 1000;
+        if (watchDuration < MIN_AD_WATCH_SECONDS) {
+            showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's. Minimum ' + MIN_AD_WATCH_SECONDS + 's required.');
+            slotLocks[i] = false; 
+            isAdWatching = false; 
+            return;
+        }
+        
+        // Track ad view count (reward will be claimed later via claim button)
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
         
         await db.ref('users/' + appState.user.id).update({ dailyAds: newAds, lastActive: todayStr() });
         appState.user.dailyAds = newAds;
         
-        toast('✅ Ad watched! ' + (Number((appState.config.dailyAdLimit||10)) - newAds[i]) + ' more to go for Slot ' + (i+1));
-        setTimeout(() => { renderAds(); updateAdClaimUI(); if (isAllDisplayAdsWatched()) startAdsResetCountdown(); else updateCycleUI(); }, 500);
+        const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
+        toast('✅ Ad watched (' + Math.round(watchDuration) + 's)! ' + remaining + ' more for Slot ' + (i+1));
+        
+        setTimeout(() => { 
+            renderAds(); 
+            updateAdClaimUI(); 
+            if (isAllDisplayAdsWatched()) startAdsResetCountdown(); 
+            else updateCycleUI(); 
+        }, 500);
+        
     } catch (e) {
-        if (e.message === 'Ad Closed' || e.message === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
-        else showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
-    } finally { slotLocks[i] = false; isAdWatching = false; adTimerState.wasCancelled = false; }
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+        if (e.message === 'Ad Closed' || e.message === 'Ad not completed') {
+            showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished. Please watch the full ad.');
+        } else {
+            showAdError('⚠️ Ad Error', e.message || 'Error loading ad.');
+        }
+    } finally { 
+        slotLocks[i] = false; 
+        isAdWatching = false; 
+        if (loadingOverlay) loadingOverlay.classList.remove('active');
+    }
 }
-function setupNetworkListener() {
-    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (conn) { conn.addEventListener('change', () => { if (adTimerState.running) { const net = getNetworkAdjustedTime(); document.getElementById('netSpeed').textContent = net.speed; const dot = document.getElementById('netDot'); dot.className = 'status-dot ' + net.type; document.getElementById('netLabel').textContent = 'Network: ' + net.label; } }); }
-}
+
+function startAdWatch(i) { watchAd(i); }
+
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
     const offlineOverlay = document.getElementById('offlineOverlay');
@@ -2397,16 +2263,13 @@ function checkBan() {
     } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
 }
 
-// ✅ UPDATED renderAds: only show 2 slots, NO per-ad reward text
 function renderAds() {
     const el = document.getElementById('ad-area');
     if (!el) return;
     el.innerHTML = '';
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
-    const sym = appState.config.currencySymbol || 'TK';
     
-    // ✅ Only show 2 slots (AD_DISPLAY_SLOTS)
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i] || { network: 'none', id: '' };
         const configured = slot && slot.network && slot.network !== 'none';
@@ -2419,7 +2282,7 @@ function renderAds() {
         const cursorStyle = (!configured || max) ? '' : 'cursor:pointer;';
         el.innerHTML += `
             <div class="ad-card ${extraClass} ${cardClass}" ${clickAttr} style="${cursorStyle}">
-                ${(configured && !max) ? '<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> 15s</div>' : ''}
+                ${(configured && !max) ? '<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> 10s</div>' : ''}
                 <div class="ad-inner">
                     <i class="fas ${icon}"></i>
                     <h4>Ad Slot ${i+1}</h4>
@@ -3011,10 +2874,7 @@ async function updateTextElements() {
     document.getElementById('bonusAmt').innerText = appState.config.dailyBonusAmount || 20;
     document.getElementById('commTotalAmt').innerText = (appState.user.totalCommission || 0).toFixed(2);
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
-    const infoRateEl = document.getElementById('commInfoRate');
-    if (infoRateEl) infoRateEl.innerText = REF_COMMISSION_RATE + '%';
     
-    // ✅ Dynamically populate withdraw methods from config
     const wdSel = document.getElementById('wd-method');
     let currentVal = wdSel.value;
     wdSel.innerHTML = '<option value="">Select Method</option>';
@@ -3026,7 +2886,6 @@ async function updateTextElements() {
         });
     }
     
-    // ✅ Dynamically update withdraw levels from config
     if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) {
         withdrawLevels = appState.config.withdrawLevels;
     }
@@ -3171,13 +3030,10 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
-// ═══════════════════════════════════════════════════════
 // INIT
-// ═══════════════════════════════════════════════════════
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
-    setupNetworkListener();
     document.getElementById('u-name').innerText = tgUser.first_name;
     document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
@@ -3215,13 +3071,6 @@ window.onload = () => {
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
-            else withdrawLevels = [
-                { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' },
-                { level: 2, requiredRefs: 7, fee: 4, minAmount: 10, maxAmount: 200, time: '30 Min-1 Hours' },
-                { level: 3, requiredRefs: 7, fee: 3, minAmount: 10, maxAmount: 300, time: '30 Min-1 Hours' },
-                { level: 4, requiredRefs: 7, fee: 2, minAmount: 10, maxAmount: 400, time: '30 Min-1 Hours' },
-                { level: 5, requiredRefs: 7, fee: 1, minAmount: 10, maxAmount: 500, time: '30 Min-1 Hours' }
-            ];
             if (appState.config.maintenance && appState.config.maintenance.active) {
                 document.getElementById('maintenanceOverlay').classList.add('active');
                 document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "We're updating.";
@@ -3247,34 +3096,6 @@ window.onload = () => {
                 }
             });
             if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); }
-        } else {
-            const defaultConfig = {
-                refBonus: 5, adReward: 0.5, dailyBonusAmount: 20, dailyAdLimit: 10, minWithdraw: 10, currencySymbol: 'TK',
-                refCommissionRate: 2, refCommissionMode: 'bonus',
-                botUsername: BOT_USERNAME, botToken: BOT_TOKEN,
-                paymentMethods: ['bKash', 'Nagad', 'Rocket'],
-                adSlots: [], newTasks: {},
-                becomeAdminLink: '', becomeAdminEnabled: false, leaderboardCustom: [],
-                channelLinks: [
-                    { label: 'NexEarn Channel', chatId: 'nexearn2' },
-                    { label: 'NexEarn Adda', chatId: 'nexearn2_adda' },
-                    { label: 'NexEarn Official', chatId: 'nexearn2_official' },
-                    { label: 'NexEarn Payment', chatId: 'nexearn2_payment' }
-                ],
-                maintenance: { active: false, message: '', estimatedMinutes: 30 },
-                withdrawLevels: [
-                    { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' },
-                    { level: 2, requiredRefs: 7, fee: 4, minAmount: 10, maxAmount: 200, time: '30 Min-1 Hours' },
-                    { level: 3, requiredRefs: 7, fee: 3, minAmount: 10, maxAmount: 300, time: '30 Min-1 Hours' },
-                    { level: 4, requiredRefs: 7, fee: 2, minAmount: 10, maxAmount: 400, time: '30 Min-1 Hours' },
-                    { level: 5, requiredRefs: 7, fee: 1, minAmount: 10, maxAmount: 500, time: '30 Min-1 Hours' }
-                ]
-            };
-            db.ref('config').set(defaultConfig);
-            channelLinks = defaultConfig.channelLinks;
-            withdrawLevels = defaultConfig.withdrawLevels;
-            REF_COMMISSION_RATE = 2;
-            REF_COMMISSION_MODE = 'bonus';
         }
     });
 
