@@ -91,6 +91,16 @@
     .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
     .ad-claim-btn:disabled:active{transform:none;}
     
+    /* ✅ NEW: Claim Window Timer (above claim button) */
+    .claim-window-timer{display:none;margin:0 20px 10px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:14px;padding:10px 14px;position:relative;overflow:hidden;box-shadow:0 6px 16px rgba(245,158,11,.25);}
+    .claim-window-timer.active{display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeIn .3s ease;}
+    .claim-window-timer.expired{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#ef4444;box-shadow:0 6px 16px rgba(239,68,68,.25);}
+    .claim-window-timer .cwt-left{display:flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:800;color:#92400e;letter-spacing:0.3px;}
+    .claim-window-timer.expired .cwt-left{color:#991b1b;}
+    .claim-window-timer .cwt-left i{font-size:0.95rem;animation:pulseText 1.5s ease-in-out infinite;}
+    .claim-window-timer .cwt-time{font-size:1.15rem;font-weight:900;color:#b45309;font-variant-numeric:tabular-nums;letter-spacing:1px;text-shadow:0 2px 6px rgba(180,83,9,.2);}
+    .claim-window-timer.expired .cwt-time{color:#dc2626;animation:pulseText 1.2s ease-in-out infinite;}
+    
     .ad-progress-wrap{margin:0 20px 12px;background:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.04);}
     .ad-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.78rem;font-weight:800;}
     .ad-progress-header .aph-left{color:#334155;}
@@ -590,7 +600,6 @@
     .ref-qualified-info{background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:12px 14px;border-radius:12px;margin-bottom:14px;border-left:3px solid #f97316;font-size:.76rem;font-weight:700;color:#9a3412;line-height:1.5;}
     .ref-qualified-info i{color:#ea580c;margin-right:5px;}
 
-    /* ✅ NEW: Level Progress Card */
     .level-progress-card{background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);color:#fff;padding:16px 18px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(76,29,149,.35);}
     .level-progress-card::before{content:'';position:absolute;width:140px;height:140px;background:rgba(255,255,255,.1);border-radius:50%;top:-60px;right:-40px;}
     .level-progress-card .lpc-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1;}
@@ -765,6 +774,12 @@
             <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
         </div>
         
+        <!-- ✅ NEW: Claim Window Timer (above claim button) -->
+        <div class="claim-window-timer" id="claimWindowTimer">
+            <div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div>
+            <div class="cwt-time" id="cwtTime">01:00:00</div>
+        </div>
+        
         <div class="ad-claim-box">
             <div class="ac-left">
                 <div class="ac-label">💰 Total Ad Earnings</div>
@@ -877,7 +892,6 @@
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-wallet" style="color:var(--primary);"></i> Withdraw Funds</div>
             
-            <!-- ✅ NEW: Level Progress Card -->
             <div class="level-progress-card" id="levelProgressCard">
                 <div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div>
                 <div class="lpc-title" id="lpcTitle">Level 1</div>
@@ -941,13 +955,18 @@ const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
 const MIN_AD_WATCH_SECONDS = 10;
+const CLAIM_WINDOW_MS = 60 * 60 * 1000; // ✅ 1 hour claim window
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 
 let withdrawLevels = [];
 let appState = {
-    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0 },
+    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
+        // ✅ NEW: Ad claim cycle + timer fields
+        adClaimedCurrentCycle: false,
+        claimWindowStartTime: 0
+    },
     config: { adSlots: [], newTasks: {} }
 };
 let isBooted = false;
@@ -966,6 +985,7 @@ let isRechecking = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
+let claimWindowTimerInterval = null; // ✅ NEW
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
@@ -991,7 +1011,7 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   AD CLAIM LOGIC
+   AD CLAIM LOGIC + 1-HOUR CLAIM WINDOW
    ═══════════════════════════════════════════════════════ */
 function calculateAdTotalEarnings() {
     const slots = appState.config.adSlots || [];
@@ -1003,17 +1023,6 @@ function calculateAdTotalEarnings() {
     const limit = Number(appState.config.dailyAdLimit || 10);
     const reward = Number(appState.config.adReward || 0.5);
     return totalSlots * limit * reward;
-}
-function calculateAdEarnedSoFar() {
-    const slots = appState.config.adSlots || [];
-    let watchedCount = 0;
-    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
-        const slot = slots[i];
-        if (!slot || !slot.network || slot.network === 'none') continue;
-        watchedCount += Number((appState.user.dailyAds || {})[i] || 0);
-    }
-    const reward = Number(appState.config.adReward || 0.5);
-    return watchedCount * reward;
 }
 function isAllDisplayAdsWatched() {
     const slots = appState.config.adSlots || [];
@@ -1027,9 +1036,98 @@ function isAllDisplayAdsWatched() {
     }
     return hasConfigured;
 }
+
+// ✅ Get remaining time in claim window (ms)
+function getClaimWindowRemaining() {
+    const startTime = Number(appState.user.claimWindowStartTime || 0);
+    if (!startTime) return 0;
+    const elapsed = Date.now() - startTime;
+    const remain = CLAIM_WINDOW_MS - elapsed;
+    return remain > 0 ? remain : 0;
+}
+
+// ✅ Start the claim window timer when all ads watched
+async function startClaimWindowIfNeeded() {
+    if (!isAllDisplayAdsWatched()) return;
+    if (appState.user.adClaimedCurrentCycle === true) return;
+    if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return; // already started
+    
+    // Only start if not already expired
+    const now = Date.now();
+    appState.user.claimWindowStartTime = now;
+    try {
+        await db.ref('users/' + appState.user.id + '/claimWindowStartTime').set(now);
+    } catch(e) {}
+    startClaimWindowTicker();
+    updateClaimWindowUI();
+}
+
+// ✅ Start ticker to update the 1-hour countdown
+function startClaimWindowTicker() {
+    if (claimWindowTimerInterval) return;
+    claimWindowTimerInterval = setInterval(() => {
+        updateClaimWindowUI();
+        // When timer expires, disable claim button
+        const remain = getClaimWindowRemaining();
+        if (remain <= 0) {
+            updateAdClaimUI();
+        }
+    }, 1000);
+}
+function stopClaimWindowTicker() {
+    if (claimWindowTimerInterval) {
+        clearInterval(claimWindowTimerInterval);
+        claimWindowTimerInterval = null;
+    }
+}
+
+// ✅ Format HH:MM:SS
+function fmtHHMMSS(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+// ✅ Update the claim window timer UI
+function updateClaimWindowUI() {
+    const timerEl = document.getElementById('claimWindowTimer');
+    const timeEl = document.getElementById('cwtTime');
+    const labelEl = document.getElementById('cwtLabel');
+    if (!timerEl || !timeEl) return;
+    
+    const allWatched = isAllDisplayAdsWatched();
+    const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
+    
+    // Hide timer if: not all watched, OR already claimed
+    if (!allWatched || alreadyClaimed) {
+        timerEl.classList.remove('active');
+        return;
+    }
+    
+    const remain = getClaimWindowRemaining();
+    if (remain <= 0) {
+        // Timer expired
+        timerEl.classList.add('active');
+        timerEl.classList.add('expired');
+        if (labelEl) labelEl.textContent = 'Claim window expired!';
+        timeEl.textContent = '00:00:00';
+        return;
+    }
+    
+    timerEl.classList.add('active');
+    timerEl.classList.remove('expired');
+    if (labelEl) labelEl.textContent = 'Claim Window:';
+    timeEl.textContent = fmtHHMMSS(remain);
+}
+
 function updateAdClaimUI() {
     const total = calculateAdTotalEarnings();
     const allWatched = isAllDisplayAdsWatched();
+    const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
+    const windowRemain = getClaimWindowRemaining();
+    const windowExpired = allWatched && !alreadyClaimed && appState.user.claimWindowStartTime > 0 && windowRemain <= 0;
     
     const adTotalEl = document.getElementById('adTotalEarnings');
     if (adTotalEl) adTotalEl.textContent = total.toFixed(2);
@@ -1050,17 +1148,46 @@ function updateAdClaimUI() {
     
     const btn = document.getElementById('adClaimBtn');
     if (!btn) return;
-    if (allWatched) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span id="adClaimBtnText">Claim ' + total.toFixed(2) + ' TK</span>';
-    } else {
+    
+    // ✅ 4টি স্টেট:
+    if (!allWatched) {
+        // 1. এখনো সব অ্যাড দেখা হয়নি
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All Ads</span>';
+    } else if (alreadyClaimed) {
+        // 2. ইতিমধ্যে Claim করা হয়েছে
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> <span id="adClaimBtnText">Already Claimed ✓</span>';
+    } else if (windowExpired) {
+        // 3. Timer expired — আর claim করা যাবে না
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-clock"></i> <span id="adClaimBtnText">Window Expired</span>';
+    } else {
+        // 4. সব দেখা + Timer active → Claim করা যাবে
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span id="adClaimBtnText">Claim ' + total.toFixed(2) + ' TK</span>';
     }
 }
+
 async function claimAdEarnings() {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন আগে!'); return; }
+    
+    // ✅ Double Claim Protection
+    if (appState.user.adClaimedCurrentCycle === true) {
+        toast('❌ এই সাইকেলে ইতিমধ্যে ক্লেইম করা হয়েছে! পরবর্তী রিসেটের জন্য অপেক্ষা করুন।');
+        updateAdClaimUI();
+        return;
+    }
+    
+    // ✅ Claim Window Expired check
+    const windowRemain = getClaimWindowRemaining();
+    if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) {
+        toast('⏰ ক্লেইম উইন্ডো (১ ঘন্টা) শেষ হয়ে গেছে! পরবর্তী রিসেটে আবার চেষ্টা করুন।');
+        updateAdClaimUI();
+        return;
+    }
+    
     const total = calculateAdTotalEarnings();
     if (total <= 0) { toast('❌ কোনো এড কনফিগার করা নেই'); return; }
     
@@ -1070,28 +1197,34 @@ async function claimAdEarnings() {
         const newBal = Number(appState.user.balance || 0) + total;
         const newEarn = Number(appState.user.totalEarned || 0) + total;
         const newClaimed = Number(appState.user.adClaimedTotal || 0) + total;
+        const claimTime = Date.now();
         
         let adHist = appState.user.adHistory || {};
-        adHist['claim_' + Date.now()] = { slot: 'Claim', amount: total, timestamp: Date.now(), type: 'adclaim' };
+        adHist['claim_' + claimTime] = { slot: 'Claim', amount: total, timestamp: claimTime, type: 'adclaim' };
         const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
         
+        // ✅ Save claimed flag to Firebase
         await db.ref('users/' + appState.user.id).update({
             balance: newBal,
             totalEarned: newEarn,
             adClaimedTotal: newClaimed,
-            adHistory: adHist
+            adHistory: adHist,
+            adClaimedCurrentCycle: true
         });
+        
         appState.user.balance = newBal;
         appState.user.totalEarned = newEarn;
         appState.user.adClaimedTotal = newClaimed;
         appState.user.adHistory = adHist;
+        appState.user.adClaimedCurrentCycle = true;
         
         const split = computeCommissionSplit(total);
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
         
         await updateTextElements();
         renderAds();
+        updateClaimWindowUI();
         toast('✅ ' + total.toFixed(2) + ' টাকা সফলভাবে ক্লেইম হয়েছে!');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
@@ -1803,11 +1936,24 @@ async function startAdsResetCountdown() {
 }
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
+    // ✅ Reset — নতুন সাইকেল, সব রিসেট
     appState.user.dailyAds = {};
     appState.user.adsResetTime = 0;
-    renderAds(); updateCycleUI();
-    toast('🔄 অ্যাড রিসেট হয়েছে! আবার দেখতে পারবেন।');
-    try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0 }); } catch (e) {}
+    appState.user.adClaimedCurrentCycle = false;
+    appState.user.claimWindowStartTime = 0;
+    stopClaimWindowTicker();
+    renderAds(); 
+    updateCycleUI();
+    updateClaimWindowUI();
+    toast('🔄 অ্যাড রিসেট হয়েছে! আবার অ্যাড দেখে ক্লেইম করতে পারবেন।');
+    try { 
+        await db.ref('users/' + tgUser.id).update({ 
+            dailyAds: {}, 
+            adsResetTime: 0,
+            adClaimedCurrentCycle: false,
+            claimWindowStartTime: 0
+        }); 
+    } catch (e) {}
 }
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
@@ -2055,6 +2201,8 @@ function startPeriodicRecheck() {
     startCycleTimer();
     startCooldownTicker();
     startTaskExpiryTicker();
+    startClaimWindowTicker(); // ✅
+    updateClaimWindowUI(); // ✅
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -2080,6 +2228,7 @@ function stopPeriodicRecheck() {
     stopCycleTimer();
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
     stopTaskExpiryTicker();
+    stopClaimWindowTicker(); // ✅
 }
 
 function trackAdClick() {
@@ -2151,11 +2300,17 @@ async function watchAd(i) {
         const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
         toast('✅ Ad watched (' + Math.round(watchDuration) + 's)! ' + remaining + ' more for Slot ' + (i+1));
         
-        setTimeout(() => { 
+        setTimeout(async () => { 
             renderAds(); 
             updateAdClaimUI(); 
-            if (isAllDisplayAdsWatched()) startAdsResetCountdown(); 
-            else updateCycleUI(); 
+            if (isAllDisplayAdsWatched()) {
+                // ✅ সব অ্যাড দেখা শেষ হলে Claim Window শুরু করো
+                await startClaimWindowIfNeeded();
+                startAdsResetCountdown();
+            } else {
+                updateCycleUI();
+            }
+            updateClaimWindowUI();
         }, 500);
         
     } catch (e) {
@@ -2195,6 +2350,7 @@ function switchTab(tabId, el) {
     if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
     if (tabId === 'history') { loadAdHistory(); }
+    if (tabId === 'home') { updateClaimWindowUI(); }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 
@@ -2225,20 +2381,10 @@ async function calculateValidReferrals() {
     } catch(e) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
 }
 
-/* ═══════════════════════════════════════════════════════
-   ✅ SEQUENTIAL LEVEL SYSTEM
-   withdrawCount = কতটি successful withdraw হয়েছে
-   - 0 → Level 1 (index 0)
-   - 1 → Level 2 (index 1)
-   - 2 → Level 3 (index 2)
-   - ...ইত্যাদি
-   - Admin Panel থেকে যত লেভেল যোগ করা হবে, ঠিক ততটাই দেখাবে
-   ═══════════════════════════════════════════════════════ */
 function getWithdrawLevel() {
     if (!withdrawLevels || withdrawLevels.length === 0) {
         return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
     }
-    // ✅ Sequential Level Unlock: withdrawCount = কতটি successful withdraw হয়েছে
     const completedWithdraws = Number(appState.user.withdrawCount || 0);
     const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
     const currentLevel = withdrawLevels[levelIndex];
@@ -2261,7 +2407,6 @@ function updateWithdrawInfo() {
     document.getElementById('wdTime').textContent = level.time || '30 Min-1 Hours';
     document.getElementById('wdRange').textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
     
-    // ✅ Update Level Progress Card
     updateLevelProgressCard(currentLevelNum, totalLevels);
     
     const canWithdraw = validReferralCount >= reqRefs;
@@ -2281,7 +2426,6 @@ function updateWithdrawInfo() {
     }
 }
 
-/* ✅ NEW: Level Progress Dots */
 function updateLevelProgressCard(currentLevelNum, totalLevels) {
     const titleEl = document.getElementById('lpcTitle');
     const trackEl = document.getElementById('lpcTrack');
@@ -2366,6 +2510,7 @@ function renderAds() {
         `;
     }
     updateAdClaimUI();
+    updateClaimWindowUI();
 }
 
 function getTaskTypeIcon(type) {
@@ -2848,7 +2993,6 @@ async function requestWithdraw() {
     
     await calculateValidReferrals();
     
-    // ✅ Check if user has enough qualified referrals for CURRENT level
     if (validReferralCount < reqRefs) {
         toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন Qualified Referral দরকার!');
         return;
@@ -2877,7 +3021,6 @@ async function requestWithdraw() {
             timestamp: Date.now()
         });
         
-        // ✅ Increment withdrawCount — পরবর্তী Level আনলক হবে
         const newCount = (appState.user.withdrawCount || 0) + 1;
         await db.ref('users/' + appState.user.id).update({
             balance: appState.user.balance - amount,
@@ -2890,7 +3033,6 @@ async function requestWithdraw() {
         document.getElementById('wd-account').value = '';
         document.getElementById('wd-amount').value = '';
         
-        // ✅ Show next level info
         const nextLevelMsg = (currentLevelNum < totalLevels) 
             ? ' 🎉 Level ' + (currentLevelNum + 1) + ' আনলক হয়েছে!' 
             : ' 🏆 সর্বোচ্চ লেভেলে পৌঁছেছেন!';
@@ -2900,7 +3042,6 @@ async function requestWithdraw() {
         await sendNotification(tgUser.id, '✅ Withdraw Request Sent!\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
         await sendNotification(ADMIN_ID, '💰 New Withdraw\nUser: ' + appState.user.name + '\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
         
-        // ✅ Immediately update UI to show next level
         await calculateValidReferrals();
         updateWithdrawInfo();
     } catch (e) {
@@ -3012,6 +3153,7 @@ async function updateTextElements() {
     updateRefClaimButton();
     updateRefTabCounts();
     updateAdClaimUI();
+    updateClaimWindowUI();
 }
 
 function setLoading(isLoading) {
@@ -3213,7 +3355,7 @@ window.onload = () => {
                     const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; document.body.appendChild(sc);
                 }
             });
-            if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); }
+            if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); }
         }
     });
 
@@ -3228,7 +3370,9 @@ window.onload = () => {
                 adsResetTime: 0, dailyBonusDate: '',
                 lastActive: today, channelVerified: false, isBanned: false, banReason: '',
                 withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
-                referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0
+                referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
+                adClaimedCurrentCycle: false,
+                claimWindowStartTime: 0
             };
             await userRef.set(appState.user);
 
@@ -3274,6 +3418,8 @@ window.onload = () => {
                 if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
                 if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
                 if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
+                if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
+                if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
@@ -3291,6 +3437,7 @@ window.onload = () => {
                 renderAds();
                 renderNewTasks();
                 updateCycleUI();
+                updateClaimWindowUI();
 
                 if (!isBooted) {
                     isBooted = true;
@@ -3308,6 +3455,14 @@ window.onload = () => {
                             document.getElementById('app').style.display = 'block';
                             setLoading(false);
                             startPeriodicRecheck();
+                            // ✅ If all ads already watched & not claimed & window active, start ticker
+                            if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
+                                if (!appState.user.claimWindowStartTime) {
+                                    await startClaimWindowIfNeeded();
+                                }
+                                startClaimWindowTicker();
+                            }
+                            updateClaimWindowUI();
                             if (appState.user.dailyBonusDate !== today) showBonus();
                             startAdminSlider();
                         } else document.getElementById('offlineOverlay').classList.add('active');
