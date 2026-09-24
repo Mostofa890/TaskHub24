@@ -842,8 +842,8 @@
             </div>
 
             <div class="ref-inner-pane" id="refPaneQualified">
-                <div class="ref-qualified-info">
-                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b>২০ টাকা বা তার বেশি</b>। শুধু Qualified ইউজারের ইনকাম থেকে আপনি কমিশন পাবেন।
+                <div class="ref-qualified-info" id="refQualifiedInfo">
+                    <i class="fas fa-info-circle"></i> Qualified Referral মানে আপনার রেফার করা ইউজারের ব্যালেন্স <b id="refQualifiedMinText">২০ টাকা বা তার বেশি</b>। শুধু Qualified ইউজারের ইনকাম থেকে আপনি কমিশন পাবেন।
                 </div>
                 <div id="myQualifiedReferralsList"><div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div></div>
             </div>
@@ -948,7 +948,10 @@ const MINI_APP_NAME = "taskhub";
 const BOT_TOKEN = "8921657661:AAFp9DQbkNWXE6WSwez0K3nQhWz5UBg5t_E";
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
-const MIN_REFERRAL_BALANCE = 20;
+
+// ✅ NEW: MIN_REFERRAL_BALANCE is now dynamic (loaded from config)
+let MIN_REFERRAL_BALANCE = 20;
+
 const AD_RESET_HOURS = 12;
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
@@ -963,7 +966,6 @@ let REF_COMMISSION_MODE = 'bonus';
 let withdrawLevels = [];
 let appState = {
     user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-        // ✅ NEW: Ad claim cycle + timer fields
         adClaimedCurrentCycle: false,
         claimWindowStartTime: 0
     },
@@ -985,7 +987,7 @@ let isRechecking = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
-let claimWindowTimerInterval = null; // ✅ NEW
+let claimWindowTimerInterval = null;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
@@ -1037,7 +1039,6 @@ function isAllDisplayAdsWatched() {
     return hasConfigured;
 }
 
-// ✅ Get remaining time in claim window (ms)
 function getClaimWindowRemaining() {
     const startTime = Number(appState.user.claimWindowStartTime || 0);
     if (!startTime) return 0;
@@ -1046,13 +1047,11 @@ function getClaimWindowRemaining() {
     return remain > 0 ? remain : 0;
 }
 
-// ✅ Start the claim window timer when all ads watched
 async function startClaimWindowIfNeeded() {
     if (!isAllDisplayAdsWatched()) return;
     if (appState.user.adClaimedCurrentCycle === true) return;
-    if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return; // already started
+    if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return;
     
-    // Only start if not already expired
     const now = Date.now();
     appState.user.claimWindowStartTime = now;
     try {
@@ -1062,12 +1061,10 @@ async function startClaimWindowIfNeeded() {
     updateClaimWindowUI();
 }
 
-// ✅ Start ticker to update the 1-hour countdown
 function startClaimWindowTicker() {
     if (claimWindowTimerInterval) return;
     claimWindowTimerInterval = setInterval(() => {
         updateClaimWindowUI();
-        // When timer expires, disable claim button
         const remain = getClaimWindowRemaining();
         if (remain <= 0) {
             updateAdClaimUI();
@@ -1081,7 +1078,6 @@ function stopClaimWindowTicker() {
     }
 }
 
-// ✅ Format HH:MM:SS
 function fmtHHMMSS(ms) {
     const totalSec = Math.max(0, Math.floor(ms / 1000));
     const h = Math.floor(totalSec / 3600);
@@ -1090,7 +1086,6 @@ function fmtHHMMSS(ms) {
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
 
-// ✅ Update the claim window timer UI
 function updateClaimWindowUI() {
     const timerEl = document.getElementById('claimWindowTimer');
     const timeEl = document.getElementById('cwtTime');
@@ -1100,7 +1095,6 @@ function updateClaimWindowUI() {
     const allWatched = isAllDisplayAdsWatched();
     const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
     
-    // Hide timer if: not all watched, OR already claimed
     if (!allWatched || alreadyClaimed) {
         timerEl.classList.remove('active');
         return;
@@ -1108,7 +1102,6 @@ function updateClaimWindowUI() {
     
     const remain = getClaimWindowRemaining();
     if (remain <= 0) {
-        // Timer expired
         timerEl.classList.add('active');
         timerEl.classList.add('expired');
         if (labelEl) labelEl.textContent = 'Claim window expired!';
@@ -1149,21 +1142,16 @@ function updateAdClaimUI() {
     const btn = document.getElementById('adClaimBtn');
     if (!btn) return;
     
-    // ✅ 4টি স্টেট:
     if (!allWatched) {
-        // 1. এখনো সব অ্যাড দেখা হয়নি
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All Ads</span>';
     } else if (alreadyClaimed) {
-        // 2. ইতিমধ্যে Claim করা হয়েছে
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-check-circle"></i> <span id="adClaimBtnText">Already Claimed ✓</span>';
     } else if (windowExpired) {
-        // 3. Timer expired — আর claim করা যাবে না
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-clock"></i> <span id="adClaimBtnText">Window Expired</span>';
     } else {
-        // 4. সব দেখা + Timer active → Claim করা যাবে
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span id="adClaimBtnText">Claim ' + total.toFixed(2) + ' TK</span>';
     }
@@ -1173,14 +1161,12 @@ async function claimAdEarnings() {
     if (!isOnline) { toast('No internet connection!'); return; }
     if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন আগে!'); return; }
     
-    // ✅ Double Claim Protection
     if (appState.user.adClaimedCurrentCycle === true) {
         toast('❌ এই সাইকেলে ইতিমধ্যে ক্লেইম করা হয়েছে! পরবর্তী রিসেটের জন্য অপেক্ষা করুন।');
         updateAdClaimUI();
         return;
     }
     
-    // ✅ Claim Window Expired check
     const windowRemain = getClaimWindowRemaining();
     if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) {
         toast('⏰ ক্লেইম উইন্ডো (১ ঘন্টা) শেষ হয়ে গেছে! পরবর্তী রিসেটে আবার চেষ্টা করুন।');
@@ -1204,7 +1190,6 @@ async function claimAdEarnings() {
         const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
         
-        // ✅ Save claimed flag to Firebase
         await db.ref('users/' + appState.user.id).update({
             balance: newBal,
             totalEarned: newEarn,
@@ -1265,6 +1250,12 @@ function updateRefTabCounts() {
 function renderReferralList() {
     updateRefTabCounts();
 
+    // ✅ Update qualified info text with dynamic value
+    const refQualifiedMinText = document.getElementById('refQualifiedMinText');
+    if (refQualifiedMinText) {
+        refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
+    }
+
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
@@ -1274,7 +1265,10 @@ function renderReferralList() {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
             const balClass = u.qualified ? 'qualified' : 'not-qualified';
             const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
-            const isIncomeActive = u.qualified ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Commission Active</span>' : '<span style="font-size:0.65rem;color:#ff4757;font-weight:800;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">⏳ Need 20TK</span>';
+            // ✅ Dynamic need value
+            const isIncomeActive = u.qualified 
+                ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Commission Active</span>' 
+                : `<span style="font-size:0.65rem;color:#ff4757;font-weight:800;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">⏳ Need ${MIN_REFERRAL_BALANCE}TK</span>`;
             html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${initial}</div><div class="ref-user-info"><h5>${esc(u.name)} ${isIncomeActive}</h5><p>ID: ${u.id}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK ${checkMark}</div></div>`;
         });
         totalContainer.innerHTML = html;
@@ -1491,265 +1485,21 @@ document.addEventListener('click', function(e) {
 
 const LEGAL_CONTENT = {
     privacy: `
-        <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
+        <span class="last-updated">📅 Last Updated: Sep/23/2026</span>
         <h1>📄 PRIVACY POLICY</h1>
-        <h2>১. ভূমিকা (Introduction)</h2>
-        <p><strong>Earn Wallet / NexEarn</strong> ("আমরা", "আমাদের", "প্ল্যাটফর্ম") একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম। এই Privacy Policy ব্যাখ্যা করে যে আমরা কী ধরনের তথ্য সংগ্রহ করি, কীভাবে ব্যবহার করি, কোথায় সংরক্ষণ করি এবং আপনার কী কী অধিকার রয়েছে।</p>
-        <p>আমাদের প্ল্যাটফর্ম ব্যবহার করার মাধ্যমে আপনি এই Privacy Policy-তে সম্মতি প্রদান করছেন। আপনি যদি সম্মত না হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার বন্ধ করুন।</p>
+        <h2>১. ভূমিকা</h2>
+        <p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম।</p>
+        <h2>১২. যোগাযোগ</h2>
+        <ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul>
         <hr>
-        <h2>২. আমরা কী কী তথ্য সংগ্রহ করি (Information We Collect)</h2>
-        <h3>২.১ Telegram অ্যাকাউন্ট তথ্য (স্বয়ংক্রিয়ভাবে সংগ্রহ)</h3>
-        <p>আপনি Telegram Web App-এর মাধ্যমে লগইন করলে আমরা নিম্নলিখিত তথ্য পাই:</p>
-        <ul>
-            <li>Telegram User ID</li>
-            <li>প্রথম নাম (First Name)</li>
-            <li>Username (যদি থাকে)</li>
-            <li>প্রোফাইল ছবি URL</li>
-            <li>Language preference</li>
-            <li>Web App start parameter (referral ID)</li>
-        </ul>
-        <h3>২.২ প্ল্যাটফর্ম কার্যক্রমের তথ্য</h3>
-        <ul>
-            <li>Balance, Total Earned, Referral Count</li>
-            <li>Ad watching history (adHistory)</li>
-            <li>Task submission history (taskSubmissions, taskHistory)</li>
-            <li>Withdraw request history</li>
-            <li>Commission history</li>
-            <li>Device ID (localStorage-এ সংরক্ষিত nexearn_device_id)</li>
-            <li>Referral relationships (কে কাকে রেফার করেছে)</li>
-            <li>Ad click count, last active date</li>
-            <li>Verified channels status</li>
-            <li>Task cooldowns এবং statuses</li>
-        </ul>
-        <h3>২.৩ Task Submission-এ আপলোড করা কনটেন্ট</h3>
-        <ul>
-            <li>ছবি / স্ক্রিনশট → ImgBB (third-party) সার্ভারে আপলোড হয়</li>
-            <li>ভয়েস / অডিও ফাইল → Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st (third-party) সার্ভারে আপলোড হয়</li>
-            <li>টেক্সট উত্তর → Firebase Realtime Database-এ সংরক্ষিত</li>
-            <li>লিংক/Task URL → Firebase-এ সংরক্ষিত</li>
-        </ul>
-        <h3>২.৪ অ্যাড নেটওয়ার্ক ডেটা</h3>
-        <p>Adsgram, Monetag, GigaPub-এর মতো থার্ড-পার্টি অ্যাড নেটওয়ার্ক ব্যবহার করা হলে তারা নিজেদের Privacy Policy অনুযায়ী ডেটা সংগ্রহ করতে পারে (IP, Device info, Ad interaction)।</p>
-        <hr>
-        <h2>৩. তথ্য কীভাবে ব্যবহার করা হয় (How We Use Information)</h2>
-        <table class="summary-table">
-            <tr><td>উদ্দেশ্য</td><td>বাবহৃত ডেটা</td></tr>
-            <tr><td>অ্যাকাউন্ট তৈরি ও লগইন</td><td>Telegram ID, Name</td></tr>
-            <tr><td>রিওয়ার্ড প্রদান</td><td>Balance, Task History, Ad History</td></tr>
-            <tr><td>রেফারেল কমিশন হিসাব</td><td>Referral relationships</td></tr>
-            <tr><td>Task যাচাই</td><td>Submission content, File URL</td></tr>
-            <tr><td>Withdraw প্রসেসিং</td><td>Account number, Method, Amount</td></tr>
-            <tr><td>সিস্টেম সুরক্ষা</td><td>Device ID, Ad clicks, Anti-fraud check</td></tr>
-            <tr><td>নোটিফিকেশন পাঠানো</td><td>Telegram ID</td></tr>
-        </table>
-        <hr>
-        <h2>৪. ডেটা কোথায় সংরক্ষিত হয় (Data Storage)</h2>
-        <p>আমরা <strong>Google Firebase Realtime Database</strong> ব্যবহার করি ডেটা সংরক্ষণের জন্য।</p>
-        <div class="warn-box">
-            <strong>⚠️ গুরুত্বপূর্ণ:</strong> Firebase Realtime Database-এ সংরক্ষিত ডেটা এনক্রিপ্টেড নয় (at-rest encryption ছাড়া)। Admin Password SHA-256 hash আকারে সংরক্ষিত। User-দের জন্য পাসওয়ার্ড নেই; শুধু Telegram authentication।
-        </div>
-        <hr>
-        <h2>৫. ডেটা শেয়ারিং (Data Sharing / Third Parties)</h2>
-        <p>আমরা আপনার ব্যক্তিগত তথ্য বিক্রি করি না। তবে নিম্নলিখিত ক্ষেত্রে ডেটা শেয়ার হয়:</p>
-        <ul>
-            <li><strong>Telegram</strong> — Bot API-এর মাধ্যমে আপনার Telegram ID ব্যবহার করে channel membership check ও notification পাঠানো হয়।</li>
-            <li><strong>File Hosting Services</strong> — ImgBB (ছবি), Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st (অডিও/ভয়েস)। এই সার্ভিসগুলো তাদের নিজস্ব Privacy Policy অনুযায়ী ফাইল সংরক্ষণ করে।</li>
-            <li><strong>Ad Networks</strong> — Adsgram, Monetag, GigaPub — অ্যাড দেখানোর জন্য।</li>
-            <li><strong>Firebase (Google)</strong> — ডেটা হোস্টিং সার্ভিস।</li>
-        </ul>
-        <hr>
-        <h2>৬. ডেটা সংরক্ষণ সময় (Data Retention)</h2>
-        <table class="summary-table">
-            <tr><td>ডেটার ধরন</td><td>সংরক্ষণ সময়</td></tr>
-            <tr><td>Ad History</td><td>সর্বশেষ ১০০টি এন্ট্রি</td></tr>
-            <tr><td>Commission History</td><td>সর্বশেষ ১০০টি এন্ট্রি</td></tr>
-            <tr><td>Task History</td><td>অনির্দিষ্টকাল</td></tr>
-            <tr><td>Task Submissions</td><td>অনির্দিষ্টকাল</td></tr>
-            <tr><td>Uploaded Files</td><td>থার্ড-পার্টি সার্ভার অনুযায়ী (24–72 ঘণ্টা বা স্থায়ী)</td></tr>
-            <tr><td>Withdraw History</td><td>অনির্দিষ্টকাল</td></tr>
-        </table>
-        <hr>
-        <h2>৭. আপনার অধিকার (Your Rights)</h2>
-        <ul>
-            <li>✅ আপনার সংরক্ষিত ডেটা দেখার অধিকার</li>
-            <li>✅ ভুল ডেটা সংশোধনের অনুরোধ</li>
-            <li>✅ অ্যাকাউন্ট মুছে ফেলার অনুরোধ (Telegram ID সহ সমস্ত ডেটা)</li>
-            <li>✅ Data processing বন্ধ করার অনুরোধ</li>
-        </ul>
-        <p>অনুরোধ পাঠান: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></p>
-        <hr>
-        <h2>৮. শিশুদের Privacy (Children's Privacy)</h2>
-        <p>আমাদের প্ল্যাটফর্ম ১৩ বছরের কম বয়সী শিশুদের জন্য নয়। যদি আপনি ১৩ বছরের কম হন, অনুগ্রহ করে প্ল্যাটফর্ম ব্যবহার করবেন না। যদি আমরা জানতে পারি যে ১৩ বছরের কম বয়সী কেউ অ্যাকাউন্ট খুলেছে, আমরা সেই অ্যাকাউন্ট এবং সংশ্লিষ্ট ডেটা মুছে ফেলব।</p>
-        <hr>
-        <h2>৯. নিরাপত্তা (Security)</h2>
-        <p>আমরা যুক্তিসঙ্গত নিরাপত্তা ব্যবস্থা গ্রহণ করি: Admin Password SHA-256 Hash, Telegram Web App authentication, Anti-tamper protection (Developer tools block, context menu block), Session expiry (24 ঘণ্টা), User ID verification।</p>
-        <div class="danger-box">
-            <strong>⚠️ মনে রাখবেন:</strong> কোনো ইন্টারনেট-ভিত্তিক সিস্টেম ১০০% নিরাপদ নয়। আমরা ডেটা লঙ্ঘনের জন্য দায়ী নই।
-        </div>
-        <hr>
-        <h2>১০. Cookies ও Local Storage</h2>
-        <p>আমরা নিম্নলিখিত Local Storage ব্যবহার করি: nexearn_device_id (ডিভাইস শনাক্তকরণ), nexearn_admin_session (Admin session), pending_survey, pending_youtube, survey_done_task, youtube_done_task। আপনি ব্রাউজার সেটিংস থেকে Local Storage মুছে ফেলতে পারেন, তবে এতে অ্যাকাউন্ট কার্যক্রম প্রভাবিত হতে পারে।</p>
-        <hr>
-        <h2>১১. Privacy Policy-তে পরিবর্তন</h2>
-        <p>আমরা এই Privacy Policy যেকোনো সময় পরিবর্তন করার অধিকার সংরক্ষণ করি। বড় পরিবর্তন হলে প্ল্যাটফর্মে নোটিশ দেওয়া হবে। পরিবর্তনের পরও প্ল্যাটফর্ম ব্যবহার চালিয়ে গেলে আপনি নতুন Policy-তে সম্মতি দিয়েছেন বলে ধরে নেওয়া হবে।</p>
-        <hr>
-        <h2>১২. যোগাযোগ (Contact)</h2>
-        <ul>
-            <li>📧 Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">https://t.me/NexEarn2Support</a></li>
-            <li>👤 Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
-        </ul>
-        <div class="consent-box">
-            <h3>✅ সম্মতি (Consent)</h3>
-            <p>উপরোক্ত Privacy Policy পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
-            <ul>
-                <li>✅ ডেটা সংগ্রহে সম্মতি</li>
-                <li>✅ Third-party শেয়ারিং-এ সম্মতি</li>
-                <li>✅ Disclaimer-এ সম্মতি</li>
-                <li>✅ Terms violation-এ account ban মানতে সম্মতি</li>
-            </ul>
-        </div>
-        <hr>
-        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet / NexEarn. All rights reserved.</p>
+        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>
     `,
-
     disclaimer: `
-        <span class="last-updated">📅 Last Updated: Sep/23/2026 &nbsp;•&nbsp; Effective: Sep/23/2026</span>
-        <h1>⚠️ DISCLAIMER (দাবিত্যাগ)</h1>
-        <h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2>
-        <p>Earn Wallet / NexEarn একটি মাইক্রো-টাস্ক প্ল্যাটফর্ম যা ব্যবহারকারীদের ছোট ছোট টাস্ক (অ্যাড দেখা, সার্ভে, অ্যাড আপলোড) সম্পন্ন করে রিওয়ার্ড (টাকা) অর্জন করতে দেয়। এই রিওয়ার্ড real money হিসেবে Telegram Bot-এর মাধ্যমে withdraw করা যায়।</p>
+        <span class="last-updated">📅 Last Updated: Sep/23/2026</span>
+        <h1>⚠️ DISCLAIMER</h1>
+        <div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div>
         <hr>
-        <h2>২. আয়ের নিশ্চয়তা নেই (No Guarantee of Income)</h2>
-        <ul>
-            <li>আমরা কোনো নির্দিষ্ট আয়ের নিশ্চয়তা দিই না।</li>
-            <li>আপনার উপার্জন সম্পূর্ণ নির্ভর করে আপনি কত টাস্ক সম্পন্ন করবেন, কত অ্যাড দেখবেন, কত রেফারেল আনবেন তার উপর।</li>
-            <li>কোনো দিন আয় কম হলে বা একেবারেই না হলে আমরা দায়ী নই।</li>
-        </ul>
-        <hr>
-        <h2>৩. তৃতীয় পক্ষের সেবা (Third-Party Services)</h2>
-        <ul>
-            <li><strong>Adsgram, Monetag, GigaPub</strong> — এই অ্যাড নেটওয়ার্কগুলোর কোনো সমস্যা, ফ্রড, অথবা অ্যাড না দেখানোর জন্য আমরা দায়ী নই।</li>
-            <li><strong>ImgBB, Bashupload, Temp.sh, Litterbox, Uguu, 0x0.st</strong> — আপলোড করা ফাইল মুছে গেলে, লিক হলে, অথবা ভুলভাবে সংরক্ষিত হলে আমরা দায়ী নই।</li>
-            <li><strong>Telegram</strong> — Telegram-এর service disruption, ban, বা policy change-এর জন্য আমরা দায়ী নই।</li>
-            <li><strong>Firebase</strong> — Firebase-এর downtime বা data loss-এর জন্য আমরা দায়ী নই।</li>
-        </ul>
-        <hr>
-        <h2>৪. অ্যাকাউন্ট বন্ধ বা স্থগিত (Account Termination)</h2>
-        <p>নিম্নলিখিত কারণে আমরা যেকোনো অ্যাকাউন্ট বিনা নোটিশে বন্ধ/স্থগিত করতে পারি:</p>
-        <div class="danger-box">
-            🚫 একাধিক অ্যাকাউন্ট খোলা (multi-accounting)<br>
-            🚫 Fake referral তৈরি<br>
-            🚫 Bot, Script, বা Automation ব্যবহার<br>
-            🚫 ভুয়া task submission (নকল স্ক্রিনশট, কপি-পেস্ট)<br>
-            🚫 Device ID manipulation<br>
-            🚫 Bug exploit বা vulnerability abuse<br>
-            🚫 Developer tool ব্যবহার করে database access<br>
-            🚫 যে কোনো ধরনের প্রতারণা
-        </div>
-        <p><strong>বন্ধ অ্যাকাউন্টের balance ফেরত দেওয়া হবে না।</strong></p>
-        <hr>
-        <h2>৫. Task এবং অ্যাড সংক্রান্ত</h2>
-        <ul>
-            <li>Task-এর সংখ্যা, রিওয়ার্ড, শর্তাবলী আগে নোটিশ ছাড়াই পরিবর্তন করার অধিকার আমরা সংরক্ষণ করি।</li>
-            <li>কোনো Task cancel হলে, rejected হলে, বা expire হলে আমরা কোনো ক্ষতিপূরণ দেব না।</li>
-            <li>Admin approve না করলে task-এর জন্য টাকা পাবেন না।</li>
-            <li>একই task-এর জন্য multiple submission করলে account ban হতে পারে।</li>
-        </ul>
-        <hr>
-        <h2>৬. Withdrawal সংক্রান্ত</h2>
-        <ul>
-            <li>Minimum এবং Maximum withdraw limit পরিবর্তনযোগ্য।</li>
-            <li>Service charge / processing fee কাটা হবে।</li>
-            <li>Qualified referral ছাড়া withdraw করা যাবে না (level অনুযায়ী)।</li>
-            <li>ভুল account number দিলে টাকা ফেরত পাওয়ার নিশ্চয়তা নেই।</li>
-            <li>Withdraw request reject হলে refund সংক্রান্ত সমস্যা হলে আমরা দায়ী নই।</li>
-        </ul>
-        <hr>
-        <h2>৭. Anti-Hack এবং Anti-Fraud System</h2>
-        <p>আমাদের প্ল্যাটফর্মে নিম্নলিখিত security system রয়েছে:</p>
-        <ul>
-            <li>Developer Tools (F12) block</li>
-            <li>Right-click / context menu block</li>
-            <li>Text selection block</li>
-            <li>Session monitoring</li>
-            <li>Device fingerprinting</li>
-            <li>User ID verification</li>
-            <li>Multiple account detection</li>
-        </ul>
-        <div class="warn-box">
-            এই সিস্টেম সক্রিয় থাকায় কিছু legitimate ব্যবহারও বাধাগ্রস্ত হতে পারে। এর জন্য আমরা দায়ী নই।
-        </div>
-        <hr>
-        <h2>৮. Balance এবং Payment</h2>
-        <ul>
-            <li>আপনার balance Telegram user ID-এর সাথে যুক্ত। Telegram account হারালে balance হারাতে পারেন।</li>
-            <li>আমরা কোনো interest বা bonus প্রদান করি না।</li>
-            <li>Currency conversion-এ fluctuation থাকতে পারে।</li>
-            <li>ট্যাক্স বা legal obligation আপনার নিজের দায়িত্ব।</li>
-        </ul>
-        <hr>
-        <h2>৯. প্ল্যাটফর্ম বন্ধ / পরিবর্তন (Service Discontinuation)</h2>
-        <p>আমরা যেকোনো সময়: প্ল্যাটফর্ম বন্ধ করতে পারি, Feature পরিবর্তন করতে পারি, Policy পরিবর্তন করতে পারি, Server migrate করতে পারি।</p>
-        <div class="warn-box">
-            এই ধরনের পরিবর্তনে আপনার অসম্পূর্ণ balance বাতিল হতে পারে। বড় পরিবর্তনের আগে আমরা নোটিশ দেওয়ার চেষ্টা করব, তবে নিশ্চয়তা দিই না।
-        </div>
-        <hr>
-        <h2>১০. আইনি সীমাবদ্ধতা (Limitation of Liability)</h2>
-        <p>যেকোনো পরোক্ষ, আকস্মিক, বিশেষ, ফলস্বরূপ, বা শাস্তিমূলক ক্ষতির জন্য আমরা দায়ী নই, যার মধ্যে রয়েছে: ডেটা হারানো, আয় হারানো, প্রোফাইল ক্ষতি, তৃতীয় পক্ষের দাবি, সেবা ব্যাঘাত।</p>
-        <div class="danger-box">
-            <strong>আমাদের সর্বোচ্চ দায় সীমাবদ্ধ আপনার শেষ ৩০ দিনের আয়ের মধ্যে।</strong>
-        </div>
-        <hr>
-        <h2>১১. ব্যবহারকারীর দায়িত্ব (User Responsibility)</h2>
-        <ul>
-            <li>আপনার Telegram account-এর নিরাপত্তা আপনার দায়িত্ব</li>
-            <li>সঠিক তথ্য প্রদান করুন</li>
-            <li>একটি ডিভাইসে একটি অ্যাকাউন্ট রাখুন</li>
-            <li>Fraud এড়িয়ে চলুন</li>
-            <li>Admin-এর নির্দেশনা মেনে চলুন</li>
-        </ul>
-        <hr>
-        <h2>১২. তৃতীয় পক্ষের লিংক</h2>
-        <p>আমাদের প্ল্যাটফর্মে তৃতীয় পক্ষের লিংক থাকতে পারে (যেমন task URL, tutorial video, contact link)। সেই লিংকে গেলে তাদের Privacy Policy প্রযোজ্য হবে। আমরা তাদের কনটেন্ট বা সেবার জন্য দায়ী নই।</p>
-        <hr>
-        <h2>১৩. Legal Compliance</h2>
-        <p>আপনি সম্মত যে আপনি আপনার দেশের/অঞ্চলের সব প্রযোজ্য আইন মেনে প্ল্যাটফর্ম ব্যবহার করবেন। Pornography, gambling, illegal activity, বা child exploitation সংক্রান্ত কোনো কাজে প্ল্যাটফর্ম ব্যবহার করলে account ban এবং আইনি ব্যবস্থা নেওয়া হবে।</p>
-        <hr>
-        <h2>১৪. Admin যোগাযোগ</h2>
-        <p>Admin-এর সাথে যোগাযোগের জন্য শুধুমাত্র প্ল্যাটফর্মের Contact সেকশন বা Support Channel ব্যবহার করুন। কোনো ব্যক্তিগত message, call, বা third-party চ্যানেলে আমরা দায়ী নই।</p>
-        <hr>
-        <h2>১৫. Scholarship / Educational Purpose</h2>
-        <p>এই প্ল্যাটফর্ম educational এবং micro-earning উদ্দেশ্যে তৈরি। এটি full-time job নয়, investment platform নয়, বা financial planning টুল নয়।</p>
-        <div class="consent-box">
-            <h3>✅ সম্মতি (Consent)</h3>
-            <p>উপরোক্ত Disclaimer পড়ে এবং বুঝে আপনি সম্মতি প্রদান করছেন। এই প্ল্যাটফর্ম ব্যবহারের মাধ্যমে আপনি:</p>
-            <ul>
-                <li>✅ ডেটা সংগ্রহে সম্মতি</li>
-                <li>✅ Third-party শেয়ারিং-এ সম্মতি</li>
-                <li>✅ Disclaimer-এ সম্মতি</li>
-                <li>✅ Terms violation-এ account ban মানতে সম্মতি</li>
-            </ul>
-        </div>
-        <h2>📞 যোগাযোগ</h2>
-        <ul>
-            <li>Support Channel: <a href="https://t.me/nexearn2" target="_blank">https://t.me/nexearn2</a></li>
-            <li>Admin Contact: <a href="mailto:extramoney890@gmail.com">extramoney890@gmail.com</a></li>
-            <li>Telegram Bot: @TaskHubBD24Bot</li>
-        </ul>
-        <h2>📝 দ্রুত সারাংশ (Quick Summary)</h2>
-        <table class="summary-table">
-            <tr><td>বিষয়</td><td>সারাংশ</td></tr>
-            <tr><td>কী সংগ্রহ করি</td><td>Telegram ID, Balance, Tasks, Uploads, Device ID</td></tr>
-            <tr><td>কেন সংগ্রহ করি</td><td>Payment, Security, Referral, Anti-fraud</td></tr>
-            <tr><td>কোথায় রাখি</td><td>Firebase, ImgBB, Audio servers, Telegram</td></tr>
-            <tr><td>কতদিন রাখি</td><td>Last 100 entries (ad/commission), Permanent (tasks)</td></tr>
-            <tr><td>শেয়ার করি কাদের</td><td>Telegram, Ad Networks, File Hosts, Firebase</td></tr>
-            <tr><td>আপনার অধিকার</td><td>Data view, Correct, Delete</td></tr>
-            <tr><td>আয়ের নিশ্চয়তা</td><td>❌ নেই</td></tr>
-            <tr><td>তৃতীয় পক্ষ</td><td>✅ দায়ী নয়</td></tr>
-            <tr><td>Fraud করলে</td><td>🚫 Account ban, balance বাতিল</td></tr>
-        </table>
-        <hr>
-        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet / NexEarn. All rights reserved.</p>
+        <p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>
     `
 };
 
@@ -1767,12 +1517,10 @@ function openLegalModal(type) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
-
 function closeLegalModal() {
     document.getElementById('legalModal').classList.remove('active');
     document.body.style.overflow = '';
 }
-
 document.getElementById('legalModal').addEventListener('click', function(e) {
     if (e.target === this) closeLegalModal();
 });
@@ -1835,7 +1583,7 @@ function openAdminLink(link) {
     } catch(e) { try { window.open(link, '_blank'); } catch(err) {} }
 }
 
-// COOLDOWN HELPERS
+// ✅ COOLDOWN HELPERS (only apply to survey & youtube_video_view)
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -1855,12 +1603,20 @@ function startCooldownTicker() {
     cooldownTimerInterval = setInterval(() => {
         const els = document.querySelectorAll('[data-cooldown-task]');
         if (!els.length) return;
+        let needsRerender = false;
         els.forEach(el => {
             const tid = el.getAttribute('data-cooldown-task');
             const remain = getCooldownRemaining(tid);
             const timeEl = el.querySelector('.cd-time');
-            if (timeEl) { if (remain > 0) { timeEl.textContent = fmtCountdown(remain); } else { renderNewTasks(); } }
+            if (timeEl) { 
+                if (remain > 0) { 
+                    timeEl.textContent = fmtCountdown(remain); 
+                } else { 
+                    needsRerender = true;
+                } 
+            }
         });
+        if (needsRerender) renderNewTasks();
     }, 1000);
 }
 
@@ -1936,7 +1692,6 @@ async function startAdsResetCountdown() {
 }
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
-    // ✅ Reset — নতুন সাইকেল, সব রিসেট
     appState.user.dailyAds = {};
     appState.user.adsResetTime = 0;
     appState.user.adClaimedCurrentCycle = false;
@@ -2132,6 +1887,7 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const refData = refSnap.val();
         
         const referredUserBalance = Number(appState.user.balance || 0);
+        // ✅ Dynamic MIN_REFERRAL_BALANCE from config
         if (referredUserBalance < MIN_REFERRAL_BALANCE) {
             return false;
         }
@@ -2201,8 +1957,8 @@ function startPeriodicRecheck() {
     startCycleTimer();
     startCooldownTicker();
     startTaskExpiryTicker();
-    startClaimWindowTicker(); // ✅
-    updateClaimWindowUI(); // ✅
+    startClaimWindowTicker();
+    updateClaimWindowUI();
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -2228,7 +1984,7 @@ function stopPeriodicRecheck() {
     stopCycleTimer();
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
     stopTaskExpiryTicker();
-    stopClaimWindowTicker(); // ✅
+    stopClaimWindowTicker();
 }
 
 function trackAdClick() {
@@ -2304,7 +2060,6 @@ async function watchAd(i) {
             renderAds(); 
             updateAdClaimUI(); 
             if (isAllDisplayAdsWatched()) {
-                // ✅ সব অ্যাড দেখা শেষ হলে Claim Window শুরু করো
                 await startClaimWindowIfNeeded();
                 startAdsResetCountdown();
             } else {
@@ -2366,6 +2121,7 @@ async function calculateValidReferrals() {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
             const bal = Number(u.balance || 0);
+            // ✅ Dynamic MIN_REFERRAL_BALANCE
             const qualified = bal >= MIN_REFERRAL_BALANCE;
             if (qualified) count++;
             const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
@@ -2613,11 +2369,13 @@ function renderNewTasks() {
         const slotProgress = totalSlots > 0 ? Math.min(100, (submittedCount / totalSlots) * 100) : 0;
         const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
 
+        // ✅ Cooldown logic: if has cooldown and cooldownRemain > 0, show countdown
+        // Priority: expired > cooldown > done > full > start
         let ribbon = '';
         if (isExpired && deleteRemain > 0) ribbon = '<span class="task-ribbon deleting">🗑️ Deleting Soon</span>';
         else if (isExpired) ribbon = '<span class="task-ribbon expired">⛔ Expired</span>';
         else if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
-        else if (isDone) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
+        else if (isDone && !isCool) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
         else if (slotsLeft <= 5 && slotsLeft > 0) ribbon = '<span class="task-ribbon">🔥 Almost Full</span>';
         else if (submittedCount === 0) ribbon = '<span class="task-ribbon new">✨ New</span>';
 
@@ -2628,13 +2386,15 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
             gradCls += ' grad-disabled';
         } else if (isCool && cooldownRemain > 0) {
+            // ✅ For cooldown tasks (survey, youtube_video_view) — show live countdown
             actionHtml = `
                 <div class="task-countdown" data-cooldown-task="${taskId}">
                     <div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div>
                     <div class="cd-time">${fmtCountdown(cooldownRemain)}</div>
                 </div>`;
             gradCls += ' grad-disabled';
-        } else if (isDone) {
+        } else if (isDone && !isCool) {
+            // Only show "Completed" for non-cooldown tasks
             actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`;
         } else if (slotsLeft <= 0) {
             actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`;
@@ -2707,6 +2467,7 @@ function openTaskSubmit(taskId) {
     const status = userState.status;
     const resubmitCount = userState.resubmitCount;
 
+    // ✅ Block re-submission during cooldown for cooldown tasks
     if (status === 'approved') {
         const type = (task.type || '').toLowerCase();
         if (hasCooldown(type)) {
@@ -3134,6 +2895,12 @@ async function updateTextElements() {
     document.getElementById('commTotalAmt').innerText = (appState.user.totalCommission || 0).toFixed(2);
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
     
+    // ✅ Update qualified info text with dynamic value
+    const refQualifiedMinText = document.getElementById('refQualifiedMinText');
+    if (refQualifiedMinText) {
+        refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
+    }
+    
     const wdSel = document.getElementById('wd-method');
     let currentVal = wdSel.value;
     wdSel.innerHTML = '<option value="">Select Method</option>';
@@ -3330,6 +3097,8 @@ window.onload = () => {
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
+            // ✅ Dynamic MIN_REFERRAL_BALANCE
+            MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             if (appState.config.maintenance && appState.config.maintenance.active) {
                 document.getElementById('maintenanceOverlay').classList.add('active');
@@ -3355,7 +3124,17 @@ window.onload = () => {
                     const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; document.body.appendChild(sc);
                 }
             });
-            if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); }
+            if (isBooted) { 
+                updateTextElements(); 
+                renderAds(); 
+                renderNewTasks(); 
+                updateCycleUI(); 
+                updateClaimWindowUI();
+                // ✅ Re-render referral list if referral tab is active
+                if (document.getElementById('page-referral').classList.contains('active')) {
+                    renderReferralList();
+                }
+            }
         }
     });
 
@@ -3455,7 +3234,6 @@ window.onload = () => {
                             document.getElementById('app').style.display = 'block';
                             setLoading(false);
                             startPeriodicRecheck();
-                            // ✅ If all ads already watched & not claimed & window active, start ticker
                             if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
                                 if (!appState.user.claimWindowStartTime) {
                                     await startClaimWindowIfNeeded();
