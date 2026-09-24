@@ -91,7 +91,6 @@
     .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
     .ad-claim-btn:disabled:active{transform:none;}
     
-    /* ✅ NEW: Claim Window Timer (above claim button) */
     .claim-window-timer{display:none;margin:0 20px 10px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:14px;padding:10px 14px;position:relative;overflow:hidden;box-shadow:0 6px 16px rgba(245,158,11,.25);}
     .claim-window-timer.active{display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeIn .3s ease;}
     .claim-window-timer.expired{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#ef4444;box-shadow:0 6px 16px rgba(239,68,68,.25);}
@@ -774,7 +773,6 @@
             <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
         </div>
         
-        <!-- ✅ NEW: Claim Window Timer (above claim button) -->
         <div class="claim-window-timer" id="claimWindowTimer">
             <div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div>
             <div class="cwt-time" id="cwtTime">01:00:00</div>
@@ -949,7 +947,6 @@ const BOT_TOKEN = "8921657661:AAFp9DQbkNWXE6WSwez0K3nQhWz5UBg5t_E";
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
-// ✅ NEW: MIN_REFERRAL_BALANCE is now dynamic (loaded from config)
 let MIN_REFERRAL_BALANCE = 20;
 
 const AD_RESET_HOURS = 12;
@@ -958,7 +955,8 @@ const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
 const MIN_AD_WATCH_SECONDS = 10;
-const CLAIM_WINDOW_MS = 60 * 60 * 1000; // ✅ 1 hour claim window
+const CLAIM_WINDOW_MS = 60 * 60 * 1000;
+const HISTORY_LIMIT = 25; // ✅ নতুন: হিস্টোরি লিমিট ২৫
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -1247,42 +1245,51 @@ function updateRefTabCounts() {
     if (incEl) incEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
 }
 
+// ✅ নতুন: রেফারেল লিস্ট রেন্ডার (সর্বোচ্চ ২৫টি)
 function renderReferralList() {
     updateRefTabCounts();
 
-    // ✅ Update qualified info text with dynamic value
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
     if (refQualifiedMinText) {
         refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
     }
 
+    // ✅ টোটাল রেফারেল (২৫টি লিমিট)
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
     } else {
         let html = '';
-        allReferralDataCache.all.forEach(u => {
+        const shown = allReferralDataCache.all.slice(0, HISTORY_LIMIT);
+        shown.forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
             const balClass = u.qualified ? 'qualified' : 'not-qualified';
             const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
-            // ✅ Dynamic need value
             const isIncomeActive = u.qualified 
                 ? '<span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">💰 Commission Active</span>' 
                 : `<span style="font-size:0.65rem;color:#ff4757;font-weight:800;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:6px;margin-left:5px;">⏳ Need ${MIN_REFERRAL_BALANCE}TK</span>`;
             html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${initial}</div><div class="ref-user-info"><h5>${esc(u.name)} ${isIncomeActive}</h5><p>ID: ${u.id}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK ${checkMark}</div></div>`;
         });
+        if (allReferralDataCache.all.length > HISTORY_LIMIT) {
+            html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি রেফারেল দেখানো হচ্ছে</div>`;
+        }
         totalContainer.innerHTML = html;
     }
 
+    // ✅ কোয়ালিফাই রেফারেল (২৫টি লিমিট)
     const qualContainer = document.getElementById('myQualifiedReferralsList');
     if (allReferralDataCache.qualified.length === 0) {
         qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো কোনো Qualified রেফার নেই</p></div>';
     } else {
         let html = '';
-        allReferralDataCache.qualified.forEach(u => {
+        const shown = allReferralDataCache.qualified.slice(0, HISTORY_LIMIT);
+        shown.forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
             html += `<div class="ref-user-item" style="background:linear-gradient(135deg,#f0fff9,#e6fff5);border-color:rgba(0,184,148,.3);"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${initial}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} <span style="font-size:0.65rem;color:#00b894;font-weight:800;background:rgba(0,184,148,.15);padding:2px 6px;border-radius:6px;margin-left:5px;">✅ Qualified</span></h5><p style="color:#10b981;">ID: ${u.id} • Commission Active</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
         });
+        if (allReferralDataCache.qualified.length > HISTORY_LIMIT) {
+            html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি কোয়ালিফাইড রেফারেল দেখানো হচ্ছে</div>`;
+        }
         qualContainer.innerHTML = html;
     }
 
@@ -1583,7 +1590,7 @@ function openAdminLink(link) {
     } catch(e) { try { window.open(link, '_blank'); } catch(err) {} }
 }
 
-// ✅ COOLDOWN HELPERS (only apply to survey & youtube_video_view)
+// ✅ COOLDOWN HELPERS
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -1887,7 +1894,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         const refData = refSnap.val();
         
         const referredUserBalance = Number(appState.user.balance || 0);
-        // ✅ Dynamic MIN_REFERRAL_BALANCE from config
         if (referredUserBalance < MIN_REFERRAL_BALANCE) {
             return false;
         }
@@ -2121,7 +2127,6 @@ async function calculateValidReferrals() {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
             const bal = Number(u.balance || 0);
-            // ✅ Dynamic MIN_REFERRAL_BALANCE
             const qualified = bal >= MIN_REFERRAL_BALANCE;
             if (qualified) count++;
             const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
@@ -2332,6 +2337,7 @@ function isTaskAutoDeleted(task) {
     return remain <= 0;
 }
 
+// ✅ নতুন টাস্ক রেন্ডারিং: Cooldown টাস্কের ক্ষেত্রে ২৪ ঘন্টা পর পর Start Now বাটন দেখাবে
 function renderNewTasks() {
     const el = document.getElementById('task-area');
     if (!el) return;
@@ -2369,8 +2375,6 @@ function renderNewTasks() {
         const slotProgress = totalSlots > 0 ? Math.min(100, (submittedCount / totalSlots) * 100) : 0;
         const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
 
-        // ✅ Cooldown logic: if has cooldown and cooldownRemain > 0, show countdown
-        // Priority: expired > cooldown > done > full > start
         let ribbon = '';
         if (isExpired && deleteRemain > 0) ribbon = '<span class="task-ribbon deleting">🗑️ Deleting Soon</span>';
         else if (isExpired) ribbon = '<span class="task-ribbon expired">⛔ Expired</span>';
@@ -2386,7 +2390,7 @@ function renderNewTasks() {
             actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
             gradCls += ' grad-disabled';
         } else if (isCool && cooldownRemain > 0) {
-            // ✅ For cooldown tasks (survey, youtube_video_view) — show live countdown
+            // ✅ কুলডাউন টাস্ক: টাইমার শেষ হলে Start Now দেখাবে
             actionHtml = `
                 <div class="task-countdown" data-cooldown-task="${taskId}">
                     <div class="cd-label"><i class="fas fa-hourglass-half"></i> Available In</div>
@@ -2394,12 +2398,12 @@ function renderNewTasks() {
                 </div>`;
             gradCls += ' grad-disabled';
         } else if (isDone && !isCool) {
-            // Only show "Completed" for non-cooldown tasks
             actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Completed</button>`;
         } else if (slotsLeft <= 0) {
             actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`;
             gradCls += ' grad-disabled';
         } else {
+            // ✅ কুলডাউন টাস্ক বা নতুন টাস্ক — Start Now সক্রিয়
             actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit('${taskId}')"><i class="fas fa-play"></i> Start Now</button>`;
         }
 
@@ -2467,7 +2471,7 @@ function openTaskSubmit(taskId) {
     const status = userState.status;
     const resubmitCount = userState.resubmitCount;
 
-    // ✅ Block re-submission during cooldown for cooldown tasks
+    // ✅ কুলডাউন টাস্কের জন্য ২৪ ঘন্টা পর পর আবার শুরু করা যাবে
     if (status === 'approved') {
         const type = (task.type || '').toLowerCase();
         if (hasCooldown(type)) {
@@ -2842,6 +2846,7 @@ async function loadMyReferrals() {
         if (container) container.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>Load failed</p></div>';
     }
 }
+// ✅ কমিশন হিস্ট্রি (২৫টি লিমিট)
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
     if (!container) return;
@@ -2850,13 +2855,17 @@ function loadCommissionHistory() {
     if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কোনো কমিশন পাইনি</p></div>'; return; }
     const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     let html = '';
-    items.slice(0, 30).forEach(it => {
+    items.slice(0, HISTORY_LIMIT).forEach(it => {
         const initial = (it.fromName || 'U').charAt(0).toUpperCase();
         const rate = it.rate || REF_COMMISSION_RATE;
         html += '<div class="comm-item"><div class="comm-item-left"><div class="comm-item-avatar">' + initial + '</div><div class="comm-item-info"><h5>' + esc(it.fromName) + '</h5><p><i class="fas fa-coins" style="color:#f39c12;"></i> ' + esc(it.source || 'Earning') + ' • ' + rate + '%</p></div></div><div class="comm-item-amt">+' + Number(it.commission || 0).toFixed(4) + '<small>' + shortDate(it.timestamp) + '</small></div></div>';
     });
+    if (items.length > HISTORY_LIMIT) {
+        html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি কমিশন হিস্ট্রি দেখানো হচ্ছে</div>`;
+    }
     container.innerHTML = html;
 }
+// ✅ অ্যাড আর্নিং হিস্ট্রি (২৫টি লিমিট)
 function loadAdHistory() {
     const container = document.getElementById('adHistoryList');
     const hist = appState.user.adHistory || {};
@@ -2866,13 +2875,16 @@ function loadAdHistory() {
     let adCount = 0, totalEarned = 0;
     items.forEach(it => { if (it.type !== 'bonus') { adCount++; totalEarned += Number(it.amount || 0); } else { totalEarned += Number(it.amount || 0); } });
     let html = '';
-    items.slice(0, 50).forEach(it => {
+    items.slice(0, HISTORY_LIMIT).forEach(it => {
         const isBonus = it.type === 'bonus';
         const isClaim = it.type === 'adclaim';
         const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : 'fa-play-circle');
         const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : 'Ad Slot ' + it.slot);
         html += '<div class="history-item"><div class="history-item-left" style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ' + icon + '"></i></div><div class="history-info"><h5>' + title + '</h5><p>' + shortDate(it.timestamp) + '</p></div></div><div class="history-amount">+' + Number(it.amount || 0).toFixed(2) + ' TK</div></div>';
     });
+    if (items.length > HISTORY_LIMIT) {
+        html += `<div style="text-align:center;font-size:0.72rem;color:#94a3b8;font-weight:700;padding:8px;">সর্বোচ্চ ${HISTORY_LIMIT}টি অ্যাড হিস্ট্রি দেখানো হচ্ছে</div>`;
+    }
     container.innerHTML = html;
     document.getElementById('histAdCount').textContent = adCount;
     document.getElementById('histAdTotal').textContent = totalEarned.toFixed(2);
@@ -2895,7 +2907,6 @@ async function updateTextElements() {
     document.getElementById('commTotalAmt').innerText = (appState.user.totalCommission || 0).toFixed(2);
     document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
     
-    // ✅ Update qualified info text with dynamic value
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
     if (refQualifiedMinText) {
         refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
@@ -3097,7 +3108,6 @@ window.onload = () => {
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
-            // ✅ Dynamic MIN_REFERRAL_BALANCE
             MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             if (appState.config.maintenance && appState.config.maintenance.active) {
@@ -3130,7 +3140,6 @@ window.onload = () => {
                 renderNewTasks(); 
                 updateCycleUI(); 
                 updateClaimWindowUI();
-                // ✅ Re-render referral list if referral tab is active
                 if (document.getElementById('page-referral').classList.contains('active')) {
                     renderReferralList();
                 }
