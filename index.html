@@ -312,7 +312,6 @@
     #adErrorPopup .box h3{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;}
     #adErrorPopup .box p{font-size:14px;color:var(--text-light);line-height:1.6;margin-bottom:16px;}
 
-    /* ✅ Ad loading overlay (short) */
     #adLoadingOverlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;flex-direction:column;}
     #adLoadingOverlay.active{display:flex;}
     .ad-loading-card{background:linear-gradient(145deg,#1a1f2e,#131724);border-radius:24px;padding:28px 24px;text-align:center;max-width:320px;width:100%;border:1px solid rgba(255,255,255,0.08);box-shadow:0 30px 80px rgba(0,0,0,0.6);}
@@ -590,6 +589,17 @@
     .ref-claim-note.success{color:#065f46;background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-left-color:#10b981;}
     .ref-qualified-info{background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:12px 14px;border-radius:12px;margin-bottom:14px;border-left:3px solid #f97316;font-size:.76rem;font-weight:700;color:#9a3412;line-height:1.5;}
     .ref-qualified-info i{color:#ea580c;margin-right:5px;}
+
+    /* ✅ NEW: Level Progress Card */
+    .level-progress-card{background:linear-gradient(135deg,#4c1d95,#6d28d9,#4f46e5);color:#fff;padding:16px 18px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 12px 28px rgba(76,29,149,.35);}
+    .level-progress-card::before{content:'';position:absolute;width:140px;height:140px;background:rgba(255,255,255,.1);border-radius:50%;top:-60px;right:-40px;}
+    .level-progress-card .lpc-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1;}
+    .level-progress-card .lpc-title{font-size:1.4rem;font-weight:900;margin:6px 0 10px;position:relative;z-index:1;text-shadow:0 3px 10px rgba(0,0,0,.2);}
+    .level-progress-card .lpc-track{display:flex;gap:6px;position:relative;z-index:1;margin-top:10px;}
+    .level-progress-card .lpc-dot{flex:1;height:8px;border-radius:20px;background:rgba(255,255,255,.2);position:relative;transition:all .3s;}
+    .level-progress-card .lpc-dot.done{background:linear-gradient(90deg,#00b894,#00cec9);box-shadow:0 0 12px rgba(0,206,201,.5);}
+    .level-progress-card .lpc-dot.current{background:linear-gradient(90deg,#f6b04a,#e84393);box-shadow:0 0 12px rgba(232,67,147,.5);animation:pulseText 1.8s ease-in-out infinite;}
+    .level-progress-card .lpc-count{font-size:.72rem;font-weight:700;opacity:.9;margin-top:8px;position:relative;z-index:1;}
 </style>
 </head>
 <body>
@@ -618,7 +628,7 @@
 
 <div id="toast" class="toast">Alert</div>
 
-<!-- ✅ SHORT AD LOADING OVERLAY (not a timer, just a loader while ad network opens) -->
+<!-- SHORT AD LOADING OVERLAY -->
 <div id="adLoadingOverlay">
     <div class="ad-loading-card">
         <div class="ad-loading-spinner"></div>
@@ -866,6 +876,15 @@
     <div id="page-withdraw" class="page-section">
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-wallet" style="color:var(--primary);"></i> Withdraw Funds</div>
+            
+            <!-- ✅ NEW: Level Progress Card -->
+            <div class="level-progress-card" id="levelProgressCard">
+                <div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div>
+                <div class="lpc-title" id="lpcTitle">Level 1</div>
+                <div class="lpc-track" id="lpcTrack"></div>
+                <div class="lpc-count" id="lpcCount">Complete this level to unlock the next</div>
+            </div>
+            
             <div id="withdrawInfo" style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:15px;border:1px solid var(--border);">
                 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">📋 Withdraw Level</span><span style="font-weight:700;color:var(--primary);" id="wdLevel">Level 1</span></div>
                 <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.9rem;"><span style="color:var(--text-light);">👥 Qualified Refs</span><span style="font-weight:700;color:var(--warning);" id="wdQualifiedRefs">0/5</span></div>
@@ -921,7 +940,7 @@ const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
-const MIN_AD_WATCH_SECONDS = 10; // ✅ Minimum 10 seconds ad must be watched
+const MIN_AD_WATCH_SECONDS = 10;
 
 let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
@@ -2068,7 +2087,6 @@ function trackAdClick() {
     db.ref('users/' + tgUser.id + '/lastActive').set(todayStr());
 }
 
-// ✅ NEW: watchAd - direct ad open, no timer page, but enforce minimum 10s watch
 async function watchAd(i) {
     if (slotLocks[i]) return;
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
@@ -2084,7 +2102,6 @@ async function watchAd(i) {
     try {
         if (!slot || !slot.network || slot.network === 'none') throw new Error('Ad not configured');
         
-        // Show loader while ad network opens
         if (loadingOverlay) loadingOverlay.classList.add('active');
         toast('Loading Ad...');
         
@@ -2113,12 +2130,10 @@ async function watchAd(i) {
             throw new Error('Unknown ad network');
         }
         
-        // Hide loader
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         
         if (!success) throw new Error('Ad not completed');
         
-        // ✅ Check minimum 10 seconds watched
         const watchDuration = (Date.now() - adStartTime) / 1000;
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             showAdError('⚠️ Ad Skipped Too Early!', 'You only watched ' + Math.round(watchDuration) + 's. Minimum ' + MIN_AD_WATCH_SECONDS + 's required.');
@@ -2127,7 +2142,6 @@ async function watchAd(i) {
             return;
         }
         
-        // Track ad view count (reward will be claimed later via claim button)
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
         
@@ -2210,27 +2224,87 @@ async function calculateValidReferrals() {
         return count;
     } catch(e) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
 }
+
+/* ═══════════════════════════════════════════════════════
+   ✅ SEQUENTIAL LEVEL SYSTEM
+   withdrawCount = কতটি successful withdraw হয়েছে
+   - 0 → Level 1 (index 0)
+   - 1 → Level 2 (index 1)
+   - 2 → Level 3 (index 2)
+   - ...ইত্যাদি
+   - Admin Panel থেকে যত লেভেল যোগ করা হবে, ঠিক ততটাই দেখাবে
+   ═══════════════════════════════════════════════════════ */
 function getWithdrawLevel() {
-    if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
-    const count = appState.user.withdrawCount || 0;
-    const refs = validReferralCount;
-    let eligibleLevel = withdrawLevels[0];
-    for (let i = 0; i < withdrawLevels.length; i++) { const level = withdrawLevels[i]; if (refs >= level.requiredRefs) eligibleLevel = level; else break; }
-    if (count > 0) { const levelIndex = Math.min(count, withdrawLevels.length - 1); const eligibleIndex = withdrawLevels.indexOf(eligibleLevel); const finalIndex = Math.max(eligibleIndex, levelIndex); return withdrawLevels[Math.min(finalIndex, withdrawLevels.length - 1)]; }
-    return eligibleLevel;
+    if (!withdrawLevels || withdrawLevels.length === 0) {
+        return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
+    }
+    // ✅ Sequential Level Unlock: withdrawCount = কতটি successful withdraw হয়েছে
+    const completedWithdraws = Number(appState.user.withdrawCount || 0);
+    const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
+    const currentLevel = withdrawLevels[levelIndex];
+    return {
+        ...currentLevel,
+        level: currentLevel.level || (levelIndex + 1),
+        _index: levelIndex
+    };
 }
+
 function updateWithdrawInfo() {
     const level = getWithdrawLevel();
     const reqRefs = level.requiredRefs || 5;
-    document.getElementById('wdLevel').textContent = 'Level ' + (level.level || 1);
+    const currentLevelNum = level.level || 1;
+    const totalLevels = withdrawLevels.length || 1;
+    
+    document.getElementById('wdLevel').textContent = 'Level ' + currentLevelNum + ' / ' + totalLevels;
     document.getElementById('wdQualifiedRefs').textContent = validReferralCount + '/' + reqRefs;
     document.getElementById('wdFee').textContent = (level.fee || 5) + '%';
     document.getElementById('wdTime').textContent = level.time || '30 Min-1 Hours';
     document.getElementById('wdRange').textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
+    
+    // ✅ Update Level Progress Card
+    updateLevelProgressCard(currentLevelNum, totalLevels);
+    
     const canWithdraw = validReferralCount >= reqRefs;
     const notice = document.getElementById('wd-notice');
-    if (!canWithdraw) { notice.textContent = '⚠️ Need ' + (reqRefs - validReferralCount) + ' more qualified referrals'; notice.style.color = '#ff4757'; }
-    else { notice.textContent = '✅ Eligible for withdraw (Level ' + (level.level || 1) + ')'; notice.style.color = '#00b894'; }
+    
+    if (!canWithdraw) {
+        notice.textContent = '⚠️ Level ' + currentLevelNum + ' এর জন্য ' + (reqRefs - validReferralCount) + ' জন Qualified Referral দরকার';
+        notice.style.color = '#ff4757';
+    } else {
+        const remainingLevels = totalLevels - currentLevelNum;
+        if (remainingLevels > 0) {
+            notice.textContent = '✅ Level ' + currentLevelNum + ' এর জন্য যোগ্য! (আরও ' + remainingLevels + ' টি লেভেল বাকি আছে)';
+        } else {
+            notice.textContent = '🏆 সর্বোচ্চ লেভেলে আছেন! Withdraw করার জন্য যোগ্য';
+        }
+        notice.style.color = '#00b894';
+    }
+}
+
+/* ✅ NEW: Level Progress Dots */
+function updateLevelProgressCard(currentLevelNum, totalLevels) {
+    const titleEl = document.getElementById('lpcTitle');
+    const trackEl = document.getElementById('lpcTrack');
+    const countEl = document.getElementById('lpcCount');
+    if (!titleEl || !trackEl || !countEl) return;
+    
+    titleEl.textContent = 'Level ' + currentLevelNum;
+    
+    let trackHtml = '';
+    for (let i = 1; i <= totalLevels; i++) {
+        let cls = 'lpc-dot';
+        if (i < currentLevelNum) cls += ' done';
+        else if (i === currentLevelNum) cls += ' current';
+        trackHtml += '<div class="' + cls + '" title="Level ' + i + '"></div>';
+    }
+    trackEl.innerHTML = trackHtml;
+    
+    const completedCount = currentLevelNum - 1;
+    if (currentLevelNum >= totalLevels) {
+        countEl.innerHTML = '🏆 সর্বোচ্চ লেভেল! আপনি All Levels Complete করেছেন।';
+    } else {
+        countEl.innerHTML = '✅ সম্পূর্ণ: ' + completedCount + ' / ' + totalLevels + ' • পরবর্তী: Level ' + (currentLevelNum + 1);
+    }
 }
 function checkMaintenance() {
     if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
@@ -2769,26 +2843,70 @@ async function requestWithdraw() {
     const amount = Number(document.getElementById('wd-amount').value);
     const level = getWithdrawLevel();
     const reqRefs = level.requiredRefs || 5;
+    const currentLevelNum = level.level || 1;
+    const totalLevels = withdrawLevels.length || 1;
+    
     await calculateValidReferrals();
-    if (validReferralCount < reqRefs) { toast('❌ Need ' + reqRefs + ' qualified referrals!'); return; }
+    
+    // ✅ Check if user has enough qualified referrals for CURRENT level
+    if (validReferralCount < reqRefs) {
+        toast('❌ Level ' + currentLevelNum + ' এর জন্য ' + reqRefs + ' জন Qualified Referral দরকার!');
+        return;
+    }
     if (!method) return toast('Please select a payment method.');
     if (!account || account.length < 3) return toast('Please enter a valid account number.');
     if (isNaN(amount) || amount <= 0) return toast('Please enter a valid amount.');
     if (amount < (level.minAmount || 10)) return toast('Minimum withdraw is ' + (level.minAmount || 10) + ' TK.');
-    if (amount > (level.maxAmount || 100)) return toast('Maximum withdraw is ' + (level.maxAmount || 100) + ' TK.');
+    if (amount > (level.maxAmount || 100)) return toast('Level ' + currentLevelNum + ' এর সর্বোচ্চ withdraw ' + (level.maxAmount || 100) + ' TK.');
     if (amount > appState.user.balance) return toast('Insufficient balance.');
+    
     const feeAmount = (amount * (level.fee || 5)) / 100;
     try {
         const wdId = 'WD' + Date.now();
-        await db.ref('withdrawals/' + wdId).set({ userId: appState.user.id, userName: appState.user.name || 'User', method, account, amount, fee: feeAmount, netAmount: amount - feeAmount, level: level.level || 1, requiredRefs: reqRefs, validRefsAtRequest: validReferralCount, status: 'pending', timestamp: Date.now() });
+        await db.ref('withdrawals/' + wdId).set({
+            userId: appState.user.id,
+            userName: appState.user.name || 'User',
+            method, account, amount,
+            fee: feeAmount,
+            netAmount: amount - feeAmount,
+            level: currentLevelNum,
+            totalLevels: totalLevels,
+            requiredRefs: reqRefs,
+            validRefsAtRequest: validReferralCount,
+            status: 'pending',
+            timestamp: Date.now()
+        });
+        
+        // ✅ Increment withdrawCount — পরবর্তী Level আনলক হবে
         const newCount = (appState.user.withdrawCount || 0) + 1;
-        await db.ref('users/' + appState.user.id).update({ balance: appState.user.balance - amount, withdrawCount: newCount });
-        document.getElementById('wd-account').value = ''; document.getElementById('wd-amount').value = '';
-        toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
-        await sendNotification(tgUser.id, '✅ Withdraw Request! Amount: ' + amount + ' TK');
-        await sendNotification(ADMIN_ID, '💰 New Withdraw: ' + appState.user.name + ' - ' + amount + ' TK');
+        await db.ref('users/' + appState.user.id).update({
+            balance: appState.user.balance - amount,
+            withdrawCount: newCount
+        });
+        
+        appState.user.balance = appState.user.balance - amount;
+        appState.user.withdrawCount = newCount;
+        
+        document.getElementById('wd-account').value = '';
+        document.getElementById('wd-amount').value = '';
+        
+        // ✅ Show next level info
+        const nextLevelMsg = (currentLevelNum < totalLevels) 
+            ? ' 🎉 Level ' + (currentLevelNum + 1) + ' আনলক হয়েছে!' 
+            : ' 🏆 সর্বোচ্চ লেভেলে পৌঁছেছেন!';
+        
+        toast('✅ Withdraw Request Sent! Fee: ' + feeAmount.toFixed(2) + ' TK' + nextLevelMsg);
+        
+        await sendNotification(tgUser.id, '✅ Withdraw Request Sent!\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
+        await sendNotification(ADMIN_ID, '💰 New Withdraw\nUser: ' + appState.user.name + '\nAmount: ' + amount + ' TK\nLevel: ' + currentLevelNum);
+        
+        // ✅ Immediately update UI to show next level
+        await calculateValidReferrals();
         updateWithdrawInfo();
-    } catch (e) { toast('Error Processing Request'); }
+    } catch (e) {
+        console.error(e);
+        toast('❌ Error Processing Request: ' + e.message);
+    }
 }
 async function loadWithdrawHistory() {
     if (!isOnline) { document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No internet.</p>'; return; }
