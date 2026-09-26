@@ -499,7 +499,6 @@
 <div id="toast" class="toast">Alert</div>
 <div id="adLoadingOverlay"><div class="ad-loading-card"><div class="ad-loading-spinner"></div><div class="ad-loading-title">Opening Ad…</div><div class="ad-loading-sub">Please wait, do not close</div></div></div>
 
-<!-- ✅ NEW: Ad Watch Progress Indicator -->
 <div id="adWatchProgress" class="ad-watch-progress">
     <i class="fas fa-hourglass-half"></i>
     <span>Ad চলছে — <span class="awp-time" id="awpTime">10s</span> বাকি</span>
@@ -707,7 +706,6 @@ const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
-// ✅ CHANGED: let instead of const → Admin Panel থেকে কনফিগারযোগ্য
 let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
@@ -755,8 +753,21 @@ let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
 let claimWindowTimerInterval = null;
-// ✅ NEW: Ad watch progress indicator
 let adWatchProgressTimer = null;
+
+// ═══════════════════════════════════════════════════════════════
+// ✅ NEW: Ad Session Tracking (Anti-cheat for app background)
+// ═══════════════════════════════════════════════════════════════
+const AD_SESSION_KEY = 'nexearn_ad_session';
+let adSession = {
+    active: false,
+    slotIndex: -1,
+    startTime: 0,
+    startPerf: 0,
+    leftApp: false,
+    leftAppAt: 0,
+    returnCount: 0
+};
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
 let userSubmissionsCache = {};
@@ -778,8 +789,64 @@ function hasCooldown(type) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ AD WATCH PROGRESS INDICATOR (NEW)
-   ইউজারকে দেখায় কত সেকেন্ড বাকি আছে
+   ✅ AD SESSION HELPERS (NEW — Anti-cheat for background exit)
+   ═══════════════════════════════════════════════════════════ */
+function saveAdSession() {
+    try {
+        const persisted = {
+            active: adSession.active,
+            slotIndex: adSession.slotIndex,
+            startTime: adSession.startTime,
+            startPerf: adSession.startPerf,
+            leftApp: adSession.leftApp,
+            leftAppAt: adSession.leftAppAt,
+            returnCount: adSession.returnCount,
+            savedAt: Date.now()
+        };
+        localStorage.setItem(AD_SESSION_KEY, JSON.stringify(persisted));
+    } catch(e) {}
+}
+
+function loadAdSession() {
+    try {
+        const raw = localStorage.getItem(AD_SESSION_KEY);
+        if (!raw) return null;
+        const data = JSON.parse(raw);
+        if (data && data.active) return data;
+        return null;
+    } catch(e) { return null; }
+}
+
+function clearAdSession() {
+    try { localStorage.removeItem(AD_SESSION_KEY); } catch(e) {}
+    adSession = {
+        active: false, slotIndex: -1, startTime: 0, startPerf: 0,
+        leftApp: false, leftAppAt: 0, returnCount: 0
+    };
+}
+
+function startAdSession(slotIndex) {
+    adSession = {
+        active: true,
+        slotIndex: slotIndex,
+        startTime: Date.now(),
+        startPerf: performance.now(),
+        leftApp: false,
+        leftAppAt: 0,
+        returnCount: 0
+    };
+    saveAdSession();
+}
+
+function getAdSessionElapsed() {
+    if (!adSession.active || !adSession.startTime) return 0;
+    const wallElapsed = (Date.now() - adSession.startTime) / 1000;
+    const perfElapsed = (performance.now() - adSession.startPerf) / 1000;
+    return Math.max(wallElapsed, perfElapsed);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ AD WATCH PROGRESS INDICATOR
    ═══════════════════════════════════════════════════════════ */
 function showAdWatchProgress(startTime) {
     const el = document.getElementById('adWatchProgress');
@@ -872,7 +939,6 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 
 /* ═══════════════════════════════════════════════════════════
    ✅ CUSTOM AD CODE EXECUTOR
-   Admin Panel থেকে যেকোনো কোড দিলেই execute হবে
    ═══════════════════════════════════════════════════════════ */
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
@@ -888,13 +954,11 @@ async function executeCustomAdCode(code) {
             else reject(new Error(msg || 'Ad failed'));
         };
         
-        // Safety timeout (90s)
         const timer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
         
         const wrappedResolve = () => { clearTimeout(timer); finish(true); };
         const wrappedReject = (msg) => { clearTimeout(timer); finish(false, msg || 'Ad closed'); };
         
-        // Global helpers for admin code
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
         window.adResolve = wrappedResolve;
@@ -905,8 +969,6 @@ async function executeCustomAdCode(code) {
         try {
             const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', code);
             const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject);
-            
-            // Auto-detect Promise return
             if (result && typeof result.then === 'function') {
                 result.then(() => wrappedResolve()).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
             }
@@ -918,7 +980,13 @@ async function executeCustomAdCode(code) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ WATCH AD (FIXED — Minimum Watch Time Enforced for ALL slots)
+   ✅✅✅ WATCH AD — FIXED (Both bugs solved)
+   
+   Bug Fixes:
+   1. Duration calculation no longer depends on single Date.now() 
+      — uses persistent session + performance.now()
+   2. If user leaves the app during ad → auto-cancel reward
+   3. Minimum watch time enforced for ALL slots
    ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
@@ -932,6 +1000,11 @@ async function watchAd(i) {
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
     
+    // ✅ STEP 1: Start session with persistent tracking
+    startAdSession(i);
+    const localStartTime = adSession.startTime;
+    showAdWatchProgress(localStartTime);
+    
     try {
         if (!slot) throw new Error('Ad not configured');
         const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
@@ -941,18 +1014,12 @@ async function watchAd(i) {
         toast('Loading Ad...');
         
         let success = false;
-        const adStartTime = Date.now();
         
-        // ✅ Show visual progress indicator to user
-        showAdWatchProgress(adStartTime);
-        
-        // ✅ CUSTOM CODE EXECUTION — Priority #1
+        // ✅ STEP 2: Show Ad
         if (hasCustomCode) {
             await executeCustomAdCode(slot.customCode);
             success = true;
-        }
-        // Legacy network-based fallback
-        else if (slot.network === 'monetag') {
+        } else if (slot.network === 'monetag') {
             const zone = String(slot.id || MONETAG_ZONE);
             await showMonetagRewardedPopup(zone);
             success = true;
@@ -972,36 +1039,56 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         if (!success) throw new Error('Ad not completed');
         
-        const watchDuration = (Date.now() - adStartTime) / 1000;
-        
         // ═══════════════════════════════════════════════════════════
-        // ✅✅✅ MAIN FIX: Minimum Watch Time enforced for ALL slots
-        // (Custom Code slot-এও এখন সময় চেক হবে)
+        // ✅ STEP 3: ANTI-CHEAT — Check if user left the app
         // ═══════════════════════════════════════════════════════════
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            const remainSeconds = Math.ceil(MIN_AD_WATCH_SECONDS - watchDuration);
-            
-            // Wait until minimum time is actually reached before showing error
-            // (Ensures user sees consistent message)
-            const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
-            if (waitMs > 0) {
-                await new Promise(r => setTimeout(r, waitMs));
-            }
-            
+        if (adSession.leftApp) {
             hideAdWatchProgress();
+            clearAdSession();
             showAdError(
-                '⚠️ Ad Skipped Too Early!',
-                'You only watched ' + Math.round(watchDuration) + ' seconds. ' +
-                'Minimum ' + MIN_AD_WATCH_SECONDS + ' seconds required to earn reward. ' +
-                'Please try again and stay until the timer completes.'
+                '⚠️ Ad Invalid!',
+                'You left the app during the ad. Please stay on this page while watching the ad to earn rewards.'
             );
             slotLocks[i] = false; 
             isAdWatching = false; 
             return;
         }
         
-        // ✅ Minimum time passed → Grant reward
+        // ✅ STEP 4: Calculate ACTUAL watch duration (persistent + reliable)
+        let watchDuration = getAdSessionElapsed();
+        
+        // Fallback safety: use localStartTime if session was corrupted
+        if (watchDuration <= 0 || !isFinite(watchDuration)) {
+            watchDuration = (Date.now() - localStartTime) / 1000;
+        }
+        
+        console.log('[Ad Watch] Duration:', watchDuration.toFixed(2), 's | Required:', MIN_AD_WATCH_SECONDS, 's');
+        
+        // ✅ STEP 5: Minimum time check
+        if (watchDuration < MIN_AD_WATCH_SECONDS) {
+            // Wait to reach minimum, then final verify
+            const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
+            if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+            
+            const finalDuration = getAdSessionElapsed();
+            
+            // If user left during wait too → reject
+            if (adSession.leftApp || finalDuration < MIN_AD_WATCH_SECONDS) {
+                hideAdWatchProgress();
+                clearAdSession();
+                showAdError(
+                    '⚠️ Ad Skipped Too Early!',
+                    'You watched only ' + Math.round(watchDuration) + ' seconds. Minimum ' + MIN_AD_WATCH_SECONDS + ' seconds required to earn reward.'
+                );
+                slotLocks[i] = false; 
+                isAdWatching = false; 
+                return;
+            }
+        }
+        
+        // ✅ Reward granted
         hideAdWatchProgress();
+        clearAdSession();
         
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
@@ -1010,7 +1097,7 @@ async function watchAd(i) {
         appState.user.dailyAds = newAds;
         
         const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
-        toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
+        toast('✅ Ad watched (' + Math.round(watchDuration) + 's)! ' + remaining + ' more for Slot ' + (i+1));
         
         setTimeout(async () => { 
             renderAds(); 
@@ -1025,6 +1112,7 @@ async function watchAd(i) {
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
+        clearAdSession();
         const em = e.message || '';
         if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed') {
             showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
@@ -1092,21 +1180,39 @@ async function watchExtraRewardAd() {
     isAdWatching = true;
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading Ad...';
-    const adStartTime = Date.now();
+    
+    startAdSession(-99);
+    const adStartTime = adSession.startTime;
     showAdWatchProgress(adStartTime);
+    
     try {
         await showMonetagRewardedPopup(MONETAG_ZONE);
         
-        // ✅ Minimum watch time check for Extra Rewards too
-        const watchDuration = (Date.now() - adStartTime) / 1000;
+        // ✅ Anti-cheat: left app?
+        if (adSession.leftApp) {
+            hideAdWatchProgress();
+            clearAdSession();
+            showAdError('⚠️ Ad Invalid!', 'You left the app during the ad.');
+            return;
+        }
+        
+        const watchDuration = getAdSessionElapsed();
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
             if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+            if (adSession.leftApp) {
+                hideAdWatchProgress();
+                clearAdSession();
+                showAdError('⚠️ Ad Invalid!', 'You left the app during the ad.');
+                return;
+            }
             hideAdWatchProgress();
-            showAdError('⚠️ Ad Skipped Too Early!', 'আপনি মাত্র ' + Math.round(watchDuration) + ' সেকেন্ড দেখেছেন। কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দরকার।');
+            clearAdSession();
+            showAdError('⚠️ Ad Skipped Too Early!', 'কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দেখতে হবে।');
             return;
         }
         hideAdWatchProgress();
+        clearAdSession();
         
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
@@ -1128,6 +1234,7 @@ async function watchExtraRewardAd() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
         hideAdWatchProgress();
+        clearAdSession();
         const em = e.message || '';
         if (em === 'Ad Closed' || em === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'সম্পূর্ণ দেখতে হবে।');
         else if (em.includes('wait')) toast('⏱️ ' + em);
@@ -1809,7 +1916,11 @@ async function claimDailyBonus() {
     const btnCancel = document.getElementById('btnCancelBonus');
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
-    const adStartTime = Date.now();
+    
+    startAdSession(-100);
+    const adStartTime = adSession.startTime;
+    showAdWatchProgress(adStartTime);
+    
     try {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
@@ -1827,11 +1938,29 @@ async function claimDailyBonus() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
             await showMonetagRewardedPopup(mtSlot.id);
         }
-        // ✅ Bonus-এও minimum time check
-        const watchDuration = (Date.now() - adStartTime) / 1000;
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            await new Promise(r => setTimeout(r, Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000)));
+        
+        // ✅ Anti-cheat check
+        if (adSession.leftApp) {
+            hideAdWatchProgress();
+            clearAdSession();
+            showAdError('⚠️ Ad Invalid!', 'You left the app during the ad.');
+            return;
         }
+        
+        const watchDuration = getAdSessionElapsed();
+        if (watchDuration < MIN_AD_WATCH_SECONDS) {
+            const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
+            if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+            if (adSession.leftApp) {
+                hideAdWatchProgress();
+                clearAdSession();
+                showAdError('⚠️ Ad Invalid!', 'You left the app during the ad.');
+                return;
+            }
+        }
+        hideAdWatchProgress();
+        clearAdSession();
+        
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -1846,6 +1975,8 @@ async function claimDailyBonus() {
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
+        hideAdWatchProgress();
+        clearAdSession();
         toast(e.message === 'Ad Closed' ? '❌ সম্পূর্ণ দেখেননি!' : '❌ সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
@@ -2778,9 +2909,30 @@ window.onload = () => {
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
+    // ═══════════════════════════════════════════════════════════════
+    // ✅ CRITICAL: visibilitychange — Detect user leaving the app
+    // If ad is active and user leaves → mark as cheat
+    // ═══════════════════════════════════════════════════════════════
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
-        else if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
+        if (document.hidden) {
+            // ✅ User left the app while ad was playing
+            if (adSession.active && isAdWatching) {
+                adSession.leftApp = true;
+                adSession.leftAppAt = Date.now();
+                saveAdSession();
+                console.log('[Ad Anti-cheat] User left app during ad — reward blocked');
+            }
+            stopPeriodicRecheck(); 
+            stopAdminSlider(); 
+            closeMenuPopup();
+        } else if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
+            // ✅ User returned
+            const sessionRaw = loadAdSession();
+            if (sessionRaw && sessionRaw.active) {
+                console.log('[Ad Anti-cheat] User returned after leaving — will be blocked');
+                // Keep session marked as leftApp so watchAd() will reject it
+            }
+            
             const resetTime = Number(appState.user.adsResetTime || 0);
             if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
             else updateCycleUI();
@@ -2802,7 +2954,24 @@ window.onload = () => {
         }
     });
 
-    window.addEventListener('beforeunload', () => { stopPeriodicRecheck(); stopAdminSlider(); if (verifyInterval) clearInterval(verifyInterval); });
+    // ✅ Handle page unload / reload during active ad
+    window.addEventListener('beforeunload', () => { 
+        if (adSession.active && isAdWatching) {
+            adSession.leftApp = true;
+            adSession.leftAppAt = Date.now();
+            saveAdSession();
+        }
+        stopPeriodicRecheck(); 
+        stopAdminSlider(); 
+        if (verifyInterval) clearInterval(verifyInterval); 
+    });
+
+    // ✅ On page load, check for abandoned ad session
+    const abandonedSession = loadAdSession();
+    if (abandonedSession && abandonedSession.active) {
+        // User reloaded during ad — clear it silently
+        clearAdSession();
+    }
 
     db.ref('config').on('value', snap => {
         if (snap.exists()) {
@@ -2815,7 +2984,6 @@ window.onload = () => {
             MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
-            // ✅ NEW: Read MIN_AD_WATCH_SECONDS from Admin Panel config
             if (appState.config.minAdWatchSeconds !== undefined && appState.config.minAdWatchSeconds !== null) {
                 const v = Number(appState.config.minAdWatchSeconds);
                 if (!isNaN(v) && v >= 3 && v <= 120) MIN_AD_WATCH_SECONDS = v;
@@ -2852,11 +3020,10 @@ window.onload = () => {
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
             
-            // ✅ Auto-inject standard SDK scripts (custom slots handle themselves)
             const slots = appState.config.adSlots || [];
             slots.forEach(slot => {
                 if (!slot) return;
-                if (slot.customCode && String(slot.customCode).trim()) return; // Custom handles itself
+                if (slot.customCode && String(slot.customCode).trim()) return;
                 if (slot.network === 'monetag' && slot.id) {
                     if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
                 } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
