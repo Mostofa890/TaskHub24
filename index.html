@@ -708,7 +708,6 @@ const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
 let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
-// ✅ HISTORY LIMIT = 25 for all history lists
 const HISTORY_LIMIT = 25;
 
 const MONETAG_DEFAULT_ZONE = '11878844';
@@ -718,8 +717,66 @@ let monetagInAppStarted = false;
 let lastMonetagShowTime = 0;
 const MONETAG_MIN_INTERVAL = 5000;
 
-// ✅ External Ad Tracking Key
-const EXT_AD_STORAGE_KEY = 'nexearn_ext_ad_session';
+/* ═══════════════════════════════════════════════════════════
+   ✅ NEW: EXTERNAL AD TRACKER (localStorage-based, tab-switch safe)
+   ═══════════════════════════════════════════════════════════ */
+const EXT_AD_TRACKER_KEY = 'nexearn_ad_tracker_v2';
+let adTrackerWatchdog = null;
+
+function adTrackerSave(data) {
+    try { localStorage.setItem(EXT_AD_TRACKER_KEY, JSON.stringify(data)); } catch(e) {}
+}
+function adTrackerLoad() {
+    try {
+        const raw = localStorage.getItem(EXT_AD_TRACKER_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
+}
+function adTrackerClear() {
+    try { localStorage.removeItem(EXT_AD_TRACKER_KEY); } catch(e) {}
+    if (adTrackerWatchdog) { clearInterval(adTrackerWatchdog); adTrackerWatchdog = null; }
+}
+function adTrackerStart(slotIndex) {
+    adTrackerClear();
+    adTrackerSave({
+        slot: slotIndex,
+        startedAt: Date.now(),
+        lastVisibleAt: Date.now(),
+        isActive: true,
+        resolved: false,
+        externalOpened: false
+    });
+    adTrackerWatchdog = setInterval(() => {
+        const t = adTrackerLoad();
+        if (!t || !t.isActive) return;
+        if (!document.hidden) {
+            t.lastVisibleAt = Date.now();
+            adTrackerSave(t);
+        }
+    }, 1000);
+}
+function adTrackerMarkExternal() {
+    const t = adTrackerLoad();
+    if (!t) return;
+    t.externalOpened = true;
+    t.externalOpenedAt = Date.now();
+    adTrackerSave(t);
+}
+function adTrackerGetDuration() {
+    const t = adTrackerLoad();
+    if (!t || !t.startedAt) return 0;
+    return (Date.now() - t.startedAt) / 1000;
+}
+function adTrackerResolve() {
+    const t = adTrackerLoad();
+    if (!t) return 0;
+    t.resolved = true;
+    t.isActive = false;
+    t.resolvedAt = Date.now();
+    adTrackerSave(t);
+    const duration = (t.resolvedAt - t.startedAt) / 1000;
+    return duration;
+}
 
 let extraRewardConfig = {
     enabled: false,
@@ -776,40 +833,6 @@ function isScreenshotTask(type) {
 }
 function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
-}
-
-/* ═══════════════════════════════════════════════════════════
-   ✅ EXTERNAL AD SESSION TRACKING
-   external ad পেজে থাকার সময় সঠিকভাবে measure করে
-   ═══════════════════════════════════════════════════════════ */
-function markExternalAdStart(slotIndex) {
-    try {
-        const session = { slot: slotIndex, startTime: Date.now(), pageVisible: !document.hidden, hiddenAt: 0 };
-        sessionStorage.setItem(EXT_AD_STORAGE_KEY, JSON.stringify(session));
-        return session;
-    } catch(e) { return null; }
-}
-function getExternalAdSession() {
-    try {
-        const raw = sessionStorage.getItem(EXT_AD_STORAGE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch(e) { return null; }
-}
-function updateExternalAdSession(updates) {
-    try {
-        const s = getExternalAdSession();
-        if (!s) return;
-        Object.assign(s, updates);
-        sessionStorage.setItem(EXT_AD_STORAGE_KEY, JSON.stringify(s));
-    } catch(e) {}
-}
-function clearExternalAdSession() {
-    try { sessionStorage.removeItem(EXT_AD_STORAGE_KEY); } catch(e) {}
-}
-function calculateExternalAdWatchTime() {
-    const s = getExternalAdSession();
-    if (!s || !s.startTime) return 0;
-    return (Date.now() - s.startTime) / 1000;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -901,7 +924,7 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ CUSTOM AD CODE EXECUTOR
+   ✅ CUSTOM AD CODE EXECUTOR — Auto-resolve on external return
    ═══════════════════════════════════════════════════════════ */
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
@@ -918,15 +941,32 @@ async function executeCustomAdCode(code) {
         const timer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
         const wrappedResolve = () => { clearTimeout(timer); finish(true); };
         const wrappedReject = (msg) => { clearTimeout(timer); finish(false, msg || 'Ad closed'); };
+        
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
         window.adResolve = wrappedResolve;
         window.adReject = wrappedReject;
         window.__adSuccess = wrappedResolve;
         window.__adFail = wrappedReject;
+        
+        // ✅ Auto-open external helper for admin code
+        window.__nexOpenExternal = function(url) {
+            adTrackerMarkExternal();
+            try {
+                if (tg && typeof tg.openLink === 'function') {
+                    tg.openLink(url, { try_instant_view: false });
+                } else {
+                    window.open(url, '_blank', 'noopener');
+                }
+            } catch(e) {
+                window.open(url, '_blank', 'noopener');
+            }
+        };
+        
         try {
-            const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', code);
-            const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject);
+            const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
+            const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject, window.__nexOpenExternal);
+            
             if (result && typeof result.then === 'function') {
                 result.then(() => wrappedResolve()).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
             }
@@ -938,8 +978,7 @@ async function executeCustomAdCode(code) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ WATCH AD — External Page Aware Minimum Time Enforcement
-   ✅ FIX: External tab switch tracked via sessionStorage
+   ✅ WATCH AD — Full fix with hybrid tracking
    ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
@@ -949,6 +988,9 @@ async function watchAd(i) {
     slotLocks[i] = true; 
     isAdWatching = true;
     trackAdClick();
+    
+    // ✅ NEW: Start tracker
+    adTrackerStart(i);
     
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
@@ -963,12 +1005,8 @@ async function watchAd(i) {
         
         let success = false;
         const adStartTime = Date.now();
-        
-        // ✅ Mark external session start
-        markExternalAdStart(i);
         showAdWatchProgress(adStartTime);
         
-        // AD EXECUTION
         if (hasCustomCode) {
             await executeCustomAdCode(slot.customCode);
             success = true;
@@ -992,20 +1030,19 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         if (!success) throw new Error('Ad not completed');
         
-        // ✅ Compute watch duration — max of in-app and external session
+        // ✅ NEW: Hybrid duration — max of in-app and tracker
         const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const externalDuration = calculateExternalAdWatchTime();
-        const watchDuration = Math.max(inAppDuration, externalDuration);
+        const trackerDuration = adTrackerGetDuration();
+        const watchDuration = Math.max(inAppDuration, trackerDuration);
         
-        // ═══════════════════════════════════════════════════════
-        // ✅ MINIMUM WATCH TIME CHECK
-        // ═══════════════════════════════════════════════════════
+        console.log('[AD DEBUG] inApp:', inAppDuration.toFixed(2), 'tracker:', trackerDuration.toFixed(2), 'final:', watchDuration.toFixed(2));
+        
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
             if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
             
             hideAdWatchProgress();
-            clearExternalAdSession();
+            adTrackerClear();
             
             showAdError(
                 '⚠️ Ad Skipped Too Early!',
@@ -1018,9 +1055,10 @@ async function watchAd(i) {
             return;
         }
         
-        // ✅ Passed → Grant reward
+        // ✅ Grant reward
         hideAdWatchProgress();
-        clearExternalAdSession();
+        adTrackerResolve();
+        adTrackerClear();
         
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
@@ -1044,9 +1082,9 @@ async function watchAd(i) {
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        clearExternalAdSession();
+        adTrackerClear();
         const em = e.message || '';
-        if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed') {
+        if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed' || em === 'Ad Skipped Too Early') {
             showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
         } else if (em === 'Ad timeout') {
             showAdError('⚠️ Ad Timeout!', 'Ad took too long. Please try again.');
@@ -1058,7 +1096,7 @@ async function watchAd(i) {
         isAdWatching = false; 
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        try { delete window.resolve; delete window.reject; delete window.adResolve; delete window.adReject; delete window.__adSuccess; delete window.__adFail; } catch(err) {}
+        try { delete window.resolve; delete window.reject; delete window.adResolve; delete window.adReject; delete window.__adSuccess; delete window.__adFail; delete window.__nexOpenExternal; } catch(err) {}
     }
 }
 function startAdWatch(i) { watchAd(i); }
@@ -1110,23 +1148,24 @@ async function watchExtraRewardAd() {
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading Ad...';
     const adStartTime = Date.now();
-    markExternalAdStart('extra');
+    adTrackerStart('extra');
     showAdWatchProgress(adStartTime);
     try {
         await showMonetagRewardedPopup(MONETAG_ZONE);
         const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const externalDuration = calculateExternalAdWatchTime();
-        const watchDuration = Math.max(inAppDuration, externalDuration);
+        const trackerDuration = adTrackerGetDuration();
+        const watchDuration = Math.max(inAppDuration, trackerDuration);
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
             if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
             hideAdWatchProgress();
-            clearExternalAdSession();
+            adTrackerClear();
             showAdError('⚠️ Ad Skipped Too Early!', 'আপনি মাত্র ' + Math.round(watchDuration) + ' সেকেন্ড দেখেছেন। কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দরকার।');
             return;
         }
         hideAdWatchProgress();
-        clearExternalAdSession();
+        adTrackerResolve();
+        adTrackerClear();
         
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
@@ -1148,7 +1187,7 @@ async function watchExtraRewardAd() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
         hideAdWatchProgress();
-        clearExternalAdSession();
+        adTrackerClear();
         const em = e.message || '';
         if (em === 'Ad Closed' || em === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'সম্পূর্ণ দেখতে হবে।');
         else if (em.includes('wait')) toast('⏱️ ' + em);
@@ -1342,7 +1381,6 @@ function renderReferralList() {
     const refQualifiedMinText = document.getElementById('refQualifiedMinText');
     if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
 
-    // ✅ LIMIT 25, newest on top (already sorted by joinedAt desc)
     const totalContainer = document.getElementById('myReferralsList');
     if (allReferralDataCache.all.length === 0) {
         totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
@@ -1819,7 +1857,7 @@ async function claimDailyBonus() {
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
     const adStartTime = Date.now();
-    markExternalAdStart('bonus');
+    adTrackerStart('bonus');
     try {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
@@ -1838,12 +1876,13 @@ async function claimDailyBonus() {
             await showMonetagRewardedPopup(mtSlot.id);
         }
         const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const externalDuration = calculateExternalAdWatchTime();
-        const watchDuration = Math.max(inAppDuration, externalDuration);
+        const trackerDuration = adTrackerGetDuration();
+        const watchDuration = Math.max(inAppDuration, trackerDuration);
         if (watchDuration < MIN_AD_WATCH_SECONDS) {
             await new Promise(r => setTimeout(r, Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000)));
         }
-        clearExternalAdSession();
+        adTrackerResolve();
+        adTrackerClear();
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -1858,7 +1897,7 @@ async function claimDailyBonus() {
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
-        clearExternalAdSession();
+        adTrackerClear();
         toast(e.message === 'Ad Closed' ? '❌ সম্পূর্ণ দেখেননি!' : '❌ সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
@@ -2004,7 +2043,6 @@ async function calculateValidReferrals() {
             allData.push(entry);
             if (qualified) qualifiedData.push(entry);
         }));
-        // ✅ Newest on top — sort by joinedAt desc
         allData.sort((a, b) => b.joinedAt - a.joinedAt);
         qualifiedData.sort((a, b) => b.balance - a.balance);
         validReferralCount = count;
@@ -2479,12 +2517,10 @@ async function loadTaskHistory() {
         });
         Object.keys(byTask).forEach(tid => { byTask[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0)); });
         const taskList = Object.keys(byTask).map(tid => byTask[tid][0]);
-        // ✅ Newest on top — sort desc
         taskList.sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
         const sym = appState.config.currencySymbol || 'TK';
         const tasks = appState.config.newTasks || {};
         let html = '';
-        // ✅ LIMIT to 25
         taskList.slice(0, HISTORY_LIMIT).forEach(sub => {
             const tid = String(sub.taskId);
             const allSubsForTask = byTask[tid];
@@ -2571,10 +2607,8 @@ async function loadWithdrawHistory() {
             document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No history.</p>';
             return;
         }
-        // ✅ Newest on top
         items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         let html = '';
-        // ✅ LIMIT 25
         items.slice(0, HISTORY_LIMIT).forEach(w => {
             const statusColor = w.status === 'pending' ? '#f39c12' : w.status === 'approved' ? '#2ecc71' : '#e74c3c';
             const statusText = w.status === 'pending' ? '⏳ Pending' : w.status === 'approved' ? '✅ Approved' : '❌ Rejected';
@@ -2604,7 +2638,6 @@ function loadCommissionHistory() {
     if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কমিশন পাইনি</p></div>'; return; }
     const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     let html = '';
-    // ✅ LIMIT 25
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const initial = (it.fromName || 'U').charAt(0).toUpperCase();
         const rate = it.rate || REF_COMMISSION_RATE;
@@ -2621,7 +2654,6 @@ function loadAdHistory() {
     let adCount = 0, totalEarned = 0;
     items.forEach(it => { if (it.type !== 'bonus') adCount++; totalEarned += Number(it.amount || 0); });
     let html = '';
-    // ✅ LIMIT 25
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const isBonus = it.type === 'bonus';
         const isClaim = it.type === 'adclaim';
@@ -2802,24 +2834,47 @@ window.onload = () => {
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
-    // ✅ UPDATED visibilitychange — tracks external ad time correctly
+    // ✅ UPDATED visibilitychange — auto-resolve on return
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            // ✅ User left the app (external ad page or tab switch)
-            const s = getExternalAdSession();
-            if (s && isAdWatching && !s.hiddenAt) {
-                updateExternalAdSession({ hiddenAt: Date.now(), pageVisible: false });
+            const t = adTrackerLoad();
+            if (t && t.isActive) {
+                t.hiddenAt = Date.now();
+                adTrackerSave(t);
             }
             stopPeriodicRecheck(); 
             stopAdminSlider(); 
             closeMenuPopup();
         } else {
-            // ✅ User returned to app
-            const s = getExternalAdSession();
-            if (s && isAdWatching && s.hiddenAt) {
-                // Elapsed time counts as watch time — keep startTime unchanged
-                // So startTime to now = actual total watch duration
-                updateExternalAdSession({ hiddenAt: 0, pageVisible: true });
+            const t = adTrackerLoad();
+            if (t && t.isActive && isAdWatching) {
+                t.hiddenAt = 0;
+                t.lastVisibleAt = Date.now();
+                adTrackerSave(t);
+                
+                // ✅ Auto-resolve/reject when returning from external page
+                if (typeof window.__adSuccess === 'function') {
+                    const duration = (Date.now() - t.startedAt) / 1000;
+                    console.log('[AD RETURN] duration:', duration, 'required:', MIN_AD_WATCH_SECONDS);
+                    
+                    if (duration >= MIN_AD_WATCH_SECONDS) {
+                        setTimeout(() => {
+                            try { 
+                                if (typeof window.__adSuccess === 'function') {
+                                    window.__adSuccess();
+                                }
+                            } catch(e) {}
+                        }, 300);
+                    } else {
+                        setTimeout(() => {
+                            try { 
+                                if (typeof window.__adFail === 'function') {
+                                    window.__adFail('Ad Skipped Too Early');
+                                }
+                            } catch(e) {}
+                        }, 300);
+                    }
+                }
             }
             
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
