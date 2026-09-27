@@ -709,6 +709,7 @@ const AD_DISPLAY_SLOTS = 2;
 let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
+const REFERRAL_REFRESH_INTERVAL = 15000;
 
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
@@ -748,7 +749,9 @@ let maintenanceTimer = null;
 let maintenanceEndTime = null;
 let validReferralCount = 0;
 let periodicRecheckInterval = null;
+let referralRefreshInterval = null;
 let isRechecking = false;
+let isCheckingChannel = false;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
@@ -863,19 +866,15 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ CORE FIX: AD EXECUTION + MIN TIME WAIT
-   সব localStorage tracking বাদ। শুধু memory + visibility events।
+   ✅ AD EXECUTION + MIN TIME WAIT
    ═══════════════════════════════════════════════════════════ */
-
-// Global state for currently active ad
-let activeAdSDK = null;  // { resolve, reject, done, error }
+let activeAdSDK = null;
 let adSDKTimer = null;
 
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
         throw new Error('No custom code provided');
     }
-    // Cancel any previous pending ad to avoid conflicts
     if (activeAdSDK) {
         try { activeAdSDK.reject(new Error('Superseded by new ad')); } catch(e) {}
         if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
@@ -897,7 +896,6 @@ async function executeCustomAdCode(code) {
         const wrappedResolve = () => finish(true);
         const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
         
-        // Only set window globals — they'll be cleaned when this ad finishes
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
         window.adResolve = wrappedResolve;
@@ -956,22 +954,15 @@ async function runAdSDK(slot) {
     }
 }
 
-/**
- * ✅✅✅ MAIN FIX: Wait for minimum watch time.
- * Uses in-memory tracking of "away time" (time spent on external page).
- * Also fixes double-counting when both visibilitychange AND blur/focus fire.
- */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve, reject) => {
-        console.log('[WAIT] Starting wait for min', minSeconds, 'seconds');
-        
         let wentAwayAt = 0;
         let awayTime = 0;
         let visFired = false;
         let lastReturnAt = 0;
         let isCurrentlyHidden = false;
         const startTime = Date.now();
-        const maxWait = 120;  // Max 2 minutes total
+        const maxWait = 120;
         let isSettled = false;
         let pollId = null;
         
@@ -986,11 +977,7 @@ function waitForMinTime(minSeconds) {
         const markHidden = () => {
             if (isCurrentlyHidden) return;
             isCurrentlyHidden = true;
-            if (!wentAwayAt) {
-                wentAwayAt = Date.now();
-                visFired = true;
-                console.log('[WAIT] Hidden/blur - went away at', wentAwayAt);
-            }
+            if (!wentAwayAt) { wentAwayAt = Date.now(); visFired = true; }
         };
         
         const markVisible = () => {
@@ -1002,15 +989,11 @@ function waitForMinTime(minSeconds) {
                 wentAwayAt = 0;
                 lastReturnAt = Date.now();
                 visFired = true;
-                console.log('[WAIT] Visible/focus - returned. Away:', away.toFixed(2), 'Total away:', awayTime.toFixed(2));
                 setTimeout(check, 300);
             }
         };
         
-        const onVisibility = () => {
-            if (document.hidden) markHidden();
-            else markVisible();
-        };
+        const onVisibility = () => { if (document.hidden) markHidden(); else markVisible(); };
         const onBlur = () => { markHidden(); };
         const onFocus = () => { markVisible(); };
         
@@ -1019,33 +1002,13 @@ function waitForMinTime(minSeconds) {
             const elapsed = (Date.now() - startTime) / 1000;
             const isVisible = !document.hidden;
             
-            // SUCCESS: User spent enough time away
-            if (awayTime >= minSeconds) {
-                console.log('[WAIT] ✅ Success - away time:', awayTime.toFixed(2));
-                settle(true);
-                return;
-            }
-            
-            // FALLBACK: No visibility events fired, but enough time elapsed
-            if (!visFired && elapsed >= minSeconds && isVisible) {
-                console.log('[WAIT] ✅ Success (fallback) - elapsed:', elapsed.toFixed(2));
-                settle(true);
-                return;
-            }
-            
-            // FAIL: User returned but didn't spend enough time away
+            if (awayTime >= minSeconds) { settle(true); return; }
+            if (!visFired && elapsed >= minSeconds && isVisible) { settle(true); return; }
             if (lastReturnAt && awayTime > 0 && awayTime < minSeconds && isVisible) {
                 const sinceReturn = (Date.now() - lastReturnAt) / 1000;
-                if (sinceReturn >= 3) {
-                    console.log('[WAIT] ❌ Fail - only', awayTime.toFixed(2), 'seconds away');
-                    settle(false, 'Ad Skipped Too Early');
-                    return;
-                }
+                if (sinceReturn >= 3) { settle(false, 'Ad Skipped Too Early'); return; }
             }
-            
-            // TIMEOUT
             if (elapsed >= maxWait) {
-                console.log('[WAIT] ⏰ Timeout');
                 if (awayTime >= minSeconds || elapsed >= minSeconds) settle(true);
                 else settle(false, 'Ad timeout');
                 return;
@@ -1063,14 +1026,10 @@ function waitForMinTime(minSeconds) {
         window.addEventListener('blur', onBlur);
         window.addEventListener('focus', onFocus);
         pollId = setInterval(check, 500);
-        
         setTimeout(check, 100);
     });
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ WATCH AD — Main function
-   ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
     if (isAdWatching) { toast('Please wait for current ad to finish!'); return; }
@@ -1091,15 +1050,11 @@ async function watchAd(i) {
         
         if (loadingOverlay) loadingOverlay.classList.add('active');
         toast('Loading Ad...');
-        
         showAdWatchProgress(adStartTime);
         
         await runAdSDK(slot);
-        
         if (loadingOverlay) loadingOverlay.classList.remove('active');
-        
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
-        
         hideAdWatchProgress();
         
         let newAds = appState.user.dailyAds || {};
@@ -1125,13 +1080,9 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
         const em = e.message || '';
-        console.log('[WATCH AD] Error:', em);
         
         if (em === 'Ad Skipped Too Early') {
-            showAdError(
-                '⚠️ Ad Skipped Too Early!',
-                'You must watch the full ad for at least ' + MIN_AD_WATCH_SECONDS + ' seconds to earn reward.'
-            );
+            showAdError('⚠️ Ad Skipped Too Early!', 'You must watch the full ad for at least ' + MIN_AD_WATCH_SECONDS + ' seconds to earn reward.');
         } else if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed') {
             showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
         } else if (em === 'Ad timeout') {
@@ -1144,15 +1095,10 @@ async function watchAd(i) {
         isAdWatching = false; 
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        // Cleanup globals only if no active ad
         if (!activeAdSDK) {
             try { 
-                delete window.resolve; 
-                delete window.reject; 
-                delete window.adResolve; 
-                delete window.adReject; 
-                delete window.__adSuccess; 
-                delete window.__adFail; 
+                delete window.resolve; delete window.reject; delete window.adResolve;
+                delete window.adReject; delete window.__adSuccess; delete window.__adFail;
                 delete window.__nexOpenExternal; 
             } catch(err) {}
         }
@@ -1160,9 +1106,9 @@ async function watchAd(i) {
 }
 function startAdWatch(i) { watchAd(i); }
 
-/* ═══════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════
    EXTRA REWARDS
-   ═══════════════════════════════════════════════════════════ */
+   ═══════════════════════════════════════════════════════ */
 function getTodayExtraRewardCount() {
     const today = todayStr();
     if (appState.user.extraRewardDate !== today) return 0;
@@ -1943,32 +1889,69 @@ async function claimDailyBonus() {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: creditReferrerCommission
+   এখন Firebase থেকে fresh balance পড়ে এবং fresh MIN_REFERRAL_BALANCE চেক করে
+   ═══════════════════════════════════════════════════════════ */
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
         if (!referrerId || commissionAmount <= 0) return false;
+        
+        // ✅ FIX: Firebase থেকে fresh user data পড়ুন (stale appState এড়াতে)
+        const freshUserSnap = await db.ref('users/' + appState.user.id).once('value');
+        if (!freshUserSnap.exists()) return false;
+        const freshUser = freshUserSnap.val();
+        const referredUserBalance = Number(freshUser.balance || 0);
+        
+        // ✅ FIX: safe MIN_REFERRAL_BALANCE
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
+            ? MIN_REFERRAL_BALANCE : 20;
+        
+        if (referredUserBalance < safeMinBal) {
+            console.log('[COMMISSION SKIP] Referred user balance', referredUserBalance, '< required', safeMinBal);
+            return false;
+        }
+        
         const refSnap = await db.ref('users/' + referrerId).once('value');
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
-        const referredUserBalance = Number(appState.user.balance || 0);
-        if (referredUserBalance < MIN_REFERRAL_BALANCE) return false;
+        
         const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
         const histId = 'com_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
         commHist[histId] = { 
-            fromId: String(appState.user.id), fromName: appState.user.name || 'User',
-            earnedAmount: Number(originalEarned), commission: commissionAmount,
-            source: String(source || 'Earning'), rate: REF_COMMISSION_RATE,
-            mode: REF_COMMISSION_MODE, timestamp: Date.now() 
+            fromId: String(appState.user.id), 
+            fromName: freshUser.name || appState.user.name || 'User',
+            earnedAmount: Number(originalEarned), 
+            commission: commissionAmount,
+            source: String(source || 'Earning'), 
+            rate: REF_COMMISSION_RATE,
+            mode: REF_COMMISSION_MODE, 
+            timestamp: Date.now() 
         };
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
-        await db.ref('users/' + referrerId).update({ referralBalance: newRefBal, totalCommission: newTotalComm, commissionHistory: commHist });
-        try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK'); } catch(e) {}
+        
+        await db.ref('users/' + referrerId).update({ 
+            referralBalance: newRefBal, 
+            totalCommission: newTotalComm, 
+            commissionHistory: commHist,
+            lastCommissionAt: Date.now(),
+            lastCommissionFrom: freshUser.name || 'User'
+        });
+        
+        console.log('[COMMISSION ADDED] +' + commissionAmount.toFixed(4), 'to', referrerId, 'from', source);
+        
+        try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK (' + source + ')'); } catch(e) {}
         return true;
-    } catch(e) { return false; }
+    } catch(e) { 
+        console.error('[COMMISSION ERROR]', e);
+        return false; 
+    }
 }
+
 function computeCommissionSplit(earnedAmount) {
     const referrerId = appState.user.referredBy;
     const rate = Number(REF_COMMISSION_RATE || 0);
@@ -1987,14 +1970,21 @@ function getCurrentChannelLinks() {
         { label: 'NexEarn Payment', chatId: 'nexearn2_payment' }
     ];
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: needsVerification — caching skip করে সর্বদা API check
+   ═══════════════════════════════════════════════════════════ */
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     const links = getCurrentChannelLinks();
-    const verifiedChannels = appState.user.verifiedChannels || {};
-    for (const link of links) { if (!verifiedChannels[link.chatId]) return true; }
-    for (const link of links) { const joined = await checkChannelMembership(tgUser.id, link.chatId); if (!joined) return true; }
+    // ✅ FIX: cache বিশ্বাস না করে প্রতিবার fresh API check
+    for (const link of links) {
+        const joined = await checkChannelMembership(tgUser.id, link.chatId);
+        if (!joined) return true;
+    }
     return false;
 }
+
 async function markVerified() {
     const links = getCurrentChannelLinks();
     const verifiedMap = {}; links.forEach(l => { verifiedMap[l.chatId] = true; });
@@ -2002,10 +1992,30 @@ async function markVerified() {
     await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
     appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: startPeriodicRecheck — referral auto-refresh যোগ
+   ═══════════════════════════════════════════════════════════ */
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI(); updateExtraRewardUI();
+    
+    // ✅ FIX: প্রতি ১৫ সেকেন্ডে referred users'দের balance রিফ্রেশ
+    referralRefreshInterval = setInterval(async () => {
+        if (!isOnline || !isBooted || document.hidden) return;
+        try {
+            await calculateValidReferrals();
+            updateRefTabCounts();
+            if (document.getElementById('page-referral').classList.contains('active')) {
+                renderReferralList();
+            }
+            if (document.getElementById('page-withdraw').classList.contains('active')) {
+                updateWithdrawInfo();
+            }
+        } catch(e) {}
+    }, REFERRAL_REFRESH_INTERVAL);
+    
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -2028,6 +2038,7 @@ function startPeriodicRecheck() {
 }
 function stopPeriodicRecheck() {
     if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
+    if (referralRefreshInterval) { clearInterval(referralRefreshInterval); referralRefreshInterval = null; }
     stopCycleTimer();
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
     stopTaskExpiryTicker();
@@ -2070,11 +2081,16 @@ async function calculateValidReferrals() {
         if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
         let count = 0;
         const allData = [], qualifiedData = [];
+        
+        // ✅ FIX: safe MIN_REFERRAL_BALANCE
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
+            ? MIN_REFERRAL_BALANCE : 20;
+        
         await Promise.all(keys.map(async (rid) => {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
             const bal = Number(u.balance || 0);
-            const qualified = bal >= MIN_REFERRAL_BALANCE;
+            const qualified = bal >= safeMinBal;
             if (qualified) count++;
             const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
             allData.push(entry);
@@ -2784,15 +2800,34 @@ async function loadLeaderboard() {
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet.</p>';
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: checkChannelMembership
+   - numeric ID vs @username দুটোই হ্যান্ডল করে
+   - restricted status এ is_member চেক করে
+   ═══════════════════════════════════════════════════════════ */
 async function checkChannelMembership(userId, chatId, retries = 2) {
+    if (!userId || !chatId) return false;
+    
+    // ✅ FIX: numeric ID (-100...) হলে @ ছাড়া, অন্যথায় @ দিয়ে
+    const rawChatId = String(chatId).trim();
+    const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId))
+        ? rawChatId
+        : '@' + rawChatId.replace(/^@/, '');
+    
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const response = await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=@' + chatId + '&user_id=' + userId, { cache: 'no-store' });
+            const url = 'https://api.telegram.org/bot' + BOT_TOKEN 
+                + '/getChatMember?chat_id=' + encodeURIComponent(formattedChatId) 
+                + '&user_id=' + userId;
+            const response = await fetch(url, { cache: 'no-store' });
             const data = await response.json();
             if (data.ok && data.result) {
                 const status = data.result.status;
-                return ['member', 'administrator', 'creator', 'restricted'].includes(status);
+                // ✅ FIX: restricted হলে is_member চেক
+                if (status === 'restricted') return data.result.is_member === true;
+                return ['member', 'administrator', 'creator'].includes(status);
             }
+            console.warn('[CHANNEL CHECK FAIL]', chatId, data.error_code, data.description);
             if (data.error_code === 400) return false;
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return false;
@@ -2822,31 +2857,45 @@ function renderChannelButtons() {
     verifyInterval = setInterval(checkAndUpdateStatus, 3000);
     setTimeout(checkAndUpdateStatus, 2000);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: checkAndUpdateStatus — race condition guard
+   ═══════════════════════════════════════════════════════════ */
 async function checkAndUpdateStatus() {
-    const userId = tgUser.id;
-    const buttons = document.querySelectorAll('.channel-btn');
-    const statusEl = document.getElementById('verifyStatus');
-    if (!userId || userId === '123456') { statusEl.textContent = '⚠️ Unable'; statusEl.className = 'verify-status error'; return; }
-    let allJoined = true;
-    for (const btn of buttons) {
-        const joined = await checkChannelMembership(userId, btn.dataset.chatId);
-        if (joined) btn.classList.add('joined');
-        else { btn.classList.remove('joined'); allJoined = false; }
-    }
-    if (allJoined && buttons.length > 0) {
-        statusEl.textContent = '✅ All joined!';
-        statusEl.className = 'verify-status success';
-        if (verifyInterval) clearInterval(verifyInterval);
-        verifyInterval = null;
-        await markVerified();
-        stopPeriodicRecheck();
-        setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
-    } else {
-        const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
-        statusEl.textContent = '❌ Join ' + remaining + ' more';
-        statusEl.className = 'verify-status error';
+    if (isCheckingChannel) return;
+    isCheckingChannel = true;
+    try {
+        const userId = tgUser.id;
+        const buttons = document.querySelectorAll('.channel-btn');
+        const statusEl = document.getElementById('verifyStatus');
+        if (!userId || userId === '123456') { 
+            statusEl.textContent = '⚠️ Unable'; 
+            statusEl.className = 'verify-status error'; 
+            return; 
+        }
+        let allJoined = true;
+        for (const btn of buttons) {
+            const joined = await checkChannelMembership(userId, btn.dataset.chatId);
+            if (joined) btn.classList.add('joined');
+            else { btn.classList.remove('joined'); allJoined = false; }
+        }
+        if (allJoined && buttons.length > 0) {
+            statusEl.textContent = '✅ All joined!';
+            statusEl.className = 'verify-status success';
+            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
+            await markVerified();
+            stopPeriodicRecheck();
+            setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
+        } else {
+            const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
+            statusEl.textContent = '❌ Join ' + remaining + ' more';
+            statusEl.className = 'verify-status error';
+        }
+    } finally {
+        isCheckingChannel = false;
     }
 }
+
 async function showAppAfterVerify() {
     if (!isOnline) { document.getElementById('offlineOverlay').classList.add('active'); return; }
     if (checkMaintenance()) return;
@@ -2910,7 +2959,13 @@ window.onload = () => {
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
-            MIN_REFERRAL_BALANCE = Number(appState.config.minReferralBalance !== undefined ? appState.config.minReferralBalance : 20);
+            
+            // ✅✅✅ FIX: safe MIN_REFERRAL_BALANCE parsing
+            const rawMinBal = appState.config.minReferralBalance;
+            const parsedMinBal = Number(rawMinBal);
+            MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
+            console.log('[CONFIG] MIN_REFERRAL_BALANCE =', MIN_REFERRAL_BALANCE, '(raw:', rawMinBal, ')');
+            
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
             if (appState.config.minAdWatchSeconds !== undefined && appState.config.minAdWatchSeconds !== null) {
@@ -3047,6 +3102,17 @@ window.onload = () => {
 
                 await updateTextElements();
                 renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
+
+                // ✅ FIX: Referral ট্যাব active থাকলে auto re-render
+                if (document.getElementById('page-referral').classList.contains('active')) {
+                    renderReferralList();
+                }
+                if (document.getElementById('page-history').classList.contains('active')) {
+                    loadAdHistory();
+                }
+                if (document.getElementById('page-withdraw').classList.contains('active')) {
+                    updateWithdrawInfo();
+                }
 
                 if (!isBooted) {
                     isBooted = true;
