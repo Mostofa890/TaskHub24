@@ -477,6 +477,10 @@
     .ad-watch-progress.show{display:flex;}
     .ad-watch-progress.ready{background:linear-gradient(135deg,#00b894,#00cec9);}
     .ad-watch-progress .awp-time{font-variant-numeric:tabular-nums;letter-spacing:1px;}
+    .file-preview-wrap{display:none;margin-top:8px;padding:8px;background:#f8f9ff;border-radius:10px;border:1px solid #e0e7ff;}
+    .file-preview-img{max-width:100%;max-height:200px;border-radius:10px;border:2px solid #6C5CE7;display:block;margin:0 auto;}
+    .file-preview-audio{width:100%;}
+    .file-preview-info{font-size:0.72rem;color:#10b981;font-weight:700;margin-top:6px;text-align:center;word-break:break-all;}
 </style>
 </head>
 <body>
@@ -710,6 +714,8 @@ let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
 const REFERRAL_REFRESH_INTERVAL = 15000;
+const CHANNEL_RECHECK_INTERVAL = 20000;
+const VERIFY_DEBOUNCE_MS = 5000;
 
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
@@ -752,6 +758,7 @@ let periodicRecheckInterval = null;
 let referralRefreshInterval = null;
 let isRechecking = false;
 let isCheckingChannel = false;
+let lastVerifyCheckTime = 0;
 let cycleTimerInterval = null;
 let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
@@ -1743,23 +1750,353 @@ function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;',
 function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FILE UPLOAD SYSTEM
+   ═══════════════════════════════════════════════════════════ */
+function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) return resolve(file);
+        if (file.size < 300 * 1024) return resolve(file);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    let { width, height } = img;
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (!blob) return reject(new Error('Compression failed'));
+                        const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                            type: 'image/jpeg',
+                            lastModified: Date.now()
+                        });
+                        console.log('[COMPRESS] Original:', (file.size / 1024).toFixed(1), 'KB → Compressed:', (compressedFile.size / 1024).toFixed(1), 'KB');
+                        resolve(compressedFile);
+                    }, 'image/jpeg', quality);
+                } catch(err) { reject(err); }
+            };
+            img.onerror = () => reject(new Error('Image decode failed'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('File read failed'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        return res;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 async function uploadToImgBB(file) {
-    const fd = new FormData(); fd.append('image', file);
-    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error?.message || 'ImgBB failed');
-    return data.data.url;
+    if (!IMGBB_API_KEY || String(IMGBB_API_KEY).trim().length < 20) {
+        throw new Error('ImgBB API key সেট করা নেই');
+    }
+    if (!file || !(file instanceof Blob)) {
+        throw new Error('কোনো ফাইল পাওয়া যায়নি');
+    }
+    if (file.size > 32 * 1024 * 1024) {
+        throw new Error('ছবি ৩২ MB এর বেশি');
+    }
+    
+    let uploadFile = file;
+    try {
+        uploadFile = await compressImage(file);
+    } catch(compressErr) {
+        console.warn('[COMPRESS FAIL]', compressErr.message);
+        uploadFile = file;
+    }
+    
+    try {
+        const fd = new FormData();
+        fd.append('image', uploadFile);
+        fd.append('name', 'task_' + Date.now());
+        console.log('[IMGBB] Uploading...', (uploadFile.size/1024).toFixed(1), 'KB');
+        const res = await fetchWithTimeout(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: 'POST', body: fd
+        }, 45000);
+        if (!res.ok) {
+            const errText = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status}: ${errText.substring(0, 100)}`);
+        }
+        const data = await res.json();
+        if (!data || !data.success) {
+            throw new Error(data?.error?.message || data?.status_txt || 'ImgBB rejected');
+        }
+        if (!data.data || !data.data.url) throw new Error('ImgBB returned no URL');
+        console.log('[IMGBB] ✅ Success:', data.data.url);
+        return data.data.url;
+    } catch(imgbbErr) {
+        console.warn('[IMGBB FAIL]', imgbbErr.message, '— trying fallbacks...');
+    }
+    
+    try {
+        console.log('[FALLBACK 1] catbox.moe');
+        const fd = new FormData();
+        fd.append('reqtype', 'fileupload');
+        fd.append('fileToUpload', uploadFile);
+        const res = await fetchWithTimeout('https://catbox.moe/user/api.php', { method: 'POST', body: fd }, 45000);
+        const url = (await res.text()).trim();
+        if (url && url.startsWith('http')) { console.log('[FALLBACK 1] ✅', url); return url; }
+        throw new Error('catbox: ' + url.substring(0, 80));
+    } catch(e1) { console.warn('[FALLBACK 1 FAIL]', e1.message); }
+    
+    try {
+        console.log('[FALLBACK 2] 0x0.st');
+        const fd = new FormData();
+        fd.append('file', uploadFile);
+        fd.append('expires', '168');
+        const res = await fetchWithTimeout('https://0x0.st', { method: 'POST', body: fd }, 45000);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const url = (await res.text()).trim();
+        if (url && url.startsWith('http')) { console.log('[FALLBACK 2] ✅', url); return url; }
+        throw new Error('0x0: ' + url.substring(0, 80));
+    } catch(e2) { console.warn('[FALLBACK 2 FAIL]', e2.message); }
+    
+    try {
+        console.log('[FALLBACK 3] tmpfiles.org');
+        const fd = new FormData();
+        fd.append('file', uploadFile);
+        const res = await fetchWithTimeout('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd }, 45000);
+        const data = await res.json();
+        if (data?.data?.url) {
+            const directUrl = String(data.data.url).replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+            console.log('[FALLBACK 3] ✅', directUrl);
+            return directUrl;
+        }
+        throw new Error('tmpfiles no URL');
+    } catch(e3) { console.warn('[FALLBACK 3 FAIL]', e3.message); }
+    
+    try {
+        console.log('[FALLBACK 4] bashupload.com');
+        const fd = new FormData();
+        fd.append('file', uploadFile);
+        const res = await fetchWithTimeout('https://bashupload.com/', { method: 'POST', body: fd }, 45000);
+        const text = await res.text();
+        const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
+        if (match) {
+            const url = match[0] + '?download=1';
+            console.log('[FALLBACK 4] ✅', url);
+            return url;
+        }
+        throw new Error('bashupload regex failed');
+    } catch(e4) { console.warn('[FALLBACK 4 FAIL]', e4.message); }
+    
+    throw new Error('সব আপলোড সার্ভার ব্যর্থ। ইন্টারনেট চেক করুন বা ছোট ছবি ব্যবহার করুন।');
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: AUDIO UPLOAD — Voice Recording Safe
+   ═══════════════════════════════════════════════════════════ */
+function getFileExtension(filename) {
+    if (!filename) return '';
+    const parts = String(filename).split('.');
+    return parts.length > 1 ? parts.pop().toLowerCase() : '';
+}
+
+function isAudioFile(file) {
+    if (!file) return false;
+    const mime = String(file.type || '').toLowerCase();
+    if (mime.startsWith('audio/')) return true;
+    // Voice recordings from some browsers use video/* MIME
+    if (mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg') return true;
+    // Fallback: check extension
+    const ext = getFileExtension(file.name || '');
+    const audioExts = ['mp3', 'wav', 'm4a', 'ogg', 'oga', 'webm', 'aac', 'flac', 'mp4', 'opus', 'amr', '3gp', 'weba', 'caf', 'aiff', 'wma'];
+    if (audioExts.includes(ext)) return true;
+    // If MIME is empty, trust the user (they said it's audio)
+    if (!mime || mime === 'application/octet-stream') return true;
+    return false;
+}
+
 async function uploadAudio(file) {
-    const services = [ uploadToBashupload, uploadToTempSh, uploadToLitterbox, uploadToUguu, uploadToZeroXZero ];
-    for (const fn of services) { try { return await fn(file); } catch (err) {} }
-    throw new Error('সব সার্ভার ব্যর্থ');
+    if (!file || !(file instanceof Blob)) {
+        throw new Error('কোনো অডিও ফাইল পাওয়া যায়নি');
+    }
+    if (file.size > 500 * 1024 * 1024) {
+        throw new Error('অডিও ৫০০ MB এর বেশি');
+    }
+    if (!isAudioFile(file)) {
+        throw new Error('শুধু অডিও ফাইল সিলেক্ট করুন');
+    }
+    
+    // Normalize filename (some voice recordings have no extension)
+    let fileName = file.name || ('voice_' + Date.now() + '.webm');
+    if (!getFileExtension(fileName)) {
+        const ext = (file.type && file.type.includes('webm')) ? '.webm' : '.mp3';
+        fileName = fileName + ext;
+    }
+    
+    // Ensure we have a proper File object with the right name
+    let uploadFile = file;
+    if (uploadFile.name !== fileName) {
+        try {
+            uploadFile = new File([file], fileName, { type: file.type || 'audio/webm', lastModified: Date.now() });
+        } catch(e) {
+            console.warn('[AUDIO] Could not rename file, using original');
+            uploadFile = file;
+        }
+    }
+    
+    console.log('[AUDIO UPLOAD] Starting:', fileName, '| Type:', file.type || 'unknown', '| Size:', (file.size/1024/1024).toFixed(2), 'MB');
+    
+    const services = [
+        { name: 'Litterbox', url: 'https://litterbox.catbox.moe/resources/internals/api.php', fn: async () => {
+            const fd = new FormData();
+            fd.append('reqtype', 'fileupload');
+            fd.append('time', '72h');
+            fd.append('fileToUpload', uploadFile, fileName);
+            const res = await fetchWithTimeout('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: fd }, 120000);
+            const url = (await res.text()).trim();
+            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            return url;
+        }},
+        { name: 'catbox', fn: async () => {
+            const fd = new FormData();
+            fd.append('reqtype', 'fileupload');
+            fd.append('fileToUpload', uploadFile, fileName);
+            const res = await fetchWithTimeout('https://catbox.moe/user/api.php', { method: 'POST', body: fd }, 120000);
+            const url = (await res.text()).trim();
+            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            return url;
+        }},
+        { name: '0x0.st', fn: async () => {
+            const fd = new FormData();
+            fd.append('file', uploadFile, fileName);
+            fd.append('expires', '168');
+            const res = await fetchWithTimeout('https://0x0.st', { method: 'POST', body: fd }, 120000);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const url = (await res.text()).trim();
+            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            return url;
+        }},
+        { name: 'Uguu', fn: async () => {
+            const fd = new FormData();
+            fd.append('files[]', uploadFile, fileName);
+            const res = await fetchWithTimeout('https://uguu.se/upload?output=text', { method: 'POST', body: fd }, 120000);
+            const url = (await res.text()).trim();
+            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            return url;
+        }},
+        { name: 'Temp.sh', fn: async () => {
+            const fd = new FormData();
+            fd.append('file', uploadFile, fileName);
+            const res = await fetchWithTimeout('https://temp.sh/upload', { method: 'POST', body: fd }, 120000);
+            const url = (await res.text()).trim();
+            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            return url;
+        }},
+        { name: 'Bashupload', fn: async () => {
+            const fd = new FormData();
+            fd.append('file', uploadFile, fileName);
+            const res = await fetchWithTimeout('https://bashupload.com/', { method: 'POST', body: fd }, 120000);
+            const text = await res.text();
+            const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
+            if (!match) throw new Error('regex failed');
+            return match[0] + '?download=1';
+        }}
+    ];
+    
+    const errors = [];
+    for (const svc of services) {
+        // Try twice per service
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                console.log(`[AUDIO UPLOAD] Trying ${svc.name} (attempt ${attempt})...`);
+                const url = await svc.fn();
+                console.log(`[AUDIO UPLOAD] ✅ ${svc.name}:`, url);
+                return url;
+            } catch(err) {
+                console.warn(`[AUDIO UPLOAD] ❌ ${svc.name} attempt ${attempt}:`, err.message);
+                if (attempt === 2) errors.push(`${svc.name}: ${err.message}`);
+                else await new Promise(r => setTimeout(r, 1000));
+            }
+        }
+    }
+    
+    throw new Error('সব সার্ভার ব্যর্থ। ইন্টারনেট চেক করুন।');
 }
-async function uploadToBashupload(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://bashupload.com/', { method: 'POST', body: fd }); const text = await res.text(); const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/); if (!match) throw new Error('fail'); return match[0] + '?download=1'; }
-async function uploadToTempSh(file) { const fd = new FormData(); fd.append('file', file); const res = await fetch('https://temp.sh/upload', { method: 'POST', body: fd }); const text = (await res.text()).trim(); if (!text.startsWith('http')) throw new Error('fail'); return text; }
-async function uploadToLitterbox(file) { const fd = new FormData(); fd.append('reqtype', 'fileupload'); fd.append('time', '72h'); fd.append('fileToUpload', file); const res = await fetch('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
-async function uploadToUguu(file) { const fd = new FormData(); fd.append('files[]', file); const res = await fetch('https://uguu.se/upload?output=text', { method: 'POST', body: fd }); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
-async function uploadToZeroXZero(file) { const fd = new FormData(); fd.append('file', file); fd.append('expires', '8760'); const res = await fetch('https://0x0.st', { method: 'POST', body: fd }); if (!res.ok) throw new Error('HTTP'); const url = (await res.text()).trim(); if (!url.startsWith('http')) throw new Error('fail'); return url; }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ FILE PREVIEW HANDLER
+   ═══════════════════════════════════════════════════════════ */
+function handleFilePreview(input, type) {
+    const file = input.files && input.files[0];
+    const wrap = document.getElementById('filePreviewWrap');
+    const preview = document.getElementById('filePreview');
+    const info = document.getElementById('filePreviewInfo');
+    
+    if (!file) {
+        if (wrap) wrap.style.display = 'none';
+        return;
+    }
+    
+    if (type === 'image') {
+        if (!file.type.startsWith('image/')) {
+            toast('⚠️ শুধু ছবি ফাইল সিলেক্ট করুন');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
+        if (file.size > 32 * 1024 * 1024) {
+            toast('⚠️ ছবি ৩২ MB এর কম হতে হবে');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
+    } else if (type === 'audio') {
+        if (!isAudioFile(file)) {
+            toast('⚠️ শুধু অডিও ফাইল সিলেক্ট করুন');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
+        if (file.size > 500 * 1024 * 1024) {
+            toast('⚠️ অডিও ৫০০ MB এর কম হতে হবে');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (preview) {
+            preview.src = e.target.result;
+            if (wrap) wrap.style.display = 'block';
+        }
+        if (info) {
+            const sizeKB = file.size / 1024;
+            const sizeStr = sizeKB > 1024 
+                ? (sizeKB / 1024).toFixed(2) + ' MB' 
+                : sizeKB.toFixed(1) + ' KB';
+            info.innerHTML = '✅ <b>' + esc(file.name || 'voice.webm') + '</b> — ' + sizeStr;
+        }
+    };
+    reader.onerror = () => {
+        toast('⚠️ ফাইল পড়তে সমস্যা');
+        input.value = '';
+        if (wrap) wrap.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+    toast('✅ ফাইল সিলেক্ট হয়েছে');
+}
 
 function checkPendingSurveyReward() {
     const done = localStorage.getItem('survey_done_task');
@@ -1889,34 +2226,23 @@ async function claimDailyBonus() {
     }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: creditReferrerCommission
-   এখন Firebase থেকে fresh balance পড়ে এবং fresh MIN_REFERRAL_BALANCE চেক করে
-   ═══════════════════════════════════════════════════════════ */
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
         if (!referrerId || commissionAmount <= 0) return false;
-        
-        // ✅ FIX: Firebase থেকে fresh user data পড়ুন (stale appState এড়াতে)
         const freshUserSnap = await db.ref('users/' + appState.user.id).once('value');
         if (!freshUserSnap.exists()) return false;
         const freshUser = freshUserSnap.val();
         const referredUserBalance = Number(freshUser.balance || 0);
-        
-        // ✅ FIX: safe MIN_REFERRAL_BALANCE
         const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
             ? MIN_REFERRAL_BALANCE : 20;
-        
         if (referredUserBalance < safeMinBal) {
             console.log('[COMMISSION SKIP] Referred user balance', referredUserBalance, '< required', safeMinBal);
             return false;
         }
-        
         const refSnap = await db.ref('users/' + referrerId).once('value');
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
-        
         const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
         const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
         const commHist = refData.commissionHistory || {};
@@ -1933,7 +2259,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         };
         const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
         if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
-        
         await db.ref('users/' + referrerId).update({ 
             referralBalance: newRefBal, 
             totalCommission: newTotalComm, 
@@ -1941,9 +2266,7 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
             lastCommissionAt: Date.now(),
             lastCommissionFrom: freshUser.name || 'User'
         });
-        
         console.log('[COMMISSION ADDED] +' + commissionAmount.toFixed(4), 'to', referrerId, 'from', source);
-        
         try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK (' + source + ')'); } catch(e) {}
         return true;
     } catch(e) { 
@@ -1963,79 +2286,99 @@ function computeCommissionSplit(earnedAmount) {
 }
 
 function getCurrentChannelLinks() {
-    return channelLinks.length ? channelLinks : [
-        { label: 'NexEarn Channel', chatId: 'nexearn2' },
-        { label: 'NexEarn Adda', chatId: 'nexearn2_adda' },
-        { label: 'NexEarn Official', chatId: 'nexearn2_official' },
-        { label: 'NexEarn Payment', chatId: 'nexearn2_payment' }
-    ];
+    if (channelLinks && channelLinks.length > 0) return channelLinks;
+    // Fallback: If config hasn't loaded yet, return null (do not force verification)
+    return null;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: needsVerification — caching skip করে সর্বদা API check
+   ✅✅✅ FIXED: CHANNEL VERIFICATION SYSTEM
+   - Returns null on unknown (API error) → won't lock user
+   - Only returns true if user is definitely NOT a member
    ═══════════════════════════════════════════════════════════ */
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     const links = getCurrentChannelLinks();
-    // ✅ FIX: cache বিশ্বাস না করে প্রতিবার fresh API check
+    if (!links || links.length === 0) {
+        console.log('[VERIFY] No channels configured, skipping verification');
+        return false;
+    }
+    
+    let hasUnknown = false;
     for (const link of links) {
-        const joined = await checkChannelMembership(tgUser.id, link.chatId);
-        if (!joined) return true;
+        const result = await checkChannelMembership(tgUser.id, link.chatId);
+        if (result === false) {
+            // Definitely not a member
+            console.log('[VERIFY] User NOT member of:', link.chatId);
+            return true;
+        }
+        if (result === null) {
+            // API error — can't determine
+            hasUnknown = true;
+            console.log('[VERIFY] Unknown result for:', link.chatId);
+        }
+    }
+    
+    if (hasUnknown) {
+        console.warn('[VERIFY] Some channels returned unknown — not locking user');
     }
     return false;
 }
 
 async function markVerified() {
-    const links = getCurrentChannelLinks();
+    const links = getCurrentChannelLinks() || [];
     const verifiedMap = {}; links.forEach(l => { verifiedMap[l.chatId] = true; });
-    await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
-    await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
+    try {
+        await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
+        await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
+        await db.ref('users/' + tgUser.id + '/verifiedAt').set(Date.now());
+    } catch(e) { console.warn('[VERIFY] markVerified failed:', e); }
     appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: startPeriodicRecheck — referral auto-refresh যোগ
+   ✅✅✅ FIXED: startPeriodicRecheck — More aggressive channel checks
    ═══════════════════════════════════════════════════════════ */
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI(); updateExtraRewardUI();
     
-    // ✅ FIX: প্রতি ১৫ সেকেন্ডে referred users'দের balance রিফ্রেশ
+    // Referral balance refresh
     referralRefreshInterval = setInterval(async () => {
         if (!isOnline || !isBooted || document.hidden) return;
         try {
             await calculateValidReferrals();
             updateRefTabCounts();
-            if (document.getElementById('page-referral').classList.contains('active')) {
-                renderReferralList();
-            }
-            if (document.getElementById('page-withdraw').classList.contains('active')) {
-                updateWithdrawInfo();
-            }
+            if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+            if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
         } catch(e) {}
     }, REFERRAL_REFRESH_INTERVAL);
     
+    // Aggressive channel recheck — every 20 seconds
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
         if (document.getElementById('app').style.display === 'none') return;
         if (appState.user.isBanned) return;
         if (checkMaintenance()) return;
+        if (!channelVerified) return;
+        
         isRechecking = true;
         try {
             const needs = await needsVerification();
             if (needs) {
                 channelVerified = false;
-                await db.ref('users/' + tgUser.id + '/channelVerified').set(false);
+                try { await db.ref('users/' + tgUser.id + '/channelVerified').set(false); } catch(e) {}
                 document.getElementById('app').style.display = 'none';
                 document.getElementById('joinModal').classList.add('active');
                 renderChannelButtons();
-                toast('⚠️ চ্যানেল ভেরিফিকেশন প্রয়োজন!');
+                toast('⚠️ আপনি চ্যানেল/গ্রুপ ছেড়ে দিয়েছেন — আবার Join করুন!');
             }
         } catch(e) {} finally { isRechecking = false; }
-    }, 30000);
+    }, CHANNEL_RECHECK_INTERVAL);
 }
+
 function stopPeriodicRecheck() {
     if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
     if (referralRefreshInterval) { clearInterval(referralRefreshInterval); referralRefreshInterval = null; }
@@ -2081,11 +2424,8 @@ async function calculateValidReferrals() {
         if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
         let count = 0;
         const allData = [], qualifiedData = [];
-        
-        // ✅ FIX: safe MIN_REFERRAL_BALANCE
         const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
             ? MIN_REFERRAL_BALANCE : 20;
-        
         await Promise.all(keys.map(async (rid) => {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
@@ -2438,9 +2778,31 @@ function openTaskSubmit(taskId) {
     }
 
     if (type === 'image' || type === 'image_upload') {
-        contentArea.innerHTML = `<label>📷 ছবি আপলোড *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/><small>JPG / PNG / GIF / WEBP (Max 30 MB)</small><label>📝 বর্ণনা</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}`;
+        contentArea.innerHTML = `
+            <label>📷 ছবি আপলোড *</label>
+            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/>
+            <div id="filePreviewWrap" class="file-preview-wrap">
+                <img id="filePreview" class="file-preview-img"/>
+                <div id="filePreviewInfo" class="file-preview-info"></div>
+            </div>
+            <small>JPG / PNG / GIF / WEBP (Max 32 MB)</small>
+            <label>📝 বর্ণনা</label>
+            <textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}
+        `;
     } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
-        contentArea.innerHTML = `<label>🎤 ভয়েস আপলোড *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''}/><small>MP3 / WAV / M4A / OGG (Max 500 MB)</small><label>📝 বর্ণনা</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}`;
+        contentArea.innerHTML = `
+            <label>🎤 ভয়েস আপলোড *</label>
+            <input type="file" id="taskVoiceInput" accept="audio/*,.webm,.ogg,.mp3,.wav,.m4a,.mp4,.opus,.amr,.aac,.flac" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'audio')"/>
+            <div id="filePreviewWrap" class="file-preview-wrap">
+                <audio id="filePreview" class="file-preview-audio" controls></audio>
+                <div id="filePreviewInfo" class="file-preview-info"></div>
+            </div>
+            <small>MP3 / WAV / M4A / OGG / WEBM (Max 500 MB)</small>
+            <label>📝 বর্ণনা</label>
+            <textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>
+            ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> আপলোড করে <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}
+        `;
     } else if (type === 'text' || type === 'text_writing') {
         contentArea.innerHTML = `<label>📝 উত্তর লিখুন *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-info-circle"></i> সঠিক তথ্য লিখুন।</div>`}`;
     } else if (isScreenshotTask(type)) {
@@ -2453,8 +2815,12 @@ function openTaskSubmit(taskId) {
                 <small>👆 কাজ শেষ করে স্ক্রিনশট নিন।</small>
             </div>
             <label>📷 স্ক্রিনশট আপলোড *</label>
-            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''}/>
-            <small>JPG / PNG / WEBP (Max 30 MB)</small>
+            <input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/>
+            <div id="filePreviewWrap" class="file-preview-wrap">
+                <img id="filePreview" class="file-preview-img"/>
+                <div id="filePreviewInfo" class="file-preview-info"></div>
+            </div>
+            <small>JPG / PNG / WEBP (Max 32 MB)</small>
             <label>📝 বর্ণনা</label>
             <textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>
             ${lockedOut ? '' : `<div class="task-hint-box"><i class="fas fa-camera"></i> লিংকে কাজ শেষ → স্ক্রিনশট → আপলোড → <b>${canResubmit ? 'Re-Submit' : 'জমা দিন'}</b></div>`}
@@ -2477,68 +2843,170 @@ async function submitGenericTask() {
     const task = taskState.task;
     const taskId = taskState.taskId;
     if (!task || !taskId) return;
-    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ Modal এ সাবমিট হয় না'); return; }
+    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { 
+        toast('⚠️ Modal এ সাবমিট হয় না'); 
+        return; 
+    }
     if (!canSubmitTask(taskId)) {
         const s = getTaskUserState(taskId);
         if (s.status === 'pending') toast('⏳ ইতিমধ্যে জমা');
         else toast('❌ আর re-submit পারবেন না');
         return;
     }
+    
     const type = taskState.type;
     const actionBtn = document.getElementById('taskSubmitActionBtn');
     const textInput = document.getElementById('taskTextInput');
     const content = textInput ? textInput.value.trim() : '';
     let fileUrl = null;
+    
+    taskState.submitting = true;
+    actionBtn.disabled = true;
+    
     try {
         if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
             const input = document.getElementById('taskImageInput');
-            const file = input && input.files[0];
-            if (!file) { toast('⚠️ ছবি সিলেক্ট করুন'); return; }
-            if (file.size > 30 * 1024 * 1024) { toast('⚠️ ছবি ৩০ MB এর কম'); return; }
-            taskState.submitting = true; actionBtn.disabled = true;
-            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
-            toast('📤 ছবি আপলোড...');
-            fileUrl = await uploadToImgBB(file);
-        } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
-            const input = document.getElementById('taskVoiceInput');
-            const file = input && input.files[0];
-            if (!file) { toast('⚠️ অডিও সিলেক্ট'); return; }
-            if (file.size > 500 * 1024 * 1024) { toast('⚠️ ৫০০ MB এর কম'); return; }
-            taskState.submitting = true; actionBtn.disabled = true;
-            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
-            toast('📤 অডিও আপলোড...');
-            fileUrl = await uploadAudio(file);
-        } else if (type === 'text' || type === 'text_writing') {
-            if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
-        } else {
-            if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); return; }
+            const file = input && input.files && input.files[0];
+            
+            if (!file) { 
+                toast('⚠️ ছবি সিলেক্ট করুন'); 
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return; 
+            }
+            if (!file.type.startsWith('image/')) {
+                toast('⚠️ শুধু ছবি ফাইল সিলেক্ট করুন');
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return;
+            }
+            if (file.size > 32 * 1024 * 1024) {
+                toast('⚠️ ছবি ৩২ MB এর কম হতে হবে');
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return;
+            }
+            
+            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড হচ্ছে...';
+            toast('📤 ছবি আপলোড হচ্ছে... (' + (file.size / 1024).toFixed(0) + ' KB)');
+            
+            try {
+                fileUrl = await uploadToImgBB(file);
+                toast('✅ ছবি আপলোড হয়েছে!');
+            } catch (uploadErr) {
+                console.error('[IMAGE UPLOAD ERROR]', uploadErr);
+                toast('❌ ' + uploadErr.message);
+                taskState.submitting = false; 
+                actionBtn.disabled = false;
+                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
+                return;
+            }
         }
-        taskState.submitting = true; actionBtn.disabled = true;
-        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> জমা...';
+        else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
+            const input = document.getElementById('taskVoiceInput');
+            const file = input && input.files && input.files[0];
+            
+            if (!file) { 
+                toast('⚠️ অডিও সিলেক্ট করুন'); 
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return; 
+            }
+            if (!isAudioFile(file)) {
+                toast('⚠️ শুধু অডিও ফাইল সিলেক্ট করুন');
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return;
+            }
+            if (file.size > 500 * 1024 * 1024) {
+                toast('⚠️ অডিও ৫০০ MB এর কম হতে হবে');
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return;
+            }
+            
+            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অডিও আপলোড...';
+            toast('📤 অডিও আপলোড হচ্ছে... (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)');
+            
+            try {
+                fileUrl = await uploadAudio(file);
+                toast('✅ অডিও আপলোড হয়েছে!');
+            } catch (uploadErr) {
+                console.error('[AUDIO UPLOAD ERROR]', uploadErr);
+                toast('❌ ' + uploadErr.message);
+                taskState.submitting = false; 
+                actionBtn.disabled = false;
+                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
+                return;
+            }
+        }
+        else if (type === 'text' || type === 'text_writing') {
+            if (!content || content.length < 2) { 
+                toast('⚠️ টেক্সট লিখুন'); 
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return; 
+            }
+        }
+        else {
+            const input = document.getElementById('taskImageInput');
+            const file = input && input.files && input.files[0];
+            if (file) {
+                actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
+                try {
+                    fileUrl = await uploadToImgBB(file);
+                } catch (uploadErr) {
+                    toast('❌ ' + uploadErr.message);
+                    taskState.submitting = false; 
+                    actionBtn.disabled = false;
+                    actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
+                    return;
+                }
+            }
+            if (!fileUrl && (!content || content.length < 2)) {
+                toast('⚠️ ছবি বা টেক্সট দিন');
+                taskState.submitting = false; 
+                actionBtn.disabled = false; 
+                return;
+            }
+        }
+        
+        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> জমা হচ্ছে...';
+        
         const subId = 'sub_' + Date.now() + '_' + tgUser.id;
         await db.ref('taskSubmissions/' + subId).set({
-            userId: tgUser.id, userName: tgUser.first_name || 'User',
-            username: tgUser.username || '', telegramId: tgUser.id,
-            taskId: taskId, taskTitle: task.title || 'Task',
+            userId: tgUser.id, 
+            userName: tgUser.first_name || 'User',
+            username: tgUser.username || '', 
+            telegramId: tgUser.id,
+            taskId: taskId, 
+            taskTitle: task.title || 'Task',
             reward: Number(task.reward || 0),
-            content: content, fileUrl: fileUrl,
-            status: 'pending', createdAt: Date.now()
+            content: content || '', 
+            fileUrl: fileUrl,
+            status: 'pending', 
+            createdAt: Date.now()
         });
+        
         await db.ref('users/' + tgUser.id).update({
             ['taskStatuses/' + taskId]: 'pending',
             ['taskHistory/' + taskId]: Date.now()
         });
+        
         if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
         if (!appState.user.taskHistory) appState.user.taskHistory = {};
         appState.user.taskStatuses[taskId] = 'pending';
         appState.user.taskHistory[taskId] = Date.now();
+        
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-        toast('✅ জমা!');
+        toast('✅ জমা সম্পন্ন!');
         closeTaskSubmit();
+        
     } catch (err) {
-        console.error('Submit error:', err);
-        toast('❌ সমস্যা: ' + err.message);
-        taskState.submitting = false; actionBtn.disabled = false;
+        console.error('[SUBMIT ERROR]', err);
+        toast('❌ সমস্যা: ' + (err.message || 'Unknown error'));
+        taskState.submitting = false; 
+        actionBtn.disabled = false;
         actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
     }
 }
@@ -2802,18 +3270,16 @@ async function loadLeaderboard() {
 
 /* ═══════════════════════════════════════════════════════════
    ✅✅✅ FIXED: checkChannelMembership
-   - numeric ID vs @username দুটোই হ্যান্ডল করে
-   - restricted status এ is_member চেক করে
+   Returns: true = joined, false = NOT joined, null = unknown (API error)
    ═══════════════════════════════════════════════════════════ */
 async function checkChannelMembership(userId, chatId, retries = 2) {
-    if (!userId || !chatId) return false;
-    
-    // ✅ FIX: numeric ID (-100...) হলে @ ছাড়া, অন্যথায় @ দিয়ে
+    if (!userId || !chatId) return null;
     const rawChatId = String(chatId).trim();
     const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId))
         ? rawChatId
         : '@' + rawChatId.replace(/^@/, '');
     
+    let lastError = null;
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             const url = 'https://api.telegram.org/bot' + BOT_TOKEN 
@@ -2823,25 +3289,34 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
             const data = await response.json();
             if (data.ok && data.result) {
                 const status = data.result.status;
-                // ✅ FIX: restricted হলে is_member চেক
+                // User definitely left if status is left/kicked
+                if (status === 'left' || status === 'kicked') return false;
+                // restricted — check is_member
                 if (status === 'restricted') return data.result.is_member === true;
+                // member/administrator/creator
                 return ['member', 'administrator', 'creator'].includes(status);
             }
+            // API returned error — could be bot not admin, channel not found, etc.
             console.warn('[CHANNEL CHECK FAIL]', chatId, data.error_code, data.description);
-            if (data.error_code === 400) return false;
+            lastError = data.description || 'API error';
+            // If chat not found or bot not admin, return null (unknown)
+            if (data.error_code === 400 || data.error_code === 403) {
+                return null;
+            }
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
-            return false;
+            return null;
         } catch (e) {
+            lastError = e.message;
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
-            return false;
+            return null;
         }
     }
-    return false;
+    return null;
 }
 
 function renderChannelButtons() {
     const container = document.getElementById('channelLinks'); container.innerHTML = '';
-    const links = getCurrentChannelLinks();
+    const links = getCurrentChannelLinks() || [];
     links.forEach(link => {
         const btn = document.createElement('a');
         btn.className = 'channel-btn'; btn.dataset.chatId = link.chatId;
@@ -2859,7 +3334,7 @@ function renderChannelButtons() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: checkAndUpdateStatus — race condition guard
+   ✅✅✅ FIXED: checkAndUpdateStatus — race guard + true/false/null
    ═══════════════════════════════════════════════════════════ */
 async function checkAndUpdateStatus() {
     if (isCheckingChannel) return;
@@ -2874,21 +3349,29 @@ async function checkAndUpdateStatus() {
             return; 
         }
         let allJoined = true;
+        let hasUnknown = false;
         for (const btn of buttons) {
             const joined = await checkChannelMembership(userId, btn.dataset.chatId);
-            if (joined) btn.classList.add('joined');
-            else { btn.classList.remove('joined'); allJoined = false; }
+            if (joined === true) {
+                btn.classList.add('joined');
+            } else if (joined === false) {
+                btn.classList.remove('joined'); 
+                allJoined = false;
+            } else {
+                // unknown — don't mark joined, but don't block
+                btn.classList.remove('joined');
+                hasUnknown = true;
+            }
         }
         if (allJoined && buttons.length > 0) {
             statusEl.textContent = '✅ All joined!';
             statusEl.className = 'verify-status success';
             if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
             await markVerified();
-            stopPeriodicRecheck();
             setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
         } else {
             const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
-            statusEl.textContent = '❌ Join ' + remaining + ' more';
+            statusEl.textContent = '❌ Join ' + remaining + ' more' + (hasUnknown ? ' (checking…)' : '');
             statusEl.className = 'verify-status error';
         }
     } finally {
@@ -2920,12 +3403,14 @@ window.onload = () => {
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
+    /* ✅✅✅ FIXED: Visibility change — always check channel verification */
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             stopPeriodicRecheck(); 
             stopAdminSlider(); 
             closeMenuPopup();
         } else {
+            // Returning to app — immediately check verification
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
                 const resetTime = Number(appState.user.adsResetTime || 0);
                 if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
@@ -2933,17 +3418,23 @@ window.onload = () => {
                 updateExtraRewardUI();
                 startPeriodicRecheck();
                 startAdminSlider();
+                
+                // ✅ Always check verification (not just if channelVerified is true)
                 if (channelVerified) {
-                    needsVerification().then(needs => {
-                        if (needs) {
-                            channelVerified = false;
-                            db.ref('users/' + tgUser.id + '/channelVerified').set(false);
-                            document.getElementById('app').style.display = 'none';
-                            document.getElementById('joinModal').classList.add('active');
-                            renderChannelButtons();
-                            toast('⚠️ চ্যানেল ভেরিফিকেশন প্রয়োজন!');
-                        }
-                    });
+                    const now = Date.now();
+                    if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
+                        lastVerifyCheckTime = now;
+                        needsVerification().then(needs => {
+                            if (needs) {
+                                channelVerified = false;
+                                db.ref('users/' + tgUser.id + '/channelVerified').set(false);
+                                document.getElementById('app').style.display = 'none';
+                                document.getElementById('joinModal').classList.add('active');
+                                renderChannelButtons();
+                                toast('⚠️ আপনি চ্যানেল/গ্রুপ ছেড়ে দিয়েছেন — আবার Join করুন!');
+                            }
+                        }).catch(e => console.warn('[VERIFY] check failed:', e));
+                    }
                 }
             }
         }
@@ -2960,11 +3451,11 @@ window.onload = () => {
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
             
-            // ✅✅✅ FIX: safe MIN_REFERRAL_BALANCE parsing
             const rawMinBal = appState.config.minReferralBalance;
             const parsedMinBal = Number(rawMinBal);
             MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
             console.log('[CONFIG] MIN_REFERRAL_BALANCE =', MIN_REFERRAL_BALANCE, '(raw:', rawMinBal, ')');
+            console.log('[CONFIG] Channel Links:', channelLinks.length);
             
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
@@ -3103,16 +3594,9 @@ window.onload = () => {
                 await updateTextElements();
                 renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
 
-                // ✅ FIX: Referral ট্যাব active থাকলে auto re-render
-                if (document.getElementById('page-referral').classList.contains('active')) {
-                    renderReferralList();
-                }
-                if (document.getElementById('page-history').classList.contains('active')) {
-                    loadAdHistory();
-                }
-                if (document.getElementById('page-withdraw').classList.contains('active')) {
-                    updateWithdrawInfo();
-                }
+                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
+                if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
 
                 if (!isBooted) {
                     isBooted = true;
@@ -3126,6 +3610,10 @@ window.onload = () => {
                         renderChannelButtons();
                     } else {
                         channelVerified = true;
+                        // ✅ Also save verified state to Firebase so periodic recheck has flag
+                        if (channelLinks && channelLinks.length > 0) {
+                            try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {}
+                        }
                         if (isOnline) {
                             document.getElementById('app').style.display = 'block';
                             setLoading(false);
