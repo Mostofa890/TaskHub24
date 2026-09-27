@@ -717,67 +717,6 @@ let monetagInAppStarted = false;
 let lastMonetagShowTime = 0;
 const MONETAG_MIN_INTERVAL = 5000;
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ NEW: EXTERNAL AD TRACKER (localStorage-based, tab-switch safe)
-   ═══════════════════════════════════════════════════════════ */
-const EXT_AD_TRACKER_KEY = 'nexearn_ad_tracker_v2';
-let adTrackerWatchdog = null;
-
-function adTrackerSave(data) {
-    try { localStorage.setItem(EXT_AD_TRACKER_KEY, JSON.stringify(data)); } catch(e) {}
-}
-function adTrackerLoad() {
-    try {
-        const raw = localStorage.getItem(EXT_AD_TRACKER_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch(e) { return null; }
-}
-function adTrackerClear() {
-    try { localStorage.removeItem(EXT_AD_TRACKER_KEY); } catch(e) {}
-    if (adTrackerWatchdog) { clearInterval(adTrackerWatchdog); adTrackerWatchdog = null; }
-}
-function adTrackerStart(slotIndex) {
-    adTrackerClear();
-    adTrackerSave({
-        slot: slotIndex,
-        startedAt: Date.now(),
-        lastVisibleAt: Date.now(),
-        isActive: true,
-        resolved: false,
-        externalOpened: false
-    });
-    adTrackerWatchdog = setInterval(() => {
-        const t = adTrackerLoad();
-        if (!t || !t.isActive) return;
-        if (!document.hidden) {
-            t.lastVisibleAt = Date.now();
-            adTrackerSave(t);
-        }
-    }, 1000);
-}
-function adTrackerMarkExternal() {
-    const t = adTrackerLoad();
-    if (!t) return;
-    t.externalOpened = true;
-    t.externalOpenedAt = Date.now();
-    adTrackerSave(t);
-}
-function adTrackerGetDuration() {
-    const t = adTrackerLoad();
-    if (!t || !t.startedAt) return 0;
-    return (Date.now() - t.startedAt) / 1000;
-}
-function adTrackerResolve() {
-    const t = adTrackerLoad();
-    if (!t) return 0;
-    t.resolved = true;
-    t.isActive = false;
-    t.resolvedAt = Date.now();
-    adTrackerSave(t);
-    const duration = (t.resolvedAt - t.startedAt) / 1000;
-    return duration;
-}
-
 let extraRewardConfig = {
     enabled: false,
     amount: 0.5,
@@ -924,8 +863,13 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ CUSTOM AD CODE EXECUTOR — Auto-resolve on external return
+   ✅✅✅ CORE FIX: AD EXECUTION + MIN TIME WAIT
+   সব localStorage tracking বাদ। শুধু memory + visibility events।
    ═══════════════════════════════════════════════════════════ */
+
+// Global state for currently active ad
+let activeAdSDK = null;  // { resolve, reject, done, error }
+
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
         throw new Error('No custom code provided');
@@ -939,8 +883,17 @@ async function executeCustomAdCode(code) {
             else reject(new Error(msg || 'Ad failed'));
         };
         const timer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
-        const wrappedResolve = () => { clearTimeout(timer); finish(true); };
-        const wrappedReject = (msg) => { clearTimeout(timer); finish(false, msg || 'Ad closed'); };
+        
+        const wrappedResolve = () => { 
+            if (done) return;
+            clearTimeout(timer); 
+            finish(true); 
+        };
+        const wrappedReject = (msg) => { 
+            if (done) return;
+            clearTimeout(timer); 
+            finish(false, msg || 'Ad closed'); 
+        };
         
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
@@ -949,17 +902,19 @@ async function executeCustomAdCode(code) {
         window.__adSuccess = wrappedResolve;
         window.__adFail = wrappedReject;
         
-        // ✅ Auto-open external helper for admin code
+        // External opener
         window.__nexOpenExternal = function(url) {
-            adTrackerMarkExternal();
+            console.log('[AD] Opening external:', url);
             try {
                 if (tg && typeof tg.openLink === 'function') {
                     tg.openLink(url, { try_instant_view: false });
+                } else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) {
+                    tg.openTelegramLink(url);
                 } else {
                     window.open(url, '_blank', 'noopener');
                 }
             } catch(e) {
-                window.open(url, '_blank', 'noopener');
+                try { window.open(url, '_blank', 'noopener'); } catch(err) {}
             }
         };
         
@@ -977,8 +932,158 @@ async function executeCustomAdCode(code) {
     });
 }
 
+/**
+ * ✅ Run the ad SDK only. Resolves when SDK is done.
+ * For external ads (openExternal), this resolves immediately.
+ * For SDK ads (Monetag, Adsgram), resolves when SDK promise resolves.
+ */
+async function runAdSDK(slot) {
+    const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+    
+    if (hasCustomCode) {
+        return await executeCustomAdCode(slot.customCode);
+    } else if (slot.network === 'monetag') {
+        const zone = String(slot.id || MONETAG_ZONE);
+        return await showMonetagRewardedPopup(zone);
+    } else if (slot.network === 'gigapub') {
+        if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
+        await window.showGiga();
+        return { done: true };
+    } else if (slot.network === 'adsgram') {
+        if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+        const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+        let res = await adCtrl.show();
+        if (!res || res.done !== true) throw new Error('Ad Closed');
+        return { done: true };
+    } else {
+        throw new Error('Ad not configured');
+    }
+}
+
+/**
+ * ✅✅✅ MAIN FIX: Wait for minimum watch time.
+ * Uses in-memory tracking of "away time" (time spent on external page).
+ * 
+ * Logic:
+ * - Track how long user was hidden (on external page)
+ * - Success if: total away time >= minSeconds
+ * - Fallback: if visibility never fired, use total elapsed time
+ * - Fail if: user returned but away time < minSeconds
+ */
+function waitForMinTime(minSeconds) {
+    return new Promise((resolve, reject) => {
+        console.log('[WAIT] Starting wait for min', minSeconds, 'seconds');
+        
+        let wentAwayAt = 0;
+        let awayTime = 0;
+        let visFired = false;
+        let lastReturnAt = 0;
+        const startTime = Date.now();
+        const maxWait = 120;  // Max 2 minutes total
+        
+        const onVisibility = () => {
+            visFired = true;
+            if (document.hidden) {
+                if (!wentAwayAt) {
+                    wentAwayAt = Date.now();
+                    console.log('[WAIT] Page hidden at', wentAwayAt);
+                }
+            } else if (wentAwayAt) {
+                const away = (Date.now() - wentAwayAt) / 1000;
+                awayTime += away;
+                wentAwayAt = 0;
+                lastReturnAt = Date.now();
+                console.log('[WAIT] Page visible. Away:', away.toFixed(2), 'Total away:', awayTime.toFixed(2));
+                setTimeout(check, 300);
+            }
+        };
+        
+        const onBlur = () => {
+            visFired = true;
+            if (!wentAwayAt) {
+                wentAwayAt = Date.now();
+                console.log('[WAIT] Blur - went away');
+            }
+        };
+        
+        const onFocus = () => {
+            if (wentAwayAt) {
+                const away = (Date.now() - wentAwayAt) / 1000;
+                awayTime += away;
+                wentAwayAt = 0;
+                lastReturnAt = Date.now();
+                visFired = true;
+                console.log('[WAIT] Focus - returned. Away:', away.toFixed(2), 'Total away:', awayTime.toFixed(2));
+                setTimeout(check, 300);
+            }
+        };
+        
+        const check = () => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const isVisible = !document.hidden;
+            
+            console.log('[WAIT CHECK] elapsed:', elapsed.toFixed(2), 'away:', awayTime.toFixed(2), 'visible:', isVisible, 'visFired:', visFired);
+            
+            // ✅ SUCCESS: User spent enough time away
+            if (awayTime >= minSeconds) {
+                console.log('[WAIT] ✅ Success - away time:', awayTime.toFixed(2));
+                cleanup();
+                resolve();
+                return;
+            }
+            
+            // ✅ FALLBACK: No visibility events fired, but enough time elapsed
+            if (!visFired && elapsed >= minSeconds && isVisible) {
+                console.log('[WAIT] ✅ Success (fallback) - elapsed:', elapsed.toFixed(2));
+                cleanup();
+                resolve();
+                return;
+            }
+            
+            // ❌ FAIL: User returned but didn't spend enough time away
+            if (lastReturnAt && awayTime > 0 && awayTime < minSeconds && isVisible) {
+                const sinceReturn = (Date.now() - lastReturnAt) / 1000;
+                if (sinceReturn >= 3) {
+                    console.log('[WAIT] ❌ Fail - only', awayTime.toFixed(2), 'seconds away');
+                    cleanup();
+                    reject(new Error('Ad Skipped Too Early'));
+                    return;
+                }
+            }
+            
+            // ⏰ TIMEOUT
+            if (elapsed >= maxWait) {
+                console.log('[WAIT] ⏰ Timeout');
+                cleanup();
+                // If we got enough time, still grant
+                if (awayTime >= minSeconds || elapsed >= minSeconds) {
+                    resolve();
+                } else {
+                    reject(new Error('Ad timeout'));
+                }
+                return;
+            }
+        };
+        
+        const cleanup = () => {
+            document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('blur', onBlur);
+            window.removeEventListener('focus', onFocus);
+            if (pollId) clearInterval(pollId);
+        };
+        
+        document.addEventListener('visibilitychange', onVisibility);
+        window.addEventListener('blur', onBlur);
+        window.addEventListener('focus', onFocus);
+        const pollId = setInterval(check, 500);
+        
+        // Initial check after small delay
+        setTimeout(check, 100);
+    });
+}
+
 /* ═══════════════════════════════════════════════════════════
-   ✅ WATCH AD — Full fix with hybrid tracking
+   ✅ WATCH AD — Main function
    ═══════════════════════════════════════════════════════════ */
 async function watchAd(i) {
     if (slotLocks[i]) return;
@@ -989,11 +1094,9 @@ async function watchAd(i) {
     isAdWatching = true;
     trackAdClick();
     
-    // ✅ NEW: Start tracker
-    adTrackerStart(i);
-    
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
+    const adStartTime = Date.now();
     
     try {
         if (!slot) throw new Error('Ad not configured');
@@ -1003,62 +1106,18 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.add('active');
         toast('Loading Ad...');
         
-        let success = false;
-        const adStartTime = Date.now();
         showAdWatchProgress(adStartTime);
         
-        if (hasCustomCode) {
-            await executeCustomAdCode(slot.customCode);
-            success = true;
-        } else if (slot.network === 'monetag') {
-            const zone = String(slot.id || MONETAG_ZONE);
-            await showMonetagRewardedPopup(zone);
-            success = true;
-        } else if (slot.network === 'gigapub') {
-            if (typeof window.showGiga === 'function') { await window.showGiga(); success = true; }
-            else throw new Error('Ad network not ready');
-        } else if (slot.network === 'adsgram') {
-            if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-            const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-            let res = await adCtrl.show();
-            if (!res || res.done !== true) throw new Error('Ad Closed');
-            success = true;
-        } else {
-            throw new Error('Ad not configured');
-        }
+        // Step 1: Run the SDK (opens external page or shows popup)
+        await runAdSDK(slot);
         
         if (loadingOverlay) loadingOverlay.classList.remove('active');
-        if (!success) throw new Error('Ad not completed');
         
-        // ✅ NEW: Hybrid duration — max of in-app and tracker
-        const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const trackerDuration = adTrackerGetDuration();
-        const watchDuration = Math.max(inAppDuration, trackerDuration);
+        // Step 2: Wait for minimum time to pass
+        await waitForMinTime(MIN_AD_WATCH_SECONDS);
         
-        console.log('[AD DEBUG] inApp:', inAppDuration.toFixed(2), 'tracker:', trackerDuration.toFixed(2), 'final:', watchDuration.toFixed(2));
-        
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
-            if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
-            
-            hideAdWatchProgress();
-            adTrackerClear();
-            
-            showAdError(
-                '⚠️ Ad Skipped Too Early!',
-                'You watched only ' + Math.round(watchDuration) + ' seconds. ' +
-                'Minimum ' + MIN_AD_WATCH_SECONDS + ' seconds required. ' +
-                'Please stay on the ad page until the timer completes.'
-            );
-            slotLocks[i] = false; 
-            isAdWatching = false; 
-            return;
-        }
-        
-        // ✅ Grant reward
+        // Step 3: Grant reward
         hideAdWatchProgress();
-        adTrackerResolve();
-        adTrackerClear();
         
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
@@ -1082,9 +1141,15 @@ async function watchAd(i) {
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        adTrackerClear();
         const em = e.message || '';
-        if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed' || em === 'Ad Skipped Too Early') {
+        console.log('[WATCH AD] Error:', em);
+        
+        if (em === 'Ad Skipped Too Early') {
+            showAdError(
+                '⚠️ Ad Skipped Too Early!',
+                'You must watch the full ad for at least ' + MIN_AD_WATCH_SECONDS + ' seconds to earn reward.'
+            );
+        } else if (em === 'Ad Closed' || em === 'Ad not completed' || em === 'Ad closed') {
             showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
         } else if (em === 'Ad timeout') {
             showAdError('⚠️ Ad Timeout!', 'Ad took too long. Please try again.');
@@ -1096,7 +1161,15 @@ async function watchAd(i) {
         isAdWatching = false; 
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        try { delete window.resolve; delete window.reject; delete window.adResolve; delete window.adReject; delete window.__adSuccess; delete window.__adFail; delete window.__nexOpenExternal; } catch(err) {}
+        try { 
+            delete window.resolve; 
+            delete window.reject; 
+            delete window.adResolve; 
+            delete window.adReject; 
+            delete window.__adSuccess; 
+            delete window.__adFail; 
+            delete window.__nexOpenExternal; 
+        } catch(err) {}
     }
 }
 function startAdWatch(i) { watchAd(i); }
@@ -1148,24 +1221,11 @@ async function watchExtraRewardAd() {
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading Ad...';
     const adStartTime = Date.now();
-    adTrackerStart('extra');
     showAdWatchProgress(adStartTime);
     try {
         await showMonetagRewardedPopup(MONETAG_ZONE);
-        const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const trackerDuration = adTrackerGetDuration();
-        const watchDuration = Math.max(inAppDuration, trackerDuration);
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            const waitMs = Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000);
-            if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
-            hideAdWatchProgress();
-            adTrackerClear();
-            showAdError('⚠️ Ad Skipped Too Early!', 'আপনি মাত্র ' + Math.round(watchDuration) + ' সেকেন্ড দেখেছেন। কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দরকার।');
-            return;
-        }
+        await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
-        adTrackerResolve();
-        adTrackerClear();
         
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
@@ -1187,9 +1247,9 @@ async function watchExtraRewardAd() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
         hideAdWatchProgress();
-        adTrackerClear();
         const em = e.message || '';
         if (em === 'Ad Closed' || em === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'সম্পূর্ণ দেখতে হবে।');
+        else if (em === 'Ad Skipped Too Early') showAdError('⚠️ Ad Skipped Too Early!', 'কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দেখতে হবে।');
         else if (em.includes('wait')) toast('⏱️ ' + em);
         else showAdError('⚠️ Ad Error', em || 'Ad লোড করা যায়নি।');
     } finally { isAdWatching = false; updateExtraRewardUI(); hideAdWatchProgress(); }
@@ -1857,7 +1917,6 @@ async function claimDailyBonus() {
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
     const adStartTime = Date.now();
-    adTrackerStart('bonus');
     try {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
@@ -1875,14 +1934,7 @@ async function claimDailyBonus() {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
             await showMonetagRewardedPopup(mtSlot.id);
         }
-        const inAppDuration = (Date.now() - adStartTime) / 1000;
-        const trackerDuration = adTrackerGetDuration();
-        const watchDuration = Math.max(inAppDuration, trackerDuration);
-        if (watchDuration < MIN_AD_WATCH_SECONDS) {
-            await new Promise(r => setTimeout(r, Math.max(0, (MIN_AD_WATCH_SECONDS - watchDuration) * 1000)));
-        }
-        adTrackerResolve();
-        adTrackerClear();
+        await waitForMinTime(MIN_AD_WATCH_SECONDS);
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -1897,7 +1949,6 @@ async function claimDailyBonus() {
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
-        adTrackerClear();
         toast(e.message === 'Ad Closed' ? '❌ সম্পূর্ণ দেখেননি!' : '❌ সমস্যা: ' + e.message);
     } finally {
         btn.disabled = false; btnCancel.disabled = false;
@@ -2834,49 +2885,12 @@ window.onload = () => {
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
-    // ✅ UPDATED visibilitychange — auto-resolve on return
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
-            const t = adTrackerLoad();
-            if (t && t.isActive) {
-                t.hiddenAt = Date.now();
-                adTrackerSave(t);
-            }
             stopPeriodicRecheck(); 
             stopAdminSlider(); 
             closeMenuPopup();
         } else {
-            const t = adTrackerLoad();
-            if (t && t.isActive && isAdWatching) {
-                t.hiddenAt = 0;
-                t.lastVisibleAt = Date.now();
-                adTrackerSave(t);
-                
-                // ✅ Auto-resolve/reject when returning from external page
-                if (typeof window.__adSuccess === 'function') {
-                    const duration = (Date.now() - t.startedAt) / 1000;
-                    console.log('[AD RETURN] duration:', duration, 'required:', MIN_AD_WATCH_SECONDS);
-                    
-                    if (duration >= MIN_AD_WATCH_SECONDS) {
-                        setTimeout(() => {
-                            try { 
-                                if (typeof window.__adSuccess === 'function') {
-                                    window.__adSuccess();
-                                }
-                            } catch(e) {}
-                        }, 300);
-                    } else {
-                        setTimeout(() => {
-                            try { 
-                                if (typeof window.__adFail === 'function') {
-                                    window.__adFail('Ad Skipped Too Early');
-                                }
-                            } catch(e) {}
-                        }, 300);
-                    }
-                }
-            }
-            
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
                 const resetTime = Number(appState.user.adsResetTime || 0);
                 if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
