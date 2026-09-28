@@ -736,10 +736,20 @@ let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 let withdrawLevels = [];
 
+// ✅ NEW: Admin Revenue Config (loaded from Firebase)
+let adminRevenueConfig = {
+    mode: 'referral_commission',
+    refCommissionRate: 5,
+    refMaxDaily: 50,
+    perTaskBonus: 0.10,
+    taskMaxDaily: 20
+};
+
 let appState = {
     user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
         adClaimedCurrentCycle: false, claimWindowStartTime: 0,
-        extraRewardDate: '', extraRewardCount: 0
+        extraRewardDate: '', extraRewardCount: 0,
+        referredByAdminCode: null
     },
     config: { adSlots: [], newTasks: {} }
 };
@@ -1181,6 +1191,8 @@ async function watchExtraRewardAd() {
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount; appState.user.adHistory = adHist;
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
+        // ✅ NEW: Give admin commission
+        await giveAdminCommission(userReward, 'extra_reward');
         await updateTextElements(); updateExtraRewardUI();
         toast('✅ +' + userReward.toFixed(2) + ' TK আয়! (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
@@ -1343,10 +1355,106 @@ async function claimAdEarnings() {
         appState.user.adClaimedTotal = newClaimed; appState.user.adHistory = adHist; appState.user.adClaimedCurrentCycle = true;
         const split = computeCommissionSplit(total);
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
+        // ✅ NEW: Give admin commission
+        await giveAdminCommission(total, 'ad_claim');
         await updateTextElements(); renderAds(); updateClaimWindowUI();
         toast('✅ ' + total.toFixed(2) + ' টাকা ক্লেইম!');
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) { toast('❌ ক্লেইম ব্যর্থ: ' + e.message); updateAdClaimUI(); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ NEW: ADMIN COMMISSION SYSTEM
+   - When user earns, if user was referred by an admin, credit admin commission
+   ═══════════════════════════════════════════════════════════ */
+async function giveAdminCommission(userEarnedAmount, sourceType) {
+    try {
+        const adminCode = appState.user.referredByAdminCode;
+        if (!adminCode) return false;
+        const mode = adminRevenueConfig.mode;
+        if (mode !== 'referral_commission' && mode !== 'hybrid') return false;
+        
+        const rate = Number(adminRevenueConfig.refCommissionRate || 5);
+        if (rate <= 0) return false;
+        
+        const commission = Number(userEarnedAmount) * rate / 100;
+        if (commission <= 0) return false;
+        
+        // Find admin by referral code
+        const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(adminCode).once('value');
+        if (!adminsSnap.exists()) {
+            console.log('[ADMIN COMM] No admin found for code:', adminCode);
+            return false;
+        }
+        
+        let adminId = null, adminData = null;
+        adminsSnap.forEach(child => { adminId = child.key; adminData = child.val(); });
+        if (!adminId || !adminData) return false;
+        
+        // Check daily limit
+        const today = new Date().toDateString();
+        const logs = adminData.commissionLogs || {};
+        let todayTotal = 0;
+        Object.values(logs).forEach(log => {
+            if (log.type === 'referral' && new Date(log.timestamp).toDateString() === today) {
+                todayTotal += Number(log.amount || 0);
+            }
+        });
+        const maxDaily = Number(adminRevenueConfig.refMaxDaily || 50);
+        const finalCommission = Math.min(commission, Math.max(0, maxDaily - todayTotal));
+        if (finalCommission <= 0) {
+            console.log('[ADMIN COMM] Daily limit reached for admin:', adminId);
+            return false;
+        }
+        
+        const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+        logs[logId] = {
+            type: 'referral',
+            source: sourceType || 'user_earning',
+            fromUserId: String(appState.user.id),
+            fromUserName: appState.user.name || 'User',
+            userEarned: Number(userEarnedAmount),
+            amount: finalCommission,
+            rate: rate,
+            timestamp: Date.now()
+        };
+        
+        // Cap logs to 200 entries
+        const logKeys = Object.keys(logs).sort((a,b) => (logs[b].timestamp||0) - (logs[a].timestamp||0));
+        if (logKeys.length > 200) logKeys.slice(200).forEach(k => delete logs[k]);
+        
+        await db.ref('admins/' + adminId).update({
+            balance: Number(adminData.balance || 0) + finalCommission,
+            totalRevenue: Number(adminData.totalRevenue || 0) + finalCommission,
+            totalRefCommission: Number(adminData.totalRefCommission || 0) + finalCommission,
+            commissionLogs: logs
+        });
+        
+        console.log('[ADMIN COMM] +' + finalCommission.toFixed(4), 'to admin', adminId, 'from', sourceType);
+        
+        // Log to super admin revenue
+        try {
+            await db.ref('superAdminRevenue').push({
+                source: 'admin_referral_commission',
+                adminId, adminCode,
+                userId: String(appState.user.id),
+                userEarned: Number(userEarnedAmount),
+                adminShare: finalCommission,
+                superShare: Number(userEarnedAmount) - finalCommission,
+                timestamp: Date.now()
+            });
+        } catch(e) {}
+        
+        // Notify admin
+        try {
+            await sendNotification(adminId, '💰 নতুন কমিশন! +' + finalCommission.toFixed(4) + ' TK (' + (sourceType || 'user earning') + ')');
+        } catch(e) {}
+        
+        return true;
+    } catch(e) {
+        console.error('[ADMIN COMM ERROR]', e);
+        return false;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1914,13 +2022,10 @@ function isAudioFile(file) {
     if (!file) return false;
     const mime = String(file.type || '').toLowerCase();
     if (mime.startsWith('audio/')) return true;
-    // Voice recordings from some browsers use video/* MIME
     if (mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg') return true;
-    // Fallback: check extension
     const ext = getFileExtension(file.name || '');
     const audioExts = ['mp3', 'wav', 'm4a', 'ogg', 'oga', 'webm', 'aac', 'flac', 'mp4', 'opus', 'amr', '3gp', 'weba', 'caf', 'aiff', 'wma'];
     if (audioExts.includes(ext)) return true;
-    // If MIME is empty, trust the user (they said it's audio)
     if (!mime || mime === 'application/octet-stream') return true;
     return false;
 }
@@ -1936,14 +2041,12 @@ async function uploadAudio(file) {
         throw new Error('শুধু অডিও ফাইল সিলেক্ট করুন');
     }
     
-    // Normalize filename (some voice recordings have no extension)
     let fileName = file.name || ('voice_' + Date.now() + '.webm');
     if (!getFileExtension(fileName)) {
         const ext = (file.type && file.type.includes('webm')) ? '.webm' : '.mp3';
         fileName = fileName + ext;
     }
     
-    // Ensure we have a proper File object with the right name
     let uploadFile = file;
     if (uploadFile.name !== fileName) {
         try {
@@ -1957,7 +2060,7 @@ async function uploadAudio(file) {
     console.log('[AUDIO UPLOAD] Starting:', fileName, '| Type:', file.type || 'unknown', '| Size:', (file.size/1024/1024).toFixed(2), 'MB');
     
     const services = [
-        { name: 'Litterbox', url: 'https://litterbox.catbox.moe/resources/internals/api.php', fn: async () => {
+        { name: 'Litterbox', fn: async () => {
             const fd = new FormData();
             fd.append('reqtype', 'fileupload');
             fd.append('time', '72h');
@@ -2015,7 +2118,6 @@ async function uploadAudio(file) {
     
     const errors = [];
     for (const svc of services) {
-        // Try twice per service
         for (let attempt = 1; attempt <= 2; attempt++) {
             try {
                 console.log(`[AUDIO UPLOAD] Trying ${svc.name} (attempt ${attempt})...`);
@@ -2165,6 +2267,8 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         appState.user.taskStatuses[taskId] = 'approved';
         appState.user.taskHistory[taskId] = taskTimestamp;
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
+        // ✅ NEW: Give admin commission
+        await giveAdminCommission(userReward, 'task_reward');
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
         renderNewTasks(); loadTaskHistory();
@@ -2215,6 +2319,8 @@ async function claimDailyBonus() {
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus');
+        // ✅ NEW: Give admin commission
+        await giveAdminCommission(split.userReward, 'daily_bonus');
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
     } catch (e) {
@@ -2287,15 +2393,9 @@ function computeCommissionSplit(earnedAmount) {
 
 function getCurrentChannelLinks() {
     if (channelLinks && channelLinks.length > 0) return channelLinks;
-    // Fallback: If config hasn't loaded yet, return null (do not force verification)
     return null;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: CHANNEL VERIFICATION SYSTEM
-   - Returns null on unknown (API error) → won't lock user
-   - Only returns true if user is definitely NOT a member
-   ═══════════════════════════════════════════════════════════ */
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     const links = getCurrentChannelLinks();
@@ -2308,12 +2408,10 @@ async function needsVerification() {
     for (const link of links) {
         const result = await checkChannelMembership(tgUser.id, link.chatId);
         if (result === false) {
-            // Definitely not a member
             console.log('[VERIFY] User NOT member of:', link.chatId);
             return true;
         }
         if (result === null) {
-            // API error — can't determine
             hasUnknown = true;
             console.log('[VERIFY] Unknown result for:', link.chatId);
         }
@@ -2336,15 +2434,11 @@ async function markVerified() {
     appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: startPeriodicRecheck — More aggressive channel checks
-   ═══════════════════════════════════════════════════════════ */
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI(); updateExtraRewardUI();
     
-    // Referral balance refresh
     referralRefreshInterval = setInterval(async () => {
         if (!isOnline || !isBooted || document.hidden) return;
         try {
@@ -2355,7 +2449,6 @@ function startPeriodicRecheck() {
         } catch(e) {}
     }, REFERRAL_REFRESH_INTERVAL);
     
-    // Aggressive channel recheck — every 20 seconds
     periodicRecheckInterval = setInterval(async () => {
         if (isRechecking || !isOnline || !isBooted) return;
         if (document.getElementById('joinModal').classList.contains('active')) return;
@@ -3268,10 +3361,6 @@ async function loadLeaderboard() {
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet.</p>';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: checkChannelMembership
-   Returns: true = joined, false = NOT joined, null = unknown (API error)
-   ═══════════════════════════════════════════════════════════ */
 async function checkChannelMembership(userId, chatId, retries = 2) {
     if (!userId || !chatId) return null;
     const rawChatId = String(chatId).trim();
@@ -3289,17 +3378,12 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
             const data = await response.json();
             if (data.ok && data.result) {
                 const status = data.result.status;
-                // User definitely left if status is left/kicked
                 if (status === 'left' || status === 'kicked') return false;
-                // restricted — check is_member
                 if (status === 'restricted') return data.result.is_member === true;
-                // member/administrator/creator
                 return ['member', 'administrator', 'creator'].includes(status);
             }
-            // API returned error — could be bot not admin, channel not found, etc.
             console.warn('[CHANNEL CHECK FAIL]', chatId, data.error_code, data.description);
             lastError = data.description || 'API error';
-            // If chat not found or bot not admin, return null (unknown)
             if (data.error_code === 400 || data.error_code === 403) {
                 return null;
             }
@@ -3333,9 +3417,6 @@ function renderChannelButtons() {
     setTimeout(checkAndUpdateStatus, 2000);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: checkAndUpdateStatus — race guard + true/false/null
-   ═══════════════════════════════════════════════════════════ */
 async function checkAndUpdateStatus() {
     if (isCheckingChannel) return;
     isCheckingChannel = true;
@@ -3358,7 +3439,6 @@ async function checkAndUpdateStatus() {
                 btn.classList.remove('joined'); 
                 allJoined = false;
             } else {
-                // unknown — don't mark joined, but don't block
                 btn.classList.remove('joined');
                 hasUnknown = true;
             }
@@ -3403,14 +3483,12 @@ window.onload = () => {
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
     else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
 
-    /* ✅✅✅ FIXED: Visibility change — always check channel verification */
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
             stopPeriodicRecheck(); 
             stopAdminSlider(); 
             closeMenuPopup();
         } else {
-            // Returning to app — immediately check verification
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
                 const resetTime = Number(appState.user.adsResetTime || 0);
                 if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
@@ -3419,7 +3497,6 @@ window.onload = () => {
                 startPeriodicRecheck();
                 startAdminSlider();
                 
-                // ✅ Always check verification (not just if channelVerified is true)
                 if (channelVerified) {
                     const now = Date.now();
                     if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
@@ -3450,6 +3527,12 @@ window.onload = () => {
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
+            
+            // ✅ NEW: Load admin revenue config
+            if (appState.config.adminRevenue) {
+                adminRevenueConfig = { ...adminRevenueConfig, ...appState.config.adminRevenue };
+                console.log('[ADMIN REVENUE CONFIG]', adminRevenueConfig);
+            }
             
             const rawMinBal = appState.config.minReferralBalance;
             const parsedMinBal = Number(rawMinBal);
@@ -3528,7 +3611,8 @@ window.onload = () => {
                 withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
                 referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
                 adClaimedCurrentCycle: false, claimWindowStartTime: 0,
-                extraRewardDate: '', extraRewardCount: 0
+                extraRewardDate: '', extraRewardCount: 0,
+                referredByAdminCode: null
             };
             await userRef.set(appState.user);
 
@@ -3538,19 +3622,52 @@ window.onload = () => {
             if (refBy && String(refBy) !== String(tgUser.id)) {
                 const deviceId = getDeviceId();
                 const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
-                if (deviceSnap.exists()) toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার!');
-                else {
-                    const refSnap = await db.ref('users/' + refBy).once('value');
-                    if (refSnap.exists()) {
-                        const r = refSnap.val();
-                        let cSnap = await db.ref('config').once('value');
-                        let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
-                        await userRef.update({ referredBy: String(refBy) });
-                        appState.user.referredBy = String(refBy);
-                        await db.ref('users/' + refBy).update({ referrals: (r.referrals || 0) + 1, balance: (r.balance || 0) + rBonus, totalEarned: (r.totalEarned || 0) + rBonus });
-                        await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', joinedAt: Date.now(), username: tgUser.username || '' });
-                        await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
-                        await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
+                if (deviceSnap.exists()) {
+                    toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার!');
+                } else {
+                    // ✅ CHECK: Is this an ADMIN referral code?
+                    if (String(refBy).startsWith('ADM') && String(refBy).length >= 6) {
+                        // Admin referral
+                        const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
+                        if (adminsSnap.exists()) {
+                            let adminId = null;
+                            adminsSnap.forEach(child => { adminId = child.key; });
+                            if (adminId) {
+                                // Save admin referral
+                                await userRef.update({ referredByAdminCode: String(refBy) });
+                                appState.user.referredByAdminCode = String(refBy);
+                                // Add user to admin's referredUsers list
+                                await db.ref('admins/' + adminId + '/referredUsers/' + tgUser.id).set({
+                                    name: tgUser.first_name || 'User',
+                                    username: tgUser.username || '',
+                                    joinedAt: Date.now()
+                                });
+                                await db.ref('deviceReferrals/' + deviceId).set({ 
+                                    referrerAdminId: adminId, 
+                                    referrerAdminCode: String(refBy),
+                                    referredId: tgUser.id, 
+                                    timestamp: Date.now() 
+                                });
+                                console.log('[ADMIN REFERRAL] User joined via admin code:', refBy);
+                                await sendNotification(adminId, '🎉 New User Joined!\n' + (tgUser.first_name || 'User') + '\nYour referral link is working!');
+                            }
+                        } else {
+                            console.warn('[ADMIN REFERRAL] Invalid admin code:', refBy);
+                        }
+                    } else {
+                        // Normal user referral
+                        const refSnap = await db.ref('users/' + refBy).once('value');
+                        if (refSnap.exists()) {
+                            const r = refSnap.val();
+                            let cSnap = await db.ref('config').once('value');
+                            let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
+                            await userRef.update({ referredBy: String(refBy) });
+                            appState.user.referredBy = String(refBy);
+                            await db.ref('users/' + refBy).update({ referrals: (r.referrals || 0) + 1, balance: (r.balance || 0) + rBonus, totalEarned: (r.totalEarned || 0) + rBonus });
+                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', joinedAt: Date.now(), username: tgUser.username || '' });
+                            await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                            await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
+                        }
                     }
                 }
             }
@@ -3578,6 +3695,7 @@ window.onload = () => {
                 if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
                 if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
                 if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
+                if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
 
                 if (appState.user.isBanned) {
                     document.getElementById('bannedOverlay').classList.add('active');
@@ -3610,7 +3728,6 @@ window.onload = () => {
                         renderChannelButtons();
                     } else {
                         channelVerified = true;
-                        // ✅ Also save verified state to Firebase so periodic recheck has flag
                         if (channelLinks && channelLinks.length > 0) {
                             try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {}
                         }
