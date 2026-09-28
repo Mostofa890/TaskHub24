@@ -481,6 +481,23 @@
     .file-preview-img{max-width:100%;max-height:200px;border-radius:10px;border:2px solid #6C5CE7;display:block;margin:0 auto;}
     .file-preview-audio{width:100%;}
     .file-preview-info{font-size:0.72rem;color:#10b981;font-weight:700;margin-top:6px;text-align:center;word-break:break-all;}
+    /* ✅ NEW: Copy Link Modal for Share */
+    .share-modal-overlay{display:none;position:fixed;inset:0;z-index:13000;background:rgba(5,6,10,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;}
+    .share-modal-overlay.active{display:flex;}
+    .share-modal{background:#fff;border-radius:24px;max-width:400px;width:100%;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:pop .3s ease;}
+    .share-modal h3{font-size:1.15rem;font-weight:900;color:#4c1d95;margin-bottom:6px;display:flex;align-items:center;gap:10px;}
+    .share-modal p{font-size:.82rem;color:#64748b;margin-bottom:16px;font-weight:600;}
+    .share-link-input{width:100%;padding:14px;border:2px dashed #6C5CE7;border-radius:12px;font-size:.82rem;font-family:'Courier New',monospace;background:#f8f7ff;color:#4338ca;font-weight:700;word-break:break-all;margin-bottom:14px;}
+    .share-apps-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+    .share-app-btn{padding:14px 8px;border-radius:14px;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-family:inherit;font-weight:800;font-size:.72rem;transition:all .2s;color:#fff;}
+    .share-app-btn:active{transform:scale(0.96);}
+    .share-app-btn.wa{background:linear-gradient(135deg,#25D366,#128C7E);}
+    .share-app-btn.tg{background:linear-gradient(135deg,#229ED9,#0088cc);}
+    .share-app-btn.ms{background:linear-gradient(135deg,#0084FF,#0066CC);}
+    .share-app-btn i{font-size:1.5rem;}
+    .share-copy-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
+    .share-copy-btn:active{transform:scale(0.98);}
+    .share-close-btn{width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;font-family:inherit;}
 </style>
 </head>
 <body>
@@ -519,6 +536,22 @@
     <div class="legal-header"><h2 id="legalModalTitle"><i class="fas fa-shield-halved"></i> Privacy Policy</h2><button class="legal-close" onclick="closeLegalModal()"><i class="fas fa-times"></i></button></div>
     <div class="legal-body" id="legalModalBody"></div>
     <div class="legal-footer">© 2025 Earn Wallet / NexEarn. All rights reserved.</div>
+  </div>
+</div>
+
+<!-- ✅ NEW: Share Modal -->
+<div class="share-modal-overlay" id="shareModal">
+  <div class="share-modal">
+    <h3><i class="fas fa-share-alt" style="color:#6C5CE7;"></i> Share Referral Link</h3>
+    <p>নিচের লিংক শেয়ার করুন। বন্ধুরা join করলে আপনি কমিশন পাবেন!</p>
+    <div class="share-link-input" id="shareLinkInput"></div>
+    <div class="share-apps-grid">
+      <button class="share-app-btn wa" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+      <button class="share-app-btn tg" onclick="shareViaTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
+      <button class="share-app-btn ms" onclick="shareViaMessenger()"><i class="fab fa-facebook-messenger"></i> Messenger</button>
+    </div>
+    <button class="share-copy-btn" onclick="copyShareLink()"><i class="fas fa-copy"></i> Copy Link</button>
+    <button class="share-close-btn" onclick="closeShareModal()">Close</button>
   </div>
 </div>
 
@@ -612,7 +645,7 @@
             <div class="card-title"><i class="fas fa-link" style="color:#0984e3;"></i> Your Referral Link</div>
             <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">শেয়ার করুন। যোগ দিলে <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
-            <div class="flex-btns"><button class="btn-blue" onclick="shareLink()"><i class="fab fa-telegram-plane"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
+            <div class="flex-btns"><button class="btn-blue" onclick="openShareModal()"><i class="fas fa-share-alt"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
         
         <div class="premium-card">
@@ -736,7 +769,6 @@ let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 let withdrawLevels = [];
 
-// ✅ NEW: Admin Revenue Config (loaded from Firebase)
 let adminRevenueConfig = {
     mode: 'referral_commission',
     refCommissionRate: 5,
@@ -793,6 +825,81 @@ function isScreenshotTask(type) {
 function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: REFERRAL LINK GENERATION
+   ═══════════════════════════════════════════════════════════ */
+function getRefLink() {
+    // ✅ Correct Telegram bot referral link format
+    // Works on WhatsApp, Facebook, Messenger, SMS, etc.
+    return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id;
+}
+
+function getShareLink() {
+    return getRefLink();
+}
+
+/* ✅ Share Modal Functions */
+function openShareModal() {
+    const link = getRefLink();
+    const inputEl = document.getElementById('shareLinkInput');
+    if (inputEl) inputEl.textContent = link;
+    document.getElementById('shareModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function closeShareModal() {
+    document.getElementById('shareModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function copyShareLink() {
+    const link = getRefLink();
+    navigator.clipboard.writeText(link).then(() => {
+        toast('✅ লিংক কপি হয়েছে!');
+    }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('✅ লিংক কপি হয়েছে!');
+    });
+}
+function shareViaWhatsApp() {
+    const link = getRefLink();
+    const text = encodeURIComponent('🎉 Join this amazing earning app! Earn money daily by watching ads and completing tasks.\n\n👇 Click here to join:\n' + link);
+    const url = 'https://wa.me/?text=' + text;
+    window.open(url, '_blank');
+}
+function shareViaTelegram() {
+    const link = getRefLink();
+    const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:');
+    const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
+}
+function shareViaMessenger() {
+    const link = getRefLink();
+    const url = 'https://www.facebook.com/dialog/send?link=' + encodeURIComponent(link) + '&app_id=291494419107518&redirect_uri=' + encodeURIComponent(window.location.href);
+    window.open(url, '_blank');
+}
+
+function copyLink() {
+    const link = getRefLink();
+    navigator.clipboard.writeText(link).then(() => {
+        toast('✅ লিংক কপি হয়েছে!');
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('✅ লিংক কপি হয়েছে!');
+    });
+}
+function shareLink() { openShareModal(); }
 
 /* ═══════════════════════════════════════════════════════════
    ✅ AD WATCH PROGRESS INDICATOR
@@ -883,7 +990,7 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅ AD EXECUTION + MIN TIME WAIT
+   ✅ AD EXECUTION
    ═══════════════════════════════════════════════════════════ */
 let activeAdSDK = null;
 let adSDKTimer = null;
@@ -1191,7 +1298,6 @@ async function watchExtraRewardAd() {
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount; appState.user.adHistory = adHist;
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
-        // ✅ NEW: Give admin commission
         await giveAdminCommission(userReward, 'extra_reward');
         await updateTextElements(); updateExtraRewardUI();
         toast('✅ +' + userReward.toFixed(2) + ' TK আয়! (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
@@ -1355,7 +1461,6 @@ async function claimAdEarnings() {
         appState.user.adClaimedTotal = newClaimed; appState.user.adHistory = adHist; appState.user.adClaimedCurrentCycle = true;
         const split = computeCommissionSplit(total);
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Earnings Claim');
-        // ✅ NEW: Give admin commission
         await giveAdminCommission(total, 'ad_claim');
         await updateTextElements(); renderAds(); updateClaimWindowUI();
         toast('✅ ' + total.toFixed(2) + ' টাকা ক্লেইম!');
@@ -1364,8 +1469,7 @@ async function claimAdEarnings() {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ NEW: ADMIN COMMISSION SYSTEM
-   - When user earns, if user was referred by an admin, credit admin commission
+   ✅ ADMIN COMMISSION SYSTEM
    ═══════════════════════════════════════════════════════════ */
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
@@ -1380,7 +1484,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
         const commission = Number(userEarnedAmount) * rate / 100;
         if (commission <= 0) return false;
         
-        // Find admin by referral code
         const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(adminCode).once('value');
         if (!adminsSnap.exists()) {
             console.log('[ADMIN COMM] No admin found for code:', adminCode);
@@ -1391,7 +1494,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
         adminsSnap.forEach(child => { adminId = child.key; adminData = child.val(); });
         if (!adminId || !adminData) return false;
         
-        // Check daily limit
         const today = new Date().toDateString();
         const logs = adminData.commissionLogs || {};
         let todayTotal = 0;
@@ -1402,10 +1504,7 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
         });
         const maxDaily = Number(adminRevenueConfig.refMaxDaily || 50);
         const finalCommission = Math.min(commission, Math.max(0, maxDaily - todayTotal));
-        if (finalCommission <= 0) {
-            console.log('[ADMIN COMM] Daily limit reached for admin:', adminId);
-            return false;
-        }
+        if (finalCommission <= 0) return false;
         
         const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7);
         logs[logId] = {
@@ -1419,7 +1518,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
             timestamp: Date.now()
         };
         
-        // Cap logs to 200 entries
         const logKeys = Object.keys(logs).sort((a,b) => (logs[b].timestamp||0) - (logs[a].timestamp||0));
         if (logKeys.length > 200) logKeys.slice(200).forEach(k => delete logs[k]);
         
@@ -1430,9 +1528,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
             commissionLogs: logs
         });
         
-        console.log('[ADMIN COMM] +' + finalCommission.toFixed(4), 'to admin', adminId, 'from', sourceType);
-        
-        // Log to super admin revenue
         try {
             await db.ref('superAdminRevenue').push({
                 source: 'admin_referral_commission',
@@ -1445,7 +1540,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
             });
         } catch(e) {}
         
-        // Notify admin
         try {
             await sendNotification(adminId, '💰 নতুন কমিশন! +' + finalCommission.toFixed(4) + ' TK (' + (sourceType || 'user earning') + ')');
         } catch(e) {}
@@ -1859,7 +1953,7 @@ function showAdError(title, msg) { document.getElementById('adErrorTitle').textC
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
 /* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FILE UPLOAD SYSTEM
+   FILE UPLOAD SYSTEM
    ═══════════════════════════════════════════════════════════ */
 function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) {
     return new Promise((resolve, reject) => {
@@ -1888,7 +1982,6 @@ function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) 
                             type: 'image/jpeg',
                             lastModified: Date.now()
                         });
-                        console.log('[COMPRESS] Original:', (file.size / 1024).toFixed(1), 'KB → Compressed:', (compressedFile.size / 1024).toFixed(1), 'KB');
                         resolve(compressedFile);
                     }, 'image/jpeg', quality);
                 } catch(err) { reject(err); }
@@ -1927,7 +2020,6 @@ async function uploadToImgBB(file) {
     try {
         uploadFile = await compressImage(file);
     } catch(compressErr) {
-        console.warn('[COMPRESS FAIL]', compressErr.message);
         uploadFile = file;
     }
     
@@ -1935,83 +2027,60 @@ async function uploadToImgBB(file) {
         const fd = new FormData();
         fd.append('image', uploadFile);
         fd.append('name', 'task_' + Date.now());
-        console.log('[IMGBB] Uploading...', (uploadFile.size/1024).toFixed(1), 'KB');
         const res = await fetchWithTimeout(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
             method: 'POST', body: fd
         }, 45000);
-        if (!res.ok) {
-            const errText = await res.text().catch(() => '');
-            throw new Error(`HTTP ${res.status}: ${errText.substring(0, 100)}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (!data || !data.success) {
-            throw new Error(data?.error?.message || data?.status_txt || 'ImgBB rejected');
-        }
+        if (!data || !data.success) throw new Error('ImgBB rejected');
         if (!data.data || !data.data.url) throw new Error('ImgBB returned no URL');
-        console.log('[IMGBB] ✅ Success:', data.data.url);
         return data.data.url;
     } catch(imgbbErr) {
-        console.warn('[IMGBB FAIL]', imgbbErr.message, '— trying fallbacks...');
+        console.warn('[IMGBB FAIL]', imgbbErr.message);
     }
     
     try {
-        console.log('[FALLBACK 1] catbox.moe');
         const fd = new FormData();
         fd.append('reqtype', 'fileupload');
         fd.append('fileToUpload', uploadFile);
         const res = await fetchWithTimeout('https://catbox.moe/user/api.php', { method: 'POST', body: fd }, 45000);
         const url = (await res.text()).trim();
-        if (url && url.startsWith('http')) { console.log('[FALLBACK 1] ✅', url); return url; }
-        throw new Error('catbox: ' + url.substring(0, 80));
-    } catch(e1) { console.warn('[FALLBACK 1 FAIL]', e1.message); }
+        if (url && url.startsWith('http')) return url;
+        throw new Error('catbox fail');
+    } catch(e1) {}
     
     try {
-        console.log('[FALLBACK 2] 0x0.st');
         const fd = new FormData();
         fd.append('file', uploadFile);
         fd.append('expires', '168');
         const res = await fetchWithTimeout('https://0x0.st', { method: 'POST', body: fd }, 45000);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
         const url = (await res.text()).trim();
-        if (url && url.startsWith('http')) { console.log('[FALLBACK 2] ✅', url); return url; }
-        throw new Error('0x0: ' + url.substring(0, 80));
-    } catch(e2) { console.warn('[FALLBACK 2 FAIL]', e2.message); }
+        if (url && url.startsWith('http')) return url;
+        throw new Error('0x0 fail');
+    } catch(e2) {}
     
     try {
-        console.log('[FALLBACK 3] tmpfiles.org');
         const fd = new FormData();
         fd.append('file', uploadFile);
         const res = await fetchWithTimeout('https://tmpfiles.org/api/v1/upload', { method: 'POST', body: fd }, 45000);
         const data = await res.json();
-        if (data?.data?.url) {
-            const directUrl = String(data.data.url).replace('tmpfiles.org/', 'tmpfiles.org/dl/');
-            console.log('[FALLBACK 3] ✅', directUrl);
-            return directUrl;
-        }
-        throw new Error('tmpfiles no URL');
-    } catch(e3) { console.warn('[FALLBACK 3 FAIL]', e3.message); }
+        if (data?.data?.url) return String(data.data.url).replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+        throw new Error('tmpfiles fail');
+    } catch(e3) {}
     
     try {
-        console.log('[FALLBACK 4] bashupload.com');
         const fd = new FormData();
         fd.append('file', uploadFile);
         const res = await fetchWithTimeout('https://bashupload.com/', { method: 'POST', body: fd }, 45000);
         const text = await res.text();
         const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
-        if (match) {
-            const url = match[0] + '?download=1';
-            console.log('[FALLBACK 4] ✅', url);
-            return url;
-        }
-        throw new Error('bashupload regex failed');
-    } catch(e4) { console.warn('[FALLBACK 4 FAIL]', e4.message); }
+        if (match) return match[0] + '?download=1';
+        throw new Error('bashupload fail');
+    } catch(e4) {}
     
-    throw new Error('সব আপলোড সার্ভার ব্যর্থ। ইন্টারনেট চেক করুন বা ছোট ছবি ব্যবহার করুন।');
+    throw new Error('সব আপলোড সার্ভার ব্যর্থ।');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: AUDIO UPLOAD — Voice Recording Safe
-   ═══════════════════════════════════════════════════════════ */
 function getFileExtension(filename) {
     if (!filename) return '';
     const parts = String(filename).split('.');
@@ -2052,12 +2121,9 @@ async function uploadAudio(file) {
         try {
             uploadFile = new File([file], fileName, { type: file.type || 'audio/webm', lastModified: Date.now() });
         } catch(e) {
-            console.warn('[AUDIO] Could not rename file, using original');
             uploadFile = file;
         }
     }
-    
-    console.log('[AUDIO UPLOAD] Starting:', fileName, '| Type:', file.type || 'unknown', '| Size:', (file.size/1024/1024).toFixed(2), 'MB');
     
     const services = [
         { name: 'Litterbox', fn: async () => {
@@ -2067,7 +2133,7 @@ async function uploadAudio(file) {
             fd.append('fileToUpload', uploadFile, fileName);
             const res = await fetchWithTimeout('https://litterbox.catbox.moe/resources/internals/api.php', { method: 'POST', body: fd }, 120000);
             const url = (await res.text()).trim();
-            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            if (!url.startsWith('http')) throw new Error('bad');
             return url;
         }},
         { name: 'catbox', fn: async () => {
@@ -2076,7 +2142,7 @@ async function uploadAudio(file) {
             fd.append('fileToUpload', uploadFile, fileName);
             const res = await fetchWithTimeout('https://catbox.moe/user/api.php', { method: 'POST', body: fd }, 120000);
             const url = (await res.text()).trim();
-            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            if (!url.startsWith('http')) throw new Error('bad');
             return url;
         }},
         { name: '0x0.st', fn: async () => {
@@ -2084,9 +2150,8 @@ async function uploadAudio(file) {
             fd.append('file', uploadFile, fileName);
             fd.append('expires', '168');
             const res = await fetchWithTimeout('https://0x0.st', { method: 'POST', body: fd }, 120000);
-            if (!res.ok) throw new Error('HTTP ' + res.status);
             const url = (await res.text()).trim();
-            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            if (!url.startsWith('http')) throw new Error('bad');
             return url;
         }},
         { name: 'Uguu', fn: async () => {
@@ -2094,7 +2159,7 @@ async function uploadAudio(file) {
             fd.append('files[]', uploadFile, fileName);
             const res = await fetchWithTimeout('https://uguu.se/upload?output=text', { method: 'POST', body: fd }, 120000);
             const url = (await res.text()).trim();
-            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            if (!url.startsWith('http')) throw new Error('bad');
             return url;
         }},
         { name: 'Temp.sh', fn: async () => {
@@ -2102,7 +2167,7 @@ async function uploadAudio(file) {
             fd.append('file', uploadFile, fileName);
             const res = await fetchWithTimeout('https://temp.sh/upload', { method: 'POST', body: fd }, 120000);
             const url = (await res.text()).trim();
-            if (!url.startsWith('http')) throw new Error('bad: ' + url.substring(0, 100));
+            if (!url.startsWith('http')) throw new Error('bad');
             return url;
         }},
         { name: 'Bashupload', fn: async () => {
@@ -2111,33 +2176,25 @@ async function uploadAudio(file) {
             const res = await fetchWithTimeout('https://bashupload.com/', { method: 'POST', body: fd }, 120000);
             const text = await res.text();
             const match = text.match(/https:\/\/bashupload\.com\/[^\s<>"']+/);
-            if (!match) throw new Error('regex failed');
+            if (!match) throw new Error('fail');
             return match[0] + '?download=1';
         }}
     ];
     
-    const errors = [];
     for (const svc of services) {
         for (let attempt = 1; attempt <= 2; attempt++) {
             try {
-                console.log(`[AUDIO UPLOAD] Trying ${svc.name} (attempt ${attempt})...`);
-                const url = await svc.fn();
-                console.log(`[AUDIO UPLOAD] ✅ ${svc.name}:`, url);
-                return url;
+                return await svc.fn();
             } catch(err) {
-                console.warn(`[AUDIO UPLOAD] ❌ ${svc.name} attempt ${attempt}:`, err.message);
-                if (attempt === 2) errors.push(`${svc.name}: ${err.message}`);
+                if (attempt === 2) console.warn(`${svc.name} failed`);
                 else await new Promise(r => setTimeout(r, 1000));
             }
         }
     }
     
-    throw new Error('সব সার্ভার ব্যর্থ। ইন্টারনেট চেক করুন।');
+    throw new Error('সব সার্ভার ব্যর্থ।');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ FILE PREVIEW HANDLER
-   ═══════════════════════════════════════════════════════════ */
 function handleFilePreview(input, type) {
     const file = input.files && input.files[0];
     const wrap = document.getElementById('filePreviewWrap');
@@ -2150,27 +2207,15 @@ function handleFilePreview(input, type) {
     }
     
     if (type === 'image') {
-        if (!file.type.startsWith('image/')) {
-            toast('⚠️ শুধু ছবি ফাইল সিলেক্ট করুন');
-            input.value = '';
-            if (wrap) wrap.style.display = 'none';
-            return;
-        }
-        if (file.size > 32 * 1024 * 1024) {
-            toast('⚠️ ছবি ৩২ MB এর কম হতে হবে');
+        if (!file.type.startsWith('image/') || file.size > 32 * 1024 * 1024) {
+            toast('⚠️ ভুল ফাইল');
             input.value = '';
             if (wrap) wrap.style.display = 'none';
             return;
         }
     } else if (type === 'audio') {
-        if (!isAudioFile(file)) {
-            toast('⚠️ শুধু অডিও ফাইল সিলেক্ট করুন');
-            input.value = '';
-            if (wrap) wrap.style.display = 'none';
-            return;
-        }
-        if (file.size > 500 * 1024 * 1024) {
-            toast('⚠️ অডিও ৫০০ MB এর কম হতে হবে');
+        if (!isAudioFile(file) || file.size > 500 * 1024 * 1024) {
+            toast('⚠️ ভুল অডিও');
             input.value = '';
             if (wrap) wrap.style.display = 'none';
             return;
@@ -2179,22 +2224,12 @@ function handleFilePreview(input, type) {
     
     const reader = new FileReader();
     reader.onload = (e) => {
-        if (preview) {
-            preview.src = e.target.result;
-            if (wrap) wrap.style.display = 'block';
-        }
+        if (preview) { preview.src = e.target.result; if (wrap) wrap.style.display = 'block'; }
         if (info) {
             const sizeKB = file.size / 1024;
-            const sizeStr = sizeKB > 1024 
-                ? (sizeKB / 1024).toFixed(2) + ' MB' 
-                : sizeKB.toFixed(1) + ' KB';
-            info.innerHTML = '✅ <b>' + esc(file.name || 'voice.webm') + '</b> — ' + sizeStr;
+            const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(2) + ' MB' : sizeKB.toFixed(1) + ' KB';
+            info.innerHTML = '✅ <b>' + esc(file.name || 'file') + '</b> — ' + sizeStr;
         }
-    };
-    reader.onerror = () => {
-        toast('⚠️ ফাইল পড়তে সমস্যা');
-        input.value = '';
-        if (wrap) wrap.style.display = 'none';
     };
     reader.readAsDataURL(file);
     toast('✅ ফাইল সিলেক্ট হয়েছে');
@@ -2267,7 +2302,6 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         appState.user.taskStatuses[taskId] = 'approved';
         appState.user.taskHistory[taskId] = taskTimestamp;
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
-        // ✅ NEW: Give admin commission
         await giveAdminCommission(userReward, 'task_reward');
         await updateTextElements();
         toast('✅ টাস্ক সম্পন্ন! +' + userReward.toFixed(2) + ' TK');
@@ -2289,7 +2323,6 @@ async function claimDailyBonus() {
     const btnCancel = document.getElementById('btnCancelBonus');
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
-    const adStartTime = Date.now();
     try {
         const slots = appState.config.adSlots || [];
         const agSlot = slots.find(s => s.network === 'adsgram');
@@ -2319,7 +2352,6 @@ async function claimDailyBonus() {
         appState.user.balance = newBal; appState.user.totalEarned = newEarn;
         appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
         if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus');
-        // ✅ NEW: Give admin commission
         await giveAdminCommission(split.userReward, 'daily_bonus');
         await updateTextElements(); hideBonus();
         toast('✅ বোনাস ক্লেইম! +' + split.userReward.toFixed(2) + ' TK');
@@ -2340,12 +2372,8 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         if (!freshUserSnap.exists()) return false;
         const freshUser = freshUserSnap.val();
         const referredUserBalance = Number(freshUser.balance || 0);
-        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
-            ? MIN_REFERRAL_BALANCE : 20;
-        if (referredUserBalance < safeMinBal) {
-            console.log('[COMMISSION SKIP] Referred user balance', referredUserBalance, '< required', safeMinBal);
-            return false;
-        }
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
+        if (referredUserBalance < safeMinBal) return false;
         const refSnap = await db.ref('users/' + referrerId).once('value');
         if (!refSnap.exists()) return false;
         const refData = refSnap.val();
@@ -2372,13 +2400,9 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
             lastCommissionAt: Date.now(),
             lastCommissionFrom: freshUser.name || 'User'
         });
-        console.log('[COMMISSION ADDED] +' + commissionAmount.toFixed(4), 'to', referrerId, 'from', source);
         try { await sendNotification(referrerId, '💰 নতুন কমিশন! +' + commissionAmount.toFixed(4) + ' TK (' + source + ')'); } catch(e) {}
         return true;
-    } catch(e) { 
-        console.error('[COMMISSION ERROR]', e);
-        return false; 
-    }
+    } catch(e) { return false; }
 }
 
 function computeCommissionSplit(earnedAmount) {
@@ -2399,26 +2423,12 @@ function getCurrentChannelLinks() {
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     const links = getCurrentChannelLinks();
-    if (!links || links.length === 0) {
-        console.log('[VERIFY] No channels configured, skipping verification');
-        return false;
-    }
-    
+    if (!links || links.length === 0) return false;
     let hasUnknown = false;
     for (const link of links) {
         const result = await checkChannelMembership(tgUser.id, link.chatId);
-        if (result === false) {
-            console.log('[VERIFY] User NOT member of:', link.chatId);
-            return true;
-        }
-        if (result === null) {
-            hasUnknown = true;
-            console.log('[VERIFY] Unknown result for:', link.chatId);
-        }
-    }
-    
-    if (hasUnknown) {
-        console.warn('[VERIFY] Some channels returned unknown — not locking user');
+        if (result === false) return true;
+        if (result === null) hasUnknown = true;
     }
     return false;
 }
@@ -2430,7 +2440,7 @@ async function markVerified() {
         await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
         await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
         await db.ref('users/' + tgUser.id + '/verifiedAt').set(Date.now());
-    } catch(e) { console.warn('[VERIFY] markVerified failed:', e); }
+    } catch(e) {}
     appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
 
@@ -2517,8 +2527,7 @@ async function calculateValidReferrals() {
         if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
         let count = 0;
         const allData = [], qualifiedData = [];
-        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0)
-            ? MIN_REFERRAL_BALANCE : 20;
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && !isNaN(MIN_REFERRAL_BALANCE) && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
         await Promise.all(keys.map(async (rid) => {
             const uSnap = await db.ref('users/' + rid).once('value');
             const u = uSnap.exists() ? uSnap.val() : {};
@@ -2960,107 +2969,57 @@ async function submitGenericTask() {
         if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
             const input = document.getElementById('taskImageInput');
             const file = input && input.files && input.files[0];
-            
-            if (!file) { 
-                toast('⚠️ ছবি সিলেক্ট করুন'); 
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return; 
+            if (!file) { toast('⚠️ ছবি সিলেক্ট করুন'); taskState.submitting = false; actionBtn.disabled = false; return; }
+            if (!file.type.startsWith('image/') || file.size > 32 * 1024 * 1024) {
+                toast('⚠️ ছবি সঠিক নয়');
+                taskState.submitting = false; actionBtn.disabled = false; return;
             }
-            if (!file.type.startsWith('image/')) {
-                toast('⚠️ শুধু ছবি ফাইল সিলেক্ট করুন');
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return;
-            }
-            if (file.size > 32 * 1024 * 1024) {
-                toast('⚠️ ছবি ৩২ MB এর কম হতে হবে');
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return;
-            }
-            
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড হচ্ছে...';
-            toast('📤 ছবি আপলোড হচ্ছে... (' + (file.size / 1024).toFixed(0) + ' KB)');
-            
             try {
                 fileUrl = await uploadToImgBB(file);
                 toast('✅ ছবি আপলোড হয়েছে!');
             } catch (uploadErr) {
-                console.error('[IMAGE UPLOAD ERROR]', uploadErr);
                 toast('❌ ' + uploadErr.message);
-                taskState.submitting = false; 
-                actionBtn.disabled = false;
-                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
-                return;
+                taskState.submitting = false; actionBtn.disabled = false;
+                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন'; return;
             }
         }
         else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
             const input = document.getElementById('taskVoiceInput');
             const file = input && input.files && input.files[0];
-            
-            if (!file) { 
-                toast('⚠️ অডিও সিলেক্ট করুন'); 
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return; 
+            if (!file) { toast('⚠️ অডিও সিলেক্ট করুন'); taskState.submitting = false; actionBtn.disabled = false; return; }
+            if (!isAudioFile(file) || file.size > 500 * 1024 * 1024) {
+                toast('⚠️ অডিও সঠিক নয়');
+                taskState.submitting = false; actionBtn.disabled = false; return;
             }
-            if (!isAudioFile(file)) {
-                toast('⚠️ শুধু অডিও ফাইল সিলেক্ট করুন');
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return;
-            }
-            if (file.size > 500 * 1024 * 1024) {
-                toast('⚠️ অডিও ৫০০ MB এর কম হতে হবে');
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return;
-            }
-            
             actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> অডিও আপলোড...';
-            toast('📤 অডিও আপলোড হচ্ছে... (' + (file.size / 1024 / 1024).toFixed(1) + ' MB)');
-            
             try {
                 fileUrl = await uploadAudio(file);
                 toast('✅ অডিও আপলোড হয়েছে!');
             } catch (uploadErr) {
-                console.error('[AUDIO UPLOAD ERROR]', uploadErr);
                 toast('❌ ' + uploadErr.message);
-                taskState.submitting = false; 
-                actionBtn.disabled = false;
-                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
-                return;
+                taskState.submitting = false; actionBtn.disabled = false;
+                actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন'; return;
             }
         }
         else if (type === 'text' || type === 'text_writing') {
-            if (!content || content.length < 2) { 
-                toast('⚠️ টেক্সট লিখুন'); 
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return; 
-            }
+            if (!content || content.length < 2) { toast('⚠️ টেক্সট লিখুন'); taskState.submitting = false; actionBtn.disabled = false; return; }
         }
         else {
             const input = document.getElementById('taskImageInput');
             const file = input && input.files && input.files[0];
             if (file) {
                 actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> আপলোড...';
-                try {
-                    fileUrl = await uploadToImgBB(file);
-                } catch (uploadErr) {
+                try { fileUrl = await uploadToImgBB(file); }
+                catch (uploadErr) {
                     toast('❌ ' + uploadErr.message);
-                    taskState.submitting = false; 
-                    actionBtn.disabled = false;
-                    actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
-                    return;
+                    taskState.submitting = false; actionBtn.disabled = false;
+                    actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন'; return;
                 }
             }
             if (!fileUrl && (!content || content.length < 2)) {
                 toast('⚠️ ছবি বা টেক্সট দিন');
-                taskState.submitting = false; 
-                actionBtn.disabled = false; 
-                return;
+                taskState.submitting = false; actionBtn.disabled = false; return;
             }
         }
         
@@ -3068,17 +3027,12 @@ async function submitGenericTask() {
         
         const subId = 'sub_' + Date.now() + '_' + tgUser.id;
         await db.ref('taskSubmissions/' + subId).set({
-            userId: tgUser.id, 
-            userName: tgUser.first_name || 'User',
-            username: tgUser.username || '', 
-            telegramId: tgUser.id,
-            taskId: taskId, 
-            taskTitle: task.title || 'Task',
+            userId: tgUser.id, userName: tgUser.first_name || 'User',
+            username: tgUser.username || '', telegramId: tgUser.id,
+            taskId: taskId, taskTitle: task.title || 'Task',
             reward: Number(task.reward || 0),
-            content: content || '', 
-            fileUrl: fileUrl,
-            status: 'pending', 
-            createdAt: Date.now()
+            content: content || '', fileUrl: fileUrl,
+            status: 'pending', createdAt: Date.now()
         });
         
         await db.ref('users/' + tgUser.id).update({
@@ -3094,12 +3048,9 @@ async function submitGenericTask() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
         toast('✅ জমা সম্পন্ন!');
         closeTaskSubmit();
-        
     } catch (err) {
-        console.error('[SUBMIT ERROR]', err);
         toast('❌ সমস্যা: ' + (err.message || 'Unknown error'));
-        taskState.submitting = false; 
-        actionBtn.disabled = false;
+        taskState.submitting = false; actionBtn.disabled = false;
         actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> জমা দিন';
     }
 }
@@ -3232,9 +3183,6 @@ async function loadWithdrawHistory() {
     } catch (e) {}
 }
 
-function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '/' + MINI_APP_NAME + '?startapp=' + tgUser.id; }
-function copyLink() { navigator.clipboard.writeText(getRefLink()); toast('Link Copied!'); }
-function shareLink() { const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=Join%20Now!'; if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 function openTutorial() { if (appState.config.tutorialLink) window.open(appState.config.tutorialLink, '_blank'); else toast('No tutorial'); }
 function openSupport() { if (appState.config.supportLink) window.open(appState.config.supportLink, '_blank'); else { if (tg && tg.openTelegramLink) tg.openTelegramLink(SUPPORT_LINK); else window.open(SUPPORT_LINK, '_blank'); } }
 
@@ -3364,16 +3312,10 @@ async function loadLeaderboard() {
 async function checkChannelMembership(userId, chatId, retries = 2) {
     if (!userId || !chatId) return null;
     const rawChatId = String(chatId).trim();
-    const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId))
-        ? rawChatId
-        : '@' + rawChatId.replace(/^@/, '');
-    
-    let lastError = null;
+    const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-            const url = 'https://api.telegram.org/bot' + BOT_TOKEN 
-                + '/getChatMember?chat_id=' + encodeURIComponent(formattedChatId) 
-                + '&user_id=' + userId;
+            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=' + encodeURIComponent(formattedChatId) + '&user_id=' + userId;
             const response = await fetch(url, { cache: 'no-store' });
             const data = await response.json();
             if (data.ok && data.result) {
@@ -3382,15 +3324,10 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
                 if (status === 'restricted') return data.result.is_member === true;
                 return ['member', 'administrator', 'creator'].includes(status);
             }
-            console.warn('[CHANNEL CHECK FAIL]', chatId, data.error_code, data.description);
-            lastError = data.description || 'API error';
-            if (data.error_code === 400 || data.error_code === 403) {
-                return null;
-            }
+            if (data.error_code === 400 || data.error_code === 403) return null;
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return null;
         } catch (e) {
-            lastError = e.message;
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return null;
         }
@@ -3528,17 +3465,13 @@ window.onload = () => {
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
             
-            // ✅ NEW: Load admin revenue config
             if (appState.config.adminRevenue) {
                 adminRevenueConfig = { ...adminRevenueConfig, ...appState.config.adminRevenue };
-                console.log('[ADMIN REVENUE CONFIG]', adminRevenueConfig);
             }
             
             const rawMinBal = appState.config.minReferralBalance;
             const parsedMinBal = Number(rawMinBal);
             MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
-            console.log('[CONFIG] MIN_REFERRAL_BALANCE =', MIN_REFERRAL_BALANCE, '(raw:', rawMinBal, ')');
-            console.log('[CONFIG] Channel Links:', channelLinks.length);
             
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
             
@@ -3616,8 +3549,15 @@ window.onload = () => {
             };
             await userRef.set(appState.user);
 
-            let refBy = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) ? tg.initDataUnsafe.start_param : null;
-            if (!refBy) { const urlParams = new URLSearchParams(window.location.search); refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp'); }
+            let refBy = null;
+            // ✅ NEW: Check both startapp (mini app) and start (bot link) params
+            if (tg && tg.initDataUnsafe) {
+                refBy = tg.initDataUnsafe.start_param || null;
+            }
+            if (!refBy) {
+                const urlParams = new URLSearchParams(window.location.search);
+                refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref');
+            }
 
             if (refBy && String(refBy) !== String(tgUser.id)) {
                 const deviceId = getDeviceId();
@@ -3625,18 +3565,14 @@ window.onload = () => {
                 if (deviceSnap.exists()) {
                     toast('⚠️ এই ডিভাইস দিয়ে আগেই রেফার!');
                 } else {
-                    // ✅ CHECK: Is this an ADMIN referral code?
                     if (String(refBy).startsWith('ADM') && String(refBy).length >= 6) {
-                        // Admin referral
                         const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
                         if (adminsSnap.exists()) {
                             let adminId = null;
                             adminsSnap.forEach(child => { adminId = child.key; });
                             if (adminId) {
-                                // Save admin referral
                                 await userRef.update({ referredByAdminCode: String(refBy) });
                                 appState.user.referredByAdminCode = String(refBy);
-                                // Add user to admin's referredUsers list
                                 await db.ref('admins/' + adminId + '/referredUsers/' + tgUser.id).set({
                                     name: tgUser.first_name || 'User',
                                     username: tgUser.username || '',
@@ -3648,14 +3584,10 @@ window.onload = () => {
                                     referredId: tgUser.id, 
                                     timestamp: Date.now() 
                                 });
-                                console.log('[ADMIN REFERRAL] User joined via admin code:', refBy);
                                 await sendNotification(adminId, '🎉 New User Joined!\n' + (tgUser.first_name || 'User') + '\nYour referral link is working!');
                             }
-                        } else {
-                            console.warn('[ADMIN REFERRAL] Invalid admin code:', refBy);
                         }
                     } else {
-                        // Normal user referral
                         const refSnap = await db.ref('users/' + refBy).once('value');
                         if (refSnap.exists()) {
                             const r = refSnap.val();
