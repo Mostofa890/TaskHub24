@@ -481,7 +481,6 @@
     .file-preview-img{max-width:100%;max-height:200px;border-radius:10px;border:2px solid #6C5CE7;display:block;margin:0 auto;}
     .file-preview-audio{width:100%;}
     .file-preview-info{font-size:0.72rem;color:#10b981;font-weight:700;margin-top:6px;text-align:center;word-break:break-all;}
-    /* ✅ NEW: Copy Link Modal for Share */
     .share-modal-overlay{display:none;position:fixed;inset:0;z-index:13000;background:rgba(5,6,10,.85);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px;}
     .share-modal-overlay.active{display:flex;}
     .share-modal{background:#fff;border-radius:24px;max-width:400px;width:100%;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:pop .3s ease;}
@@ -539,7 +538,6 @@
   </div>
 </div>
 
-<!-- ✅ NEW: Share Modal -->
 <div class="share-modal-overlay" id="shareModal">
   <div class="share-modal">
     <h3><i class="fas fa-share-alt" style="color:#6C5CE7;"></i> Share Referral Link</h3>
@@ -715,7 +713,6 @@
     <i class="fas fa-trophy nav-item" onclick="switchTab('leaderboard', this)"></i>
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
 </div>
-
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyC_WvNxSQQ58TcJhDcBw5NUrAZjOQe1T2g",
@@ -826,20 +823,12 @@ function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅✅✅ FIXED: REFERRAL LINK GENERATION
-   ═══════════════════════════════════════════════════════════ */
 function getRefLink() {
-    // ✅ Correct Telegram bot referral link format
-    // Works on WhatsApp, Facebook, Messenger, SMS, etc.
     return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id;
 }
-
 function getShareLink() {
     return getRefLink();
 }
-
-/* ✅ Share Modal Functions */
 function openShareModal() {
     const link = getRefLink();
     const inputEl = document.getElementById('shareLinkInput');
@@ -856,7 +845,6 @@ function copyShareLink() {
     navigator.clipboard.writeText(link).then(() => {
         toast('✅ লিংক কপি হয়েছে!');
     }).catch(() => {
-        // Fallback
         const ta = document.createElement('textarea');
         ta.value = link;
         document.body.appendChild(ta);
@@ -884,7 +872,6 @@ function shareViaMessenger() {
     const url = 'https://www.facebook.com/dialog/send?link=' + encodeURIComponent(link) + '&app_id=291494419107518&redirect_uri=' + encodeURIComponent(window.location.href);
     window.open(url, '_blank');
 }
-
 function copyLink() {
     const link = getRefLink();
     navigator.clipboard.writeText(link).then(() => {
@@ -901,9 +888,6 @@ function copyLink() {
 }
 function shareLink() { openShareModal(); }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ AD WATCH PROGRESS INDICATOR
-   ═══════════════════════════════════════════════════════════ */
 function showAdWatchProgress(startTime) {
     const el = document.getElementById('adWatchProgress');
     const timeEl = document.getElementById('awpTime');
@@ -930,9 +914,6 @@ function hideAdWatchProgress() {
     if (adWatchProgressTimer) { clearInterval(adWatchProgressTimer); adWatchProgressTimer = null; }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ MONETAG HELPERS
-   ═══════════════════════════════════════════════════════════ */
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
 }
@@ -989,9 +970,6 @@ function startMonetagInAppInterstitial(zoneId, settings) {
     start();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ AD EXECUTION
-   ═══════════════════════════════════════════════════════════ */
 let activeAdSDK = null;
 let adSDKTimer = null;
 
@@ -1020,12 +998,13 @@ async function executeCustomAdCode(code) {
         const wrappedResolve = () => finish(true);
         const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
         
-        window.resolve = wrappedResolve;
-        window.reject = wrappedReject;
-        window.adResolve = wrappedResolve;
-        window.adReject = wrappedReject;
-        window.__adSuccess = wrappedResolve;
-        window.__adFail = wrappedReject;
+        // ✅ FIX: Ad SDK-এর নিজের resolve() ব্লক করা — যেন অ্যাড ক্লোজ হলেই রিওয়ার্ড না হয়
+        window.resolve = () => { console.log('[AD] SDK resolved — waiting for min time'); };
+        window.reject = (msg) => { console.log('[AD] SDK rejected:', msg); };
+        window.adResolve = window.resolve;
+        window.adReject = window.reject;
+        window.__adSuccess = window.resolve;
+        window.__adFail = window.reject;
         
         window.__nexOpenExternal = function(url) {
             console.log('[AD] Opening external:', url);
@@ -1046,8 +1025,10 @@ async function executeCustomAdCode(code) {
             const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
             const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject, window.__nexOpenExternal);
             
+            // ✅ FIX: Promise resolve কে ব্লক করা — waitForMinTime নিজেই সিদ্ধান্ত নেবে
             if (result && typeof result.then === 'function') {
-                result.then(() => wrappedResolve()).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
+                result.then(() => { console.log('[AD] Promise resolved — waiting for min time check'); })
+                      .catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
             }
         } catch(e) {
             finish(false, e.message || 'Code error');
@@ -1078,18 +1059,21 @@ async function runAdSDK(slot) {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   ✅✅✅ FIXED: waitForMinTime — এখন সঠিকভাবে চেক করবে
+   ═══════════════════════════════════════════════════════════ */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve, reject) => {
-        let wentAwayAt = 0;
         let awayTime = 0;
-        let visFired = false;
+        let wentAwayAt = 0;
         let lastReturnAt = 0;
+        let hasWatchedEnough = false;
         let isCurrentlyHidden = false;
-        const startTime = Date.now();
-        const maxWait = 120;
         let isSettled = false;
         let pollId = null;
-        
+        const startTime = Date.now();
+        const maxWait = 120;
+
         const settle = (ok, err) => {
             if (isSettled) return;
             isSettled = true;
@@ -1097,13 +1081,13 @@ function waitForMinTime(minSeconds) {
             if (ok) resolve();
             else reject(new Error(err || 'Ad closed'));
         };
-        
+
         const markHidden = () => {
             if (isCurrentlyHidden) return;
             isCurrentlyHidden = true;
-            if (!wentAwayAt) { wentAwayAt = Date.now(); visFired = true; }
+            if (!wentAwayAt) wentAwayAt = Date.now();
         };
-        
+
         const markVisible = () => {
             if (!isCurrentlyHidden) return;
             isCurrentlyHidden = false;
@@ -1112,44 +1096,59 @@ function waitForMinTime(minSeconds) {
                 awayTime += away;
                 wentAwayAt = 0;
                 lastReturnAt = Date.now();
-                visFired = true;
-                setTimeout(check, 300);
+                if (awayTime >= minSeconds) {
+                    hasWatchedEnough = true;
+                    settle(true);
+                    return;
+                }
             }
         };
-        
+
         const onVisibility = () => { if (document.hidden) markHidden(); else markVisible(); };
         const onBlur = () => { markHidden(); };
         const onFocus = () => { markVisible(); };
-        
+
         const check = () => {
             if (isSettled) return;
             const elapsed = (Date.now() - startTime) / 1000;
             const isVisible = !document.hidden;
-            
-            if (awayTime >= minSeconds) { settle(true); return; }
-            if (!visFired && elapsed >= minSeconds && isVisible) { settle(true); return; }
+
+            if (hasWatchedEnough || awayTime >= minSeconds) {
+                settle(true);
+                return;
+            }
+
             if (lastReturnAt && awayTime > 0 && awayTime < minSeconds && isVisible) {
                 const sinceReturn = (Date.now() - lastReturnAt) / 1000;
-                if (sinceReturn >= 3) { settle(false, 'Ad Skipped Too Early'); return; }
+                if (sinceReturn >= 2) {
+                    settle(false, 'Ad Skipped Too Early');
+                    return;
+                }
             }
+
+            if (!isCurrentlyHidden && !wentAwayAt && elapsed >= minSeconds && awayTime === 0) {
+                settle(true);
+                return;
+            }
+
             if (elapsed >= maxWait) {
-                if (awayTime >= minSeconds || elapsed >= minSeconds) settle(true);
+                if (awayTime >= minSeconds) settle(true);
                 else settle(false, 'Ad timeout');
                 return;
             }
         };
-        
+
         const cleanup = () => {
             document.removeEventListener('visibilitychange', onVisibility);
             window.removeEventListener('blur', onBlur);
             window.removeEventListener('focus', onFocus);
             if (pollId) { clearInterval(pollId); pollId = null; }
         };
-        
+
         document.addEventListener('visibilitychange', onVisibility);
         window.addEventListener('blur', onBlur);
         window.addEventListener('focus', onFocus);
-        pollId = setInterval(check, 500);
+        pollId = setInterval(check, 300);
         setTimeout(check, 100);
     });
 }
@@ -1230,9 +1229,6 @@ async function watchAd(i) {
 }
 function startAdWatch(i) { watchAd(i); }
 
-/* ═══════════════════════════════════════════════════════
-   EXTRA REWARDS
-   ═══════════════════════════════════════════════════════ */
 function getTodayExtraRewardCount() {
     const today = todayStr();
     if (appState.user.extraRewardDate !== today) return 0;
@@ -1311,11 +1307,7 @@ async function watchExtraRewardAd() {
         else showAdError('⚠️ Ad Error', em || 'Ad লোড করা যায়নি।');
     } finally { isAdWatching = false; updateExtraRewardUI(); hideAdWatchProgress(); }
 }
-
-/* ═══════════════════════════════════════════════════════
-   AD CLAIM LOGIC
-   ═══════════════════════════════════════════════════════ */
-function calculateAdTotalEarnings() {
+    function calculateAdTotalEarnings() {
     const slots = appState.config.adSlots || [];
     let totalSlots = 0;
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
@@ -1468,9 +1460,6 @@ async function claimAdEarnings() {
     } catch (e) { toast('❌ ক্লেইম ব্যর্থ: ' + e.message); updateAdClaimUI(); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ✅ ADMIN COMMISSION SYSTEM
-   ═══════════════════════════════════════════════════════════ */
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
         const adminCode = appState.user.referredByAdminCode;
@@ -1551,9 +1540,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
     }
 }
 
-/* ═══════════════════════════════════════════════════════
-   REFERRAL HELPERS
-   ═══════════════════════════════════════════════════════ */
 function switchRefTab(tab) {
     currentRefTab = tab;
     const tabTotal = document.getElementById('refTabTotal');
@@ -1649,7 +1635,6 @@ async function claimReferralIncome() {
     finally { updateRefClaimButton(); }
 }
 
-/* TASK EXPIRY HELPERS */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
     return daysMatch ? parseInt(daysMatch[1]) : 7;
@@ -1703,7 +1688,6 @@ function startTaskExpiryTicker() {
 }
 function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
-// ANTI-HACK
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
@@ -1717,7 +1701,6 @@ function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(
     document.addEventListener('dragstart', (e) => e.preventDefault());
 })();
 
-// THREE-DOT MENU
 function toggleMenuPopup(e) {
     if (e) e.stopPropagation();
     const popup = document.getElementById('menuPopup');
@@ -1749,7 +1732,6 @@ function openLegalModal(type) {
 function closeLegalModal() { document.getElementById('legalModal').classList.remove('active'); document.body.style.overflow = ''; }
 document.getElementById('legalModal').addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
 
-// ADMIN SLIDER
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
     try {
@@ -1951,10 +1933,7 @@ function shortDate(ts) { const d = new Date(ts); return d.getDate() + '/' + (d.g
 function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c])); }
 function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Ad Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
-
-/* ═══════════════════════════════════════════════════════════
-   FILE UPLOAD SYSTEM
-   ═══════════════════════════════════════════════════════════ */
+    
 function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) {
     return new Promise((resolve, reject) => {
         if (!file.type.startsWith('image/')) return resolve(file);
@@ -2625,7 +2604,7 @@ function checkBan() {
         return true;
     } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
 }
-
+    
 function renderAds() {
     const el = document.getElementById('ad-area');
     if (!el) return;
@@ -3409,7 +3388,6 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
-// INIT
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
@@ -3550,7 +3528,6 @@ window.onload = () => {
             await userRef.set(appState.user);
 
             let refBy = null;
-            // ✅ NEW: Check both startapp (mini app) and start (bot link) params
             if (tg && tg.initDataUnsafe) {
                 refBy = tg.initDataUnsafe.start_param || null;
             }
