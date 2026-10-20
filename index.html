@@ -11,8 +11,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <!-- Adexium Widget Script -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
-<!-- Adsgram SDK (Required for Adsgram) -->
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <!-- Montage Zone Script -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 <style>
@@ -962,35 +960,19 @@ async function runSpecificCustomAd(targetKey) {
             if (slot.customCode && String(slot.customCode).trim().length > 0) {
                 return await executeCustomAdCode(slot.customCode);
             }
-            // ✅ Adsgram Integration
-            if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram === 'undefined') throw new Error('Adsgram SDK not loaded');
-                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : 'your-block-id' });
-                try {
-                    const res = await adCtrl.show();
-                    if (res && res.done === true) {
-                        return { done: true };
-                    } else {
-                        throw new Error('Ad not completed');
-                    }
-                } catch (e) {
-                    throw new Error(e.description || 'Ad Closed');
-                }
-            }
-            // ✅ Monetag Integration
             if (slot.network === 'monetag') {
                 return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             }
-            // ✅ RichAds Integration (Requires their JS code)
-            if (slot.network === 'richads') {
-                // RichAds requires a personalized JS tag. If the admin set a customCode, it will be used above.
-                // If not, we can't show it without their specific script.
-                throw new Error('RichAds requires custom JS code from dashboard');
-            }
-            // ✅ GigaPub Integration
             if (slot.network === 'gigapub') {
-                if (typeof window.showGiga !== 'function') throw new Error('GigaPub not ready');
+                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
                 await window.showGiga();
+                return { done: true };
+            }
+            if (slot.network === 'adsgram') {
+                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+                let res = await adCtrl.show();
+                if (!res || res.done !== true) throw new Error('Ad Closed');
                 return { done: true };
             }
         }
