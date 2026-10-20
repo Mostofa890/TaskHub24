@@ -9,6 +9,8 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Adexium Widget Script -->
+<script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <style>
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
@@ -685,7 +687,6 @@ let REF_COMMISSION_RATE = 2;
 let REF_COMMISSION_MODE = 'bonus';
 let withdrawLevels = [];
 
-// ✅ ADMIN REVENUE CONFIG — Properly loaded from DB
 let adminRevenueConfig = {
     mode: 'referral_commission',
     refCommissionRate: 5,
@@ -880,6 +881,9 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 let activeAdSDK = null;
 let adSDKTimer = null;
 
+// ═══════════════════════════════════════════════════════════
+// ✅ UPDATED: Custom Ad Code Execution Engine (All Networks Supported)
+// ═══════════════════════════════════════════════════════════
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
         throw new Error('No custom code provided');
@@ -931,27 +935,50 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
+    // ✅ Priority 1: Direct Custom Ad Button for this target
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
     if (!btn) btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
+    
     if (btn && btn.code && String(btn.code).trim()) {
         return await executeCustomAdCode(btn.code);
     }
-    const slots = appState.config.adSlots || [];
-    let targetSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0) || slots.find(s => s && s.network && s.network !== 'none');
-    if (targetSlot) {
-        const hasCustomCode = targetSlot.customCode && String(targetSlot.customCode).trim().length > 0;
-        if (hasCustomCode) return await executeCustomAdCode(targetSlot.customCode);
-        else if (targetSlot.network === 'monetag') return await showMonetagRewardedPopup(String(targetSlot.id || MONETAG_ZONE));
-        else if (targetSlot.network === 'gigapub') { if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready'); await window.showGiga(); return { done: true }; }
-        else if (targetSlot.network === 'adsgram') {
-            if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-            const adCtrl = window.Adsgram.init({ blockId: targetSlot.id ? String(targetSlot.id) : '23393' });
-            let res = await adCtrl.show();
-            if (!res || res.done !== true) throw new Error('Ad Closed');
-            return { done: true };
+    
+    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2 targets)
+    if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
+        const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
+        const slots = appState.config.adSlots || [];
+        const slot = slots[slotIndex];
+        
+        if (slot) {
+            if (slot.customCode && String(slot.customCode).trim().length > 0) {
+                return await executeCustomAdCode(slot.customCode);
+            }
+            if (slot.network === 'monetag') {
+                return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
+            }
+            if (slot.network === 'gigapub') {
+                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
+                await window.showGiga();
+                return { done: true };
+            }
+            if (slot.network === 'adsgram') {
+                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+                let res = await adCtrl.show();
+                if (!res || res.done !== true) throw new Error('Ad Closed');
+                return { done: true };
+            }
         }
     }
+    
+    // ✅ Fallback: Try any available custom slot
+    const slots = appState.config.adSlots || [];
+    let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
+    if (fallbackSlot) {
+        return await executeCustomAdCode(fallbackSlot.customCode);
+    }
+    
     throw new Error('No ads configured by Admin');
 }
 
@@ -1301,9 +1328,6 @@ async function claimAdEarnings() {
     } catch (e) { toast('❌ Failed: ' + e.message); updateAdClaimUI(); }
 }
 
-// ═══════════════════════════════════════════════════════════
-// ✅ ADMIN COMMISSION — Main Function (FIXED)
-// ═══════════════════════════════════════════════════════════
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
         const adminCode = appState.user.referredByAdminCode;
@@ -2786,9 +2810,6 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
-// ═══════════════════════════════════════════════════════════
-// ✅ MAIN INIT — with FIXED Admin Referral Priority
-// ═══════════════════════════════════════════════════════════
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
@@ -2839,7 +2860,6 @@ window.onload = () => {
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
             
-            // ✅ FIXED: Properly load admin revenue config
             if (appState.config.adminRevenue) {
                 const ar = appState.config.adminRevenue;
                 adminRevenueConfig = {
@@ -2929,9 +2949,6 @@ window.onload = () => {
                 refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref');
             }
 
-            // ═══════════════════════════════════════════════════════════
-            // ✅ FIXED: Admin code check FIRST (any code >= 6 chars)
-            // ═══════════════════════════════════════════════════════════
             if (refBy && String(refBy) !== String(tgUser.id)) {
                 const deviceId = getDeviceId();
                 const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
@@ -2940,7 +2957,6 @@ window.onload = () => {
                 } else {
                     let handled = false;
                     
-                    // ✅ STEP 1: Try as Admin Code (any length >= 6)
                     if (String(refBy).length >= 6) {
                         try {
                             const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
@@ -2969,7 +2985,6 @@ window.onload = () => {
                         } catch(e) { console.warn('[ADMIN REF]', e); }
                     }
                     
-                    // ✅ STEP 2: If not admin, try as regular user referral
                     if (!handled) {
                         const refSnap = await db.ref('users/' + refBy).once('value');
                         if (refSnap.exists()) {
