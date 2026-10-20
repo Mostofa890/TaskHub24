@@ -779,7 +779,7 @@ let appState = {
         extraRewardDate: '', extraRewardCount: 0,
         referredByAdminCode: null
     },
-    config: { adSlots: [], newTasks: {} }
+    config: { adSlots: [], customAdButtons: [], newTasks: {} }
 };
 let isBooted = false;
 let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : { id: '123456', first_name: 'Guest User', photo_url: 'https://via.placeholder.com/100' };
@@ -1042,53 +1042,41 @@ async function executeCustomAdCode(code) {
     });
 }
 
-// ✅ NEW: Function to handle any Custom Ad (from Admin Panel)
-async function runAnyCustomAd() {
-    const slots = appState.config.adSlots || [];
-    let targetSlot = null;
+// ✅ নতুন ও আপডেট করা ফাংশন: নির্দিষ্ট বাটনের জন্য Custom Code খুঁজে বের করে রান করবে
+async function runSpecificCustomAd(targetKey) {
+    const buttons = appState.config.customAdButtons || [];
     
-    // Find the first slot that has custom code
-    for (let i = 0; i < slots.length; i++) {
-        const slot = slots[i];
-        if (slot && slot.customCode && String(slot.customCode).trim().length > 0) {
-            targetSlot = slot;
-            break;
+    // বাটনটি খুঁজে বের করা (active স্ট্যাটাস সহ)
+    let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
+    
+    // যদি না পাওয়া যায়, তবে ডিফল্টভাবে slot 1 থেকে খোঁজা
+    if (!btn) {
+        btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
+    }
+
+    if (btn && btn.code && String(btn.code).trim()) {
+        return await executeCustomAdCode(btn.code);
+    }
+    
+    // ফলব্যাক: যদি কোনো কাস্টম বাটন না থাকে, তবে পুরনো slot গুলো চেক করা
+    const slots = appState.config.adSlots || [];
+    let targetSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0) || slots.find(s => s && s.network && s.network !== 'none');
+    
+    if (targetSlot) {
+        const hasCustomCode = targetSlot.customCode && String(targetSlot.customCode).trim().length > 0;
+        if (hasCustomCode) return await executeCustomAdCode(targetSlot.customCode);
+        else if (targetSlot.network === 'monetag') return await showMonetagRewardedPopup(String(targetSlot.id || MONETAG_ZONE));
+        else if (targetSlot.network === 'gigapub') { if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready'); await window.showGiga(); return { done: true }; }
+        else if (targetSlot.network === 'adsgram') {
+            if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+            const adCtrl = window.Adsgram.init({ blockId: targetSlot.id ? String(targetSlot.id) : '23393' });
+            let res = await adCtrl.show();
+            if (!res || res.done !== true) throw new Error('Ad Closed');
+            return { done: true };
         }
     }
-
-    if (!targetSlot) {
-        // Fallback to standard networks if no custom code exists
-        for (let i = 0; i < slots.length; i++) {
-            const slot = slots[i];
-            if (slot && slot.network && slot.network !== 'none') {
-                targetSlot = slot;
-                break;
-            }
-        }
-    }
-
-    if (!targetSlot) throw new Error('No ads configured by Admin');
-
-    const hasCustomCode = targetSlot.customCode && String(targetSlot.customCode).trim().length > 0;
-
-    if (hasCustomCode) {
-        return await executeCustomAdCode(targetSlot.customCode);
-    } else if (targetSlot.network === 'monetag') {
-        const zone = String(targetSlot.id || MONETAG_ZONE);
-        return await showMonetagRewardedPopup(zone);
-    } else if (targetSlot.network === 'gigapub') {
-        if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
-        await window.showGiga();
-        return { done: true };
-    } else if (targetSlot.network === 'adsgram') {
-        if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-        const adCtrl = window.Adsgram.init({ blockId: targetSlot.id ? String(targetSlot.id) : '23393' });
-        let res = await adCtrl.show();
-        if (!res || res.done !== true) throw new Error('Ad Closed');
-        return { done: true };
-    } else {
-        throw new Error('Ad not configured');
-    }
+    
+    throw new Error('No ads configured by Admin');
 }
 
 function waitForMinTime(minSeconds) {
@@ -1194,6 +1182,7 @@ async function watchAd(i) {
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
     const adStartTime = Date.now();
+    const targetKey = i === 0 ? 'adSlot1' : 'adSlot2';
     
     try {
         if (!slot) throw new Error('Ad not configured');
@@ -1204,7 +1193,7 @@ async function watchAd(i) {
         toast('Loading Ad...');
         showAdWatchProgress(adStartTime);
         
-        await runAnyCustomAd(); // ✅ Uses the new function
+        await runSpecificCustomAd(targetKey); // ✅ নির্দিষ্ট বাটনের কোড রান করবে
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
@@ -1304,7 +1293,7 @@ async function watchExtraRewardAd() {
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
     try {
-        await runAnyCustomAd(); // ✅ Uses Admin Custom Code
+        await runSpecificCustomAd('extraReward'); // ✅ Extra Reward বাটনের কোড
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
         
@@ -2335,7 +2324,7 @@ async function claimDailyBonus() {
     try {
         subText.innerText = 'অ্যাড লোড হচ্ছে...';
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
-        await runAnyCustomAd(); // ✅ Uses Admin Custom Code
+        await runSpecificCustomAd('dailyBonus'); // ✅ Daily Bonus বাটনের কোড
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
