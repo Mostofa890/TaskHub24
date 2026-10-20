@@ -9,7 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 
 <style>
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
@@ -546,7 +545,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <div class="share-apps-grid">
       <button class="share-app-btn wa" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
       <button class="share-app-btn tg" onclick="shareViaTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
-      <button class="share-app-btn ms" onclick="shareViaMessenger()"><i class="fab fa-facebook-messenger"></i> Messenger</button>
+      <button class="share-app-btn ms" onclick="shareViaFacebook()"><i class="fab fa-facebook-messenger"></i> Messenger</button>
     </div>
     <button class="share-copy-btn" onclick="copyShareLink()"><i class="fas fa-copy"></i> Copy Link</button>
     <button class="share-close-btn" onclick="closeShareModal()">Close</button>
@@ -803,8 +802,6 @@ let cooldownTimerInterval = null;
 let taskExpiryTickerInterval = null;
 let claimWindowTimerInterval = null;
 let adWatchProgressTimer = null;
-
-// ✅ NEW: lastActive tracker interval
 let lastActiveInterval = null;
 
 let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
@@ -826,9 +823,6 @@ function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
 
-// ═══════════════════════════════════════════════════════════
-// ✅ NEW: LAST ACTIVE TRACKER (Admin Panel-এর Online Status)
-// ═══════════════════════════════════════════════════════════
 function updateLastActive() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return;
     if (!isOnline) return;
@@ -881,9 +875,9 @@ function shareViaTelegram() {
     if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
     else window.open(url, '_blank');
 }
-function shareViaMessenger() {
+function shareViaFacebook() {
     const link = getRefLink();
-    const url = 'https://www.facebook.com/dialog/send?link=' + encodeURIComponent(link) + '&app_id=291494419107518&redirect_uri=' + encodeURIComponent(window.location.href);
+    const url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link);
     window.open(url, '_blank');
 }
 function copyLink() {
@@ -1048,21 +1042,47 @@ async function executeCustomAdCode(code) {
     });
 }
 
-async function runAdSDK(slot) {
-    const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+// ✅ NEW: Function to handle any Custom Ad (from Admin Panel)
+async function runAnyCustomAd() {
+    const slots = appState.config.adSlots || [];
+    let targetSlot = null;
     
+    // Find the first slot that has custom code
+    for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
+        if (slot && slot.customCode && String(slot.customCode).trim().length > 0) {
+            targetSlot = slot;
+            break;
+        }
+    }
+
+    if (!targetSlot) {
+        // Fallback to standard networks if no custom code exists
+        for (let i = 0; i < slots.length; i++) {
+            const slot = slots[i];
+            if (slot && slot.network && slot.network !== 'none') {
+                targetSlot = slot;
+                break;
+            }
+        }
+    }
+
+    if (!targetSlot) throw new Error('No ads configured by Admin');
+
+    const hasCustomCode = targetSlot.customCode && String(targetSlot.customCode).trim().length > 0;
+
     if (hasCustomCode) {
-        return await executeCustomAdCode(slot.customCode);
-    } else if (slot.network === 'monetag') {
-        const zone = String(slot.id || MONETAG_ZONE);
+        return await executeCustomAdCode(targetSlot.customCode);
+    } else if (targetSlot.network === 'monetag') {
+        const zone = String(targetSlot.id || MONETAG_ZONE);
         return await showMonetagRewardedPopup(zone);
-    } else if (slot.network === 'gigapub') {
+    } else if (targetSlot.network === 'gigapub') {
         if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
         await window.showGiga();
         return { done: true };
-    } else if (slot.network === 'adsgram') {
+    } else if (targetSlot.network === 'adsgram') {
         if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-        const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+        const adCtrl = window.Adsgram.init({ blockId: targetSlot.id ? String(targetSlot.id) : '23393' });
         let res = await adCtrl.show();
         if (!res || res.done !== true) throw new Error('Ad Closed');
         return { done: true };
@@ -1184,7 +1204,7 @@ async function watchAd(i) {
         toast('Loading Ad...');
         showAdWatchProgress(adStartTime);
         
-        await runAdSDK(slot);
+        await runAnyCustomAd(); // ✅ Uses the new function
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
@@ -1284,7 +1304,7 @@ async function watchExtraRewardAd() {
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
     try {
-        await showMonetagRewardedPopup(MONETAG_ZONE);
+        await runAnyCustomAd(); // ✅ Uses Admin Custom Code
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
         
@@ -2313,23 +2333,11 @@ async function claimDailyBonus() {
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
     try {
-        const slots = appState.config.adSlots || [];
-        const agSlot = slots.find(s => s.network === 'adsgram');
-        const mtSlot = slots.find(s => s.network === 'monetag');
-        if (agSlot && agSlot.id) {
-            subText.innerText = '১ম অ্যাড লোড...';
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 1...';
-            if (typeof window.Adsgram === 'undefined') throw new Error('Ad Network Not Ready');
-            const adCtrl = window.Adsgram.init({ blockId: String(agSlot.id) });
-            let res = await adCtrl.show();
-            if (!res || res.done !== true) throw new Error('Ad Closed');
-        }
-        if (mtSlot && mtSlot.id) {
-            subText.innerText = '২য় অ্যাড লোড...';
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad 2...';
-            await showMonetagRewardedPopup(mtSlot.id);
-        }
+        subText.innerText = 'অ্যাড লোড হচ্ছে...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+        await runAnyCustomAd(); // ✅ Uses Admin Custom Code
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
+        
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
         const baseBonus = Number(appState.config.dailyBonusAmount || 20);
         const split = computeCommissionSplit(baseBonus);
@@ -2438,7 +2446,6 @@ function startPeriodicRecheck() {
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI(); updateExtraRewardUI();
     
-    // ✅ NEW: Update lastActive every 30 seconds
     lastActiveInterval = setInterval(updateLastActive, 30000);
     
     referralRefreshInterval = setInterval(async () => {
@@ -2477,7 +2484,6 @@ function startPeriodicRecheck() {
 function stopPeriodicRecheck() {
     if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
     if (referralRefreshInterval) { clearInterval(referralRefreshInterval); referralRefreshInterval = null; }
-    // ✅ NEW: Clear lastActive interval
     if (lastActiveInterval) { clearInterval(lastActiveInterval); lastActiveInterval = null; }
     stopCycleTimer();
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
@@ -2486,7 +2492,6 @@ function stopPeriodicRecheck() {
 }
 function trackAdClick() {
     db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
-    // ✅ FIXED: lastActive এখন Date.now() timestamp পাঠায়
     db.ref('users/' + tgUser.id + '/lastActive').set(Date.now());
 }
 
@@ -3398,7 +3403,6 @@ async function showAppAfterVerify() {
     document.getElementById('app').style.display = 'block';
     setLoading(false);
     startPeriodicRecheck();
-    // ✅ NEW: Update lastActive immediately
     updateLastActive();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
     startAdminSlider();
@@ -3422,7 +3426,6 @@ window.onload = () => {
             stopAdminSlider(); 
             closeMenuPopup();
         } else {
-            // ✅ NEW: Update lastActive when user returns
             updateLastActive();
             
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
@@ -3454,7 +3457,6 @@ window.onload = () => {
     });
 
     window.addEventListener('beforeunload', () => { 
-        // ✅ NEW: Final lastActive update
         updateLastActive();
         stopPeriodicRecheck(); 
         stopAdminSlider(); 
@@ -3516,6 +3518,7 @@ window.onload = () => {
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
             
+            // Auto-inject standard SDK scripts (custom slots handle themselves)
             const slots = appState.config.adSlots || [];
             slots.forEach(slot => {
                 if (!slot) return;
@@ -3669,8 +3672,6 @@ window.onload = () => {
                             document.getElementById('app').style.display = 'block';
                             setLoading(false);
                             startPeriodicRecheck();
-                            
-                            // ✅ NEW: Update lastActive immediately on boot
                             updateLastActive();
                             
                             if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
