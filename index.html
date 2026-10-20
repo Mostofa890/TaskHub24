@@ -635,6 +635,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
 </div>
 <script>
+/* === 1. INITIAL SETUP & FIREBASE CONFIG === */
 const firebaseConfig = {
     apiKey: "AIzaSyC_WvNxSQQ58TcJhDcBw5NUrAZjOQe1T2g",
     authDomain: "cat-coins-34d4c.firebaseapp.com",
@@ -745,6 +746,7 @@ function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
 
+/* === 2. AD WATCH PROGRESS & UI SETUP === */
 function updateLastActive() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return;
     if (!isOnline) return;
@@ -823,6 +825,7 @@ function hideAdWatchProgress() {
     if (adWatchProgressTimer) { clearInterval(adWatchProgressTimer); adWatchProgressTimer = null; }
 }
 
+/* === 3. CUSTOM AD ENGINE (ADMIN TO USER) === */
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
 }
@@ -881,9 +884,6 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 let activeAdSDK = null;
 let adSDKTimer = null;
 
-// ═══════════════════════════════════════════════════════════
-// ✅ UPDATED: Custom Ad Code Execution Engine (All Networks Supported)
-// ═══════════════════════════════════════════════════════════
 async function executeCustomAdCode(code) {
     if (!code || typeof code !== 'string' || !code.trim()) {
         throw new Error('No custom code provided');
@@ -938,8 +938,12 @@ async function runSpecificCustomAd(targetKey) {
     // ✅ Priority 1: Direct Custom Ad Button for this target
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
-    if (!btn) btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
     
+    // Fallback: If no specific target, check for adSlot1
+    if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
+        btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
+    }
+
     if (btn && btn.code && String(btn.code).trim()) {
         return await executeCustomAdCode(btn.code);
     }
@@ -982,6 +986,7 @@ async function runSpecificCustomAd(targetKey) {
     throw new Error('No ads configured by Admin');
 }
 
+/* === 4. AD WATCHING LOGIC === */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve, reject) => {
         let awayTime = 0, wentAwayAt = 0, lastReturnAt = 0, hasWatchedEnough = false;
@@ -1098,6 +1103,7 @@ async function watchAd(i) {
 }
 function startAdWatch(i) { watchAd(i); }
 
+/* === 5. EXTRA REWARDS LOGIC === */
 function getTodayExtraRewardCount() {
     const today = todayStr();
     if (appState.user.extraRewardDate !== today) return 0;
@@ -1328,6 +1334,7 @@ async function claimAdEarnings() {
     } catch (e) { toast('❌ Failed: ' + e.message); updateAdClaimUI(); }
 }
 
+/* === 6. ADMIN COMMISSION LOGIC === */
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
         const adminCode = appState.user.referredByAdminCode;
@@ -1463,6 +1470,7 @@ async function claimReferralIncome() {
     finally { updateRefClaimButton(); }
 }
 
+/* === 7. TASKS LOGIC === */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
     return daysMatch ? parseInt(daysMatch[1]) : 7;
@@ -1541,6 +1549,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
+/* === 8. LEGAL & ADMIN SLIDER === */
 const LEGAL_CONTENT = {
     privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
     disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
@@ -1747,6 +1756,7 @@ function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;',
 function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
 function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
+/* === 9. FILE UPLOAD HELPERS === */
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -2810,6 +2820,7 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
+/* === 10. MAIN BOOT / ONLOAD === */
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
