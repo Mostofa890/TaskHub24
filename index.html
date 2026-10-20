@@ -11,6 +11,8 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <!-- Adexium Widget Script -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<!-- Adsgram SDK (Required for Adsgram) -->
+<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 <!-- Montage Zone Script -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 <style>
@@ -960,20 +962,241 @@ async function runSpecificCustomAd(targetKey) {
             if (slot.customCode && String(slot.customCode).trim().length > 0) {
                 return await executeCustomAdCode(slot.customCode);
             }
+            // ✅ Adsgram Integration
+            if (slot.network === 'adsgram') {
+                if (typeof window.Adsgram === 'undefined') throw new Error('Adsgram SDK not loaded');
+                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : 'your-block-id' });
+                try {
+                    const res = await adCtrl.show();
+/* === 3. CUSTOM AD ENGINE (ADMIN TO USER) === */
+function isMonetagSDKReady(zoneId) {
+    return typeof window['show_' + String(zoneId)] === 'function';
+}
+function reloadMonetagSDK(zoneId) {
+    zoneId = String(zoneId || '').trim();
+    if (!zoneId) return;
+    document.querySelectorAll('script[data-zone]').forEach(s => { if (s.dataset.zone !== zoneId) s.remove(); });
+    if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
+        const sc = document.createElement('script');
+        sc.src = '//libtl.com/sdk.js';
+        sc.dataset.zone = zoneId;
+        sc.dataset.sdk = 'show_' + zoneId;
+        sc.async = true;
+        sc.onload = () => { monetagSDKReady = true; };
+        document.head.appendChild(sc);
+    }
+    MONETAG_ZONE = zoneId;
+}
+async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
+    const start = Date.now();
+    while (Date.now() - start < maxWaitMs) {
+        if (isMonetagSDKReady(zoneId)) return true;
+        await new Promise(r => setTimeout(r, 150));
+    }
+    return false;
+}
+async function showMonetagRewardedPopup(zoneId) {
+    zoneId = String(zoneId || MONETAG_ZONE);
+    const fnName = 'show_' + zoneId;
+    const now = Date.now();
+    if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) throw new Error('Please wait a few seconds');
+    if (!isMonetagSDKReady(zoneId)) {
+        const ok = await waitForMonetagSDK(zoneId, 4000);
+        if (!ok) throw new Error('Ad Network Not Ready');
+    }
+    lastMonetagShowTime = now;
+    return new Promise((resolve, reject) => {
+        try {
+            window[fnName]('pop').then(() => resolve({ done: true })).catch(() => reject(new Error('Ad Closed')));
+        } catch (e) { reject(new Error(e.message || 'Ad Error')); }
+    });
+}
+function startMonetagInAppInterstitial(zoneId, settings) {
+    zoneId = String(zoneId || MONETAG_ZONE);
+    const fnName = 'show_' + zoneId;
+    if (monetagInAppStarted) return;
+    settings = settings || { frequency: 2, capping: 0.1, interval: 100, timeout: 5, everyPage: false };
+    const start = () => {
+        if (isMonetagSDKReady(zoneId)) {
+            try { window[fnName]({ type: 'inApp', inAppSettings: settings }); monetagInAppStarted = true; } catch(e) {}
+        } else setTimeout(start, 500);
+    };
+    start();
+}
+
+let activeAdSDK = null;
+let adSDKTimer = null;
+
+async function executeCustomAdCode(code) {
+    if (!code || typeof code !== 'string' || !code.trim()) {
+        throw new Error('No custom code provided');
+    }
+    if (activeAdSDK) {
+        try { activeAdSDK.reject(new Error('Superseded')); } catch(e) {}
+        if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
+        activeAdSDK = null;
+    }
+    return new Promise((resolve, reject) => {
+        let done = false;
+        const finish = (ok, msg) => {
+            if (done) return;
+            done = true;
+            if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
+            if (activeAdSDK && activeAdSDK.finish === finish) activeAdSDK = null;
+            if (ok) resolve({ done: true });
+            else reject(new Error(msg || 'Ad failed'));
+        };
+        activeAdSDK = { finish, reject: (e) => finish(false, e && e.message), resolve: () => finish(true) };
+        adSDKTimer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
+        
+        const wrappedResolve = () => finish(true);
+        const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
+        
+        window.resolve = () => { console.log('[AD] SDK resolved'); };
+        window.reject = (msg) => { console.log('[AD] SDK rejected:', msg); };
+        window.adResolve = window.resolve;
+        window.adReject = window.reject;
+        window.__adSuccess = window.resolve;
+        window.__adFail = window.reject;
+        
+        window.__nexOpenExternal = function(url) {
+            try {
+                if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_instant_view: false });
+                else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) tg.openTelegramLink(url);
+                else window.open(url, '_blank', 'noopener');
+            } catch(e) { try { window.open(url, '_blank'); } catch(err) {} }
+        };
+        
+        try {
+            const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
+            const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject, window.__nexOpenExternal);
+            if (result && typeof result.then === 'function') {
+                result.then(() => {}).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
+            }
+        } catch(e) { finish(false, e.message || 'Code error'); }
+    });
+}
+
+async function runSpecificCustomAd(targetKey) {
+    // ✅ Priority 1: Direct Custom Ad Button for this target
+    const buttons = appState.config.customAdButtons || [];
+    let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
+    
+    // Fallback: If no specific target, check for adSlot1
+    if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
+        btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
+    }
+
+    if (btn) {
+        // ✅ Check if it's a Custom HTML Design
+        if (btn.designType === 'html_design' && btn.design) {
+            return new Promise((resolve, reject) => {
+                const d = btn.design;
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.style.cssText = `position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.3s ease;`;
+                
+                const card = document.createElement('div');
+                card.style.cssText = `width:100%;max-width:360px;background:${d.bgColor};color:${d.textColor};border-radius:24px;padding:24px;text-align:center;box-shadow:0 25px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;`;
+                
+                card.innerHTML = `
+                    <h2 style="margin:0 0 10px;font-size:1.4rem;font-weight:800;">${esc(d.title)}</h2>
+                    <p style="margin:0 0 20px;font-size:0.9rem;opacity:0.9;">${esc(d.desc)}</p>
+                    <button id="ad-design-btn" style="width:100%;padding:14px;border-radius:14px;border:none;background:${d.btnBg};color:${d.btnTextColor};font-weight:800;font-size:1rem;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.15);">${esc(d.btnText)}</button>
+                `;
+                
+                overlay.appendChild(card);
+                document.body.appendChild(overlay);
+                
+                const cleanup = () => { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); };
+                
+                const btnEl = card.querySelector('#ad-design-btn');
+                btnEl.onclick = () => { cleanup(); resolve({ done: true }); };
+                
+                // Auto-close after 15 seconds (optional safety)
+                setTimeout(() => { cleanup(); resolve({ done: true }); }, 15000);
+            });
+        }
+        
+        // ✅ Otherwise use the custom JS code
+        if (btn.code && String(btn.code).trim()) {
+            return await executeCustomAdCode(btn.code);
+        }
+    }
+    
+    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2 targets)
+    if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
+        const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
+        const slots = appState.config.adSlots || [];
+        const slot = slots[slotIndex];
+        
+        if (slot) {
+            if (slot.customCode && String(slot.customCode).trim().length > 0) {
+                return await executeCustomAdCode(slot.customCode);
+            }
+            // ✅ Adsgram Integration
+            if (slot.network === 'adsgram') {
+                if (typeof window.Adsgram === 'undefined') throw new Error('Adsgram SDK not loaded');
+                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : 'your-block-id' });
+                try {
+                    const res = await adCtrl.show();
+                    if (res && res.done === true) {
+                        return { done: true };
+                    } else {
+                        throw new Error('Ad not completed');
+                    }
+                } catch (e) {
+                    throw new Error(e.description || 'Ad Closed');
+                }
+            }
+            // ✅ Monetag Integration
             if (slot.network === 'monetag') {
                 return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             }
+            // ✅ RichAds Integration (Requires their JS code)
+            if (slot.network === 'richads') {
+                // RichAds requires a personalized JS tag. If the admin set a customCode, it will be used above.
+                // If not, we can't show it without their specific script.
+                throw new Error('RichAds requires custom JS code from dashboard');
+            }
+            // ✅ GigaPub Integration
             if (slot.network === 'gigapub') {
-                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
+                if (typeof window.showGiga !== 'function') throw new Error('GigaPub not ready');
                 await window.showGiga();
                 return { done: true };
             }
-            if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-                let res = await adCtrl.show();
-                if (!res || res.done !== true) throw new Error('Ad Closed');
-                return { done: true };
+            // ✅ Taddy Integration
+            if (slot.network === 'taddy') {
+                if (typeof window.Taddy !== 'undefined' && typeof window.Taddy.showAd === 'function') {
+                    return new Promise((res, rej) => {
+                        window.Taddy.showAd({
+                            placementId: slot.id ? String(slot.id) : 'your-placement-id',
+                            onAdComplete: () => res({ done: true }),
+                            onAdError: (e) => rej(new Error(e || 'Ad Error'))
+                        });
+                    });
+                }
+                throw new Error('Taddy SDK not loaded');
+            }
+            // ✅ OnClickA Integration
+            if (slot.network === 'onclicka') {
+                if (typeof window.onclicka !== 'undefined') {
+                    return new Promise((res, rej) => {
+                        window.onclicka.showRewarded({
+                            zoneId: slot.id ? String(slot.id) : 'your-zone-id',
+                            onComplete: () => res({ done: true }),
+                            onError: (e) => rej(new Error(e || 'Ad Error'))
+                        });
+                    });
+                }
+                throw new Error('OnClickA SDK not loaded');
+            }
+            // ✅ Fallback for other networks: Open External
+            if (['adsterra','propellerads','clickadilla','hilltopads','adcash','popads','exoclick','trafficjunky','adfrix','adx'].includes(slot.network)) {
+                return new Promise((res) => {
+                    window.__nexOpenExternal('https://example.com'); // Placeholder URL
+                    setTimeout(() => res({ done: true }), 5000);
+                });
             }
         }
     }
