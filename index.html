@@ -969,20 +969,30 @@ async function runSpecificCustomAd(targetKey) {
     if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
         const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
         const slots = appState.config.adSlots || [];
-        const slot = slots[slotIndex];
+        const slot = slots[slotIndex]; // ✅ এখানে slot ভ্যারিয়েবলটি ডিফাইন করা হলো
         
         if (slot) {
+            // ✅ যদি অ্যাডমিন প্যানেল থেকে স্লটের ভেতর কাস্টম কোড দেওয়া থাকে
             if (slot.customCode && String(slot.customCode).trim().length > 0) {
                 return await executeCustomAdCode(slot.customCode);
             }
+            
+            // যদি সরাসরি Monetag সিলেক্ট করা থাকে
             if (slot.network === 'monetag') {
                 return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             }
+            
+            // যদি সরাসরি GigaPub সিলেক্ট করা থাকে
             if (slot.network === 'gigapub') {
                 if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
-                await window.showGiga();
-                return { done: true };
+                return await new Promise((resolve, reject) => {
+                    window.showGiga("main")
+                        .then(() => resolve({ done: true }))
+                        .catch(e => reject(new Error('Ad closed or failed')));
+                });
             }
+            
+            // যদি সরাসরি Adsgram সিলেক্ট করা থাকে
             if (slot.network === 'adsgram') {
                 if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
                 const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
