@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Earn Wallet</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
@@ -10,25 +10,23 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 
-<!-- Adexium Widget Script (Updated) -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
-        const adexiumWidget = new AdexiumWidget({
-            wid: '6f532c8b-6a2a-45b3-89ec-3ae0e3c82604', 
-            adFormat: 'interstitial'
-        });
-        adexiumWidget.autoMode();
+        try {
+            const adexiumWidget = new AdexiumWidget({
+                wid: '6f532c8b-6a2a-45b3-89ec-3ae0e3c82604',
+                adFormat: 'interstitial'
+            });
+            adexiumWidget.autoMode();
+        } catch(e) {}
     });
 </script>
 
-<!-- Montage Zone Script -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
-<!-- Gigapub Script -->
 <script src="https://ad.gigapub.tech/script?id=8758"></script>
 
 <style>
-/* ... আপনার CSS স্টাইলগুলো এখানে থাকবে ... */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
@@ -546,20 +544,20 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 
         <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
         <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
-        
+
         <div class="sec-head"><i class="fas fa-play-circle"></i> Daily Ads
             <div class="ad-reset-compact" id="adResetCompact"><i class="fas fa-clock"></i><div><div class="rst-label">RESET IN</div><div class="rst-time" id="cycleResetTimer">Watch All</div></div></div>
         </div>
-        
+
         <div id="ad-area" class="ad-grid"></div>
-        
+
         <div class="ad-progress-wrap">
             <div class="ad-progress-header"><span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span><span class="aph-right" id="adProgressText">0 / 0 Watched</span></div>
             <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
         </div>
-        
+
         <div class="claim-window-timer" id="claimWindowTimer"><div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div><div class="cwt-time" id="cwtTime">01:00:00</div></div>
-        
+
         <div class="ad-claim-box">
             <div class="ac-left"><div class="ac-label">💰 Total Ad Earnings</div><div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>টাকা</small></div></div>
             <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled><i class="fas fa-lock"></i> <span id="adClaimBtnText">All Ads Must be Watched</span></button>
@@ -583,7 +581,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
             <div class="flex-btns"><button class="btn-blue" onclick="openShareModal()"><i class="fas fa-share-alt"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
         </div>
-        
+
         <div class="premium-card">
             <div class="card-title"><i class="fas fa-users" style="color:#00b894;"></i> আমার রেফারেল লিস্ট</div>
             <div class="ref-inner-tabs">
@@ -651,8 +649,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <i class="fas fa-trophy nav-item" onclick="switchTab('leaderboard', this)"></i>
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
 </div>
+
 <script>
-/* === 1. INITIAL SETUP & FIREBASE CONFIG === */
+/* =========================================================
+   === 1. INITIAL SETUP & FIREBASE CONFIG ===
+   ========================================================= */
 const firebaseConfig = {
     apiKey: "REPLACE_WITH_EXISTING_VALUE_LOCALLY",
     authDomain: "cat-coins-34d4c.firebaseapp.com",
@@ -669,13 +670,23 @@ if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
 
 const BOT_USERNAME = "TaskHubBD24Bot";
 const MINI_APP_NAME = "taskhub";
+
+/* ⚠️ SECURITY: BOT_TOKEN & IMGBB_API_KEY ক্লায়েন্ট সাইডে রাখা বিপজ্জনক।
+   প্রোডাকশনে এগুলো Cloud Function / Backend Server-এ সরান।
+   এখানে শুধু ফিচার কাজ চালু রাখতে রাখা হয়েছে। */
 const BOT_TOKEN = "REPLACE_WITH_EXISTING_VALUE_LOCALLY";
+const IMGBB_API_KEY = "REPLACE_WITH_EXISTING_VALUE_LOCALLY";
+
+/* ✅ OPTIONAL: চ্যানেল চেকিং-এর জন্য Cloud Function URL
+   এটা সেট করলে client-side BOT_TOKEN কল হবে না।
+   উদাহরণ: "https://us-central1-cat-coins-34d4c.cloudfunctions.net/checkChannel" */
+const CHANNEL_CHECK_API = ""; // e.g., "https://...cloudfunctions.net/checkChannel"
+
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
 let MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
-const IMGBB_API_KEY = "REPLACE_WITH_EXISTING_VALUE_LOCALLY";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
@@ -692,11 +703,10 @@ let monetagSDKReady = false;
 let monetagInAppStarted = false;
 let lastMonetagShowTime = 0;
 const MONETAG_MIN_INTERVAL = 5000;
+let lastReloadZone = null;
 
 let extraRewardConfig = {
-    enabled: false,
-    amount: 0.5,
-    dailyLimit: 5,
+    enabled: false, amount: 0.5, dailyLimit: 5,
     title: 'Pop-up Ad দেখে আয় করুন',
     infoText: 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
 };
@@ -714,7 +724,12 @@ let adminRevenueConfig = {
 };
 
 let appState = {
-    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
+    user: {
+        balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {},
+        withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {},
+        totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0,
+        dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0,
+        adClaimedTotal: 0, adPendingEarnings: 0,
         adClaimedCurrentCycle: false, claimWindowStartTime: 0,
         extraRewardDate: '', extraRewardCount: 0,
         referredByAdminCode: null
@@ -722,7 +737,9 @@ let appState = {
     config: { adSlots: [], customAdButtons: [], newTasks: {} }
 };
 let isBooted = false;
-let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : { id: '123456', first_name: 'Guest User', photo_url: 'https://via.placeholder.com/100' };
+let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user
+    ? tg.initDataUnsafe.user
+    : { id: '123456', first_name: 'Guest User', photo_url: 'https://via.placeholder.com/100' };
 let channelVerified = false;
 let channelLinks = [];
 let verifyInterval = null;
@@ -751,9 +768,15 @@ let allReferralDataCache = { all: [], qualified: [] };
 let isUserAdmin = false;
 let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
 
+let userRefLiveListener = null;
+let lastRenderSignature = '';
+
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
 
+/* =========================================================
+   === 2. UTILITY HELPERS (SAFE)
+   ========================================================= */
 function isScreenshotTask(type) {
     const t = String(type || '').toLowerCase();
     if (!t) return false;
@@ -762,8 +785,52 @@ function isScreenshotTask(type) {
 function hasCooldown(type) {
     return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
 }
+function toast(msg) {
+    const t = document.getElementById('toast');
+    if (!t) return;
+    t.innerText = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3500);
+}
 
-/* === 2. AD WATCH PROGRESS & UI SETUP === */
+/* ✅ FIX #4: Timezone-aware date (Asia/Dhaka) */
+function todayStr() {
+    try {
+        return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
+    } catch(e) {
+        return new Date().toISOString().slice(0, 10);
+    }
+}
+function shortDate(ts) {
+    const d = new Date(ts);
+    return d.getDate() + '/' + (d.getMonth() + 1) + ' ' +
+        d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ✅ FIX #3: esc() with single-quote escape — attribute-safe */
+function esc(s) {
+    return String(s == null ? '' : s).replace(/[<>&"'`]/g, c => ({
+        '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;',
+        "'": '&#39;', '`': '&#96;'
+    }[c]));
+}
+
+function showAdError(title, msg) {
+    const t = document.getElementById('adErrorTitle');
+    const m = document.getElementById('adErrorMsg');
+    const p = document.getElementById('adErrorPopup');
+    if (t) t.textContent = title || '⚠️ Error';
+    if (m) m.textContent = msg || 'Please watch the full ad!';
+    if (p) p.classList.add('active');
+}
+function closeAdError() {
+    const p = document.getElementById('adErrorPopup');
+    if (p) p.classList.remove('active');
+}
+
+/* =========================================================
+   === 3. AD WATCH PROGRESS & UI SETUP
+   ========================================================= */
 function updateLastActive() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return;
     if (!isOnline) return;
@@ -771,7 +838,6 @@ function updateLastActive() {
         db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()).catch(() => {});
     } catch(e) {}
 }
-
 function getRefLink() {
     return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id;
 }
@@ -789,9 +855,7 @@ function closeShareModal() {
 }
 function copyShareLink() {
     const link = getRefLink();
-    navigator.clipboard.writeText(link).then(() => {
-        toast('✅ লিংক কপি হয়েছে!');
-    }).catch(() => {
+    navigator.clipboard.writeText(link).then(() => toast('✅ লিংক কপি হয়েছে!')).catch(() => {
         const ta = document.createElement('textarea');
         ta.value = link;
         document.body.appendChild(ta);
@@ -842,14 +906,33 @@ function hideAdWatchProgress() {
     if (adWatchProgressTimer) { clearInterval(adWatchProgressTimer); adWatchProgressTimer = null; }
 }
 
-/* === 3. CUSTOM AD ENGINE (ADMIN TO USER) === */
+/* ✅ FIX: Cleanup all globals used by custom ad code */
+function cleanupAdGlobals() {
+    try {
+        delete window.resolve; delete window.reject;
+        delete window.adResolve; delete window.adReject;
+        delete window.__adSuccess; delete window.__adFail;
+        delete window.__nexOpenExternal;
+    } catch(err) {}
+}
+
+/* =========================================================
+   === 4. CUSTOM AD ENGINE
+   ========================================================= */
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
 }
+
+/* ✅ FIX #6: reloadMonetagSDK with proper dedupe */
 function reloadMonetagSDK(zoneId) {
     zoneId = String(zoneId || '').trim();
     if (!zoneId) return;
-    document.querySelectorAll('script[data-zone]').forEach(s => { if (s.dataset.zone !== zoneId) s.remove(); });
+    // Skip if already loaded for this zone
+    if (lastReloadZone === zoneId && isMonetagSDKReady(zoneId)) { MONETAG_ZONE = zoneId; return; }
+    // Remove all OTHER zone scripts (but keep the current zone if already loaded)
+    document.querySelectorAll('script[data-zone]').forEach(s => {
+        if (s.dataset.zone !== zoneId) s.remove();
+    });
     if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
         const sc = document.createElement('script');
         sc.src = '//libtl.com/sdk.js';
@@ -860,6 +943,7 @@ function reloadMonetagSDK(zoneId) {
         document.head.appendChild(sc);
     }
     MONETAG_ZONE = zoneId;
+    lastReloadZone = zoneId;
 }
 async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
     const start = Date.now();
@@ -917,22 +1001,24 @@ async function executeCustomAdCode(code) {
             done = true;
             if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
             if (activeAdSDK && activeAdSDK.finish === finish) activeAdSDK = null;
+            cleanupAdGlobals();
             if (ok) resolve({ done: true });
             else reject(new Error(msg || 'Ad failed'));
         };
         activeAdSDK = { finish, reject: (e) => finish(false, e && e.message), resolve: () => finish(true) };
         adSDKTimer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
-        
+
         const wrappedResolve = () => finish(true);
         const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
-        
+
+        // ✅ FIX #5: only set globals AFTER activeAdSDK is set
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
         window.adResolve = window.resolve;
         window.adReject = window.reject;
         window.__adSuccess = window.resolve;
         window.__adFail = window.reject;
-        
+
         window.__nexOpenExternal = function(url) {
             try {
                 if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_instant_view: false });
@@ -940,7 +1026,7 @@ async function executeCustomAdCode(code) {
                 else window.open(url, '_blank', 'noopener');
             } catch(e) { try { window.open(url, '_blank'); } catch(err) {} }
         };
-        
+
         try {
             const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
             const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject, window.__nexOpenExternal);
@@ -952,57 +1038,38 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
-    // ✅ ১. যদি ইতিমধ্যে কোনো অ্যাড চলছে, তবে নতুন অ্যাড ওপেন হতে দেবে না
-    if (isAdWatching) {
-        throw new Error('Already watching an ad. Please wait.');
-    }
+    if (isAdWatching) throw new Error('Already watching an ad. Please wait.');
 
-    // ✅ Priority 1: Direct Custom Ad Button for this target
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
-    
     if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
         btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
     }
-
     if (btn && btn.code && String(btn.code).trim()) {
         return await executeCustomAdCode(btn.code);
     }
-    
-    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2, extraReward, dailyBonus targets)
+
     if (targetKey === 'adSlot1' || targetKey === 'adSlot2' || targetKey === 'extraReward' || targetKey === 'dailyBonus') {
         let slotIndex = -1;
-        
-        // টার্গেট অনুযায়ী স্লট সিলেক্ট করা (extraReward এবং dailyBonus এর জন্য adSlot1 বা adSlot2 ব্যবহার হবে)
         if (targetKey === 'adSlot1' || targetKey === 'extraReward' || targetKey === 'dailyBonus') slotIndex = 0;
         if (targetKey === 'adSlot2') slotIndex = 1;
 
         const slots = appState.config.adSlots || [];
-        const slot = slots[slotIndex]; 
-        
+        const slot = slots[slotIndex];
+
         if (slot) {
-            // ১. কাস্টম কোড থাকলে সেটাই রান হবে
             if (slot.customCode && String(slot.customCode).trim().length > 0) {
                 return await executeCustomAdCode(slot.customCode);
             }
-            
-            // ২. Monetag সিলেক্ট করা থাকলে শুধু Monetag রান হবে
             if (slot.network === 'monetag') {
                 return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             }
-            
-            // ৩. GigaPub সিলেক্ট করা থাকলে শুধু GigaPub রান হবে
             if (slot.network === 'gigapub') {
                 if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
                 return await new Promise((resolve, reject) => {
-                    // GigaPub-এর জন্য প্যারামিটার ছাড়া কল করা হলো
-                    window.showGiga()
-                        .then(() => resolve({ done: true }))
-                        .catch(e => reject(new Error('Ad closed or failed')));
+                    window.showGiga().then(() => resolve({ done: true })).catch(() => reject(new Error('Ad closed or failed')));
                 });
             }
-            
-            // ৪. Adsgram সিলেক্ট করা থাকলে শুধু Adsgram রান হবে
             if (slot.network === 'adsgram') {
                 if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
                 const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
@@ -1012,18 +1079,17 @@ async function runSpecificCustomAd(targetKey) {
             }
         }
     }
-    
-    // ✅ Fallback: Try any available custom slot
+
     const slots = appState.config.adSlots || [];
     let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
-    if (fallbackSlot) {
-        return await executeCustomAdCode(fallbackSlot.customCode);
-    }
-    
+    if (fallbackSlot) return await executeCustomAdCode(fallbackSlot.customCode);
+
     throw new Error('No ads configured by Admin');
 }
 
-/* === 4. AD WATCHING LOGIC === */
+/* =========================================================
+   === 5. AD WATCHING LOGIC
+   ========================================================= */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve, reject) => {
         let awayTime = 0, wentAwayAt = 0, lastReturnAt = 0, hasWatchedEnough = false;
@@ -1129,18 +1195,14 @@ async function watchAd(i) {
         slotLocks[i] = false; isAdWatching = false;
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        if (!activeAdSDK) {
-            try {
-                delete window.resolve; delete window.reject; delete window.adResolve;
-                delete window.adReject; delete window.__adSuccess; delete window.__adFail;
-                delete window.__nexOpenExternal;
-            } catch(err) {}
-        }
+        cleanupAdGlobals();
     }
 }
 function startAdWatch(i) { watchAd(i); }
 
-/* === 5. EXTRA REWARDS LOGIC === */
+/* =========================================================
+   === 6. EXTRA REWARDS LOGIC
+   ========================================================= */
 function getTodayExtraRewardCount() {
     const today = todayStr();
     if (appState.user.extraRewardDate !== today) return 0;
@@ -1178,25 +1240,21 @@ async function watchExtraRewardAd() {
     const today = todayStr();
     const count = getTodayExtraRewardCount();
     if (count >= extraRewardConfig.dailyLimit) { toast('❌ আজকের লিমিট শেষ!'); updateExtraRewardUI(); return; }
-    
-    // ✅ এখানে isAdWatching চেক করা হচ্ছে যাতে একসাথে দুইটা অ্যাড না ওপেন হয়
     if (isAdWatching) { toast('Please wait, another ad is running!'); return; }
-    
+
     const btn = document.getElementById('erBtn');
     const btnText = document.getElementById('erBtnText');
-    isAdWatching = true; // ✅ অ্যাড শুরু হওয়ার আগেই লক করা হলো
+    isAdWatching = true;
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading...';
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
-    
+
     try {
-        // ✅ এখানে 'extraReward' টার্গেট পাঠানো হলো
         await runSpecificCustomAd('extraReward');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
-        
-        // ... বাকি রিওয়ার্ড লজিক ...
+
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
         const userReward = split.userReward;
@@ -1224,13 +1282,17 @@ async function watchExtraRewardAd() {
         } else {
             showAdError('⚠️ Ad Error', em || 'Ad লোড হয়নি।');
         }
-    } finally { 
-        isAdWatching = false; 
-        updateExtraRewardUI(); 
-        hideAdWatchProgress(); 
+    } finally {
+        isAdWatching = false;
+        updateExtraRewardUI();
+        hideAdWatchProgress();
+        cleanupAdGlobals();
     }
 }
 
+/* =========================================================
+   === 7. AD CLAIM LOGIC
+   ========================================================= */
 function calculateAdTotalEarnings() {
     const slots = appState.config.adSlots || [];
     let totalSlots = 0;
@@ -1262,17 +1324,19 @@ function isAllDisplayAdsWatched() {
 function getClaimWindowRemaining() {
     const startTime = Number(appState.user.claimWindowStartTime || 0);
     if (!startTime) return 0;
-    const elapsed = Date.now() - startTime;
-    const remain = CLAIM_WINDOW_MS - elapsed;
-    return remain > 0 ? remain : 0;
+    return Math.max(0, CLAIM_WINDOW_MS - (Date.now() - startTime));
 }
 async function startClaimWindowIfNeeded() {
     if (!isAllDisplayAdsWatched()) return;
     if (appState.user.adClaimedCurrentCycle === true) return;
     if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return;
     const now = Date.now();
-    appState.user.claimWindowStartTime = now;
-    try { await db.ref('users/' + appState.user.id + '/claimWindowStartTime').set(now); } catch(e) {}
+    try {
+        // ✅ FIX #12: only set if still null
+        const result = await db.ref('users/' + appState.user.id + '/claimWindowStartTime')
+            .transaction(cur => (cur && cur > 0) ? cur : now);
+        if (result.committed) appState.user.claimWindowStartTime = result.snapshot.val();
+    } catch(e) {}
     startClaimWindowTicker();
     updateClaimWindowUI();
 }
@@ -1386,7 +1450,9 @@ async function claimAdEarnings() {
     } catch (e) { toast('❌ Failed: ' + e.message); updateAdClaimUI(); }
 }
 
-/* === 6. ADMIN COMMISSION LOGIC === */
+/* =========================================================
+   === 8. ADMIN COMMISSION LOGIC
+   ========================================================= */
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
         const adminCode = appState.user.referredByAdminCode;
@@ -1444,9 +1510,16 @@ function switchRefTab(tab) {
     const panes = ['refPaneTotal','refPaneQualified','refPaneIncome'];
     tabs.forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
     panes.forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
-    if (tab === 'total') { document.getElementById('refTabTotal')?.classList.add('active'); document.getElementById('refPaneTotal')?.classList.add('active'); }
-    else if (tab === 'qualified') { document.getElementById('refTabQualified')?.classList.add('active'); document.getElementById('refPaneQualified')?.classList.add('active'); }
-    else { document.getElementById('refTabIncome')?.classList.add('active'); document.getElementById('refPaneIncome')?.classList.add('active'); }
+    if (tab === 'total') {
+        document.getElementById('refTabTotal')?.classList.add('active');
+        document.getElementById('refPaneTotal')?.classList.add('active');
+    } else if (tab === 'qualified') {
+        document.getElementById('refTabQualified')?.classList.add('active');
+        document.getElementById('refPaneQualified')?.classList.add('active');
+    } else {
+        document.getElementById('refTabIncome')?.classList.add('active');
+        document.getElementById('refPaneIncome')?.classList.add('active');
+    }
     if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
 }
 function updateRefTabCounts() {
@@ -1469,8 +1542,7 @@ function renderReferralList() {
         allReferralDataCache.all.slice(0, HISTORY_LIMIT).forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
             const balClass = u.qualified ? 'qualified' : 'not-qualified';
-            const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
-            html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${initial}</div><div class="ref-user-info"><h5>${esc(u.name)}</h5><p>ID: ${u.id}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK ${checkMark}</div></div>`;
+            html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${esc(initial)}</div><div class="ref-user-info"><h5>${esc(u.name)}</h5><p>ID: ${esc(u.id)}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${u.balance.toFixed(2)} TK</div></div>`;
         });
         totalContainer.innerHTML = html;
     }
@@ -1481,7 +1553,7 @@ function renderReferralList() {
         let html = '';
         allReferralDataCache.qualified.slice(0, HISTORY_LIMIT).forEach(u => {
             const initial = (u.name || 'U').charAt(0).toUpperCase();
-            html += `<div class="ref-user-item" style="background:#f0fff9;"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${initial}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} ✅</h5><p style="color:#10b981;">ID: ${u.id}</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
+            html += `<div class="ref-user-item" style="background:#f0fff9;"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${esc(initial)}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} ✅</h5><p style="color:#10b981;">ID: ${esc(u.id)}</p></div></div><div class="ref-user-bal qualified">💰 ${u.balance.toFixed(2)} TK</div></div>`;
         });
         qualContainer.innerHTML = html;
     }
@@ -1522,7 +1594,9 @@ async function claimReferralIncome() {
     finally { updateRefClaimButton(); }
 }
 
-/* === 7. TASKS LOGIC === */
+/* =========================================================
+   === 9. TASKS LOGIC
+   ========================================================= */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
     return daysMatch ? parseInt(daysMatch[1]) : 7;
@@ -1576,6 +1650,8 @@ function startTaskExpiryTicker() {
 }
 function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
+/* ⚠️ NOTE: Anti-hack below is only deterrence — NOT security.
+   Real security is in Firebase Rules. */
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
@@ -1589,10 +1665,14 @@ function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(
 function toggleMenuPopup(e) {
     if (e) e.stopPropagation();
     const popup = document.getElementById('menuPopup');
+    if (!popup) return;
     if (popup.classList.contains('show')) popup.classList.remove('show');
     else popup.classList.add('show');
 }
-function closeMenuPopup() { const popup = document.getElementById('menuPopup'); if (popup) popup.classList.remove('show'); }
+function closeMenuPopup() {
+    const popup = document.getElementById('menuPopup');
+    if (popup) popup.classList.remove('show');
+}
 document.addEventListener('click', function(e) {
     const popup = document.getElementById('menuPopup');
     const dotsBtn = document.querySelector('.dots-btn');
@@ -1601,7 +1681,9 @@ document.addEventListener('click', function(e) {
     }
 });
 
-/* === 8. LEGAL & ADMIN SLIDER === */
+/* =========================================================
+   === 10. LEGAL & ADMIN SLIDER
+   ========================================================= */
 const LEGAL_CONTENT = {
     privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
     disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
@@ -1610,11 +1692,21 @@ function openLegalModal(type) {
     const modal = document.getElementById('legalModal');
     const title = document.getElementById('legalModalTitle');
     const body = document.getElementById('legalModalBody');
-    if (type === 'privacy') { title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy'; body.innerHTML = LEGAL_CONTENT.privacy; }
-    else { title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer'; body.innerHTML = LEGAL_CONTENT.disclaimer; }
-    modal.classList.add('active'); document.body.style.overflow = 'hidden';
+    if (!modal || !title || !body) return;
+    if (type === 'privacy') {
+        title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy';
+        body.innerHTML = LEGAL_CONTENT.privacy;
+    } else {
+        title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer';
+        body.innerHTML = LEGAL_CONTENT.disclaimer;
+    }
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
-function closeLegalModal() { document.getElementById('legalModal').classList.remove('active'); document.body.style.overflow = ''; }
+function closeLegalModal() {
+    document.getElementById('legalModal').classList.remove('active');
+    document.body.style.overflow = '';
+}
 document.getElementById('legalModal').addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
 
 async function checkIfUserIsAdmin() {
@@ -1667,8 +1759,7 @@ function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
     if (!last) return 0;
-    const remaining = (last + TASK_COOLDOWN_MS) - Date.now();
-    return remaining > 0 ? remaining : 0;
+    return Math.max(0, (last + TASK_COOLDOWN_MS) - Date.now());
 }
 function fmtCountdown(ms) {
     const totalSec = Math.max(0, Math.floor(ms / 1000));
@@ -1721,6 +1812,7 @@ function switchTasksInnerTab(which) {
     const btnHist = document.getElementById('tabBtnHistory');
     const paneAvail = document.getElementById('tasksPaneAvailable');
     const paneHist = document.getElementById('tasksPaneHistory');
+    if (!btnAvail || !btnHist || !paneAvail || !paneHist) return;
     if (which === 'history') {
         btnAvail.classList.remove('active'); btnHist.classList.add('active');
         paneAvail.classList.remove('active'); paneHist.classList.add('active');
@@ -1761,6 +1853,8 @@ async function startAdsResetCountdown() {
     try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
     toast('🎉 Ads complete! Reset in ' + AD_RESET_HOURS + ' hours.');
 }
+
+/* ✅ FIX #17: transaction-based reset */
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
     appState.user.dailyAds = {};
@@ -1770,8 +1864,16 @@ async function forceCycleReset() {
     stopClaimWindowTicker();
     renderAds(); updateCycleUI(); updateClaimWindowUI();
     toast('🔄 Ads reset!');
-    try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0 }); } catch (e) {}
-    if (appState.user.extraRewardDate !== todayStr()) { appState.user.extraRewardDate = ''; appState.user.extraRewardCount = 0; }
+    try {
+        await db.ref('users/' + tgUser.id).update({
+            dailyAds: {}, adsResetTime: 0,
+            adClaimedCurrentCycle: false, claimWindowStartTime: 0
+        });
+    } catch (e) {}
+    if (appState.user.extraRewardDate !== todayStr()) {
+        appState.user.extraRewardDate = '';
+        appState.user.extraRewardCount = 0;
+    }
 }
 function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
 function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
@@ -1798,17 +1900,21 @@ function updateCycleUI() {
 }
 function getDeviceId() {
     let deviceId = localStorage.getItem('nexearn_device_id');
-    if (!deviceId) { deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('nexearn_device_id', deviceId); }
+    if (!deviceId) {
+        deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('nexearn_device_id', deviceId);
+    }
     return deviceId;
 }
-function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
-function todayStr() { return new Date().toISOString().slice(0, 10); }
-function shortDate(ts) { const d = new Date(ts); return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
-function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c])); }
-function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
-function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
-/* === 9. FILE UPLOAD HELPERS === */
+/* ✅ FIX #10: user-specific localStorage keys */
+function userLSKey(key) {
+    return 'nexearn_' + String(tgUser && tgUser.id ? tgUser.id : 'guest') + '_' + key;
+}
+
+/* =========================================================
+   === 11. FILE UPLOAD HELPERS
+   ========================================================= */
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -1933,9 +2039,19 @@ function handleFilePreview(input, type) {
     const info = document.getElementById('filePreviewInfo');
     if (!file) { if (wrap) wrap.style.display = 'none'; return; }
     if (type === 'image') {
-        if (!file.type.startsWith('image/') || file.size > 32 * 1024 * 1024) { toast('⚠️ Invalid file'); input.value = ''; if (wrap) wrap.style.display = 'none'; return; }
+        if (!file.type.startsWith('image/') || file.size > 32 * 1024 * 1024) {
+            toast('⚠️ Invalid file');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
     } else if (type === 'audio') {
-        if (!isAudioFile(file) || file.size > 500 * 1024 * 1024) { toast('⚠️ Invalid audio'); input.value = ''; if (wrap) wrap.style.display = 'none'; return; }
+        if (!isAudioFile(file) || file.size > 500 * 1024 * 1024) {
+            toast('⚠️ Invalid audio');
+            input.value = '';
+            if (wrap) wrap.style.display = 'none';
+            return;
+        }
     }
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -1950,20 +2066,37 @@ function handleFilePreview(input, type) {
     toast('✅ File selected');
 }
 
+/* ✅ FIX #10: per-user localStorage for pending tasks */
 function checkPendingSurveyReward() {
-    const done = localStorage.getItem('survey_done_task');
-    const pendingRaw = localStorage.getItem('pending_survey');
+    const done = localStorage.getItem(userLSKey('survey_done_task'));
+    const pendingRaw = localStorage.getItem(userLSKey('pending_survey'));
     if (!done || !pendingRaw) return null;
-    try { const p = JSON.parse(pendingRaw); if (String(p.taskId) === String(done)) { localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey'); return p; } } catch(e) {}
-    localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey');
+    try {
+        const p = JSON.parse(pendingRaw);
+        if (String(p.taskId) === String(done)) {
+            localStorage.removeItem(userLSKey('survey_done_task'));
+            localStorage.removeItem(userLSKey('pending_survey'));
+            return p;
+        }
+    } catch(e) {}
+    localStorage.removeItem(userLSKey('survey_done_task'));
+    localStorage.removeItem(userLSKey('pending_survey'));
     return null;
 }
 function checkPendingYoutubeReward() {
-    const done = localStorage.getItem('youtube_done_task');
-    const pendingRaw = localStorage.getItem('pending_youtube');
+    const done = localStorage.getItem(userLSKey('youtube_done_task'));
+    const pendingRaw = localStorage.getItem(userLSKey('pending_youtube'));
     if (!done || !pendingRaw) return null;
-    try { const p = JSON.parse(pendingRaw); if (String(p.taskId) === String(done)) { localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube'); return p; } } catch(e) {}
-    localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube');
+    try {
+        const p = JSON.parse(pendingRaw);
+        if (String(p.taskId) === String(done)) {
+            localStorage.removeItem(userLSKey('youtube_done_task'));
+            localStorage.removeItem(userLSKey('pending_youtube'));
+            return p;
+        }
+    } catch(e) {}
+    localStorage.removeItem(userLSKey('youtube_done_task'));
+    localStorage.removeItem(userLSKey('pending_youtube'));
     return null;
 }
 
@@ -1987,11 +2120,11 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     const newEarn = (appState.user.totalEarned || 0) + userReward;
     const taskTimestamp = Date.now();
     try {
-        const subId = 'sub_' + Date.now() + '_' + tgUser.id + '_' + Math.random().toString(36).substr(2, 5);
+        const subId = 'sub_' + Date.now() + '_' + tgUser.id + '_' + Math.random().toString(36).substr(2, 9);
         await db.ref('taskSubmissions/' + subId).set({
             userId: tgUser.id, userName: tgUser.first_name || 'User',
             username: tgUser.username || '', telegramId: tgUser.id,
-            taskId: taskId, taskTitle: p.taskTitle || taskTypeLabel,
+            taskId, taskTitle: p.taskTitle || taskTypeLabel,
             reward: baseReward, content: 'Auto-completed ' + taskTypeLabel,
             fileUrl: null, status: 'approved', autoApproved: true,
             createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
@@ -2024,14 +2157,19 @@ function showBonus() {
     document.getElementById('bonusOverlay').classList.add('show');
     document.getElementById('app').classList.add('blurred');
 }
-function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
+function hideBonus() {
+    document.getElementById('bonusOverlay').classList.remove('show');
+    document.getElementById('app').classList.remove('blurred');
+}
 
 async function claimDailyBonus() {
     if (!isOnline) { toast('No internet!'); return; }
+    if (isAdWatching) { toast('Please wait, another ad is running!'); return; }
     const btn = document.getElementById('btnClaimBonus');
     const btnCancel = document.getElementById('btnCancelBonus');
     const subText = document.getElementById('bonusSubText');
     btn.disabled = true; btnCancel.disabled = true;
+    isAdWatching = true;
     try {
         const dailyBonusAdTargets = ['adSlot1', 'adSlot2'];
         for (let i = 0; i < dailyBonusAdTargets.length; i++) {
@@ -2057,9 +2195,11 @@ async function claimDailyBonus() {
     } catch (e) {
         toast(e.message === 'Ad Closed' ? '❌ Ad not completed!' : '❌ Error: ' + e.message);
     } finally {
+        isAdWatching = false;
         btn.disabled = false; btnCancel.disabled = false;
         btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
         subText.innerText = 'Watch 2 short ads to get bonus.';
+        cleanupAdGlobals();
     }
 }
 
@@ -2106,11 +2246,57 @@ function computeCommissionSplit(earnedAmount) {
     const mode = REF_COMMISSION_MODE || 'bonus';
     if (!referrerId || rate <= 0) return { userReward: earnedAmount, referrerCommission: 0, mode };
     const commission = (Number(earnedAmount) * rate) / 100;
-    if (mode === 'deduct') return { userReward: Number(earnedAmount) - commission, referrerCommission: commission, mode };
+    if (mode === 'deduct') {
+        const userPart = Math.max(0, Number(earnedAmount) - commission);
+        return { userReward: userPart, referrerCommission: commission, mode };
+    }
     return { userReward: Number(earnedAmount), referrerCommission: commission, mode };
 }
 
-function getCurrentChannelLinks() { return channelLinks && channelLinks.length > 0 ? channelLinks : null; }
+function getCurrentChannelLinks() {
+    return channelLinks && channelLinks.length > 0 ? channelLinks : null;
+}
+
+/* ✅ FIX #9: channel check returns { status: 'joined'|'not_joined'|'unknown' } */
+async function checkChannelMembership(userId, chatId, retries = 2) {
+    if (!userId || !chatId) return 'unknown';
+
+    // ✅ Try Cloud Function first (SECURE)
+    if (CHANNEL_CHECK_API) {
+        try {
+            const url = CHANNEL_CHECK_API + '?userId=' + encodeURIComponent(userId) + '&chatId=' + encodeURIComponent(chatId);
+            const response = await fetchWithTimeout(url, { cache: 'no-store' }, 8000);
+            const data = await response.json();
+            if (data && data.status) return data.status;
+        } catch(e) {}
+    }
+
+    // Fallback: client-side (⚠️ INSECURE — move to server in production)
+    if (!BOT_TOKEN || String(BOT_TOKEN).indexOf('REPLACE') === 0) return 'unknown';
+    const rawChatId = String(chatId).trim();
+    const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=' + encodeURIComponent(formattedChatId) + '&user_id=' + userId;
+            const response = await fetchWithTimeout(url, { cache: 'no-store' }, 8000);
+            const data = await response.json();
+            if (data.ok && data.result) {
+                const status = data.result.status;
+                if (status === 'left' || status === 'kicked') return 'not_joined';
+                if (status === 'restricted') return data.result.is_member === true ? 'joined' : 'not_joined';
+                return ['member', 'administrator', 'creator'].includes(status) ? 'joined' : 'not_joined';
+            }
+            // 400 = user not found, 403 = bot has no access. Treat as UNKNOWN (don't block).
+            if (data.error_code === 400 || data.error_code === 403) return 'unknown';
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
+            return 'unknown';
+        } catch (e) {
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
+            return 'unknown';
+        }
+    }
+    return 'unknown';
+}
 
 async function needsVerification() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
@@ -2118,7 +2304,7 @@ async function needsVerification() {
     if (!links || links.length === 0) return false;
     for (const link of links) {
         const result = await checkChannelMembership(tgUser.id, link.chatId);
-        if (result === false) return true;
+        if (result === 'not_joined') return true;
     }
     return false;
 }
@@ -2180,15 +2366,26 @@ function stopPeriodicRecheck() {
     stopClaimWindowTicker();
 }
 function trackAdClick() {
-    db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
-    db.ref('users/' + tgUser.id + '/lastActive').set(Date.now());
+    try {
+        db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
+        db.ref('users/' + tgUser.id + '/lastActive').set(Date.now());
+    } catch(e) {}
 }
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
     const offlineOverlay = document.getElementById('offlineOverlay');
     const indicator = document.getElementById('offlineIndicator');
-    if (!isOnline) { offlineOverlay.classList.add('active'); indicator.classList.add('show'); document.getElementById('app').style.display = 'none'; }
-    else { offlineOverlay.classList.remove('active'); indicator.classList.remove('show'); if (isBooted && !document.getElementById('joinModal').classList.contains('active')) document.getElementById('app').style.display = 'block'; }
+    if (!isOnline) {
+        offlineOverlay.classList.add('active');
+        indicator.classList.add('show');
+        document.getElementById('app').style.display = 'none';
+    } else {
+        offlineOverlay.classList.remove('active');
+        indicator.classList.remove('show');
+        if (isBooted && !document.getElementById('joinModal').classList.contains('active')) {
+            document.getElementById('app').style.display = 'block';
+        }
+    }
 }
 window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); });
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
@@ -2212,7 +2409,12 @@ async function calculateValidReferrals() {
     try {
         const refs = appState.user.referredUsers || {};
         const keys = Object.keys(refs);
-        if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
+        if (keys.length === 0) {
+            validReferralCount = 0;
+            allReferralDataCache.all = [];
+            allReferralDataCache.qualified = [];
+            return 0;
+        }
         let count = 0;
         const allData = [], qualifiedData = [];
         const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
@@ -2232,7 +2434,12 @@ async function calculateValidReferrals() {
         allReferralDataCache.all = allData;
         allReferralDataCache.qualified = qualifiedData;
         return count;
-    } catch(e) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
+    } catch(e) {
+        validReferralCount = 0;
+        allReferralDataCache.all = [];
+        allReferralDataCache.qualified = [];
+        return 0;
+    }
 }
 
 function getWithdrawLevel() {
@@ -2295,7 +2502,11 @@ function checkMaintenance() {
         }
         document.getElementById('app').style.display = 'none';
         return true;
-    } else { document.getElementById('maintenanceOverlay').classList.remove('active'); if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; } return false; }
+    } else {
+        document.getElementById('maintenanceOverlay').classList.remove('active');
+        if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+        return false;
+    }
 }
 function updateMaintenanceTimer() {
     if (!maintenanceEndTime) return;
@@ -2310,7 +2521,10 @@ function checkBan() {
         document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
         document.getElementById('app').style.display = 'none';
         return true;
-    } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
+    } else {
+        document.getElementById('bannedOverlay').classList.remove('active');
+        return false;
+    }
 }
 
 function renderAds() {
@@ -2403,14 +2617,23 @@ function renderNewTasks() {
         else if (submittedCount === 0) ribbon = '<span class="task-ribbon new">✨ New</span>';
         let actionHtml = '';
         let gradCls = gradClass;
-        if (isExpired) { actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`; gradCls += ' grad-disabled'; }
-        else if (isCool && cooldownRemain > 0) { actionHtml = `<div class="task-countdown" data-cooldown-task="${esc(taskId)}"><div class="cd-label">Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`; gradCls += ' grad-disabled'; }
-        else if (isDone && !isCool) { actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Done</button>`; }
-        else if (slotsLeft <= 0) { actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`; gradCls += ' grad-disabled'; }
-        else { actionHtml = `<button class="btn-act btn-start" data-task-id="${esc(taskId)}" onclick="openTaskSubmit(this.dataset.taskId)"><i class="fas fa-play"></i> Start</button>`; }
+        if (isExpired) {
+            actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`;
+            gradCls += ' grad-disabled';
+        } else if (isCool && cooldownRemain > 0) {
+            actionHtml = `<div class="task-countdown" data-cooldown-task="${esc(taskId)}"><div class="cd-label">Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`;
+            gradCls += ' grad-disabled';
+        } else if (isDone && !isCool) {
+            actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Done</button>`;
+        } else if (slotsLeft <= 0) {
+            actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`;
+            gradCls += ' grad-disabled';
+        } else {
+            actionHtml = `<button class="btn-act btn-start" data-task-id="${esc(taskId)}" onclick="openTaskSubmit(this.dataset.taskId)"><i class="fas fa-play"></i> Start</button>`;
+        }
         const expiryTextHtml = isExpired ? '⛔ Expired' : '⏳ ' + fmtTaskTime(expiryRemain);
         const deleteHtml = (isExpired && deleteRemain > 0) ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${esc(taskId)}"><i class="fas fa-trash-alt"></i> Auto-delete: <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span></div>` : '';
-        renderedHtml += `<div class="task-item ${gradCls}"><div class="task-inner"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;"><div style="flex:1;min-width:0;"><span class="task-emoji">${typeIcon}</span><span class="task-name">${esc(task.title)}</span><div class="task-cat-row"><div class="task-cat"><i class="fas fa-tag"></i> ${esc(task.category || typeLabel)}</div>${ribbon}</div></div><div class="task-reward-badge"><i class="fas fa-coins"></i> +${task.reward} ${sym}</div></div><div class="task-info-row"><div class="task-meta"><div class="meta-item"><i class="fas fa-users"></i> <span class="${slotClass}">${slotsLeft} slots left</span></div><div class="meta-item" data-expiry-task="${esc(taskId)}" data-expired="${isExpired ? '1' : '0'}"><i class="fas fa-clock"></i> <span class="expiry-text task-expiry-live ${isExpired ? 'expired' : ''}">${expiryTextHtml}</span></div>${deleteHtml}${isCool ? '<div class="meta-item" style="color:#6366f1;"><i class="fas fa-sync-alt"></i> 24hr repeatable</div>' : ''}</div>${actionHtml}</div>${totalSlots > 0 && totalSlots <= 1000 ? `<div class="task-progress-mini"><div class="bar" style="width:${slotProgress}%"></div></div>` : ''}</div></div>`;
+        renderedHtml += `<div class="task-item ${gradCls}"><div class="task-inner"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;"><div style="flex:1;min-width:0;"><span class="task-emoji">${typeIcon}</span><span class="task-name">${esc(task.title)}</span><div class="task-cat-row"><div class="task-cat"><i class="fas fa-tag"></i> ${esc(task.category || typeLabel)}</div>${ribbon}</div></div><div class="task-reward-badge"><i class="fas fa-coins"></i> +${esc(String(task.reward || 0))} ${sym}</div></div><div class="task-info-row"><div class="task-meta"><div class="meta-item"><i class="fas fa-users"></i> <span class="${slotClass}">${slotsLeft} slots left</span></div><div class="meta-item" data-expiry-task="${esc(taskId)}" data-expired="${isExpired ? '1' : '0'}"><i class="fas fa-clock"></i> <span class="expiry-text task-expiry-live ${isExpired ? 'expired' : ''}">${expiryTextHtml}</span></div>${deleteHtml}${isCool ? '<div class="meta-item" style="color:#6366f1;"><i class="fas fa-sync-alt"></i> 24hr repeatable</div>' : ''}</div>${actionHtml}</div>${totalSlots > 0 && totalSlots <= 1000 ? `<div class="task-progress-mini"><div class="bar" style="width:${slotProgress}%"></div></div>` : ''}</div></div>`;
     });
     if (!hasVisibleTask) el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>No tasks available</p></div>';
     else el.innerHTML = renderedHtml;
@@ -2440,7 +2663,7 @@ function openTaskSubmit(taskId) {
     taskState.currentStatus = status;
     if (type === 'survey' || type === 'youtube_video_view') {
         const pending = { taskId, taskTitle: task.title || 'Task', reward: task.reward || 0, url: task.url || task.link || '', timer: parseInt(task.timer) || 60, startedAt: Date.now() };
-        localStorage.setItem(type === 'survey' ? 'pending_survey' : 'pending_youtube', JSON.stringify(pending));
+        localStorage.setItem(userLSKey(type === 'survey' ? 'pending_survey' : 'pending_youtube'), JSON.stringify(pending));
         window.location.href = (type === 'survey' ? 'survey.html' : 'youtube.html');
         return;
     }
@@ -2450,6 +2673,7 @@ function openTaskSubmit(taskId) {
     document.getElementById('taskSubmitCategory').textContent = task.category || getTaskTypeLabel(task.type);
     document.getElementById('taskSubmitReward').textContent = task.reward + ' ' + sym;
     document.getElementById('taskSubmitTimeLeft').textContent = task.timeLimit || '';
+    /* ✅ FIX #8: XSS-safe task description */
     document.getElementById('taskSubmitDesc').textContent = task.description || '';
     const contentArea = document.getElementById('taskContentArea');
     const actionBtn = document.getElementById('taskSubmitActionBtn');
@@ -2595,7 +2819,7 @@ async function loadTaskHistory() {
             const icon = getTaskTypeIcon(taskMeta.type);
             const dateStr = sub.createdAt ? new Date(sub.createdAt).toLocaleString('en-GB') : '';
             const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `<div class="th-reason-box"><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
-            const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${sub.fileUrl}" target="_blank" style="color:#6C5CE7;font-weight:700;">View</a></div></div>` : '';
+            const fileHtml = sub.fileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${esc(sub.fileUrl)}" target="_blank" rel="noopener" style="color:#6C5CE7;font-weight:700;">View</a></div></div>` : '';
             let actionHtml = '';
             if (taskMeta.type && hasCooldown(taskMeta.type) && status === 'approved') {
                 const remain = getCooldownRemaining(tid);
@@ -2661,7 +2885,7 @@ async function loadWithdrawHistory() {
         items.slice(0, HISTORY_LIMIT).forEach(w => {
             const col = w.status === 'pending' ? '#f39c12' : w.status === 'approved' ? '#2ecc71' : '#e74c3c';
             const txt = w.status === 'pending' ? '⏳ Pending' : w.status === 'approved' ? '✅ Approved' : '❌ Rejected';
-            html += `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;"><div><span style="font-weight:700;font-size:1.1rem;">${w.amount} TK</span><div style="font-size:0.75rem;color:#999;">Level ${w.level||1} • ${shortDate(w.timestamp)}</div></div><span style="color:${col};font-weight:600;padding:4px 12px;border-radius:20px;background:${col}20;">${txt}</span></div>`;
+            html += `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;"><div><span style="font-weight:700;font-size:1.1rem;">${esc(String(w.amount))} TK</span><div style="font-size:0.75rem;color:#999;">Level ${esc(String(w.level||1))} • ${shortDate(w.timestamp)}</div></div><span style="color:${col};font-weight:600;padding:4px 12px;border-radius:20px;background:${col}20;">${txt}</span></div>`;
         });
         document.getElementById('historyList').innerHTML = html;
     } catch (e) {}
@@ -2686,7 +2910,7 @@ function loadCommissionHistory() {
     let html = '';
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const initial = (it.fromName || 'U').charAt(0).toUpperCase();
-        html += `<div class="comm-item"><div class="comm-item-left"><div class="comm-item-avatar">${initial}</div><div class="comm-item-info"><h5>${esc(it.fromName)}</h5><p><i class="fas fa-coins"></i> ${esc(it.source || 'Earning')} • ${it.rate || REF_COMMISSION_RATE}%</p></div></div><div class="comm-item-amt">+${Number(it.commission || 0).toFixed(4)}<small>${shortDate(it.timestamp)}</small></div></div>`;
+        html += `<div class="comm-item"><div class="comm-item-left"><div class="comm-item-avatar">${esc(initial)}</div><div class="comm-item-info"><h5>${esc(it.fromName)}</h5><p><i class="fas fa-coins"></i> ${esc(it.source || 'Earning')} • ${esc(String(it.rate || REF_COMMISSION_RATE))}%</p></div></div><div class="comm-item-amt">+${Number(it.commission || 0).toFixed(4)}<small>${shortDate(it.timestamp)}</small></div></div>`;
     });
     container.innerHTML = html;
 }
@@ -2694,7 +2918,12 @@ function loadAdHistory() {
     const container = document.getElementById('adHistoryList');
     const hist = appState.user.adHistory || {};
     const keys = Object.keys(hist);
-    if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-play-circle"></i><p>No ads watched</p></div>'; document.getElementById('histAdCount').textContent = '0'; document.getElementById('histAdTotal').textContent = '0'; return; }
+    if (keys.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-play-circle"></i><p>No ads watched</p></div>';
+        document.getElementById('histAdCount').textContent = '0';
+        document.getElementById('histAdTotal').textContent = '0';
+        return;
+    }
     const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     let adCount = 0, totalEarned = 0;
     items.forEach(it => { if (it.type !== 'bonus') adCount++; totalEarned += Number(it.amount || 0); });
@@ -2702,7 +2931,7 @@ function loadAdHistory() {
     items.slice(0, HISTORY_LIMIT).forEach(it => {
         const isBonus = it.type === 'bonus', isClaim = it.type === 'adclaim', isExtra = it.type === 'extra';
         const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : (isExtra ? 'fa-bolt' : 'fa-play-circle'));
-        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : 'Ad Slot ' + it.slot));
+        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : 'Ad Slot ' + esc(String(it.slot))));
         html += `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ${icon}"></i></div><div class="history-info"><h5>${title}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount || 0).toFixed(2)} TK</div></div>`;
     });
     container.innerHTML = html;
@@ -2711,8 +2940,14 @@ function loadAdHistory() {
 }
 
 async function sendNotification(userId, message) {
-    if (!BOT_TOKEN) return;
-    try { await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: userId, text: message, parse_mode: 'HTML' }) }); } catch (e) {}
+    if (!BOT_TOKEN || String(BOT_TOKEN).indexOf('REPLACE') === 0) return;
+    try {
+        await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: userId, text: message, parse_mode: 'HTML' })
+        });
+    } catch (e) {}
 }
 
 async function updateTextElements() {
@@ -2783,53 +3018,34 @@ async function loadLeaderboard() {
         const pic = u.photo || 'https://via.placeholder.com/100';
         const name = (u.name || 'User').substring(0, 12);
         const bal = u.balance.toFixed(2);
-        const statsHtml = `<div class="rank-stats-col"><div class="rank-badge badge-bal">${bal} ${sym}</div><div class="rank-badge badge-ref"><i class="fas fa-users"></i> ${u.referrals} Refs</div></div>`;
+        const statsHtml = `<div class="rank-stats-col"><div class="rank-badge badge-bal">${bal} ${sym}</div><div class="rank-badge badge-ref"><i class="fas fa-users"></i> ${esc(String(u.referrals))} Refs</div></div>`;
         const crownIcon = u._isCustom ? '👑' : '';
         const safeImg = 'onerror="this.src=\'https://via.placeholder.com/100\'"';
-        if (i === 0) p1 = `<div class="podium-item rank-1"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
-        else if (i === 1) p2 = `<div class="podium-item rank-2"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
-        else if (i === 2) p3 = `<div class="podium-item rank-3"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
-        else listHtml += `<div class="leader-row ${u._isCustom ? 'is-custom' : ''}"><div class="leader-left"><div class="rank-num">#${i+1}</div><img src="${pic}" ${safeImg}><span>${esc(name)} ${crownIcon}</span></div><div class="leader-right-stats"><span class="leader-right-bal">${bal} ${sym}</span><span class="leader-right-ref"><i class="fas fa-users"></i> ${u.referrals} Refs</span></div></div>`;
+        if (i === 0) p1 = `<div class="podium-item rank-1"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else if (i === 1) p2 = `<div class="podium-item rank-2"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else if (i === 2) p3 = `<div class="podium-item rank-3"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else listHtml += `<div class="leader-row ${u._isCustom ? 'is-custom' : ''}"><div class="leader-left"><div class="rank-num">#${i+1}</div><img src="${esc(pic)}" ${safeImg}><span>${esc(name)} ${crownIcon}</span></div><div class="leader-right-stats"><span class="leader-right-bal">${bal} ${sym}</span><span class="leader-right-ref"><i class="fas fa-users"></i> ${esc(String(u.referrals))} Refs</span></div></div>`;
     });
     document.getElementById('podium-area').innerHTML = p2 + p1 + p3;
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet</p>';
 }
 
-async function checkChannelMembership(userId, chatId, retries = 2) {
-    if (!userId || !chatId) return null;
-    const rawChatId = String(chatId).trim();
-    const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
-    for (let attempt = 0; attempt <= retries; attempt++) {
-        try {
-            const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=' + encodeURIComponent(formattedChatId) + '&user_id=' + userId;
-            const response = await fetch(url, { cache: 'no-store' });
-            const data = await response.json();
-            if (data.ok && data.result) {
-                const status = data.result.status;
-                if (status === 'left' || status === 'kicked') return false;
-                if (status === 'restricted') return data.result.is_member === true;
-                return ['member', 'administrator', 'creator'].includes(status);
-            }
-            if (data.error_code === 400 || data.error_code === 403) return null;
-            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
-            return null;
-        } catch (e) {
-            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
-            return null;
-        }
-    }
-    return null;
-}
-
 function renderChannelButtons() {
-    const container = document.getElementById('channelLinks'); container.innerHTML = '';
+    const container = document.getElementById('channelLinks');
+    container.innerHTML = '';
     const links = getCurrentChannelLinks() || [];
     links.forEach(link => {
         const btn = document.createElement('a');
-        btn.className = 'channel-btn'; btn.dataset.chatId = link.chatId;
-        btn.href = 'https://t.me/' + link.chatId; btn.target = '_blank';
+        btn.className = 'channel-btn';
+        btn.dataset.chatId = link.chatId;
+        btn.href = 'https://t.me/' + link.chatId;
+        btn.target = '_blank';
         btn.innerHTML = '<i class="fa-brands fa-telegram"></i> ' + esc(link.label);
-        btn.onclick = (e) => { e.preventDefault(); openLink('https://t.me/' + link.chatId); setTimeout(checkAndUpdateStatus, 2500); };
+        btn.onclick = (e) => {
+            e.preventDefault();
+            openLink('https://t.me/' + link.chatId);
+            setTimeout(checkAndUpdateStatus, 2500);
+        };
         container.appendChild(btn);
     });
     const statusEl = document.getElementById('verifyStatus');
@@ -2840,6 +3056,7 @@ function renderChannelButtons() {
     setTimeout(checkAndUpdateStatus, 2000);
 }
 
+/* ✅ FIX #9: handle 'unknown' state gracefully (don't block user) */
 async function checkAndUpdateStatus() {
     if (isCheckingChannel) return;
     isCheckingChannel = true;
@@ -2847,24 +3064,42 @@ async function checkAndUpdateStatus() {
         const userId = tgUser.id;
         const buttons = document.querySelectorAll('.channel-btn');
         const statusEl = document.getElementById('verifyStatus');
-        if (!userId || userId === '123456') { statusEl.textContent = '⚠️ Unable'; statusEl.className = 'verify-status error'; return; }
-        let allJoined = true, hasUnknown = false;
-        for (const btn of buttons) {
-            const joined = await checkChannelMembership(userId, btn.dataset.chatId);
-            if (joined === true) btn.classList.add('joined');
-            else if (joined === false) { btn.classList.remove('joined'); allJoined = false; }
-            else { btn.classList.remove('joined'); hasUnknown = true; }
+        if (!userId || userId === '123456') {
+            statusEl.textContent = '⚠️ Unable';
+            statusEl.className = 'verify-status error';
+            return;
         }
-        if (allJoined && buttons.length > 0) {
+        let allJoined = true, hasUnknown = false, anyNotJoined = false;
+        for (const btn of buttons) {
+            const result = await checkChannelMembership(userId, btn.dataset.chatId);
+            if (result === 'joined') btn.classList.add('joined');
+            else if (result === 'not_joined') {
+                btn.classList.remove('joined');
+                allJoined = false;
+                anyNotJoined = true;
+            } else {
+                btn.classList.remove('joined');
+                hasUnknown = true;
+            }
+        }
+        // ✅ Only block if at least one is definitively not joined
+        if (allJoined && !hasUnknown && buttons.length > 0) {
             statusEl.textContent = '✅ All joined!';
             statusEl.className = 'verify-status success';
             if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
             await markVerified();
-            setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
-        } else {
+            setTimeout(() => {
+                document.getElementById('joinModal').classList.remove('active');
+                showAppAfterVerify();
+            }, 800);
+        } else if (anyNotJoined) {
             const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
-            statusEl.textContent = '❌ Join ' + remaining + ' more' + (hasUnknown ? ' (checking...)' : '');
+            statusEl.textContent = '❌ Join ' + remaining + ' more';
             statusEl.className = 'verify-status error';
+        } else {
+            // All unknown — don't block, assume joined
+            statusEl.textContent = '⏳ Checking...';
+            statusEl.className = 'verify-status loading';
         }
     } finally { isCheckingChannel = false; }
 }
@@ -2883,7 +3118,9 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
-/* === 10. MAIN BOOT / ONLOAD === */
+/* =========================================================
+   === 12. MAIN BOOT
+   ========================================================= */
 window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
@@ -2892,11 +3129,16 @@ window.onload = () => {
     if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
 
     if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
-    else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
+    else setTimeout(() => {
+        if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
+    }, 1500);
 
     document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
-        else {
+        if (document.hidden) {
+            stopPeriodicRecheck();
+            stopAdminSlider();
+            closeMenuPopup();
+        } else {
             updateLastActive();
             if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
                 const resetTime = Number(appState.user.adsResetTime || 0);
@@ -2924,16 +3166,26 @@ window.onload = () => {
         }
     });
 
-    window.addEventListener('beforeunload', () => { updateLastActive(); stopPeriodicRecheck(); stopAdminSlider(); if (verifyInterval) clearInterval(verifyInterval); });
+    window.addEventListener('beforeunload', () => {
+        updateLastActive();
+        stopPeriodicRecheck();
+        stopAdminSlider();
+        if (verifyInterval) clearInterval(verifyInterval);
+    });
 
+    /* ✅ FIX #7: throttle config listener to avoid repeated heavy re-renders */
+    let configDebounce = null;
     db.ref('config').on('value', snap => {
-        if (snap.exists()) {
-            appState.config = snap.val();
+        if (!snap.exists()) return;
+        const newConfig = snap.val();
+        if (configDebounce) clearTimeout(configDebounce);
+        configDebounce = setTimeout(() => {
+            appState.config = newConfig;
             if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
-            
+
             if (appState.config.adminRevenue) {
                 const ar = appState.config.adminRevenue;
                 adminRevenueConfig = {
@@ -2944,7 +3196,7 @@ window.onload = () => {
                     taskMaxDaily: Number(ar.taskMaxDaily) || 20
                 };
             }
-            
+
             const parsedMinBal = Number(appState.config.minReferralBalance);
             MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
@@ -2963,8 +3215,8 @@ window.onload = () => {
                 updateExtraRewardUI();
             }
             if (appState.config.monetagZone) {
-                MONETAG_ZONE = String(appState.config.monetagZone);
-                if (MONETAG_ZONE !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(MONETAG_ZONE);
+                const zone = String(appState.config.monetagZone);
+                if (zone !== MONETAG_ZONE) { MONETAG_ZONE = zone; reloadMonetagSDK(zone); }
             }
             if (appState.config.maintenance && appState.config.maintenance.active) {
                 document.getElementById('maintenanceOverlay').classList.add('active');
@@ -2984,18 +3236,27 @@ window.onload = () => {
             slots.forEach(slot => {
                 if (!slot) return;
                 if (slot.customCode && String(slot.customCode).trim()) return;
-                if (slot.network === 'monetag' && slot.id) { if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id); }
-                else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
-                    const sc = document.createElement('script'); sc.id = 'adsg-script'; sc.src = 'https://sad.adsgram.ai/js/sad.min.js'; sc.async = true; document.body.appendChild(sc);
+                if (slot.network === 'monetag' && slot.id) {
+                    if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
+                } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
+                    const sc = document.createElement('script');
+                    sc.id = 'adsg-script';
+                    sc.src = 'https://sad.adsgram.ai/js/sad.min.js';
+                    sc.async = true;
+                    document.body.appendChild(sc);
                 } else if (slot.network === 'gigapub' && !document.getElementById('giga-script')) {
-                    const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; sc.async = true; document.body.appendChild(sc);
+                    const sc = document.createElement('script');
+                    sc.id = 'giga-script';
+                    sc.src = 'https://ad.gigapub.tech/script?id=1';
+                    sc.async = true;
+                    document.body.appendChild(sc);
                 }
             });
             if (isBooted) {
                 updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
                 if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
             }
-        }
+        }, 250);
     });
 
     const userRef = db.ref('users/' + tgUser.id);
@@ -3004,7 +3265,8 @@ window.onload = () => {
         if (!snap.exists()) {
             appState.user = {
                 id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
-                balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, adHistory: {}, referredUsers: {}, verifiedChannels: {},
+                balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, adHistory: {},
+                referredUsers: {}, verifiedChannels: {},
                 totalCommission: 0, commissionHistory: {}, referredBy: null,
                 adsResetTime: 0, dailyBonusDate: '',
                 lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
@@ -3030,7 +3292,7 @@ window.onload = () => {
                     toast('⚠️ This device already referred!');
                 } else {
                     let handled = false;
-                    
+
                     if (String(refBy).length >= 6) {
                         try {
                             const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
@@ -3058,7 +3320,7 @@ window.onload = () => {
                             }
                         } catch(e) { console.warn('[ADMIN REF]', e); }
                     }
-                    
+
                     if (!handled) {
                         const refSnap = await db.ref('users/' + refBy).once('value');
                         if (refSnap.exists()) {
@@ -3067,9 +3329,21 @@ window.onload = () => {
                             let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
                             await userRef.update({ referredBy: String(refBy) });
                             appState.user.referredBy = String(refBy);
-                            await db.ref('users/' + refBy).update({ referrals: (r.referrals || 0) + 1, balance: (r.balance || 0) + rBonus, totalEarned: (r.totalEarned || 0) + rBonus });
-                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', joinedAt: Date.now(), username: tgUser.username || '' });
-                            await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                            await db.ref('users/' + refBy).update({
+                                referrals: (r.referrals || 0) + 1,
+                                balance: (r.balance || 0) + rBonus,
+                                totalEarned: (r.totalEarned || 0) + rBonus
+                            });
+                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({
+                                name: tgUser.first_name || 'User',
+                                joinedAt: Date.now(),
+                                username: tgUser.username || ''
+                            });
+                            await db.ref('deviceReferrals/' + deviceId).set({
+                                referrerId: refBy,
+                                referredId: tgUser.id,
+                                timestamp: Date.now()
+                            });
                             await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
                             handled = true;
                         }
@@ -3078,37 +3352,44 @@ window.onload = () => {
             }
         }
 
-        userRef.on('value', async liveSnap => {
-            if (liveSnap.exists()) {
-                appState.user = liveSnap.val();
-                if (!appState.user.dailyAds) appState.user.dailyAds = {};
-                if (!appState.user.taskHistory) appState.user.taskHistory = {};
-                if (!appState.user.adHistory) appState.user.adHistory = {};
-                if (!appState.user.referredUsers) appState.user.referredUsers = {};
-                if (!appState.user.verifiedChannels) appState.user.verifiedChannels = {};
-                if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
-                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
-                if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
-                if (appState.user.adsResetTime === undefined) appState.user.adsResetTime = 0;
-                if (appState.user.dailyBonusDate === undefined) appState.user.dailyBonusDate = '';
-                if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
-                if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
-                if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
-                if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
-                if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
-                if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
-                if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
-                if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
-                if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
-                if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
+        /* ✅ FIX #7: userRef.on('value') is now debounced for UI updates */
+        let uiDebounce = null;
+        userRef.on('value', liveSnap => {
+            if (!liveSnap.exists()) return;
+            appState.user = liveSnap.val();
+            // Ensure fields
+            if (!appState.user.dailyAds) appState.user.dailyAds = {};
+            if (!appState.user.taskHistory) appState.user.taskHistory = {};
+            if (!appState.user.adHistory) appState.user.adHistory = {};
+            if (!appState.user.referredUsers) appState.user.referredUsers = {};
+            if (!appState.user.verifiedChannels) appState.user.verifiedChannels = {};
+            if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
+            if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+            if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+            if (appState.user.adsResetTime === undefined) appState.user.adsResetTime = 0;
+            if (appState.user.dailyBonusDate === undefined) appState.user.dailyBonusDate = '';
+            if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
+            if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
+            if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
+            if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
+            if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
+            if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
+            if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
+            if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
+            if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
+            if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
 
-                if (appState.user.isBanned) {
-                    document.getElementById('bannedOverlay').classList.add('active');
-                    document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
-                    document.getElementById('app').style.display = 'none';
-                    return;
-                } else document.getElementById('bannedOverlay').classList.remove('active');
+            if (appState.user.isBanned) {
+                document.getElementById('bannedOverlay').classList.add('active');
+                document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
+                document.getElementById('app').style.display = 'none';
+                return;
+            } else {
+                document.getElementById('bannedOverlay').classList.remove('active');
+            }
 
+            if (uiDebounce) clearTimeout(uiDebounce);
+            uiDebounce = setTimeout(async () => {
                 const resetTime = Number(appState.user.adsResetTime || 0);
                 if (resetTime > 0 && resetTime <= Date.now()) await forceCycleReset();
 
@@ -3118,9 +3399,11 @@ window.onload = () => {
                 if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
                 if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
                 if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+            }, 150);
 
-                if (!isBooted) {
-                    isBooted = true;
+            if (!isBooted) {
+                isBooted = true;
+                (async () => {
                     if (checkMaintenance()) { setLoading(false); return; }
                     if (checkBan()) { setLoading(false); return; }
                     setupUserSubmissionsListener();
@@ -3131,7 +3414,9 @@ window.onload = () => {
                         renderChannelButtons();
                     } else {
                         channelVerified = true;
-                        if (channelLinks && channelLinks.length > 0) { try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {} }
+                        if (channelLinks && channelLinks.length > 0) {
+                            try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {}
+                        }
                         if (isOnline) {
                             document.getElementById('app').style.display = 'block';
                             setLoading(false);
@@ -3145,13 +3430,15 @@ window.onload = () => {
                             if (appState.user.dailyBonusDate !== today) showBonus();
                             startAdminSlider();
                             startMonetagInAppInterstitial(MONETAG_ZONE);
-                        } else document.getElementById('offlineOverlay').classList.add('active');
+                        } else {
+                            document.getElementById('offlineOverlay').classList.add('active');
+                        }
                     }
                     const pendingSurvey = checkPendingSurveyReward();
                     if (pendingSurvey) setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500);
                     const pendingYoutube = checkPendingYoutubeReward();
                     if (pendingYoutube) setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500);
-                }
+                })();
             }
         });
     });
