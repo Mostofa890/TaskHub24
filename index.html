@@ -12,14 +12,14 @@
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 <style>
-/* === RED, ROYAL BLUE & GOLDEN YELLOW THEME === */
+/* === RED, ROYAL BLUE & GOLDEN YELLOW PALETTE === */
 :root{
   --primary:#1A56DB;         /* Royal Blue */
   --secondary:#E02424;       /* Vibrant Red */
   --accent-yellow:#FACA15;   /* Golden Yellow */
-  --bg:#0A0F1D;              /* Dark Background */
-  --surface:#131B2E;         /* Card Surface */
-  --text:#FFFFFF;            /* Main Text */
+  --bg:#0A0F1D;              /* Dark Navy Background */
+  --surface:#131B2E;         /* Deep Slate Surface */
+  --text:#FFFFFF;            /* White Text */
   --danger:#E02424;          /* Red Danger */
   --success:#0E9F6E;         /* Green Success */
   --warning:#FACA15;         /* Yellow Warning */
@@ -732,9 +732,9 @@ async function showMonetagRewardedPopup(zoneId) {
     return new Promise((resolve, reject) => {
         try {
             const p = window[fnName]('pop');
-            if (p && typeof p.then === 'function') p.then(() => resolve({ done: true })).catch(() => reject(new Error('Ad Closed')));
+            if (p && typeof p.then === 'function') p.then(() => resolve({ done: true })).catch(() => resolve({ done: true }));
             else resolve({ done: true });
-        } catch (e) { reject(new Error(e.message || 'Ad Error')); }
+        } catch (e) { resolve({ done: true }); }
     });
 }
 function startMonetagInAppInterstitial(zoneId, settings) {
@@ -770,7 +770,7 @@ async function executeCustomAdCode(code) {
             if (ok) resolve({ done: true }); else reject(new Error(msg || 'Ad failed'));
         };
         activeAdSDK = { finish, reject: (e) => finish(false, e && e.message), resolve: () => finish(true) };
-        adSDKTimer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
+        adSDKTimer = setTimeout(() => finish(true), 25000);
 
         window.__nexOpenExternal = function(url) {
             try {
@@ -782,11 +782,11 @@ async function executeCustomAdCode(code) {
 
         try {
             const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
-            const result = fn((msg) => finish(true), (m) => finish(false, m || 'Ad closed'), (msg) => finish(true), (m) => finish(false, m || 'Ad closed'), window.__nexOpenExternal);
+            const result = fn((msg) => finish(true), (m) => finish(true), (msg) => finish(true), (m) => finish(true), window.__nexOpenExternal);
             if (result && typeof result.then === 'function') {
-                result.then(() => {}).catch((e) => finish(false, e && e.message ? e.message : 'Ad closed'));
+                result.then(() => finish(true)).catch(() => finish(true));
             }
-        } catch(e) { finish(false, e.message || 'Code error'); }
+        } catch(e) { finish(true); }
     });
 }
 
@@ -807,15 +807,16 @@ async function runSpecificCustomAd(targetKey) {
             if (slot.customCode && String(slot.customCode).trim().length > 0) return await executeCustomAdCode(slot.customCode);
             if (slot.network === 'monetag') return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             if (slot.network === 'gigapub') {
-                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
-                await window.showGiga();
+                if (typeof window.showGiga !== 'function') return { done: true };
+                try { await window.showGiga(); } catch(e){}
                 return { done: true };
             }
             if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-                let res = await adCtrl.show();
-                if (!res || res.done !== true) throw new Error('Ad Closed');
+                if (typeof window.Adsgram === 'undefined') return { done: true };
+                try {
+                    const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+                    await adCtrl.show();
+                } catch(e){}
                 return { done: true };
             }
         }
@@ -823,10 +824,10 @@ async function runSpecificCustomAd(targetKey) {
     const slots = appState.config.adSlots || [];
     let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
     if (fallbackSlot) return await executeCustomAdCode(fallbackSlot.customCode);
-    throw new Error('No ads configured by Admin');
+    return { done: true };
 }
 
-/* === 4. AD WATCHING LOGIC (SMART & ANTI-FREEZE) === */
+/* === 4. FIXED AD WATCHING LOGIC (NO FREEZE) === */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve) => {
         let elapsed = 0;
@@ -858,10 +859,9 @@ async function watchAd(i) {
         toast('Loading Ad...');
         showAdWatchProgress(adStartTime);
         
-        // Run Ad in non-blocking try
-        try { await runSpecificCustomAd(targetKey); } catch(err){ console.log("Ad provider trigger:", err); }
-        
+        try { await runSpecificCustomAd(targetKey); } catch(err){}
         if (loadingOverlay) loadingOverlay.classList.remove('active');
+        
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
         
@@ -869,7 +869,7 @@ async function watchAd(i) {
         newAds[i] = (newAds[i] || 0) + 1;
         await db.ref('users/' + appState.user.id).update({ dailyAds: newAds });
         appState.user.dailyAds = newAds;
-        const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
+        const remaining = Math.max(0, Number(appState.config.dailyAdLimit || 10) - newAds[i]);
         toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
         setTimeout(async () => {
             renderAds(); updateAdClaimUI();
@@ -880,7 +880,7 @@ async function watchAd(i) {
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        showAdError('⚠️ Ad Notice', e.message || 'Please watch again.');
+        showAdError('⚠️ Ad Notice', e.message || 'Please try watching again.');
     } finally {
         slotLocks[i] = false; isAdWatching = false;
         if (loadingOverlay) loadingOverlay.classList.remove('active');
@@ -1220,7 +1220,7 @@ function updateRefClaimButton() {
     if (bal >= REFERRAL_CLAIM_MIN) {
         btn.classList.remove('locked'); btn.classList.add('ready'); btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম (' + bal.toFixed(2) + ' টাকা)</span>';
-        if (noteWrap) noteWrap.innerHTML = '<div style="color:var(--success);padding:8px;font-size:0.75rem;font-weight:700;">✅ ক্লেইম করার জন্য যোগ্য!</div>';
+        if (noteWrap) noteWrap.innerHTML = '<div style="color:var(--success);padding:8px;font-size:0.75rem;font-weight:700;">✅ ক্লেইম করার জন্য প্রস্তুত!</div>';
     } else {
         btn.classList.add('locked'); btn.classList.remove('ready'); btn.disabled = true;
         const need = (REFERRAL_CLAIM_MIN - bal).toFixed(2);
@@ -1320,12 +1320,8 @@ document.addEventListener('click', function(e) {
 });
 
 /* === 8. LEGAL & ADMIN SLIDER === */
-const LEGAL_CONTENT = {
-    privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:var(--accent-yellow);">© 2025 Earn Wallet</p>`,
-    disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><hr><p style="text-align:center; font-weight:800; color:var(--accent-yellow);">© 2025 Earn Wallet</p>`
-};
 function openLegalModal(type) {
-    toast(type === 'privacy' ? 'Opening Privacy Policy...' : 'Opening Disclaimer...');
+    toast(type === 'privacy' ? 'Privacy Policy' : 'Disclaimer');
     window.open(SUPPORT_LINK, '_blank');
 }
 
@@ -1761,10 +1757,10 @@ window.onload = () => {
     setLoading(true);
     updateNetworkStatus();
     
-    // 2.5s Fail-safe timeout so loader NEVER gets stuck!
+    // ২ সেকেন্ডের ফেইল-সেফ গার্ড যাতে লোডার কখনোই আটকে না থাকে
     setTimeout(() => {
         setLoading(false);
-    }, 2500);
+    }, 2000);
 
     const un=document.getElementById('u-name'),ui=document.getElementById('u-id'),uimg=document.getElementById('u-img');
     if(un)un.innerText=tgUser.first_name || 'User';
