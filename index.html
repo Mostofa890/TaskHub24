@@ -952,11 +952,15 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
+    // ✅ ১. যদি ইতিমধ্যে কোনো অ্যাড চলছে, তবে নতুন অ্যাড ওপেন হতে দেবে না
+    if (isAdWatching) {
+        throw new Error('Already watching an ad. Please wait.');
+    }
+
     // ✅ Priority 1: Direct Custom Ad Button for this target
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
     
-    // Fallback: If no specific target, check for adSlot1
     if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
         btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
     }
@@ -965,34 +969,40 @@ async function runSpecificCustomAd(targetKey) {
         return await executeCustomAdCode(btn.code);
     }
     
-    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2 targets)
-    if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
-        const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
+    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2, extraReward, dailyBonus targets)
+    if (targetKey === 'adSlot1' || targetKey === 'adSlot2' || targetKey === 'extraReward' || targetKey === 'dailyBonus') {
+        let slotIndex = -1;
+        
+        // টার্গেট অনুযায়ী স্লট সিলেক্ট করা (extraReward এবং dailyBonus এর জন্য adSlot1 বা adSlot2 ব্যবহার হবে)
+        if (targetKey === 'adSlot1' || targetKey === 'extraReward' || targetKey === 'dailyBonus') slotIndex = 0;
+        if (targetKey === 'adSlot2') slotIndex = 1;
+
         const slots = appState.config.adSlots || [];
-        const slot = slots[slotIndex]; // ✅ এখানে slot ভ্যারিয়েবলটি ডিফাইন করা হলো
+        const slot = slots[slotIndex]; 
         
         if (slot) {
-            // ✅ যদি অ্যাডমিন প্যানেল থেকে স্লটের ভেতর কাস্টম কোড দেওয়া থাকে
+            // ১. কাস্টম কোড থাকলে সেটাই রান হবে
             if (slot.customCode && String(slot.customCode).trim().length > 0) {
                 return await executeCustomAdCode(slot.customCode);
             }
             
-            // যদি সরাসরি Monetag সিলেক্ট করা থাকে
+            // ২. Monetag সিলেক্ট করা থাকলে শুধু Monetag রান হবে
             if (slot.network === 'monetag') {
                 return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
             }
             
-            // যদি সরাসরি GigaPub সিলেক্ট করা থাকে
+            // ৩. GigaPub সিলেক্ট করা থাকলে শুধু GigaPub রান হবে
             if (slot.network === 'gigapub') {
                 if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
                 return await new Promise((resolve, reject) => {
-                    window.showGiga("main")
+                    // GigaPub-এর জন্য প্যারামিটার ছাড়া কল করা হলো
+                    window.showGiga()
                         .then(() => resolve({ done: true }))
                         .catch(e => reject(new Error('Ad closed or failed')));
                 });
             }
             
-            // যদি সরাসরি Adsgram সিলেক্ট করা থাকে
+            // ৪. Adsgram সিলেক্ট করা থাকলে শুধু Adsgram রান হবে
             if (slot.network === 'adsgram') {
                 if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
                 const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
@@ -1168,18 +1178,25 @@ async function watchExtraRewardAd() {
     const today = todayStr();
     const count = getTodayExtraRewardCount();
     if (count >= extraRewardConfig.dailyLimit) { toast('❌ আজকের লিমিট শেষ!'); updateExtraRewardUI(); return; }
-    if (isAdWatching) { toast('Please wait!'); return; }
+    
+    // ✅ এখানে isAdWatching চেক করা হচ্ছে যাতে একসাথে দুইটা অ্যাড না ওপেন হয়
+    if (isAdWatching) { toast('Please wait, another ad is running!'); return; }
+    
     const btn = document.getElementById('erBtn');
     const btnText = document.getElementById('erBtnText');
-    isAdWatching = true;
+    isAdWatching = true; // ✅ অ্যাড শুরু হওয়ার আগেই লক করা হলো
     if (btn) btn.disabled = true;
     if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading...';
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
+    
     try {
+        // ✅ এখানে 'extraReward' টার্গেট পাঠানো হলো
         await runSpecificCustomAd('extraReward');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
+        
+        // ... বাকি রিওয়ার্ড লজিক ...
         const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
         const userReward = split.userReward;
@@ -1202,9 +1219,16 @@ async function watchExtraRewardAd() {
     } catch (e) {
         hideAdWatchProgress();
         const em = e.message || '';
-        if (em === 'Ad Skipped Too Early') showAdError('⚠️ Ad Skipped!', 'কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দেখুন।');
-        else showAdError('⚠️ Ad Error', em || 'Ad লোড হয়নি।');
-    } finally { isAdWatching = false; updateExtraRewardUI(); hideAdWatchProgress(); }
+        if (em.includes('not watched') || em.includes('Skip')) {
+            showAdError('⚠️ Ad Skipped!', 'কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দেখুন।');
+        } else {
+            showAdError('⚠️ Ad Error', em || 'Ad লোড হয়নি।');
+        }
+    } finally { 
+        isAdWatching = false; 
+        updateExtraRewardUI(); 
+        hideAdWatchProgress(); 
+    }
 }
 
 function calculateAdTotalEarnings() {
