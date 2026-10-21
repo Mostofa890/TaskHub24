@@ -1038,7 +1038,21 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
-    if (isAdWatching) throw new Error('Already watching an ad. Please wait.');
+    // ✅ FIX: Auto-Timeout to clear stuck "isAdWatching" flag
+    if (isAdWatching) {
+        if (!adWatchTimeout) {
+            adWatchTimeout = setTimeout(() => {
+                isAdWatching = false; 
+                adWatchTimeout = null;
+            }, 30000);
+        }
+        throw new Error('Already watching an ad. Please wait.');
+    }
+    
+    if (adWatchTimeout) {
+        clearTimeout(adWatchTimeout);
+        adWatchTimeout = null;
+    }
 
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
@@ -1086,7 +1100,6 @@ async function runSpecificCustomAd(targetKey) {
 
     throw new Error('No ads configured by Admin');
 }
-
 /* =========================================================
    === 5. AD WATCHING LOGIC
    ========================================================= */
