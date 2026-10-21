@@ -8,12 +8,27 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<!-- Adexium Widget Script -->
+<script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+
+<!-- Adexium Widget Script (Updated) -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        const adexiumWidget = new AdexiumWidget({
+            wid: '6f532c8b-6a2a-45b3-89ec-3ae0e3c82604', 
+            adFormat: 'interstitial'
+        });
+        adexiumWidget.autoMode();
+    });
+</script>
+
 <!-- Montage Zone Script -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
+<!-- Gigapub Script -->
+<script src="https://ad.gigapub.tech/script?id=8758"></script>
+
 <style>
+/* ... আপনার CSS স্টাইলগুলো এখানে থাকবে ... */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
