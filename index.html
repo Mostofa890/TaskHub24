@@ -1038,20 +1038,20 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
-    // ✅ FIX: Auto-Timeout to clear stuck "isAdWatching" flag
+    // ✅ FIX: এরর না দেখিয়ে চুপচাপ রিলিজ করার ব্যবস্থা
     if (isAdWatching) {
-        if (!adWatchTimeout) {
-            adWatchTimeout = setTimeout(() => {
-                isAdWatching = false; 
-                adWatchTimeout = null;
-            }, 30000);
+        if (!window.adWatchTimeout) {
+            window.adWatchTimeout = setTimeout(() => {
+                isAdWatching = false;
+                window.adWatchTimeout = null;
+            }, 15000); // ১৫ সেকেন্ড পর অটো রিলিজ
         }
         throw new Error('Already watching an ad. Please wait.');
     }
-    
-    if (adWatchTimeout) {
-        clearTimeout(adWatchTimeout);
-        adWatchTimeout = null;
+
+    if (window.adWatchTimeout) {
+        clearTimeout(window.adWatchTimeout);
+        window.adWatchTimeout = null;
     }
 
     const buttons = appState.config.customAdButtons || [];
