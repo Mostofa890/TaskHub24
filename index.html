@@ -9,10 +9,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<!-- Adexium Widget Script -->
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
+<!-- Montage Zone Script -->
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 <style>
-/* === সব স্টাইল অপরিবর্তিত === */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
@@ -648,18 +649,16 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const tg = window.Telegram.WebApp;
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
 if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
 
 const BOT_USERNAME = "TaskHubBD24Bot";
 const MINI_APP_NAME = "taskhub";
-const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
 let MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
-const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const AD_DISPLAY_SLOTS = 2;
@@ -706,7 +705,7 @@ let appState = {
     config: { adSlots: [], customAdButtons: [], newTasks: {} }
 };
 let isBooted = false;
-let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : { id: '123456', first_name: 'Guest User', photo_url: 'https://via.placeholder.com/100' };
+let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
 let channelVerified = false;
 let channelLinks = [];
 let verifyInterval = null;
@@ -751,47 +750,55 @@ function hasCooldown(type) {
 function updateLastActive() {
     if (!tgUser || !tgUser.id || tgUser.id === '123456') return;
     if (!isOnline) return;
-    try { db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()).catch(() => {}); } catch(e) {}
+    try {
+        db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()).catch(() => {});
+    } catch(e) {}
 }
 
-function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id; }
+function getRefLink() {
+    return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id;
+}
 function getShareLink() { return getRefLink(); }
-
 function openShareModal() {
     const link = getRefLink();
     const inputEl = document.getElementById('shareLinkInput');
     if (inputEl) inputEl.textContent = link;
-    const el = document.getElementById('shareModal');
-    if (el) { el.classList.add('active'); document.body.style.overflow = 'hidden'; }
+    document.getElementById('shareModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 function closeShareModal() {
-    const el = document.getElementById('shareModal');
-    if (el) el.classList.remove('active');
+    document.getElementById('shareModal').classList.remove('active');
     document.body.style.overflow = '';
 }
 function copyShareLink() {
     const link = getRefLink();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(() => toast('✅ লিংক কপি হয়েছে!')).catch(() => fallbackCopy(link));
-    } else fallbackCopy(link);
-}
-function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-    toast('✅ লিংক কপি হয়েছে!');
+    navigator.clipboard.writeText(link).then(() => {
+        toast('✅ লিংক কপি হয়েছে!');
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = link;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        toast('✅ লিংক কপি হয়েছে!');
+    });
 }
 function shareViaWhatsApp() {
-    const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:\n' + getRefLink());
+    const link = getRefLink();
+    const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:\n' + link);
     window.open('https://wa.me/?text=' + text, '_blank');
 }
 function shareViaTelegram() {
-    const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=' + encodeURIComponent('🎉 Join this amazing earning app!');
-    if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
+    const link = getRefLink();
+    const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:');
+    const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text;
+    if (tg && tg.openTelegramLink) tg.openTelegramLink(url);
+    else window.open(url, '_blank');
 }
 function shareViaFacebook() {
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(getRefLink()), '_blank');
+    const link = getRefLink();
+    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link), '_blank');
 }
 function copyLink() { copyShareLink(); }
 function shareLink() { openShareModal(); }
@@ -800,7 +807,8 @@ function showAdWatchProgress(startTime) {
     const el = document.getElementById('adWatchProgress');
     const timeEl = document.getElementById('awpTime');
     if (!el || !timeEl) return;
-    el.classList.add('show'); el.classList.remove('ready');
+    el.classList.add('show');
+    el.classList.remove('ready');
     if (adWatchProgressTimer) clearInterval(adWatchProgressTimer);
     const update = () => {
         const elapsed = (Date.now() - startTime) / 1000;
@@ -818,12 +826,12 @@ function hideAdWatchProgress() {
 }
 
 /* === 3. CUSTOM AD ENGINE (ADMIN TO USER) === */
-function isMonetagSDKReady(zoneId) { return typeof window['show_' + String(zoneId)] === 'function'; }
-
+function isMonetagSDKReady(zoneId) {
+    return typeof window['show_' + String(zoneId)] === 'function';
+}
 function reloadMonetagSDK(zoneId) {
     zoneId = String(zoneId || '').trim();
     if (!zoneId) return;
-    monetagSDKReady = false;
     document.querySelectorAll('script[data-zone]').forEach(s => { if (s.dataset.zone !== zoneId) s.remove(); });
     if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
         const sc = document.createElement('script');
@@ -832,7 +840,6 @@ function reloadMonetagSDK(zoneId) {
         sc.dataset.sdk = 'show_' + zoneId;
         sc.async = true;
         sc.onload = () => { monetagSDKReady = true; };
-        sc.onerror = () => { console.warn('[MONETAG] SDK load failed'); };
         document.head.appendChild(sc);
     }
     MONETAG_ZONE = zoneId;
@@ -848,22 +855,17 @@ async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
 async function showMonetagRewardedPopup(zoneId) {
     zoneId = String(zoneId || MONETAG_ZONE);
     const fnName = 'show_' + zoneId;
-    lastMonetagShowTime = Date.now();
-    return new Promise((resolve) => {
+    const now = Date.now();
+    if (now - lastMonetagShowTime < MONETAG_MIN_INTERVAL) throw new Error('Please wait a few seconds');
+    if (!isMonetagSDKReady(zoneId)) {
+        const ok = await waitForMonetagSDK(zoneId, 4000);
+        if (!ok) throw new Error('Ad Network Not Ready');
+    }
+    lastMonetagShowTime = now;
+    return new Promise((resolve, reject) => {
         try {
-            if (typeof window[fnName] === 'function') {
-                const p = window[fnName]('pop');
-                if (p && typeof p.then === 'function') {
-                    p.then(() => resolve({ done: true })).catch(() => resolve({ done: true }));
-                } else {
-                    resolve({ done: true });
-                }
-            } else {
-                resolve({ done: true });
-            }
-        } catch (e) {
-            resolve({ done: true });
-        }
+            window[fnName]('pop').then(() => resolve({ done: true })).catch(() => reject(new Error('Ad Closed')));
+        } catch (e) { reject(new Error(e.message || 'Ad Error')); }
     });
 }
 function startMonetagInAppInterstitial(zoneId, settings) {
@@ -883,92 +885,167 @@ let activeAdSDK = null;
 let adSDKTimer = null;
 
 async function executeCustomAdCode(code) {
-    if (!code || typeof code !== 'string' || !code.trim()) return { done: true };
+    if (!code || typeof code !== 'string' || !code.trim()) {
+        throw new Error('No custom code provided');
+    }
     if (activeAdSDK) {
         try { activeAdSDK.reject(new Error('Superseded')); } catch(e) {}
         if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
         activeAdSDK = null;
     }
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let done = false;
         const finish = (ok, msg) => {
             if (done) return;
             done = true;
             if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
             if (activeAdSDK && activeAdSDK.finish === finish) activeAdSDK = null;
-            resolve({ done: true });
+            if (ok) resolve({ done: true });
+            else reject(new Error(msg || 'Ad failed'));
         };
-        activeAdSDK = { finish, reject: () => finish(true), resolve: () => finish(true) };
-        adSDKTimer = setTimeout(() => finish(true), 15000);
-
+        activeAdSDK = { finish, reject: (e) => finish(false, e && e.message), resolve: () => finish(true) };
+        adSDKTimer = setTimeout(() => finish(false, 'Ad timeout'), 90000);
+        
+        const wrappedResolve = () => finish(true);
+        const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
+        
+        window.resolve = wrappedResolve;
+        window.reject = wrappedReject;
+        window.adResolve = wrappedResolve;
+        window.adReject = wrappedReject;
+        window.__adSuccess = wrappedResolve;
+        window.__adFail = wrappedReject;
+        
         window.__nexOpenExternal = function(url) {
+            const safeUrl = safeHttpUrl(url);
+            if (!safeUrl) return;
             try {
-                if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_instant_view: false });
-                else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) tg.openTelegramLink(url);
-                else window.open(url, '_blank', 'noopener');
-            } catch(e) { try { window.open(url, '_blank'); } catch(err) {} }
+                if (tg && typeof tg.openLink === 'function') tg.openLink(safeUrl, { try_instant_view: false });
+                else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(safeUrl)) tg.openTelegramLink(safeUrl);
+                else window.open(safeUrl, '_blank', 'noopener,noreferrer');
+            } catch(e) { try { window.open(safeUrl, '_blank', 'noopener,noreferrer'); } catch(err) {} }
         };
-
+        
         try {
             const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
-            const result = fn(() => finish(true), () => finish(true), () => finish(true), () => finish(true), window.__nexOpenExternal);
+            const result = fn(wrappedResolve, wrappedReject, wrappedResolve, wrappedReject, window.__nexOpenExternal);
             if (result && typeof result.then === 'function') {
-                result.then(() => finish(true)).catch(() => finish(true));
+                result.then(() => {}).catch((e) => wrappedReject(e && e.message ? e.message : 'Ad closed'));
             }
-        } catch(e) { finish(true); }
+        } catch(e) { finish(false, e.message || 'Code error'); }
     });
 }
 
 async function runSpecificCustomAd(targetKey) {
+    // ✅ Priority 1: Direct Custom Ad Button for this target
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
+    
+    // Fallback: If no specific target, check for adSlot1
     if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
         btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
     }
+
     if (btn && btn.code && String(btn.code).trim()) {
         return await executeCustomAdCode(btn.code);
     }
+    
+    // ✅ Priority 2: Ad Slots (for adSlot1, adSlot2 targets)
     if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
         const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
         const slots = appState.config.adSlots || [];
         const slot = slots[slotIndex];
+        
         if (slot) {
-            if (slot.customCode && String(slot.customCode).trim().length > 0) return await executeCustomAdCode(slot.customCode);
-            if (slot.network === 'monetag') return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
+            if (slot.customCode && String(slot.customCode).trim().length > 0) {
+                return await executeCustomAdCode(slot.customCode);
+            }
+            if (slot.network === 'monetag') {
+                return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
+            }
             if (slot.network === 'gigapub') {
-                if (typeof window.showGiga === 'function') {
-                    try { await window.showGiga(); } catch(e){}
-                }
+                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
+                await window.showGiga();
                 return { done: true };
             }
             if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram !== 'undefined') {
-                    try {
-                        const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-                        await adCtrl.show();
-                    } catch(e){}
-                }
+                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
+                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
+                let res = await adCtrl.show();
+                if (!res || res.done !== true) throw new Error('Ad Closed');
                 return { done: true };
             }
         }
     }
+    
+    // ✅ Fallback: Try any available custom slot
     const slots = appState.config.adSlots || [];
     let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
-    if (fallbackSlot) return await executeCustomAdCode(fallbackSlot.customCode);
-    return { done: true };
+    if (fallbackSlot) {
+        return await executeCustomAdCode(fallbackSlot.customCode);
+    }
+    
+    throw new Error('No ads configured by Admin');
 }
 
-/* === 4. FIXED AD WATCHING LOGIC (NO FREEZE & NO HANG) === */
+/* === 4. AD WATCHING LOGIC === */
 function waitForMinTime(minSeconds) {
-    return new Promise((resolve) => {
-        let sec = 0;
-        const timer = setInterval(() => {
-            sec++;
-            if (sec >= minSeconds) {
-                clearInterval(timer);
-                resolve();
+    return new Promise((resolve, reject) => {
+        let awayTime = 0, wentAwayAt = 0, lastReturnAt = 0, hasWatchedEnough = false;
+        let isCurrentlyHidden = false, isSettled = false, pollId = null;
+        const startTime = Date.now();
+        const maxWait = 120;
+        const settle = (ok, err) => {
+            if (isSettled) return;
+            isSettled = true;
+            cleanup();
+            if (ok) resolve(); else reject(new Error(err || 'Ad closed'));
+        };
+        const markHidden = () => {
+            if (isCurrentlyHidden) return;
+            isCurrentlyHidden = true;
+            if (!wentAwayAt) wentAwayAt = Date.now();
+        };
+        const markVisible = () => {
+            if (!isCurrentlyHidden) return;
+            isCurrentlyHidden = false;
+            if (wentAwayAt) {
+                const away = (Date.now() - wentAwayAt) / 1000;
+                awayTime += away;
+                wentAwayAt = 0;
+                lastReturnAt = Date.now();
+                if (awayTime >= minSeconds) { hasWatchedEnough = true; settle(true); }
             }
-        }, 1000);
+        };
+        const onVisibility = () => { if (document.hidden) markHidden(); else markVisible(); };
+        const onBlur = () => markHidden();
+        const onFocus = () => markVisible();
+        const check = () => {
+            if (isSettled) return;
+            const elapsed = (Date.now() - startTime) / 1000;
+            const isVisible = !document.hidden;
+            if (hasWatchedEnough || awayTime >= minSeconds) { settle(true); return; }
+            if (lastReturnAt && awayTime > 0 && awayTime < minSeconds && isVisible) {
+                const sinceReturn = (Date.now() - lastReturnAt) / 1000;
+                if (sinceReturn >= 2) { settle(false, 'Ad Skipped Too Early'); return; }
+            }
+            if (!isCurrentlyHidden && !wentAwayAt && elapsed >= minSeconds && awayTime === 0) { settle(true); return; }
+            if (elapsed >= maxWait) {
+                if (awayTime >= minSeconds) settle(true);
+                else settle(false, 'Ad timeout');
+            }
+        };
+        const cleanup = () => {
+            document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('blur', onBlur);
+            window.removeEventListener('focus', onFocus);
+            if (pollId) { clearInterval(pollId); pollId = null; }
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+        window.addEventListener('blur', onBlur);
+        window.addEventListener('focus', onFocus);
+        pollId = setInterval(check, 300);
+        setTimeout(check, 100);
     });
 }
 
@@ -976,39 +1053,35 @@ async function watchAd(i) {
     if (slotLocks[i]) return;
     if (isAdWatching) { toast('Please wait!'); return; }
     if (!isOnline) { toast('No internet!'); return; }
-    slotLocks[i] = true; 
-    isAdWatching = true;
+    slotLocks[i] = true; isAdWatching = true;
     trackAdClick();
+    const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
     const adStartTime = Date.now();
     const targetKey = i === 0 ? 'adSlot1' : 'adSlot2';
     try {
-        const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
         if (!slot) throw new Error('Ad not configured');
         const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
         if (!hasCustomCode && (!slot.network || slot.network === 'none')) throw new Error('Ad not configured');
-        
         if (loadingOverlay) loadingOverlay.classList.add('active');
         toast('Loading Ad...');
         showAdWatchProgress(adStartTime);
-        
-        try {
-            await runSpecificCustomAd(targetKey);
-        } catch(err) {
-            console.log("Ad execution warning:", err);
-        }
-        
+        await runSpecificCustomAd(targetKey);
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
-        
-        let newAds = Object.assign({}, appState.user.dailyAds || {});
-        newAds[i] = (newAds[i] || 0) + 1;
-        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds });
+        const dailyLimit = Number(appState.config.dailyAdLimit || 10);
+        const adCountRef = db.ref('users/' + appState.user.id + '/dailyAds/' + i);
+        const adCountResult = await adCountRef.transaction(current => {
+            const count = Number(current || 0);
+            if (count >= dailyLimit) return;
+            return count + 1;
+        });
+        if (!adCountResult.committed) throw new Error('Daily slot limit reached');
+        const newAds = { ...(appState.user.dailyAds || {}), [i]: Number(adCountResult.snapshot.val() || 0) };
         appState.user.dailyAds = newAds;
-        const remaining = Math.max(0, Number(appState.config.dailyAdLimit || 10) - newAds[i]);
+        const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
         toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
-        
         setTimeout(async () => {
             renderAds(); updateAdClaimUI();
             if (isAllDisplayAdsWatched()) { await startClaimWindowIfNeeded(); startAdsResetCountdown(); }
@@ -1018,11 +1091,22 @@ async function watchAd(i) {
     } catch (e) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
-        showAdError('⚠️ Ad Notice', e.message || 'Please try watching again.');
+        const em = e.message || '';
+        if (em === 'Ad Skipped Too Early') showAdError('⚠️ Ad Skipped Too Early!', 'You must watch at least ' + MIN_AD_WATCH_SECONDS + ' seconds.');
+        else if (em === 'Ad Closed' || em === 'Ad not completed') showAdError('⚠️ Ad Not Completed!', 'You closed the ad before it finished.');
+        else if (em === 'Ad timeout') showAdError('⚠️ Ad Timeout!', 'Please try again.');
+        else showAdError('⚠️ Ad Error', em || 'Error loading ad.');
     } finally {
         slotLocks[i] = false; isAdWatching = false;
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         hideAdWatchProgress();
+        if (!activeAdSDK) {
+            try {
+                delete window.resolve; delete window.reject; delete window.adResolve;
+                delete window.adReject; delete window.__adSuccess; delete window.__adFail;
+                delete window.__nexOpenExternal;
+            } catch(err) {}
+        }
     }
 }
 function startAdWatch(i) { watchAd(i); }
@@ -1049,14 +1133,14 @@ function updateExtraRewardUI() {
     const btnText = document.getElementById('erBtnText');
     if (countEl) countEl.textContent = count + '/' + limit;
     if (titleEl) titleEl.textContent = extraRewardConfig.title;
-    if (amountEl) amountEl.textContent = Number(extraRewardConfig.amount || 0).toFixed(2);
+    if (amountEl) amountEl.textContent = extraRewardConfig.amount.toFixed(2);
     if (infoEl) infoEl.textContent = extraRewardConfig.infoText;
     if (remaining <= 0) {
         if (btn) btn.disabled = true;
         if (btnText) btnText.textContent = 'আজকের লিমিট শেষ ✓';
     } else {
         if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Watch Ad & Earn +' + Number(extraRewardConfig.amount || 0).toFixed(2) + ' TK';
+        if (btnText) btnText.textContent = 'Watch Ad & Earn +' + extraRewardConfig.amount.toFixed(2) + ' TK';
     }
 }
 async function watchExtraRewardAd() {
@@ -1074,23 +1158,32 @@ async function watchExtraRewardAd() {
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
     try {
-        try { await runSpecificCustomAd('extraReward'); } catch(e){}
+        await runSpecificCustomAd('extraReward');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
-        const rewardAmount = Number(extraRewardConfig.amount || 0);
+        const rewardAmount = extraRewardConfig.amount;
         const split = computeCommissionSplit(rewardAmount);
         const userReward = split.userReward;
         const referrerCommission = split.referrerCommission;
-        const newCount = count + 1;
-        const newBal = Number(appState.user.balance || 0) + userReward;
-        const newEarn = Number(appState.user.totalEarned || 0) + userReward;
-        let adHist = Object.assign({}, appState.user.adHistory || {});
-        adHist['extra_' + Date.now()] = { slot: 'Extra Reward', amount: userReward, timestamp: Date.now(), type: 'extra' };
-        const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
-        if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
-        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, extraRewardDate: today, extraRewardCount: newCount, adHistory: adHist });
-        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
-        appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount; appState.user.adHistory = adHist;
+        const rewardTime = Date.now();
+        let newCount = 0;
+        const result = await db.ref('users/' + appState.user.id).transaction(user => {
+            if (!user) return;
+            const currentCount = user.extraRewardDate === today ? Number(user.extraRewardCount || 0) : 0;
+            if (currentCount >= Number(extraRewardConfig.dailyLimit || 0)) return;
+            newCount = currentCount + 1;
+            user.balance = Number(user.balance || 0) + userReward;
+            user.totalEarned = Number(user.totalEarned || 0) + userReward;
+            user.extraRewardDate = today;
+            user.extraRewardCount = newCount;
+            user.adHistory = user.adHistory || {};
+            user.adHistory['extra_' + rewardTime] = { slot: 'Extra Reward', amount: userReward, timestamp: rewardTime, type: 'extra' };
+            const keys = Object.keys(user.adHistory).sort((a,b) => (user.adHistory[b].timestamp||0) - (user.adHistory[a].timestamp||0));
+            if (keys.length > 100) keys.slice(100).forEach(k => delete user.adHistory[k]);
+            return user;
+        });
+        if (!result.committed) throw new Error('Daily reward limit reached');
+        appState.user = result.snapshot.val();
         if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
         await giveAdminCommission(userReward, 'extra_reward');
         await updateTextElements(); updateExtraRewardUI();
@@ -1098,472 +1191,2016 @@ async function watchExtraRewardAd() {
         if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
     } catch (e) {
         hideAdWatchProgress();
-        showAdError('⚠️ Ad Error', e.message || 'Ad লোড হয়নি।');
+        const em = e.message || '';
+        if (em === 'Ad Skipped Too Early') showAdError('⚠️ Ad Skipped!', 'কমপক্ষে ' + MIN_AD_WATCH_SECONDS + ' সেকেন্ড দেখুন।');
+        else showAdError('⚠️ Ad Error', em || 'Ad লোড হয়নি।');
     } finally { isAdWatching = false; updateExtraRewardUI(); hideAdWatchProgress(); }
 }
-  <script>
-/* === 1. INITIAL SETUP & FIREBASE CONFIG === */
-const firebaseConfig = {
-    apiKey: "AIzaSyC_WvNxSQQ58TcJhDcBw5NUrAZjOQe1T2g",
-    authDomain: "cat-coins-34d4c.firebaseapp.com",
-    databaseURL: "https://cat-coins-34d4c-default-rtdb.firebaseio.com",
-    projectId: "cat-coins-34d4c",
-    storageBucket: "cat-coins-34d4c.appspot.com",
-    messagingSenderId: "616291442045",
-    appId: "1:616291442045:android:9de76c46bfdc5edec60014"
+
+function calculateAdTotalEarnings() {
+    const slots = appState.config.adSlots || [];
+    let totalSlots = 0;
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot) continue;
+        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+        if (hasCustomCode || (slot.network && slot.network !== 'none')) totalSlots++;
+    }
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    const reward = Number(appState.config.adReward || 0.5);
+    return totalSlots * limit * reward;
+}
+function isAllDisplayAdsWatched() {
+    const slots = appState.config.adSlots || [];
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    let hasConfigured = false;
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot) continue;
+        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+        const configured = hasCustomCode || (slot.network && slot.network !== 'none');
+        if (!configured) continue;
+        hasConfigured = true;
+        if (Number((appState.user.dailyAds || {})[i] || 0) < limit) return false;
+    }
+    return hasConfigured;
+}
+function getClaimWindowRemaining() {
+    const startTime = Number(appState.user.claimWindowStartTime || 0);
+    if (!startTime) return 0;
+    const elapsed = Date.now() - startTime;
+    const remain = CLAIM_WINDOW_MS - elapsed;
+    return remain > 0 ? remain : 0;
+}
+async function startClaimWindowIfNeeded() {
+    if (!isAllDisplayAdsWatched()) return;
+    if (appState.user.adClaimedCurrentCycle === true) return;
+    if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return;
+    const now = Date.now();
+    appState.user.claimWindowStartTime = now;
+    try { await db.ref('users/' + appState.user.id + '/claimWindowStartTime').set(now); } catch(e) {}
+    startClaimWindowTicker();
+    updateClaimWindowUI();
+}
+function startClaimWindowTicker() {
+    if (claimWindowTimerInterval) return;
+    claimWindowTimerInterval = setInterval(() => {
+        updateClaimWindowUI();
+        const remain = getClaimWindowRemaining();
+        if (remain <= 0) updateAdClaimUI();
+    }, 1000);
+}
+function stopClaimWindowTicker() {
+    if (claimWindowTimerInterval) { clearInterval(claimWindowTimerInterval); claimWindowTimerInterval = null; }
+}
+function fmtHHMMSS(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+function updateClaimWindowUI() {
+    const timerEl = document.getElementById('claimWindowTimer');
+    const timeEl = document.getElementById('cwtTime');
+    const labelEl = document.getElementById('cwtLabel');
+    if (!timerEl || !timeEl) return;
+    const allWatched = isAllDisplayAdsWatched();
+    const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
+    if (!allWatched || alreadyClaimed) { timerEl.classList.remove('active'); return; }
+    const remain = getClaimWindowRemaining();
+    if (remain <= 0) {
+        timerEl.classList.add('active', 'expired');
+        if (labelEl) labelEl.textContent = 'Claim window expired!';
+        timeEl.textContent = '00:00:00';
+        return;
+    }
+    timerEl.classList.add('active');
+    timerEl.classList.remove('expired');
+    if (labelEl) labelEl.textContent = 'Claim Window:';
+    timeEl.textContent = fmtHHMMSS(remain);
+}
+function updateAdClaimUI() {
+    const total = calculateAdTotalEarnings();
+    const allWatched = isAllDisplayAdsWatched();
+    const alreadyClaimed = appState.user.adClaimedCurrentCycle === true;
+    const windowRemain = getClaimWindowRemaining();
+    const windowExpired = allWatched && !alreadyClaimed && appState.user.claimWindowStartTime > 0 && windowRemain <= 0;
+    const adTotalEl = document.getElementById('adTotalEarnings');
+    if (adTotalEl) adTotalEl.textContent = total.toFixed(2);
+    let watchedCount = 0, totalPossible = 0;
+    const slots = appState.config.adSlots || [];
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i];
+        if (!slot) continue;
+        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+        const configured = hasCustomCode || (slot.network && slot.network !== 'none');
+        if (!configured) continue;
+        totalPossible += limit;
+        watchedCount += Number((appState.user.dailyAds || {})[i] || 0);
+    }
+    const progressText = document.getElementById('adProgressText');
+    const progressFill = document.getElementById('adProgressFill');
+    if (progressText) progressText.textContent = watchedCount + ' / ' + totalPossible + ' Watched';
+    if (progressFill) progressFill.style.width = (totalPossible > 0 ? (watchedCount / totalPossible) * 100 : 0) + '%';
+    const btn = document.getElementById('adClaimBtn');
+    if (!btn) return;
+    if (!allWatched) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>Watch All Ads</span>';
+    } else if (alreadyClaimed) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> <span>Already Claimed ✓</span>';
+    } else if (windowExpired) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-clock"></i> <span>Window Expired</span>';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>Claim ' + total.toFixed(2) + ' TK</span>';
+    }
+}
+async function claimAdEarnings() {
+    if (!isOnline) { toast('No internet!'); return; }
+    if (!isAllDisplayAdsWatched()) { toast('❌ সব অ্যাড দেখুন!'); return; }
+    if (appState.user.adClaimedCurrentCycle === true) { toast('❌ Already claimed!'); updateAdClaimUI(); return; }
+    const windowRemain = getClaimWindowRemaining();
+    if (appState.user.claimWindowStartTime > 0 && windowRemain <= 0) { toast('⏰ Claim window expired!'); updateAdClaimUI(); return; }
+    const total = calculateAdTotalEarnings();
+    if (total <= 0) { toast('❌ No ads configured'); return; }
+    const split = computeCommissionSplit(total);
+    const userReward = split.userReward;
+    const btn = document.getElementById('adClaimBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
+    try {
+        const claimTime = Date.now();
+        const result = await db.ref('users/' + appState.user.id).transaction(user => {
+            if (!user || user.adClaimedCurrentCycle === true) return;
+            const slotList = appState.config.adSlots || [];
+            const dailyLimit = Number(appState.config.dailyAdLimit || 10);
+            let hasConfigured = false;
+            for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+                const slot = slotList[i];
+                const configured = slot && ((slot.customCode && String(slot.customCode).trim()) || (slot.network && slot.network !== 'none'));
+                if (!configured) continue;
+                hasConfigured = true;
+                if (Number((user.dailyAds || {})[i] || 0) < dailyLimit) return;
+            }
+            if (!hasConfigured) return;
+            const startTime = Number(user.claimWindowStartTime || 0);
+            if (startTime > 0 && Date.now() - startTime >= CLAIM_WINDOW_MS) return;
+            user.balance = Number(user.balance || 0) + userReward;
+            user.totalEarned = Number(user.totalEarned || 0) + userReward;
+            user.adClaimedTotal = Number(user.adClaimedTotal || 0) + userReward;
+            user.adClaimedCurrentCycle = true;
+            user.adHistory = user.adHistory || {};
+            user.adHistory['claim_' + claimTime] = { slot: 'Claim', amount: userReward, timestamp: claimTime, type: 'adclaim' };
+            const keys = Object.keys(user.adHistory).sort((a,b) => (user.adHistory[b].timestamp||0) - (user.adHistory[a].timestamp||0));
+            if (keys.length > 100) keys.slice(100).forEach(k => delete user.adHistory[k]);
+            return user;
+        });
+        if (!result.committed) throw new Error('Claim is already used, incomplete, or expired');
+        appState.user = result.snapshot.val();
+        if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, total, 'Ad Claim');
+        await giveAdminCommission(userReward, 'ad_claim');
+        await updateTextElements(); renderAds(); updateClaimWindowUI();
+        toast('✅ ' + userReward.toFixed(2) + ' TK claimed!');
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    } catch (e) { toast('❌ Failed: ' + e.message); updateAdClaimUI(); }
+}
+
+/* === 6. ADMIN COMMISSION LOGIC === */
+async function giveAdminCommission(userEarnedAmount, sourceType) {
+    try {
+        const adminCode = appState.user.referredByAdminCode;
+        if (!adminCode) return false;
+        const mode = adminRevenueConfig.mode;
+        if (mode !== 'referral_commission' && mode !== 'hybrid') return false;
+        const rate = Number(adminRevenueConfig.refCommissionRate || 5);
+        if (rate <= 0) return false;
+        const commission = Number(userEarnedAmount) * rate / 100;
+        if (commission <= 0) return false;
+        const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(adminCode).once('value');
+        if (!adminsSnap.exists()) return false;
+        let adminId = null, adminData = null;
+        adminsSnap.forEach(child => { adminId = child.key; adminData = child.val(); });
+        if (!adminId || !adminData) return false;
+        const today = new Date().toDateString();
+        const logs = adminData.commissionLogs || {};
+        let todayTotal = 0;
+        Object.values(logs).forEach(log => {
+            if (log.type === 'referral' && new Date(log.timestamp).toDateString() === today) todayTotal += Number(log.amount || 0);
+        });
+        const maxDaily = Number(adminRevenueConfig.refMaxDaily || 50);
+        const finalCommission = Math.min(commission, Math.max(0, maxDaily - todayTotal));
+        if (finalCommission <= 0) return false;
+        const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+        logs[logId] = {
+            type: 'referral', source: sourceType || 'user_earning',
+            fromUserId: String(appState.user.id), fromUserName: appState.user.name || 'User',
+            userEarned: Number(userEarnedAmount), amount: finalCommission, rate: rate,
+            timestamp: Date.now()
+        };
+        const logKeys = Object.keys(logs).sort((a,b) => (logs[b].timestamp||0) - (logs[a].timestamp||0));
+        if (logKeys.length > 200) logKeys.slice(200).forEach(k => delete logs[k]);
+        await db.ref('admins/' + adminId).update({
+            balance: Number(adminData.balance || 0) + finalCommission,
+            totalRevenue: Number(adminData.totalRevenue || 0) + finalCommission,
+            totalRefCommission: Number(adminData.totalRefCommission || 0) + finalCommission,
+            commissionLogs: logs
+        });
+        try {
+            await db.ref('superAdminRevenue').push({
+                source: 'admin_referral_commission', adminId, adminCode,
+                userId: String(appState.user.id), userEarned: Number(userEarnedAmount),
+                adminShare: finalCommission, superShare: Number(userEarnedAmount) - finalCommission,
+                timestamp: Date.now()
+            });
+        } catch(e) {}
+        return true;
+    } catch(e) { console.error('[ADMIN COMM ERROR]', e); return false; }
+}
+
+function switchRefTab(tab) {
+    currentRefTab = tab;
+    const tabs = ['refTabTotal','refTabQualified','refTabIncome'];
+    const panes = ['refPaneTotal','refPaneQualified','refPaneIncome'];
+    tabs.forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
+    panes.forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
+    if (tab === 'total') { document.getElementById('refTabTotal')?.classList.add('active'); document.getElementById('refPaneTotal')?.classList.add('active'); }
+    else if (tab === 'qualified') { document.getElementById('refTabQualified')?.classList.add('active'); document.getElementById('refPaneQualified')?.classList.add('active'); }
+    else { document.getElementById('refTabIncome')?.classList.add('active'); document.getElementById('refPaneIncome')?.classList.add('active'); }
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+function updateRefTabCounts() {
+    const totalEl = document.getElementById('refTabTotalCount');
+    const qualEl = document.getElementById('refTabQualifiedCount');
+    const incEl = document.getElementById('refTabIncomeCount');
+    if (totalEl) totalEl.textContent = allReferralDataCache.all.length;
+    if (qualEl) qualEl.textContent = allReferralDataCache.qualified.length;
+    if (incEl) incEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
+}
+function renderReferralList() {
+    updateRefTabCounts();
+    const refQualifiedMinText = document.getElementById('refQualifiedMinText');
+    if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
+    const totalContainer = document.getElementById('myReferralsList');
+    if (allReferralDataCache.all.length === 0) {
+        totalContainer.innerHTML = '<div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div>';
+    } else {
+        let html = '';
+        allReferralDataCache.all.slice(0, HISTORY_LIMIT).forEach(u => {
+            const initial = (u.name || 'U').charAt(0).toUpperCase();
+            const balClass = u.qualified ? 'qualified' : 'not-qualified';
+            const checkMark = u.qualified ? '<span class="ref-badge-check">✅</span>' : '';
+            html += `<div class="ref-user-item"><div class="ref-user-left"><div class="ref-user-avatar">${esc(initial)}</div><div class="ref-user-info"><h5>${esc(u.name)}</h5><p>ID: ${esc(u.id)}</p></div></div><div class="ref-user-bal ${balClass}">💰 ${Number(u.balance || 0).toFixed(2)} TK ${checkMark}</div></div>`;
+        });
+        totalContainer.innerHTML = html;
+    }
+    const qualContainer = document.getElementById('myQualifiedReferralsList');
+    if (allReferralDataCache.qualified.length === 0) {
+        qualContainer.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>এখনো Qualified নেই</p></div>';
+    } else {
+        let html = '';
+        allReferralDataCache.qualified.slice(0, HISTORY_LIMIT).forEach(u => {
+            const initial = (u.name || 'U').charAt(0).toUpperCase();
+            html += `<div class="ref-user-item" style="background:#f0fff9;"><div class="ref-user-left"><div class="ref-user-avatar" style="background:linear-gradient(135deg,#00b894,#00cec9);">${esc(initial)}</div><div class="ref-user-info"><h5 style="color:#065f46;">${esc(u.name)} ✅</h5><p style="color:#10b981;">ID: ${esc(u.id)}</p></div></div><div class="ref-user-bal qualified">💰 ${Number(u.balance || 0).toFixed(2)} TK</div></div>`;
+        });
+        qualContainer.innerHTML = html;
+    }
+    const ribEl = document.getElementById('refIncomeBalance');
+    if (ribEl) ribEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
+    updateRefClaimButton();
+    loadCommissionHistory();
+}
+function updateRefClaimButton() {
+    const bal = Number(appState.user.referralBalance || 0);
+    const btn = document.getElementById('refClaimBtn');
+    const noteWrap = document.getElementById('refClaimNoteWrap');
+    if (!btn) return;
+    if (bal >= REFERRAL_CLAIM_MIN) {
+        btn.classList.remove('locked'); btn.classList.add('ready'); btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>এখনই ক্লেইম (' + bal.toFixed(2) + ' টাকা)</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> যোগ্য!</div>';
+    } else {
+        btn.classList.add('locked'); btn.classList.remove('ready'); btn.disabled = true;
+        const need = (REFERRAL_CLAIM_MIN - bal).toFixed(2);
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>আরও ' + need + ' টাকা প্রয়োজন</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> <b>' + REFERRAL_CLAIM_MIN + ' টাকা</b> হলে সক্রিয় হবে।</div>';
+    }
+}
+async function claimReferralIncome() {
+    if (!isOnline) { toast('No internet!'); return; }
+    const btn = document.getElementById('refClaimBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
+    try {
+        let claimedAmount = 0;
+        const result = await db.ref('users/' + appState.user.id).transaction(user => {
+            if (!user) return;
+            const currentReferralBalance = Number(user.referralBalance || 0);
+            if (currentReferralBalance < REFERRAL_CLAIM_MIN) return;
+            claimedAmount = currentReferralBalance;
+            user.balance = Number(user.balance || 0) + currentReferralBalance;
+            user.referralBalance = 0;
+            return user;
+        });
+        if (!result.committed) throw new Error('Referral balance is below the claim minimum');
+        appState.user = result.snapshot.val();
+        await updateTextElements(); renderReferralList();
+        toast('✅ ' + claimedAmount.toFixed(2) + ' TK added!');
+    } catch (e) { toast('❌ ' + e.message); }
+    finally { updateRefClaimButton(); }
+}
+
+/* === 7. TASKS LOGIC === */
+function getTaskDaysFromLimit(task) {
+    const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
+    return daysMatch ? parseInt(daysMatch[1]) : 7;
+}
+function getTaskTimeRemaining(task) {
+    if (!task || !task.createdAt) return null;
+    const days = getTaskDaysFromLimit(task);
+    return (task.createdAt + days * 24 * 60 * 60 * 1000) - Date.now();
+}
+function getTaskAutoDeleteRemaining(task) {
+    if (!task || !task.createdAt) return null;
+    const days = getTaskDaysFromLimit(task);
+    return (task.createdAt + (days + 1) * 24 * 60 * 60 * 1000) - Date.now();
+}
+function fmtTaskTime(ms) {
+    if (ms == null || ms <= 0) return '00:00:00';
+    const totalSec = Math.floor(ms / 1000);
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (d > 0) return d + 'd ' + String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm';
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+function startTaskExpiryTicker() {
+    stopTaskExpiryTicker();
+    taskExpiryTickerInterval = setInterval(() => {
+        if (!isBooted || !isOnline) return;
+        const tasks = appState.config.newTasks || {};
+        let needsRerender = false;
+        Object.keys(tasks).forEach(taskId => {
+            const task = tasks[taskId];
+            if (!task) return;
+            if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
+            const deleteRemain = getTaskAutoDeleteRemaining(task);
+            if (deleteRemain !== null && deleteRemain <= 0) { needsRerender = true; return; }
+            const expiryWrap = document.querySelector('[data-expiry-task="' + taskId + '"]');
+            if (expiryWrap) {
+                const remain = getTaskTimeRemaining(task);
+                const wasExpired = expiryWrap.dataset.expired === '1';
+                const isNowExpired = remain <= 0;
+                if (isNowExpired && !wasExpired) needsRerender = true;
+                else if (!isNowExpired && !wasExpired) {
+                    const textEl = expiryWrap.querySelector('.expiry-text');
+                    if (textEl) textEl.textContent = '⏳ ' + fmtTaskTime(remain);
+                }
+            }
+        });
+        if (needsRerender) renderNewTasks();
+    }, 1000);
+}
+function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
+
+(function initAntiHack() {
+    document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
+    document.addEventListener('keydown', (e) => {
+        const isBlocked = e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) || (e.ctrlKey && ['U','u'].includes(e.key));
+        if (isBlocked) { e.preventDefault(); e.stopPropagation(); return false; }
+    }, true);
+    document.addEventListener('selectstart', (e) => { e.preventDefault(); });
+    document.addEventListener('dragstart', (e) => e.preventDefault());
+})();
+
+function toggleMenuPopup(e) {
+    if (e) e.stopPropagation();
+    const popup = document.getElementById('menuPopup');
+    if (popup.classList.contains('show')) popup.classList.remove('show');
+    else popup.classList.add('show');
+}
+function closeMenuPopup() { const popup = document.getElementById('menuPopup'); if (popup) popup.classList.remove('show'); }
+document.addEventListener('click', function(e) {
+    const popup = document.getElementById('menuPopup');
+    const dotsBtn = document.querySelector('.dots-btn');
+    if (popup && popup.classList.contains('show')) {
+        if (!popup.contains(e.target) && (!dotsBtn || !dotsBtn.contains(e.target))) popup.classList.remove('show');
+    }
+});
+
+/* === 8. LEGAL & ADMIN SLIDER === */
+const LEGAL_CONTENT = {
+    privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
+    disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const tg = window.Telegram.WebApp;
-if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
+function openLegalModal(type) {
+    const modal = document.getElementById('legalModal');
+    const title = document.getElementById('legalModalTitle');
+    const body = document.getElementById('legalModalBody');
+    if (type === 'privacy') { title.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy'; body.innerHTML = LEGAL_CONTENT.privacy; }
+    else { title.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer'; body.innerHTML = LEGAL_CONTENT.disclaimer; }
+    modal.classList.add('active'); document.body.style.overflow = 'hidden';
+}
+function closeLegalModal() { document.getElementById('legalModal').classList.remove('active'); document.body.style.overflow = ''; }
+document.getElementById('legalModal').addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
 
-const BOT_USERNAME = "TaskHubBD24Bot";
-const MINI_APP_NAME = "taskhub";
-const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
-const ADMIN_ID = "7755558465";
-const SUPPORT_LINK = "https://t.me/NexEarn2Support";
+async function checkIfUserIsAdmin() {
+    if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
+    try {
+        const adminsSnap = await db.ref('admins').once('value');
+        let found = false;
+        adminsSnap.forEach(child => {
+            const a = child.val();
+            if (String(a.telegramId) === String(tgUser.id) || String(a.id) === String(tgUser.id) || String(child.key) === String(tgUser.id)) found = true;
+        });
+        return found;
+    } catch(e) { return false; }
+}
+async function startAdminSlider() {
+    if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
+    if (!tgUser || tgUser.id === '123456') return;
+    isUserAdmin = await checkIfUserIsAdmin();
+    if (isUserAdmin) return;
+    const slider = document.getElementById('adminSlider');
+    if (!slider) return;
+    stopAdminSlider();
+    const VISIBLE_MS = 10000, HIDDEN_MS = 7000;
+    const runCycle = () => {
+        if (!slider || !document.body.contains(slider)) return;
+        if (!appState.config.becomeAdminEnabled || !appState.config.becomeAdminLink) return;
+        slider.classList.add('show');
+        adminSliderHideTimer = setTimeout(() => { slider.classList.remove('show'); }, VISIBLE_MS);
+        adminSliderLoopTimer = setTimeout(runCycle, VISIBLE_MS + HIDDEN_MS);
+    };
+    adminSliderShowTimer = setTimeout(runCycle, 2000);
+}
+function stopAdminSlider() {
+    if (adminSliderShowTimer) { clearTimeout(adminSliderShowTimer); adminSliderShowTimer = null; }
+    if (adminSliderHideTimer) { clearTimeout(adminSliderHideTimer); adminSliderHideTimer = null; }
+    if (adminSliderLoopTimer) { clearTimeout(adminSliderLoopTimer); adminSliderLoopTimer = null; }
+    const slider = document.getElementById('adminSlider');
+    if (slider) slider.classList.remove('show');
+}
+function handleBecomeAdmin() {
+    const link = appState.config.becomeAdminLink || '';
+    if (!link || !/^https?:\/\//i.test(link)) { toast('⚠️ Invalid link'); return; }
+    try {
+        if (tg && typeof tg.openLink === 'function') tg.openLink(link);
+        else window.open(link, '_blank');
+    } catch(e) { window.open(link, '_blank'); }
+}
 
-let MIN_REFERRAL_BALANCE = 20;
-const AD_RESET_HOURS = 12;
-const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
-const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
-const REFERRAL_CLAIM_MIN = 10;
-const AD_DISPLAY_SLOTS = 2;
-let MIN_AD_WATCH_SECONDS = 10;
-const CLAIM_WINDOW_MS = 60 * 60 * 1000;
-const HISTORY_LIMIT = 25;
-const REFERRAL_REFRESH_INTERVAL = 15000;
-const CHANNEL_RECHECK_INTERVAL = 20000;
-const VERIFY_DEBOUNCE_MS = 5000;
+function getCooldownRemaining(taskId) {
+    const cool = appState.user.taskCooldowns || {};
+    const last = Number(cool[taskId] || 0);
+    if (!last) return 0;
+    const remaining = (last + TASK_COOLDOWN_MS) - Date.now();
+    return remaining > 0 ? remaining : 0;
+}
+function fmtCountdown(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+function startCooldownTicker() {
+    if (cooldownTimerInterval) return;
+    cooldownTimerInterval = setInterval(() => {
+        const els = document.querySelectorAll('[data-cooldown-task]');
+        if (!els.length) return;
+        let needsRerender = false;
+        els.forEach(el => {
+            const tid = el.getAttribute('data-cooldown-task');
+            const remain = getCooldownRemaining(tid);
+            const timeEl = el.querySelector('.cd-time');
+            if (timeEl) { if (remain > 0) timeEl.textContent = fmtCountdown(remain); else needsRerender = true; }
+        });
+        if (needsRerender) renderNewTasks();
+    }, 1000);
+}
 
-const MONETAG_DEFAULT_ZONE = '11878844';
-let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
-let monetagSDKReady = false;
-let monetagInAppStarted = false;
-let lastMonetagShowTime = 0;
-const MONETAG_MIN_INTERVAL = 5000;
+function openTaskLink(url) {
+    const safeUrl = safeHttpUrl(url);
+    if (!safeUrl || safeUrl === '#' || safeUrl === 'undefined') { toast('⚠️ No valid link'); return; }
+    try {
+        if (tg && typeof tg.openLink === 'function') { tg.openLink(safeUrl, { try_instant_view: false }); return; }
+        if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(safeUrl)) { tg.openTelegramLink(safeUrl); return; }
+    } catch (e) {}
+    window.open(safeUrl, '_blank', 'noopener,noreferrer');
+}
+function getTaskUserState(taskId) {
+    const subs = userSubmissionsCache[String(taskId)] || [];
+    if (subs.length === 0) return { status: 'new', resubmitCount: 0, latest: null };
+    const latest = subs[0];
+    const status = (latest.status || 'pending').toLowerCase();
+    const resubmitCount = Math.max(0, subs.length - 1);
+    return { status, resubmitCount, latest };
+}
+function canSubmitTask(taskId) {
+    const s = getTaskUserState(taskId);
+    if (s.status === 'approved') return false;
+    if (s.status === 'pending') return false;
+    if (s.status === 'rejected' || s.status === 'cancelled') return s.resubmitCount === 0;
+    return true;
+}
+function switchTasksInnerTab(which) {
+    const btnAvail = document.getElementById('tabBtnAvailable');
+    const btnHist = document.getElementById('tabBtnHistory');
+    const paneAvail = document.getElementById('tasksPaneAvailable');
+    const paneHist = document.getElementById('tasksPaneHistory');
+    if (which === 'history') {
+        btnAvail.classList.remove('active'); btnHist.classList.add('active');
+        paneAvail.classList.remove('active'); paneHist.classList.add('active');
+        loadTaskHistory();
+    } else {
+        btnHist.classList.remove('active'); btnAvail.classList.add('active');
+        paneHist.classList.remove('active'); paneAvail.classList.add('active');
+        renderNewTasks();
+    }
+}
+function setupUserSubmissionsListener() {
+    db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).on('value', snap => {
+        userSubmissionsCache = {};
+        snap.forEach(child => {
+            const sub = child.val();
+            const tid = String(sub.taskId);
+            if (!userSubmissionsCache[tid]) userSubmissionsCache[tid] = [];
+            userSubmissionsCache[tid].push(sub);
+        });
+        Object.keys(userSubmissionsCache).forEach(tid => {
+            userSubmissionsCache[tid].sort((a, b) => (b.createdAt || b.timestamp || 0) - (a.createdAt || a.timestamp || 0));
+            const latest = userSubmissionsCache[tid][0];
+            if (latest && latest.status) {
+                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+                appState.user.taskStatuses[tid] = latest.status;
+            }
+        });
+        renderNewTasks();
+        if (document.getElementById('tasksPaneHistory') && document.getElementById('tasksPaneHistory').classList.contains('active')) loadTaskHistory();
+    });
+}
 
-let extraRewardConfig = {
-    enabled: false,
-    amount: 0.5,
-    dailyLimit: 5,
-    title: 'Pop-up Ad দেখে আয় করুন',
-    infoText: 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
-};
+async function startAdsResetCountdown() {
+    if (appState.user._startingAdsReset) return;
+    if (appState.user.adsResetTime && appState.user.adsResetTime > Date.now()) return;
+    appState.user._startingAdsReset = true;
+    const resetTime = Date.now() + (AD_RESET_HOURS * 60 * 60 * 1000);
+    appState.user.adsResetTime = resetTime;
+    updateCycleUI();
+    try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
+    finally { delete appState.user._startingAdsReset; }
+    toast('🎉 Ads complete! Reset in ' + AD_RESET_HOURS + ' hours.');
+}
+async function forceCycleReset() {
+    if (!tgUser || !tgUser.id) return;
+    appState.user.dailyAds = {};
+    appState.user.adsResetTime = 0;
+    appState.user.adClaimedCurrentCycle = false;
+    appState.user.claimWindowStartTime = 0;
+    stopClaimWindowTicker();
+    renderAds(); updateCycleUI(); updateClaimWindowUI();
+    toast('🔄 Ads reset!');
+    try { await db.ref('users/' + tgUser.id).update({ dailyAds: {}, adsResetTime: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0 }); } catch (e) {}
+    if (appState.user.extraRewardDate !== todayStr()) { appState.user.extraRewardDate = ''; appState.user.extraRewardCount = 0; }
+}
+function startCycleTimer() { stopCycleTimer(); updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
+function stopCycleTimer() { if (cycleTimerInterval) { clearInterval(cycleTimerInterval); cycleTimerInterval = null; } }
+function formatTimeUntil(targetMs) {
+    const diff = Math.max(0, targetMs - Date.now());
+    const h = Math.floor(diff / 3600000), m = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+    return String(h).padStart(2, '0') + 'h ' + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's';
+}
+function updateCycleUI() {
+    const compactEl = document.getElementById('adResetCompact');
+    const timeEl = document.getElementById('cycleResetTimer');
+    if (!compactEl || !timeEl) return;
+    const resetTime = Number(appState.user.adsResetTime || 0);
+    if (resetTime > 0) {
+        const remaining = resetTime - Date.now();
+        if (remaining <= 0) { timeEl.textContent = 'Resetting...'; forceCycleReset(); return; }
+        timeEl.textContent = formatTimeUntil(resetTime);
+        compactEl.classList.remove('expired');
+        return;
+    }
+    if (isAllDisplayAdsWatched()) { startAdsResetCountdown(); return; }
+    timeEl.textContent = 'Watch All';
+    compactEl.classList.add('expired');
+}
+function getDeviceId() {
+    let deviceId = localStorage.getItem('nexearn_device_id');
+    if (!deviceId) { deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); localStorage.setItem('nexearn_device_id', deviceId); }
+    return deviceId;
+}
+function toast(msg) { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3500); }
+function todayStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function safeHttpUrl(value) {
+    try {
+        const url = new URL(String(value || '').trim(), window.location.href);
+        return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    } catch (e) { return ''; }
+}
+function inlineStringArg(value) {
+    return JSON.stringify(String(value)).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function getBackendEndpoint(route) {
+    // Put only the public HTTPS API base URL in Firebase config.backendApiUrl.
+    // The server must validate Telegram initData and keep every bot/storage secret server-side.
+    const base = String((appState.config && appState.config.backendApiUrl) || '').trim();
+    if (!base) return '';
+    try {
+        const url = new URL(base);
+        if (url.protocol !== 'https:' && !['localhost', '127.0.0.1'].includes(url.hostname)) return '';
+        url.pathname = url.pathname.replace(/\/+$/, '') + '/' + String(route || '').replace(/^\/+/, '');
+        url.search = '';
+        url.hash = '';
+        return url.href;
+    } catch (e) { return ''; }
+}
+function shortDate(ts) { const d = new Date(ts); return d.getDate() + '/' + (d.getMonth() + 1) + ' ' + d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }); }
+function esc(s) { return String(s || '').replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c])); }
+function showAdError(title, msg) { document.getElementById('adErrorTitle').textContent = title || '⚠️ Error'; document.getElementById('adErrorMsg').textContent = msg || 'Please watch the full ad!'; document.getElementById('adErrorPopup').classList.add('active'); }
+function closeAdError() { document.getElementById('adErrorPopup').classList.remove('active'); }
 
-let REF_COMMISSION_RATE = 2;
-let REF_COMMISSION_MODE = 'bonus';
-let withdrawLevels = [];
+/* === 9. FILE UPLOAD HELPERS === */
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try { return await fetch(url, { ...options, signal: controller.signal }); }
+    finally { clearTimeout(timer); }
+}
+function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) {
+    return new Promise((resolve, reject) => {
+        if (!file.type.startsWith('image/')) return resolve(file);
+        if (file.size < 300 * 1024) return resolve(file);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    let { width, height } = img;
+                    if (width > maxWidth || height > maxHeight) {
+                        const ratio = Math.min(maxWidth / width, maxHeight / height);
+                        width = Math.round(width * ratio); height = Math.round(height * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width; canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (!blob) return reject(new Error('Compression failed'));
+                        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg', lastModified: Date.now() }));
+                    }, 'image/jpeg', quality);
+                } catch(err) { reject(err); }
+            };
+            img.onerror = () => reject(new Error('Image decode failed'));
+            img.src = e.target.result;
+        };
+        reader.onerror = () => reject(new Error('File read failed'));
+        reader.readAsDataURL(file);
+    });
+}
+async function uploadToImgBB(file) {
+    if (!file || !(file instanceof Blob)) throw new Error('No file');
+    if (file.size > 32 * 1024 * 1024) throw new Error('File > 32MB');
+    let uploadFile = file;
+    try { uploadFile = await compressImage(file); } catch(e) { uploadFile = file; }
+    const endpoint = getBackendEndpoint('uploads');
+    if (!endpoint) throw new Error('Secure upload endpoint is not configured');
+    const form = new FormData();
+    form.append('file', uploadFile, uploadFile.name || ('task_' + Date.now() + '.jpg'));
+    const headers = {};
+    if (tg && tg.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+    const res = await fetchWithTimeout(endpoint, { method: 'POST', body: form, headers }, 120000);
+    if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+    const data = await res.json();
+    const url = safeHttpUrl(data && (data.url || (data.data && data.data.url)));
+    if (!url) throw new Error('Upload service returned an invalid URL');
+    return url;
+}
+function getFileExtension(filename) { if (!filename) return ''; const p = String(filename).split('.'); return p.length > 1 ? p.pop().toLowerCase() : ''; }
+function isAudioFile(file) {
+    if (!file) return false;
+    const mime = String(file.type || '').toLowerCase();
+    if (mime.startsWith('audio/')) return true;
+    if (mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg') return true;
+    const ext = getFileExtension(file.name || '');
+    const audioExts = ['mp3','wav','m4a','ogg','oga','webm','aac','flac','mp4','opus','amr','3gp','weba','caf','aiff','wma'];
+    if (audioExts.includes(ext)) return true;
+    if (!mime || mime === 'application/octet-stream') return true;
+    return false;
+}
+async function uploadAudio(file) {
+    if (!file || !(file instanceof Blob)) throw new Error('No file');
+    if (file.size > 500 * 1024 * 1024) throw new Error('File > 500MB');
+    if (!isAudioFile(file)) throw new Error('Only audio files');
+    let fileName = file.name || ('voice_' + Date.now() + '.webm');
+    if (!getFileExtension(fileName)) fileName += '.webm';
+    let uploadFile = file;
+    if (uploadFile.name !== fileName) {
+        try { uploadFile = new File([file], fileName, { type: file.type || 'audio/webm', lastModified: Date.now() }); }
+        catch(e) { uploadFile = file; }
+    }
+    const endpoint = getBackendEndpoint('uploads');
+    if (!endpoint) throw new Error('Secure upload endpoint is not configured');
+    const form = new FormData();
+    form.append('file', uploadFile, fileName);
+    const headers = {};
+    if (tg && tg.initData) headers['X-Telegram-Init-Data'] = tg.initData;
+    const res = await fetchWithTimeout(endpoint, { method: 'POST', body: form, headers }, 120000);
+    if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+    const data = await res.json();
+    const url = safeHttpUrl(data && (data.url || (data.data && data.data.url)));
+    if (!url) throw new Error('Upload service returned an invalid URL');
+    return url;
+}
+function handleFilePreview(input, type) {
+    const file = input.files && input.files[0];
+    const wrap = document.getElementById('filePreviewWrap');
+    const preview = document.getElementById('filePreview');
+    const info = document.getElementById('filePreviewInfo');
+    if (!file) { if (wrap) wrap.style.display = 'none'; return; }
+    if (type === 'image') {
+        if (!file.type.startsWith('image/') || file.size > 32 * 1024 * 1024) { toast('⚠️ Invalid file'); input.value = ''; if (wrap) wrap.style.display = 'none'; return; }
+    } else if (type === 'audio') {
+        if (!isAudioFile(file) || file.size > 500 * 1024 * 1024) { toast('⚠️ Invalid audio'); input.value = ''; if (wrap) wrap.style.display = 'none'; return; }
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        if (preview) { preview.src = e.target.result; if (wrap) wrap.style.display = 'block'; }
+        if (info) {
+            const sizeKB = file.size / 1024;
+            const sizeStr = sizeKB > 1024 ? (sizeKB / 1024).toFixed(2) + ' MB' : sizeKB.toFixed(1) + ' KB';
+            info.innerHTML = '✅ <b>' + esc(file.name || 'file') + '</b> — ' + sizeStr;
+        }
+    };
+    reader.readAsDataURL(file);
+    toast('✅ File selected');
+}
 
-let adminRevenueConfig = {
-    mode: 'referral_commission',
-    refCommissionRate: 5,
-    refMaxDaily: 50,
-    perTaskBonus: 0.10,
-    taskMaxDaily: 20
-};
+function checkPendingSurveyReward() {
+    const done = localStorage.getItem('survey_done_task');
+    const pendingRaw = localStorage.getItem('pending_survey');
+    if (!done || !pendingRaw) return null;
+    try { const p = JSON.parse(pendingRaw); if (String(p.taskId) === String(done)) { localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey'); return p; } } catch(e) {}
+    localStorage.removeItem('survey_done_task'); localStorage.removeItem('pending_survey');
+    return null;
+}
+function checkPendingYoutubeReward() {
+    const done = localStorage.getItem('youtube_done_task');
+    const pendingRaw = localStorage.getItem('pending_youtube');
+    if (!done || !pendingRaw) return null;
+    try { const p = JSON.parse(pendingRaw); if (String(p.taskId) === String(done)) { localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube'); return p; } } catch(e) {}
+    localStorage.removeItem('youtube_done_task'); localStorage.removeItem('pending_youtube');
+    return null;
+}
 
-let appState = {
-    user: { balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, withdrawCount: 0, adHistory: {}, referredUsers: {}, verifiedChannels: {}, totalCommission: 0, commissionHistory: {}, referredBy: null, adsResetTime: 0, dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {}, referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-        adClaimedCurrentCycle: false, claimWindowStartTime: 0,
-        extraRewardDate: '', extraRewardCount: 0,
-        referredByAdminCode: null
-    },
-    config: { adSlots: [], customAdButtons: [], newTasks: {} }
-};
-let isBooted = false;
-let tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : { id: '123456', first_name: 'Guest User', photo_url: 'https://via.placeholder.com/100' };
-let channelVerified = false;
-let channelLinks = [];
-let verifyInterval = null;
-let isOnline = navigator.onLine;
-let isAdWatching = false;
-let slotLocks = {};
-let maintenanceTimer = null;
-let maintenanceEndTime = null;
-let validReferralCount = 0;
-let periodicRecheckInterval = null;
-let referralRefreshInterval = null;
-let isRechecking = false;
-let isCheckingChannel = false;
-let lastVerifyCheckTime = 0;
-let cycleTimerInterval = null;
-let cooldownTimerInterval = null;
-let taskExpiryTickerInterval = null;
-let claimWindowTimerInterval = null;
-let adWatchProgressTimer = null;
-let lastActiveInterval = null;
+async function awardExternalTaskReward(p, taskTypeLabel) {
+    const taskId = p.taskId;
+    if (!taskId) return;
+    const userState = getTaskUserState(taskId);
+    let taskType = '';
+    const task = (appState.config.newTasks || {})[taskId];
+    if (task) taskType = String(task.type || '').toLowerCase();
+    const isCool = hasCooldown(taskType);
+    if (userState.status === 'approved') {
+        if (!isCool) return;
+        if (getCooldownRemaining(taskId) > 0) return;
+    } else if (userState.status === 'pending') return;
+    const baseReward = Number(p.reward || 0);
+    const split = computeCommissionSplit(baseReward);
+    const userReward = split.userReward;
+    const referrerCommission = split.referrerCommission;
+    const newBal = (appState.user.balance || 0) + userReward;
+    const newEarn = (appState.user.totalEarned || 0) + userReward;
+    const taskTimestamp = Date.now();
+    try {
+        const subId = 'sub_' + Date.now() + '_' + tgUser.id + '_' + Math.random().toString(36).substr(2, 5);
+        await db.ref('taskSubmissions/' + subId).set({
+            userId: tgUser.id, userName: tgUser.first_name || 'User',
+            username: tgUser.username || '', telegramId: tgUser.id,
+            taskId: taskId, taskTitle: p.taskTitle || taskTypeLabel,
+            reward: baseReward, content: 'Auto-completed ' + taskTypeLabel,
+            fileUrl: null, status: 'approved', autoApproved: true,
+            createdAt: taskTimestamp, reviewedAt: taskTimestamp, reviewedBy: 'system'
+        });
+        await db.ref('users/' + tgUser.id).update({
+            balance: newBal, totalEarned: newEarn,
+            ['taskStatuses/' + taskId]: 'approved',
+            ['taskHistory/' + taskId]: taskTimestamp,
+            ['taskCooldowns/' + taskId]: taskTimestamp
+        });
+        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
+        if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+        if (!appState.user.taskHistory) appState.user.taskHistory = {};
+        if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+        appState.user.taskStatuses[taskId] = 'approved';
+        appState.user.taskHistory[taskId] = taskTimestamp;
+        appState.user.taskCooldowns[taskId] = taskTimestamp;
+        await db.ref('config/newTasks/' + taskId + '/submittedCount').transaction(c => (c || 0) + 1);
+        if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId));
+        await giveAdminCommission(userReward, 'task_reward');
+        await updateTextElements();
+        toast('✅ Task complete! +' + userReward.toFixed(2) + ' TK');
+        renderNewTasks(); loadTaskHistory();
+    } catch (e) { console.error(e); toast('❌ Reward error'); }
+}
 
-let taskState = { taskId: null, task: null, type: 'text', completed: false, submitting: false, currentStatus: 'new' };
-let userSubmissionsCache = {};
-let currentRefTab = 'total';
-let allReferralDataCache = { all: [], qualified: [] };
-let isUserAdmin = false;
-let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
+function showBonus() {
+    if (!isOnline) { toast('No internet!'); return; }
+    if (appState.user.dailyBonusDate === todayStr()) { toast('Already claimed today!'); return; }
+    document.getElementById('bonusOverlay').classList.add('show');
+    document.getElementById('app').classList.add('blurred');
+}
+function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
 
-const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
-const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
+async function claimDailyBonus() {
+    if (!isOnline) { toast('No internet!'); return; }
+    if (appState.user.dailyBonusDate === todayStr()) { toast('Already claimed today!'); hideBonus(); return; }
+    const btn = document.getElementById('btnClaimBonus');
+    const btnCancel = document.getElementById('btnCancelBonus');
+    const subText = document.getElementById('bonusSubText');
+    btn.disabled = true; btnCancel.disabled = true;
+    try {
+        subText.innerText = 'Loading ad...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        for (let adIndex = 0; adIndex < 2; adIndex++) {
+            await runSpecificCustomAd('dailyBonus');
+            await waitForMinTime(MIN_AD_WATCH_SECONDS);
+        }
+        btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
+        const baseBonus = Number(appState.config.dailyBonusAmount || 20);
+        const split = computeCommissionSplit(baseBonus);
+        const bonusDate = todayStr();
+        const bonusTime = Date.now();
+        const result = await db.ref('users/' + appState.user.id).transaction(user => {
+            if (!user || user.dailyBonusDate === bonusDate) return;
+            user.balance = Number(user.balance || 0) + split.userReward;
+            user.totalEarned = Number(user.totalEarned || 0) + split.userReward;
+            user.dailyBonusDate = bonusDate;
+            user.adHistory = user.adHistory || {};
+            user.adHistory['bonus_' + bonusTime] = { slot: 'Bonus', amount: split.userReward, timestamp: bonusTime, type: 'bonus' };
+            const keys = Object.keys(user.adHistory).sort((a,b) => (user.adHistory[b].timestamp||0) - (user.adHistory[a].timestamp||0));
+            if (keys.length > 100) keys.slice(100).forEach(k => delete user.adHistory[k]);
+            return user;
+        });
+        if (!result.committed) throw new Error('Bonus already claimed today');
+        appState.user = result.snapshot.val();
+        if (split.referrerCommission > 0) await creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus');
+        await giveAdminCommission(split.userReward, 'daily_bonus');
+        await updateTextElements(); hideBonus();
+        toast('✅ Bonus claimed! +' + split.userReward.toFixed(2) + ' TK');
+    } catch (e) {
+        toast(e.message === 'Ad Closed' ? '❌ Ad not completed!' : '❌ Error: ' + e.message);
+    } finally {
+        btn.disabled = false; btnCancel.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
+        subText.innerText = 'Watch 2 short ads to get bonus.';
+    }
+}
 
-function isScreenshotTask(type) {
+async function creditReferrerCommission(commissionAmount, originalEarned, source) {
+    try {
+        const referrerId = appState.user.referredBy;
+        if (!referrerId || commissionAmount <= 0) return false;
+        const freshUserSnap = await db.ref('users/' + appState.user.id).once('value');
+        if (!freshUserSnap.exists()) return false;
+        const freshUser = freshUserSnap.val();
+        const referredUserBalance = Number(freshUser.balance || 0);
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
+        if (referredUserBalance < safeMinBal) return false;
+        const refSnap = await db.ref('users/' + referrerId).once('value');
+        if (!refSnap.exists()) return false;
+        const refData = refSnap.val();
+        const newRefBal = Number(refData.referralBalance || 0) + commissionAmount;
+        const newTotalComm = Number(refData.totalCommission || 0) + commissionAmount;
+        const commHist = refData.commissionHistory || {};
+        const histId = 'com_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        commHist[histId] = {
+            fromId: String(appState.user.id),
+            fromName: freshUser.name || appState.user.name || 'User',
+            earnedAmount: Number(originalEarned),
+            commission: commissionAmount,
+            source: String(source || 'Earning'),
+            rate: REF_COMMISSION_RATE,
+            mode: REF_COMMISSION_MODE,
+            timestamp: Date.now()
+        };
+        const keys = Object.keys(commHist).sort((a,b) => (commHist[b].timestamp||0) - (commHist[a].timestamp||0));
+        if (keys.length > 100) keys.slice(100).forEach(k => delete commHist[k]);
+        await db.ref('users/' + referrerId).update({
+            referralBalance: newRefBal, totalCommission: newTotalComm, commissionHistory: commHist,
+            lastCommissionAt: Date.now(), lastCommissionFrom: freshUser.name || 'User'
+        });
+        return true;
+    } catch(e) { return false; }
+}
+
+function computeCommissionSplit(earnedAmount) {
+    const referrerId = appState.user.referredBy;
+    const amount = Number(earnedAmount || 0);
+    const rate = Math.max(0, Math.min(100, Number(REF_COMMISSION_RATE || 0)));
+    const mode = REF_COMMISSION_MODE || 'bonus';
+    if (!referrerId || rate <= 0) return { userReward: amount, referrerCommission: 0, mode };
+    const commission = (amount * rate) / 100;
+    if (mode === 'deduct') return { userReward: amount - commission, referrerCommission: commission, mode };
+    return { userReward: amount, referrerCommission: commission, mode };
+}
+
+function getCurrentChannelLinks() { return channelLinks && channelLinks.length > 0 ? channelLinks : null; }
+
+async function needsVerification() {
+    if (!tgUser || !tgUser.id || tgUser.id === '123456') return false;
+    const links = getCurrentChannelLinks();
+    if (!links || links.length === 0) return false;
+    for (const link of links) {
+        const result = await checkChannelMembership(tgUser.id, link.chatId);
+        if (result !== true) return true;
+    }
+    return false;
+}
+
+async function markVerified() {
+    const links = getCurrentChannelLinks() || [];
+    const verifiedMap = {};
+    links.forEach(l => { verifiedMap[l.chatId] = true; });
+    try {
+        await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
+        await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
+        await db.ref('users/' + tgUser.id + '/verifiedAt').set(Date.now());
+    } catch(e) {}
+    appState.user.verifiedChannels = verifiedMap; channelVerified = true;
+}
+
+function startPeriodicRecheck() {
+    stopPeriodicRecheck();
+    startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
+    updateClaimWindowUI(); updateExtraRewardUI();
+    lastActiveInterval = setInterval(updateLastActive, 30000);
+    referralRefreshInterval = setInterval(async () => {
+        if (!isOnline || !isBooted || document.hidden) return;
+        try {
+            await calculateValidReferrals();
+            updateRefTabCounts();
+            if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+            if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+        } catch(e) {}
+    }, REFERRAL_REFRESH_INTERVAL);
+    periodicRecheckInterval = setInterval(async () => {
+        if (isRechecking || !isOnline || !isBooted) return;
+        if (document.getElementById('joinModal').classList.contains('active')) return;
+        if (document.getElementById('app').style.display === 'none') return;
+        if (appState.user.isBanned) return;
+        if (checkMaintenance()) return;
+        if (!channelVerified) return;
+        isRechecking = true;
+        try {
+            const needs = await needsVerification();
+            if (needs) {
+                channelVerified = false;
+                try { await db.ref('users/' + tgUser.id + '/channelVerified').set(false); } catch(e) {}
+                document.getElementById('app').style.display = 'none';
+                document.getElementById('joinModal').classList.add('active');
+                renderChannelButtons();
+                toast('⚠️ Please rejoin channels!');
+            }
+        } catch(e) {} finally { isRechecking = false; }
+    }, CHANNEL_RECHECK_INTERVAL);
+}
+function stopPeriodicRecheck() {
+    if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
+    if (referralRefreshInterval) { clearInterval(referralRefreshInterval); referralRefreshInterval = null; }
+    if (lastActiveInterval) { clearInterval(lastActiveInterval); lastActiveInterval = null; }
+    stopCycleTimer();
+    if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
+    stopTaskExpiryTicker();
+    stopClaimWindowTicker();
+}
+function trackAdClick() {
+    db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
+    db.ref('users/' + tgUser.id + '/lastActive').set(Date.now());
+}
+function updateNetworkStatus() {
+    isOnline = navigator.onLine;
+    const offlineOverlay = document.getElementById('offlineOverlay');
+    const indicator = document.getElementById('offlineIndicator');
+    if (!isOnline) { offlineOverlay.classList.add('active'); indicator.classList.add('show'); document.getElementById('app').style.display = 'none'; }
+    else {
+        offlineOverlay.classList.remove('active'); indicator.classList.remove('show');
+        if (isBooted && !document.getElementById('joinModal').classList.contains('active') && !checkMaintenance() && !checkBan()) document.getElementById('app').style.display = 'block';
+    }
+}
+window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); });
+window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
+
+function switchTab(tabId, el) {
+    if (!isOnline) { toast('No internet!'); return; }
+    document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + tabId).classList.add('active');
+    el.classList.add('active');
+    if (tabId === 'tasks') { renderNewTasks(); loadTaskHistory(); }
+    if (tabId === 'leaderboard') loadLeaderboard();
+    if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
+    if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
+    if (tabId === 'history') { loadAdHistory(); }
+    if (tabId === 'home') { updateClaimWindowUI(); updateExtraRewardUI(); }
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+}
+
+async function calculateValidReferrals() {
+    try {
+        const refs = appState.user.referredUsers || {};
+        const keys = Object.keys(refs);
+        if (keys.length === 0) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
+        let count = 0;
+        const allData = [], qualifiedData = [];
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
+        await Promise.all(keys.map(async (rid) => {
+            const uSnap = await db.ref('users/' + rid).once('value');
+            const u = uSnap.exists() ? uSnap.val() : {};
+            const bal = Number(u.balance || 0);
+            const qualified = bal >= safeMinBal;
+            if (qualified) count++;
+            const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
+            allData.push(entry);
+            if (qualified) qualifiedData.push(entry);
+        }));
+        allData.sort((a, b) => b.joinedAt - a.joinedAt);
+        qualifiedData.sort((a, b) => b.balance - a.balance);
+        validReferralCount = count;
+        allReferralDataCache.all = allData;
+        allReferralDataCache.qualified = qualifiedData;
+        return count;
+    } catch(e) { validReferralCount = 0; allReferralDataCache.all = []; allReferralDataCache.qualified = []; return 0; }
+}
+
+function getWithdrawLevel() {
+    if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
+    const completedWithdraws = Number(appState.user.withdrawCount || 0);
+    const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
+    const currentLevel = withdrawLevels[levelIndex];
+    return { ...currentLevel, level: currentLevel.level || (levelIndex + 1), _index: levelIndex };
+}
+function updateWithdrawInfo() {
+    const level = getWithdrawLevel();
+    const reqRefs = level.requiredRefs || 5;
+    const currentLevelNum = level.level || 1;
+    const totalLevels = withdrawLevels.length || 1;
+    document.getElementById('wdLevel').textContent = 'Level ' + currentLevelNum + ' / ' + totalLevels;
+    document.getElementById('wdQualifiedRefs').textContent = validReferralCount + '/' + reqRefs;
+    document.getElementById('wdFee').textContent = (level.fee || 5) + '%';
+    document.getElementById('wdTime').textContent = level.time || '30 Min-1 Hours';
+    document.getElementById('wdRange').textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
+    updateLevelProgressCard(currentLevelNum, totalLevels);
+    const canWithdraw = validReferralCount >= reqRefs;
+    const notice = document.getElementById('wd-notice');
+    if (!canWithdraw) {
+        notice.textContent = '⚠️ Level ' + currentLevelNum + ' requires ' + (reqRefs - validReferralCount) + ' more qualified refs';
+        notice.style.color = '#ff4757';
+    } else {
+        const remainingLevels = totalLevels - currentLevelNum;
+        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' eligible! (' + remainingLevels + ' more)';
+        else notice.textContent = '🏆 Max level!';
+        notice.style.color = '#00b894';
+    }
+}
+function updateLevelProgressCard(currentLevelNum, totalLevels) {
+    const titleEl = document.getElementById('lpcTitle');
+    const trackEl = document.getElementById('lpcTrack');
+    const countEl = document.getElementById('lpcCount');
+    if (!titleEl || !trackEl || !countEl) return;
+    titleEl.textContent = 'Level ' + currentLevelNum;
+    let trackHtml = '';
+    for (let i = 1; i <= totalLevels; i++) {
+        let cls = 'lpc-dot';
+        if (i < currentLevelNum) cls += ' done';
+        else if (i === currentLevelNum) cls += ' current';
+        trackHtml += '<div class="' + cls + '"></div>';
+    }
+    trackEl.innerHTML = trackHtml;
+    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 Max level!';
+    else countEl.innerHTML = '✅ ' + (currentLevelNum - 1) + ' / ' + totalLevels + ' • Next: Level ' + (currentLevelNum + 1);
+}
+function checkMaintenance() {
+    if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
+        document.getElementById('maintenanceOverlay').classList.add('active');
+        document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
+        if (appState.config.maintenance.estimatedMinutes) {
+            const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
+            maintenanceEndTime = Date.now() + (mins * 60 * 1000);
+            updateMaintenanceTimer();
+            if (maintenanceTimer) clearInterval(maintenanceTimer);
+            maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
+        }
+        document.getElementById('app').style.display = 'none';
+        return true;
+    } else { document.getElementById('maintenanceOverlay').classList.remove('active'); if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; } return false; }
+}
+function updateMaintenanceTimer() {
+    if (!maintenanceEndTime) return;
+    const diff = Math.max(0, Math.floor((maintenanceEndTime - Date.now()) / 1000));
+    const mins = Math.floor(diff / 60), secs = diff % 60;
+    document.getElementById('maintenanceTime').textContent = '⏳ ' + mins + 'm ' + secs + 's remaining';
+    if (diff <= 0) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+}
+function checkBan() {
+    if (appState.user && appState.user.isBanned) {
+        document.getElementById('bannedOverlay').classList.add('active');
+        document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
+        document.getElementById('app').style.display = 'none';
+        return true;
+    } else { document.getElementById('bannedOverlay').classList.remove('active'); return false; }
+}
+
+function renderAds() {
+    const el = document.getElementById('ad-area');
+    if (!el) return;
+    el.innerHTML = '';
+    const slots = appState.config.adSlots || [];
+    const limit = Number(appState.config.dailyAdLimit || 10);
+    for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
+        const slot = slots[i] || { network: 'none', id: '' };
+        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
+        const configured = slot && (hasCustomCode || (slot.network && slot.network !== 'none'));
+        const done = (appState.user.dailyAds && appState.user.dailyAds[i]) ? appState.user.dailyAds[i] : 0;
+        const max = done >= limit;
+        const cardClass = !configured ? 'not-set disabled' : (max ? 'disabled' : '');
+        const extraClass = `slot-${(i % 2) + 1}`;
+        const icon = (i === 0 ? 'fa-play' : 'fa-circle-play');
+        const clickAttr = (!configured || max) ? '' : `onclick="startAdWatch(${i})"`;
+        el.innerHTML += `
+            <div class="ad-card ${extraClass} ${cardClass}" ${clickAttr}>
+                ${(configured && !max) ? `<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> ${MIN_AD_WATCH_SECONDS}s</div>` : ''}
+                <div class="ad-inner">
+                    <i class="fas ${icon}"></i>
+                    <h4>Ad Slot ${i+1}</h4>
+                    ${configured ? `<div class="progress-pill">${done}/${limit} Watched</div>` : '<div class="progress-pill">Not Configured</div>'}
+                </div>
+            </div>
+        `;
+    }
+    updateAdClaimUI();
+    updateClaimWindowUI();
+    updateExtraRewardUI();
+}
+
+function getTaskTypeIcon(type) {
+    const m = { survey:'📊', image:'🖼️', voice:'🎤', audio:'🎤', text:'📝', youtube_video_view:'▶️', youtube_like:'👍', youtube_comment:'💬', youtube_subscribe:'🔔', app_download:'📱', app_install:'📲', website_visit:'🌐', telegram_join:'✈️', telegram_channel:'📢', facebook_like:'👍', facebook_follow:'👥', instagram_follow:'👥', instagram_like:'❤️', twitter_follow:'🐦', tiktok_follow:'🎵', voice_recording:'🎙️', image_upload:'📷', text_writing:'✍️', sign_up:'📝', general:'📋', other:'🔧' };
+    return m[(type || '').toLowerCase()] || '📋';
+}
+function getTaskGradientClass(type) {
     const t = String(type || '').toLowerCase();
-    if (!t) return false;
-    return !SPECIAL_TASK_TYPES.includes(t);
+    if (['youtube_video_view','youtube_like','youtube_comment','youtube_subscribe'].includes(t)) return 'grad-youtube';
+    if (t === 'survey') return 'grad-survey';
+    if (['voice','audio','voice_recording'].includes(t)) return 'grad-voice';
+    if (['image','image_upload'].includes(t)) return 'grad-image';
+    if (['text','text_writing'].includes(t)) return 'grad-text';
+    return 'grad-link';
 }
-function hasCooldown(type) {
-    return COOLDOWN_TASK_TYPES.includes(String(type || '').toLowerCase());
+function getTaskTypeLabel(type) {
+    const m = { survey:'Survey', image:'Image', voice:'Voice', audio:'Voice', text:'Text', youtube_video_view:'YouTube View', youtube_like:'YouTube Like', youtube_comment:'YouTube Comment', youtube_subscribe:'YouTube Subscribe', app_download:'App Download', app_install:'App Install', website_visit:'Website', telegram_join:'Telegram', telegram_channel:'Telegram Channel', facebook_like:'Facebook Like', facebook_follow:'Facebook Follow', instagram_follow:'Instagram Follow', instagram_like:'Instagram Like', twitter_follow:'Twitter', tiktok_follow:'TikTok', voice_recording:'Voice Recording', image_upload:'Image Upload', text_writing:'Text Writing', sign_up:'Sign Up', general:'General', other:'Other' };
+    return m[(type || '').toLowerCase()] || 'Task';
+}
+function isTaskExpired(task) { const r = getTaskTimeRemaining(task); return r !== null && r <= 0; }
+function isTaskAutoDeleted(task) { const r = getTaskAutoDeleteRemaining(task); return r !== null && r <= 0; }
+
+function renderNewTasks() {
+    const el = document.getElementById('task-area');
+    if (!el) return;
+    el.innerHTML = '';
+    const tasks = appState.config.newTasks || {};
+    const sym = appState.config.currencySymbol || 'TK';
+    let hasVisibleTask = false, visibleCount = 0, renderedHtml = '';
+    Object.keys(tasks).forEach(taskId => {
+        const task = tasks[taskId];
+        if (!task || typeof task !== 'object') return;
+        if (isTaskAutoDeleted(task)) return;
+        if (task.status === 'closed' || task.status === 'pending' || task.status === 'cancelled') return;
+        hasVisibleTask = true;
+        visibleCount++;
+        const isExpired = isTaskExpired(task);
+        const expiryRemain = getTaskTimeRemaining(task);
+        const deleteRemain = getTaskAutoDeleteRemaining(task);
+        const userState = getTaskUserState(taskId);
+        const status = userState.status;
+        const submittedCount = task.submittedCount || 0;
+        const totalSlots = task.totalSlots || 100;
+        const slotsLeft = Math.max(0, totalSlots - submittedCount);
+        const isDone = status === 'approved';
+        const typeIcon = getTaskTypeIcon(task.type);
+        const typeLabel = getTaskTypeLabel(task.type);
+        const gradClass = getTaskGradientClass(task.type);
+        const isCool = hasCooldown(task.type);
+        const cooldownRemain = isCool ? getCooldownRemaining(taskId) : 0;
+        const slotProgress = totalSlots > 0 ? Math.min(100, (submittedCount / totalSlots) * 100) : 0;
+        const slotClass = slotsLeft <= 5 ? 'slots-left' : 'slots-left safe';
+        let ribbon = '';
+        if (isExpired && deleteRemain > 0) ribbon = '<span class="task-ribbon deleting">🗑️ Deleting</span>';
+        else if (isExpired) ribbon = '<span class="task-ribbon expired">⛔ Expired</span>';
+        else if (isCool && cooldownRemain > 0) ribbon = '<span class="task-ribbon cooldown">⏱️ 24h Cooldown</span>';
+        else if (isDone && !isCool) ribbon = '<span class="task-ribbon hot">✓ Done</span>';
+        else if (slotsLeft <= 5 && slotsLeft > 0) ribbon = '<span class="task-ribbon">🔥 Almost Full</span>';
+        else if (submittedCount === 0) ribbon = '<span class="task-ribbon new">✨ New</span>';
+        let actionHtml = '';
+        let gradCls = gradClass;
+        if (isExpired) { actionHtml = `<button class="btn-act expired-btn" disabled><i class="fas fa-clock"></i> Expired</button>`; gradCls += ' grad-disabled'; }
+        else if (isCool && cooldownRemain > 0) { actionHtml = `<div class="task-countdown" data-cooldown-task="${esc(taskId)}"><div class="cd-label">Available In</div><div class="cd-time">${fmtCountdown(cooldownRemain)}</div></div>`; gradCls += ' grad-disabled'; }
+        else if (isDone && !isCool) { actionHtml = `<button class="btn-act done-btn" disabled><i class="fas fa-check-circle"></i> Done</button>`; }
+        else if (slotsLeft <= 0) { actionHtml = `<button class="btn-act full-btn" disabled><i class="fas fa-users-slash"></i> Full</button>`; gradCls += ' grad-disabled'; }
+        else { actionHtml = `<button class="btn-act btn-start" onclick="openTaskSubmit(${inlineStringArg(taskId)})"><i class="fas fa-play"></i> Start</button>`; }
+        const expiryTextHtml = isExpired ? '⛔ Expired' : '⏳ ' + fmtTaskTime(expiryRemain);
+        const deleteHtml = (isExpired && deleteRemain > 0) ? `<div class="meta-item" style="color:#dc2626;" data-delete-task="${esc(taskId)}"><i class="fas fa-trash-alt"></i> Auto-delete: <span class="delete-text task-delete-live">${fmtTaskTime(deleteRemain)}</span></div>` : '';
+        renderedHtml += `<div class="task-item ${gradCls}"><div class="task-inner"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;"><div style="flex:1;min-width:0;"><span class="task-emoji">${typeIcon}</span><span class="task-name">${esc(task.title)}</span><div class="task-cat-row"><div class="task-cat"><i class="fas fa-tag"></i> ${esc(task.category || typeLabel)}</div>${ribbon}</div></div><div class="task-reward-badge"><i class="fas fa-coins"></i> +${Number(task.reward || 0)} ${esc(sym)}</div></div><div class="task-info-row"><div class="task-meta"><div class="meta-item"><i class="fas fa-users"></i> <span class="${slotClass}">${slotsLeft} slots left</span></div><div class="meta-item" data-expiry-task="${esc(taskId)}" data-expired="${isExpired ? '1' : '0'}"><i class="fas fa-clock"></i> <span class="expiry-text task-expiry-live ${isExpired ? 'expired' : ''}">${expiryTextHtml}</span></div>${deleteHtml}${isCool ? '<div class="meta-item" style="color:#6366f1;"><i class="fas fa-sync-alt"></i> 24hr repeatable</div>' : ''}</div>${actionHtml}</div>${totalSlots > 0 && totalSlots <= 1000 ? `<div class="task-progress-mini"><div class="bar" style="width:${slotProgress}%"></div></div>` : ''}</div></div>`;
+    });
+    if (!hasVisibleTask) el.innerHTML = '<div class="empty-state"><i class="fas fa-tasks"></i><p>No tasks available</p></div>';
+    else el.innerHTML = renderedHtml;
+    const badge = document.getElementById('taskCountBadge');
+    if (badge) badge.textContent = visibleCount;
+    if (visibleCount > 0) startCooldownTicker();
 }
 
-/* === 2. AD WATCH PROGRESS & UI SETUP === */
-function updateLastActive() {
-    if (!tgUser || !tgUser.id || tgUser.id === '123456') return;
-    if (!isOnline) return;
-    try { db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()).catch(() => {}); } catch(e) {}
-}
-
-function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id; }
-function getShareLink() { return getRefLink(); }
-
-function openShareModal() {
-    const link = getRefLink();
-    const inputEl = document.getElementById('shareLinkInput');
-    if (inputEl) inputEl.textContent = link;
-    const el = document.getElementById('shareModal');
-    if (el) { el.classList.add('active'); document.body.style.overflow = 'hidden'; }
-}
-function closeShareModal() {
-    const el = document.getElementById('shareModal');
-    if (el) el.classList.remove('active');
-    document.body.style.overflow = '';
-}
-function copyShareLink() {
-    const link = getRefLink();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(() => toast('✅ লিংক কপি হয়েছে!')).catch(() => fallbackCopy(link));
-    } else fallbackCopy(link);
-}
-function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text; document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-    toast('✅ লিংক কপি হয়েছে!');
-}
-function shareViaWhatsApp() {
-    const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:\n' + getRefLink());
-    window.open('https://wa.me/?text=' + text, '_blank');
-}
-function shareViaTelegram() {
-    const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=' + encodeURIComponent('🎉 Join this amazing earning app!');
-    if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
-}
-function shareViaFacebook() {
-    window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(getRefLink()), '_blank');
-}
-function copyLink() { copyShareLink(); }
-function shareLink() { openShareModal(); }
-
-function showAdWatchProgress(startTime) {
-    const el = document.getElementById('adWatchProgress');
-    const timeEl = document.getElementById('awpTime');
-    if (!el || !timeEl) return;
-    el.classList.add('show'); el.classList.remove('ready');
-    if (adWatchProgressTimer) clearInterval(adWatchProgressTimer);
-    const update = () => {
-        const elapsed = (Date.now() - startTime) / 1000;
-        const remain = Math.max(0, MIN_AD_WATCH_SECONDS - elapsed);
-        if (remain > 0) timeEl.textContent = Math.ceil(remain) + 's';
-        else { timeEl.textContent = 'সম্পন্ন ✓'; el.classList.add('ready'); }
-    };
-    update();
-    adWatchProgressTimer = setInterval(update, 250);
-}
-function hideAdWatchProgress() {
-    const el = document.getElementById('adWatchProgress');
-    if (el) el.classList.remove('show', 'ready');
-    if (adWatchProgressTimer) { clearInterval(adWatchProgressTimer); adWatchProgressTimer = null; }
-}
-
-/* === 3. CUSTOM AD ENGINE (ADMIN TO USER) === */
-function isMonetagSDKReady(zoneId) { return typeof window['show_' + String(zoneId)] === 'function'; }
-
-function reloadMonetagSDK(zoneId) {
-    zoneId = String(zoneId || '').trim();
-    if (!zoneId) return;
-    monetagSDKReady = false;
-    document.querySelectorAll('script[data-zone]').forEach(s => { if (s.dataset.zone !== zoneId) s.remove(); });
-    if (!document.querySelector('script[data-zone="' + zoneId + '"]')) {
-        const sc = document.createElement('script');
-        sc.src = '//libtl.com/sdk.js';
-        sc.dataset.zone = zoneId;
-        sc.dataset.sdk = 'show_' + zoneId;
-        sc.async = true;
-        sc.onload = () => { monetagSDKReady = true; };
-        sc.onerror = () => { console.warn('[MONETAG] SDK load failed'); };
-        document.head.appendChild(sc);
+function openTaskSubmit(taskId) {
+    const task = appState.config.newTasks[taskId];
+    if (!task) { toast('Task not found'); return; }
+    if (isTaskExpired(task)) { toast('Task expired'); return; }
+    const userState = getTaskUserState(taskId);
+    const status = userState.status;
+    const resubmitCount = userState.resubmitCount;
+    if (status === 'approved') {
+        const type = (task.type || '').toLowerCase();
+        if (hasCooldown(type)) {
+            if (getCooldownRemaining(taskId) > 0) { toast('⏱️ Try later'); return; }
+        } else { toast('✅ Already completed'); return; }
     }
-    MONETAG_ZONE = zoneId;
-}
-async function waitForMonetagSDK(zoneId, maxWaitMs = 4000) {
-    const start = Date.now();
-    while (Date.now() - start < maxWaitMs) {
-        if (isMonetagSDKReady(zoneId)) return true;
-        await new Promise(r => setTimeout(r, 150));
+    const type = (task.type || 'text').toLowerCase();
+    taskState.taskId = taskId;
+    taskState.task = task;
+    taskState.type = type;
+    taskState.submitting = false;
+    taskState.currentStatus = status;
+    if (type === 'survey' || type === 'youtube_video_view') {
+        const pending = { taskId, taskTitle: task.title || 'Task', reward: task.reward || 0, url: task.url || task.link || '', timer: parseInt(task.timer) || 60, startedAt: Date.now() };
+        localStorage.setItem(type === 'survey' ? 'pending_survey' : 'pending_youtube', JSON.stringify(pending));
+        window.location.href = (type === 'survey' ? 'survey.html' : 'youtube.html');
+        return;
     }
-    return false;
+    const sym = appState.config.currencySymbol || 'TK';
+    document.getElementById('taskHeadIcon').textContent = getTaskTypeIcon(task.type);
+    document.getElementById('taskSubmitTitle').textContent = task.title || 'Task';
+    document.getElementById('taskSubmitCategory').textContent = task.category || getTaskTypeLabel(task.type);
+    document.getElementById('taskSubmitReward').textContent = task.reward + ' ' + sym;
+    document.getElementById('taskSubmitTimeLeft').textContent = task.timeLimit || '';
+    document.getElementById('taskSubmitDesc').textContent = task.description || '';
+    const contentArea = document.getElementById('taskContentArea');
+    const actionBtn = document.getElementById('taskSubmitActionBtn');
+    const bannerWrap = document.getElementById('taskStatusBannerWrap');
+    contentArea.innerHTML = ''; bannerWrap.innerHTML = '';
+    actionBtn.disabled = false;
+    actionBtn.className = 'task-btn task-btn-submit';
+    actionBtn.style.display = 'flex';
+    const isPending = (status === 'pending');
+    const isRejectedOrCancelled = (status === 'rejected' || status === 'cancelled');
+    let canResubmit = false, lockedOut = false;
+    if (isPending) {
+        bannerWrap.innerHTML = `<div class="task-status-warning"><i class="fas fa-hourglass-half"></i><div><b>⏳ Pending</b><br><span style="font-weight:600;font-size:0.78rem;">Admin will review.</span></div></div>`;
+        lockedOut = true;
+    } else if (isRejectedOrCancelled) {
+        if (resubmitCount === 0) {
+            canResubmit = true;
+            bannerWrap.innerHTML = `<div class="task-status-info"><i class="fas fa-redo"></i><div><b>🔄 Re-Submit (1/1)</b></div></div>`;
+        } else {
+            lockedOut = true;
+            bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ No more re-submit</b></div></div>`;
+        }
+    }
+    if (type === 'image' || type === 'image_upload') {
+        contentArea.innerHTML = `<label>📷 Upload Image *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/><div id="filePreviewWrap" class="file-preview-wrap"><img id="filePreview" class="file-preview-img"/><div id="filePreviewInfo" class="file-preview-info"></div></div><small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+    } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
+        contentArea.innerHTML = `<label>🎤 Upload Audio *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'audio')"/><div id="filePreviewWrap" class="file-preview-wrap"><audio id="filePreview" class="file-preview-audio" controls></audio><div id="filePreviewInfo" class="file-preview-info"></div></div><small>MP3 / WAV / M4A (Max 500 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+    } else if (type === 'text' || type === 'text_writing') {
+        contentArea.innerHTML = `<label>📝 Your Answer *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+    } else if (isScreenshotTask(type)) {
+        const taskUrl = safeHttpUrl(task.url || task.link || '');
+        const hasUrl = Boolean(taskUrl);
+        contentArea.innerHTML = `<div class="task-open-link-box"><div class="task-open-link-label">🔗 Task Link</div><button class="task-open-link-btn" data-task-url="${esc(taskUrl)}" onclick="openTaskLink(this.dataset.taskUrl)" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;"' : ''}><i class="fas fa-external-link-alt"></i> Open Link</button><small>👆 Complete task and take screenshot.</small></div><label>📷 Upload Screenshot *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/><div id="filePreviewWrap" class="file-preview-wrap"><img id="filePreview" class="file-preview-img"/><div id="filePreviewInfo" class="file-preview-info"></div></div><small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+    } else {
+        contentArea.innerHTML = `<label>📝 Your Answer *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+    }
+    if (isPending) { actionBtn.disabled = true; actionBtn.className = 'task-btn task-btn-pending'; actionBtn.innerHTML = '<i class="fas fa-hourglass-half"></i> Pending'; }
+    else if (lockedOut) { actionBtn.disabled = true; actionBtn.className = 'task-btn task-btn-locked'; actionBtn.innerHTML = '<i class="fas fa-ban"></i> Locked'; }
+    else if (canResubmit) { actionBtn.disabled = false; actionBtn.innerHTML = '<i class="fas fa-redo"></i> Re-Submit'; }
+    else { actionBtn.disabled = false; actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit'; }
+    document.getElementById('taskSubmitModal').classList.add('active');
+    document.getElementById('app').classList.add('blurred');
 }
-async function showMonetagRewardedPopup(zoneId) {
-    zoneId = String(zoneId || MONETAG_ZONE);
-    const fnName = 'show_' + zoneId;
-    lastMonetagShowTime = Date.now();
-    return new Promise((resolve) => {
+
+async function submitGenericTask() {
+    if (taskState.submitting) return;
+    const task = taskState.task;
+    const taskId = taskState.taskId;
+    if (!task || !taskId) return;
+    if (taskState.type === 'survey' || taskState.type === 'youtube_video_view') { toast('⚠️ Submit externally'); return; }
+    if (!canSubmitTask(taskId)) {
+        const s = getTaskUserState(taskId);
+        if (s.status === 'pending') toast('⏳ Already submitted');
+        else toast('❌ Cannot re-submit');
+        return;
+    }
+    const type = taskState.type;
+    const actionBtn = document.getElementById('taskSubmitActionBtn');
+    const textInput = document.getElementById('taskTextInput');
+    const content = textInput ? textInput.value.trim() : '';
+    let fileUrl = null;
+    taskState.submitting = true;
+    actionBtn.disabled = true;
+    try {
+        if (type === 'image' || type === 'image_upload' || isScreenshotTask(type)) {
+            const input = document.getElementById('taskImageInput');
+            const file = input && input.files && input.files[0];
+            if (!file) { toast('⚠️ Select image'); taskState.submitting = false; actionBtn.disabled = false; return; }
+            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            try { fileUrl = await uploadToImgBB(file); toast('✅ Uploaded!'); }
+            catch (err) { toast('❌ ' + err.message); taskState.submitting = false; actionBtn.disabled = false; actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit'; return; }
+        } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
+            const input = document.getElementById('taskVoiceInput');
+            const file = input && input.files && input.files[0];
+            if (!file) { toast('⚠️ Select audio'); taskState.submitting = false; actionBtn.disabled = false; return; }
+            actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            try { fileUrl = await uploadAudio(file); toast('✅ Uploaded!'); }
+            catch (err) { toast('❌ ' + err.message); taskState.submitting = false; actionBtn.disabled = false; actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit'; return; }
+        } else if (type === 'text' || type === 'text_writing') {
+            if (!content || content.length < 2) { toast('⚠️ Write text'); taskState.submitting = false; actionBtn.disabled = false; return; }
+        } else {
+            if (!fileUrl && (!content || content.length < 2)) { toast('⚠️ Image or text required'); taskState.submitting = false; actionBtn.disabled = false; return; }
+        }
+        actionBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        const subId = 'sub_' + Date.now() + '_' + tgUser.id;
+        await db.ref('taskSubmissions/' + subId).set({
+            userId: tgUser.id, userName: tgUser.first_name || 'User',
+            username: tgUser.username || '', telegramId: tgUser.id,
+            taskId, taskTitle: task.title || 'Task',
+            reward: Number(task.reward || 0),
+            content: content || '', fileUrl,
+            status: 'pending', createdAt: Date.now()
+        });
+        await db.ref('users/' + tgUser.id).update({
+            ['taskStatuses/' + taskId]: 'pending',
+            ['taskHistory/' + taskId]: Date.now()
+        });
+        if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+        if (!appState.user.taskHistory) appState.user.taskHistory = {};
+        appState.user.taskStatuses[taskId] = 'pending';
+        appState.user.taskHistory[taskId] = Date.now();
+        toast('✅ Submitted!');
+        closeTaskSubmit();
+    } catch (err) {
+        toast('❌ ' + (err.message || 'Error'));
+        taskState.submitting = false; actionBtn.disabled = false;
+        actionBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit';
+    }
+}
+
+function closeTaskSubmit() {
+    document.getElementById('taskSubmitModal').classList.remove('active');
+    document.getElementById('app').classList.remove('blurred');
+    taskState.taskId = null; taskState.task = null; taskState.submitting = false; taskState.currentStatus = 'new';
+}
+function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ Cancelled'); }
+
+async function loadTaskHistory() {
+    const container = document.getElementById('taskHistoryArea');
+    if (!container) return;
+    container.innerHTML = '<p style="text-align:center;color:#999;padding:30px 0;">Loading...</p>';
+    try {
+        const snap = await db.ref('taskSubmissions').orderByChild('userId').equalTo(tgUser.id).once('value');
+        const subs = [];
+        snap.forEach(child => { const v = child.val(); v._id = child.key; subs.push(v); });
+        if (subs.length === 0) { container.innerHTML = '<div class="empty-state" style="padding:50px 20px;"><i class="fas fa-clipboard-list"></i><p>No tasks completed yet</p></div>'; return; }
+        const byTask = {};
+        subs.forEach(sub => { const tid = String(sub.taskId); if (!byTask[tid]) byTask[tid] = []; byTask[tid].push(sub); });
+        Object.keys(byTask).forEach(tid => { byTask[tid].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); });
+        const taskList = Object.keys(byTask).map(tid => byTask[tid][0]);
+        taskList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        const sym = appState.config.currencySymbol || 'TK';
+        const tasks = appState.config.newTasks || {};
+        let html = '';
+        taskList.slice(0, HISTORY_LIMIT).forEach(sub => {
+            const tid = String(sub.taskId);
+            const subCount = byTask[tid].length;
+            const resubmitCount = Math.max(0, subCount - 1);
+            const status = (sub.status || 'pending').toLowerCase();
+            const stClass = status === 'approved' ? 'approved' : status === 'rejected' ? 'rejected' : status === 'cancelled' ? 'cancelled' : 'pending';
+            const stLabel = status === 'approved' ? '✅ Approved' : status === 'rejected' ? '❌ Rejected' : status === 'cancelled' ? '⛔ Cancelled' : '⏳ Pending';
+            const taskMeta = tasks[tid] || {};
+            const icon = getTaskTypeIcon(taskMeta.type);
+            const dateStr = sub.createdAt ? new Date(sub.createdAt).toLocaleString('en-GB') : '';
+            const reasonHtml = ((status === 'rejected' || status === 'cancelled') && sub.reason) ? `<div class="th-reason-box"><b>Reason:</b> ${esc(sub.reason)}</div>` : '';
+            const safeFileUrl = safeHttpUrl(sub.fileUrl);
+            const fileHtml = safeFileUrl ? `<div class="th-card-meta" style="margin-top:6px;"><div class="row"><i class="fas fa-paperclip"></i><a href="${esc(safeFileUrl)}" target="_blank" rel="noopener noreferrer" style="color:#6C5CE7;font-weight:700;">View</a></div></div>` : '';
+            let actionHtml = '';
+            if (taskMeta.type && hasCooldown(taskMeta.type) && status === 'approved') {
+                const remain = getCooldownRemaining(tid);
+                if (remain > 0) actionHtml = `<div class="th-locked-note" style="background:#e0e7ff;color:#4338ca;"><i class="fas fa-hourglass-half"></i> Next in ${fmtCountdown(remain)}</div>`;
+            }
+            if (status === 'rejected' || status === 'cancelled') {
+                if (resubmitCount === 0 && !isTaskExpired(taskMeta)) actionHtml = `<button class="th-resubmit-btn" onclick="openTaskSubmit(${inlineStringArg(tid)})"><i class="fas fa-redo"></i> Re-Submit</button>`;
+                else actionHtml = `<div class="th-locked-note">🔒 Re-submit used</div>`;
+            }
+            html += `<div class="th-card ${stClass}"><div class="th-card-head"><div class="th-card-title">${icon} ${esc(sub.taskTitle || 'Task')}</div><span class="th-card-badge ${stClass}">${stLabel}</span></div><div class="th-card-meta"><div class="row"><i class="fas fa-coins"></i> Reward: <span class="reward">${Number(sub.reward || 0).toFixed(2)} ${sym}</span></div><div class="row"><i class="fas fa-calendar"></i> ${dateStr}</div></div>${fileHtml}${reasonHtml}${actionHtml}</div>`;
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<p style="text-align:center;color:#ef4444;padding:30px 0;">Failed</p>'; }
+}
+async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
+
+async function requestWithdraw() {
+    if (!isOnline) { toast('No internet!'); return; }
+    const method = document.getElementById('wd-method').value;
+    const account = document.getElementById('wd-account').value.trim();
+    const amount = Number(document.getElementById('wd-amount').value);
+    const level = getWithdrawLevel();
+    const reqRefs = level.requiredRefs || 5;
+    const currentLevelNum = level.level || 1;
+    const totalLevels = withdrawLevels.length || 1;
+    await calculateValidReferrals();
+    if (validReferralCount < reqRefs) { toast('❌ Level ' + currentLevelNum + ' requires ' + reqRefs + ' refs!'); return; }
+    if (!method) return toast('Select method');
+    if (Array.isArray(appState.config.paymentMethods) && !appState.config.paymentMethods.includes(method)) return toast('Invalid payment method');
+    if (!account || account.length < 3) return toast('Valid account');
+    if (!Number.isFinite(amount) || amount <= 0) return toast('Valid amount');
+    if (amount < (level.minAmount || 10)) return toast('Min ' + (level.minAmount || 10) + ' TK');
+    if (amount > (level.maxAmount || 100)) return toast('Max ' + (level.maxAmount || 100) + ' TK');
+    if (amount > appState.user.balance) return toast('Insufficient balance');
+    const feeAmount = (amount * (level.fee || 5)) / 100;
+    try {
+        const balanceRef = db.ref('users/' + appState.user.id + '/balance');
+        const withdrawalRef = db.ref('withdrawals').push();
+        const debit = await balanceRef.transaction(current => {
+            const balance = Number(current || 0);
+            if (!Number.isFinite(balance) || balance < amount) return;
+            return balance - amount;
+        });
+        if (!debit.committed) throw new Error('Insufficient balance');
         try {
-            if (typeof window[fnName] === 'function') {
-                const p = window[fnName]('pop');
-                if (p && typeof p.then === 'function') {
-                    p.then(() => resolve({ done: true })).catch(() => resolve({ done: true }));
-                } else {
-                    resolve({ done: true });
+            await withdrawalRef.set({
+            userId: appState.user.id, userName: appState.user.name || 'User',
+            method, account, amount, fee: feeAmount, netAmount: amount - feeAmount,
+            level: currentLevelNum, totalLevels,
+            requiredRefs: reqRefs, validRefsAtRequest: validReferralCount,
+            status: 'pending', timestamp: Date.now()
+            });
+        } catch (writeError) {
+            await balanceRef.transaction(current => Number(current || 0) + amount);
+            throw writeError;
+        }
+        appState.user.balance = Number(debit.snapshot.val() || 0);
+        document.getElementById('wd-account').value = '';
+        document.getElementById('wd-amount').value = '';
+        toast('✅ Withdraw sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
+        await calculateValidReferrals();
+        updateWithdrawInfo();
+    } catch (e) { toast('❌ ' + e.message); }
+}
+async function loadWithdrawHistory() {
+    if (!isOnline) { document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No internet</p>'; return; }
+    try {
+        const snap = await db.ref('withdrawals').orderByChild('userId').equalTo(tgUser.id).once('value');
+        const items = [];
+        snap.forEach(child => items.push(child.val()));
+        if (items.length === 0) { document.getElementById('historyList').innerHTML = '<p style="text-align:center;color:#999;padding:20px 0;">No history</p>'; return; }
+        items.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        let html = '';
+        items.slice(0, HISTORY_LIMIT).forEach(w => {
+            const col = w.status === 'pending' ? '#f39c12' : w.status === 'approved' ? '#2ecc71' : '#e74c3c';
+            const txt = w.status === 'pending' ? '⏳ Pending' : w.status === 'approved' ? '✅ Approved' : '❌ Rejected';
+            html += `<div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #eee;"><div><span style="font-weight:700;font-size:1.1rem;">${w.amount} TK</span><div style="font-size:0.75rem;color:#999;">Level ${w.level||1} • ${shortDate(w.timestamp)}</div></div><span style="color:${col};font-weight:600;padding:4px 12px;border-radius:20px;background:${col}20;">${txt}</span></div>`;
+        });
+        document.getElementById('historyList').innerHTML = html;
+    } catch (e) {}
+}
+
+function openTutorial() {
+    const url = safeHttpUrl(appState.config.tutorialLink);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    else toast('No valid tutorial link');
+}
+function openSupport() {
+    const url = safeHttpUrl(appState.config.supportLink || SUPPORT_LINK);
+    if (!url) { toast('No valid support link'); return; }
+    if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) tg.openTelegramLink(url);
+    else window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+async function loadMyReferrals() {
+    const container = document.getElementById('myReferralsList');
+    if (container) container.innerHTML = '<p style="text-align:center;color:#999;padding:15px;">Loading...</p>';
+    try { await calculateValidReferrals(); renderReferralList(); }
+    catch (e) { if (container) container.innerHTML = '<div class="empty-state"><p>Load failed</p></div>'; }
+}
+function loadCommissionHistory() {
+    const container = document.getElementById('commissionHistoryList');
+    if (!container) return;
+    const hist = appState.user.commissionHistory || {};
+    const keys = Object.keys(hist);
+    if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>No commissions yet</p></div>'; return; }
+    const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    let html = '';
+    items.slice(0, HISTORY_LIMIT).forEach(it => {
+        const initial = (it.fromName || 'U').charAt(0).toUpperCase();
+        html += `<div class="comm-item"><div class="comm-item-left"><div class="comm-item-avatar">${initial}</div><div class="comm-item-info"><h5>${esc(it.fromName)}</h5><p><i class="fas fa-coins"></i> ${esc(it.source || 'Earning')} • ${it.rate || REF_COMMISSION_RATE}%</p></div></div><div class="comm-item-amt">+${Number(it.commission || 0).toFixed(4)}<small>${shortDate(it.timestamp)}</small></div></div>`;
+    });
+    container.innerHTML = html;
+}
+function loadAdHistory() {
+    const container = document.getElementById('adHistoryList');
+    const hist = appState.user.adHistory || {};
+    const keys = Object.keys(hist);
+    if (keys.length === 0) { container.innerHTML = '<div class="empty-state"><i class="fas fa-play-circle"></i><p>No ads watched</p></div>'; document.getElementById('histAdCount').textContent = '0'; document.getElementById('histAdTotal').textContent = '0'; return; }
+    const items = keys.map(k => ({ id: k, ...hist[k] })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    let adCount = 0, totalEarned = 0;
+    items.forEach(it => { if (it.type !== 'bonus') adCount++; totalEarned += Number(it.amount || 0); });
+    let html = '';
+    items.slice(0, HISTORY_LIMIT).forEach(it => {
+        const isBonus = it.type === 'bonus', isClaim = it.type === 'adclaim', isExtra = it.type === 'extra';
+        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : (isExtra ? 'fa-bolt' : 'fa-play-circle'));
+        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : 'Ad Slot ' + it.slot));
+        html += `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ${icon}"></i></div><div class="history-info"><h5>${title}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount || 0).toFixed(2)} TK</div></div>`;
+    });
+    container.innerHTML = html;
+    document.getElementById('histAdCount').textContent = adCount;
+    document.getElementById('histAdTotal').textContent = totalEarned.toFixed(2);
+}
+
+async function sendNotification(userId, message) {
+    const endpoint = getBackendEndpoint('telegram/notify');
+    if (!endpoint || !tg || !tg.initData) return false;
+    try {
+        const response = await fetchWithTimeout(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+            body: JSON.stringify({ userId: String(userId), message: String(message || '') })
+        }, 15000);
+        return response.ok;
+    } catch (e) { return false; }
+}
+
+async function updateTextElements() {
+    const sym = appState.config.currencySymbol || 'TK';
+    document.getElementById('u-bal').innerText = (appState.user.balance || 0).toFixed(2);
+    document.getElementById('u-earn').innerText = (appState.user.totalEarned || 0).toFixed(2);
+    document.getElementById('u-ref').innerText = appState.user.referrals || 0;
+    document.querySelectorAll('.currency').forEach(el => el.innerText = sym);
+    document.getElementById('ref-link-text').innerText = getRefLink();
+    document.getElementById('ref-bonus-txt').innerText = (appState.config.refBonus || 5) + ' ' + sym;
+    document.getElementById('bonusAmt').innerText = appState.config.dailyBonusAmount || 20;
+    document.getElementById('commTotalAmt').innerText = (appState.user.totalCommission || 0).toFixed(2);
+    document.getElementById('commRateTxt').innerText = REF_COMMISSION_RATE + '%';
+    const refQualifiedMinText = document.getElementById('refQualifiedMinText');
+    if (refQualifiedMinText) refQualifiedMinText.textContent = MIN_REFERRAL_BALANCE + ' টাকা বা তার বেশি';
+    const wdSel = document.getElementById('wd-method');
+    let currentVal = wdSel.value;
+    wdSel.innerHTML = '<option value="">Select Method</option>';
+    if (appState.config.paymentMethods && Array.isArray(appState.config.paymentMethods)) {
+        appState.config.paymentMethods.forEach(m => {
+            if (m && String(m).trim()) wdSel.innerHTML += '<option value="' + esc(m) + '" ' + (currentVal === m ? 'selected' : '') + '>' + esc(m) + '</option>';
+        });
+    }
+    if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
+    await calculateValidReferrals();
+    updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts();
+    updateAdClaimUI(); updateClaimWindowUI(); updateExtraRewardUI();
+}
+
+function setLoading(isLoading) {
+    const loader = document.getElementById('loader'), app = document.getElementById('app');
+    if (isLoading) { loader.style.display = 'flex'; app.style.display = 'none'; }
+    else {
+        loader.style.display = 'none';
+        const joinModal = document.getElementById('joinModal');
+        if (!isOnline || (joinModal && joinModal.classList.contains('active')) || checkMaintenance() || checkBan()) app.style.display = 'none';
+        else app.style.display = 'block';
+    }
+}
+
+async function loadLeaderboard() {
+    if (!isOnline) return;
+    const sym = appState.config.currencySymbol || 'TK';
+    const snap = await db.ref('users').orderByChild('balance').limitToLast(30).once('value');
+    let realUsers = [];
+    snap.forEach(child => {
+        const u = child.val();
+        if (Number(u.balance || 0) > 0) realUsers.push({ _id: child.key, name: u.name || 'User', photo: u.photo || '', balance: Number(u.balance || 0), referrals: Number(u.referrals || 0), _isCustom: false });
+    });
+    const custom = appState.config.leaderboardCustom || [];
+    custom.forEach(c => {
+        const cBalance = Number(c.balance || 0);
+        const cRefs = Number(c.refs || 0);
+        let matched = false;
+        if (c.userId) {
+            const idx = realUsers.findIndex(u => String(u._id) === String(c.userId));
+            if (idx >= 0) { matched = true; realUsers[idx].balance = Math.max(realUsers[idx].balance, cBalance); realUsers[idx].referrals = Math.max(realUsers[idx].referrals, cRefs); realUsers[idx]._isCustom = true; }
+        }
+        if (!matched) realUsers.push({ _id: 'custom_' + Math.random().toString(36).substr(2, 8), name: c.name || 'Admin Added', photo: c.photo || '', balance: cBalance, referrals: cRefs, _isCustom: true });
+    });
+    realUsers.sort((a, b) => b.balance - a.balance);
+    const top10 = realUsers.slice(0, 10);
+    let p1 = '', p2 = '', p3 = '', listHtml = '';
+    top10.forEach((u, i) => {
+        const pic = safeHttpUrl(u.photo) || 'https://via.placeholder.com/100';
+        const name = (u.name || 'User').substring(0, 12);
+        const bal = u.balance.toFixed(2);
+        const statsHtml = `<div class="rank-stats-col"><div class="rank-badge badge-bal">${bal} ${sym}</div><div class="rank-badge badge-ref"><i class="fas fa-users"></i> ${u.referrals} Refs</div></div>`;
+        const crownIcon = u._isCustom ? '👑' : '';
+        const safeImg = 'onerror="this.src=\'https://via.placeholder.com/100\'"';
+        if (i === 0) p1 = `<div class="podium-item rank-1"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else if (i === 1) p2 = `<div class="podium-item rank-2"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else if (i === 2) p3 = `<div class="podium-item rank-3"><i class="fas fa-crown crown"></i><img src="${pic}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
+        else listHtml += `<div class="leader-row ${u._isCustom ? 'is-custom' : ''}"><div class="leader-left"><div class="rank-num">#${i+1}</div><img src="${pic}" ${safeImg}><span>${esc(name)} ${crownIcon}</span></div><div class="leader-right-stats"><span class="leader-right-bal">${bal} ${sym}</span><span class="leader-right-ref"><i class="fas fa-users"></i> ${u.referrals} Refs</span></div></div>`;
+    });
+    document.getElementById('podium-area').innerHTML = p2 + p1 + p3;
+    document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet</p>';
+}
+
+async function checkChannelMembership(userId, chatId, retries = 2) {
+    if (!userId || !chatId) return null;
+    const endpoint = getBackendEndpoint('telegram/membership');
+    if (!endpoint || !tg || !tg.initData) return null;
+    for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+            const response = await fetchWithTimeout(endpoint, {
+                method: 'POST',
+                cache: 'no-store',
+                headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+                body: JSON.stringify({ userId: String(userId), chatId: String(chatId) })
+            }, 12000);
+            if (!response.ok) {
+                if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
+                return null;
+            }
+            const data = await response.json();
+            if (typeof data.member === 'boolean') return data.member;
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
+            return null;
+        } catch (e) {
+            if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
+            return null;
+        }
+    }
+    return null;
+}
+
+function renderChannelButtons() {
+    const container = document.getElementById('channelLinks'); container.innerHTML = '';
+    const links = getCurrentChannelLinks() || [];
+    links.forEach(link => {
+        const btn = document.createElement('a');
+        btn.className = 'channel-btn'; btn.dataset.chatId = link.chatId;
+        btn.href = 'https://t.me/' + link.chatId; btn.target = '_blank';
+        btn.innerHTML = '<i class="fa-brands fa-telegram"></i> ' + esc(link.label);
+        btn.onclick = (e) => { e.preventDefault(); openLink('https://t.me/' + link.chatId); setTimeout(checkAndUpdateStatus, 2500); };
+        container.appendChild(btn);
+    });
+    const statusEl = document.getElementById('verifyStatus');
+    statusEl.textContent = '⏳ Checking...';
+    statusEl.className = 'verify-status loading';
+    if (verifyInterval) clearInterval(verifyInterval);
+    verifyInterval = setInterval(checkAndUpdateStatus, 3000);
+    setTimeout(checkAndUpdateStatus, 2000);
+}
+
+async function checkAndUpdateStatus() {
+    if (isCheckingChannel) return;
+    isCheckingChannel = true;
+    try {
+        const userId = tgUser.id;
+        const buttons = document.querySelectorAll('.channel-btn');
+        const statusEl = document.getElementById('verifyStatus');
+        if (!userId || userId === '123456') { statusEl.textContent = '⚠️ Unable'; statusEl.className = 'verify-status error'; return; }
+        let allJoined = true, hasUnknown = false;
+        for (const btn of buttons) {
+            const joined = await checkChannelMembership(userId, btn.dataset.chatId);
+            if (joined === true) btn.classList.add('joined');
+            else if (joined === false) { btn.classList.remove('joined'); allJoined = false; }
+            else { btn.classList.remove('joined'); allJoined = false; hasUnknown = true; }
+        }
+        if (allJoined && buttons.length > 0) {
+            statusEl.textContent = '✅ All joined!';
+            statusEl.className = 'verify-status success';
+            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
+            await markVerified();
+            setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800);
+        } else {
+            const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length;
+            statusEl.textContent = '❌ Join ' + remaining + ' more' + (hasUnknown ? ' (checking...)' : '');
+            statusEl.className = 'verify-status error';
+        }
+    } finally { isCheckingChannel = false; }
+}
+
+async function showAppAfterVerify() {
+    if (!isOnline) { document.getElementById('offlineOverlay').classList.add('active'); return; }
+    if (checkMaintenance()) return;
+    if (checkBan()) return;
+    document.getElementById('app').style.display = 'block';
+    setLoading(false);
+    startPeriodicRecheck();
+    updateLastActive();
+    if (appState.user.dailyBonusDate !== todayStr()) showBonus();
+    startAdminSlider();
+    startMonetagInAppInterstitial(MONETAG_ZONE);
+}
+function openLink(url) {
+    const safeUrl = safeHttpUrl(url);
+    if (!safeUrl) { toast('Invalid link'); return; }
+    if (tg && tg.openTelegramLink && /t\.me|telegram\.me/i.test(safeUrl)) tg.openTelegramLink(safeUrl);
+    else window.open(safeUrl, '_blank', 'noopener,noreferrer');
+}
+
+/* === 10. MAIN BOOT / ONLOAD === */
+window.onload = () => {
+    setLoading(true);
+    updateNetworkStatus();
+    if (!tgUser || !tgUser.id || !tg || !tg.initData) {
+        const loaderSub = document.querySelector('.loader-sub');
+        if (loaderSub) loaderSub.textContent = 'Open this mini app from its Telegram bot to continue.';
+        return;
+    }
+    document.getElementById('u-name').innerText = tgUser.first_name;
+    document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
+    if (tgUser.photo_url) document.getElementById('u-img').src = safeHttpUrl(tgUser.photo_url) || 'https://via.placeholder.com/45';
+
+    if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
+    else setTimeout(() => { if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true; }, 1500);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
+        else {
+            updateLastActive();
+            if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
+                const resetTime = Number(appState.user.adsResetTime || 0);
+                if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
+                else updateCycleUI();
+                updateExtraRewardUI();
+                startPeriodicRecheck();
+                startAdminSlider();
+                if (channelVerified) {
+                    const now = Date.now();
+                    if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
+                        lastVerifyCheckTime = now;
+                        needsVerification().then(needs => {
+                            if (needs) {
+                                channelVerified = false;
+                                db.ref('users/' + tgUser.id + '/channelVerified').set(false);
+                                document.getElementById('app').style.display = 'none';
+                                document.getElementById('joinModal').classList.add('active');
+                                renderChannelButtons();
+                            }
+                        }).catch(() => {});
+                    }
+                }
+            }
+        }
+    });
+
+    window.addEventListener('beforeunload', () => { updateLastActive(); stopPeriodicRecheck(); stopAdminSlider(); if (verifyInterval) clearInterval(verifyInterval); });
+
+    db.ref('config').on('value', snap => {
+        if (snap.exists()) {
+            appState.config = snap.val();
+            if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
+            if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
+            REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
+            REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
+            
+            if (appState.config.adminRevenue) {
+                const ar = appState.config.adminRevenue;
+                adminRevenueConfig = {
+                    mode: ar.mode || 'referral_commission',
+                    refCommissionRate: Number(ar.refCommissionRate) || 5,
+                    refMaxDaily: Number(ar.refMaxDaily) || 50,
+                    perTaskBonus: Number(ar.perTaskBonus) || 0.10,
+                    taskMaxDaily: Number(ar.taskMaxDaily) || 20
+                };
+            }
+            
+            const parsedMinBal = Number(appState.config.minReferralBalance);
+            MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
+            if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
+            if (appState.config.minAdWatchSeconds !== undefined && appState.config.minAdWatchSeconds !== null) {
+                const v = Number(appState.config.minAdWatchSeconds);
+                if (!isNaN(v) && v >= 3 && v <= 120) MIN_AD_WATCH_SECONDS = v;
+            }
+            if (appState.config.extraReward) {
+                extraRewardConfig = {
+                    enabled: appState.config.extraReward.enabled !== false,
+                    amount: Number(appState.config.extraReward.amount || 0.5),
+                    dailyLimit: Number(appState.config.extraReward.dailyLimit || 5),
+                    title: appState.config.extraReward.title || 'Pop-up Ad দেখে আয় করুন',
+                    infoText: appState.config.extraReward.infoText || 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
+                };
+                updateExtraRewardUI();
+            }
+            if (appState.config.monetagZone) {
+                MONETAG_ZONE = String(appState.config.monetagZone);
+                if (MONETAG_ZONE !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(MONETAG_ZONE);
+            }
+            if (appState.config.maintenance && appState.config.maintenance.active) {
+                document.getElementById('maintenanceOverlay').classList.add('active');
+                document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
+                if (appState.config.maintenance.estimatedMinutes) {
+                    const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
+                    maintenanceEndTime = Date.now() + (mins * 60 * 1000);
+                    updateMaintenanceTimer();
+                    if (maintenanceTimer) clearInterval(maintenanceTimer);
+                    maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
                 }
             } else {
-                resolve({ done: true });
+                document.getElementById('maintenanceOverlay').classList.remove('active');
+                if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
-        } catch (e) {
-            resolve({ done: true });
-        }
-    });
-}
-function startMonetagInAppInterstitial(zoneId, settings) {
-    zoneId = String(zoneId || MONETAG_ZONE);
-    const fnName = 'show_' + zoneId;
-    if (monetagInAppStarted) return;
-    settings = settings || { frequency: 2, capping: 0.1, interval: 100, timeout: 5, everyPage: false };
-    const start = () => {
-        if (isMonetagSDKReady(zoneId)) {
-            try { window[fnName]({ type: 'inApp', inAppSettings: settings }); monetagInAppStarted = true; } catch(e) {}
-        } else setTimeout(start, 500);
-    };
-    start();
-}
-
-let activeAdSDK = null;
-let adSDKTimer = null;
-
-async function executeCustomAdCode(code) {
-    if (!code || typeof code !== 'string' || !code.trim()) return { done: true };
-    if (activeAdSDK) {
-        try { activeAdSDK.reject(new Error('Superseded')); } catch(e) {}
-        if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
-        activeAdSDK = null;
-    }
-    return new Promise((resolve) => {
-        let done = false;
-        const finish = (ok, msg) => {
-            if (done) return;
-            done = true;
-            if (adSDKTimer) { clearTimeout(adSDKTimer); adSDKTimer = null; }
-            if (activeAdSDK && activeAdSDK.finish === finish) activeAdSDK = null;
-            resolve({ done: true });
-        };
-        activeAdSDK = { finish, reject: () => finish(true), resolve: () => finish(true) };
-        adSDKTimer = setTimeout(() => finish(true), 15000);
-
-        window.__nexOpenExternal = function(url) {
-            try {
-                if (tg && typeof tg.openLink === 'function') tg.openLink(url, { try_instant_view: false });
-                else if (tg && typeof tg.openTelegramLink === 'function' && /t\.me|telegram\.me/i.test(url)) tg.openTelegramLink(url);
-                else window.open(url, '_blank', 'noopener');
-            } catch(e) { try { window.open(url, '_blank'); } catch(err) {} }
-        };
-
-        try {
-            const fn = new Function('resolve', 'reject', 'adResolve', 'adReject', 'openExternal', code);
-            const result = fn(() => finish(true), () => finish(true), () => finish(true), () => finish(true), window.__nexOpenExternal);
-            if (result && typeof result.then === 'function') {
-                result.then(() => finish(true)).catch(() => finish(true));
-            }
-        } catch(e) { finish(true); }
-    });
-}
-
-async function runSpecificCustomAd(targetKey) {
-    const buttons = appState.config.customAdButtons || [];
-    let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
-    if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
-        btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
-    }
-    if (btn && btn.code && String(btn.code).trim()) {
-        return await executeCustomAdCode(btn.code);
-    }
-    if (targetKey === 'adSlot1' || targetKey === 'adSlot2') {
-        const slotIndex = targetKey === 'adSlot1' ? 0 : 1;
-        const slots = appState.config.adSlots || [];
-        const slot = slots[slotIndex];
-        if (slot) {
-            if (slot.customCode && String(slot.customCode).trim().length > 0) return await executeCustomAdCode(slot.customCode);
-            if (slot.network === 'monetag') return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
-            if (slot.network === 'gigapub') {
-                if (typeof window.showGiga === 'function') {
-                    try { await window.showGiga(); } catch(e){}
+            const slots = appState.config.adSlots || [];
+            slots.forEach(slot => {
+                if (!slot) return;
+                if (slot.customCode && String(slot.customCode).trim()) return;
+                if (slot.network === 'monetag' && slot.id) { if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id); }
+                else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
+                    const sc = document.createElement('script'); sc.id = 'adsg-script'; sc.src = 'https://sad.adsgram.ai/js/sad.min.js'; sc.async = true; document.body.appendChild(sc);
+                } else if (slot.network === 'gigapub' && !document.getElementById('giga-script')) {
+                    const sc = document.createElement('script'); sc.id = 'giga-script'; sc.src = 'https://ad.gigapub.tech/script?id=1'; sc.async = true; document.body.appendChild(sc);
                 }
-                return { done: true };
-            }
-            if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram !== 'undefined') {
-                    try {
-                        const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-                        await adCtrl.show();
-                    } catch(e){}
-                }
-                return { done: true };
+            });
+            if (isBooted) {
+                updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
+                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
             }
         }
-    }
-    const slots = appState.config.adSlots || [];
-    let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
-    if (fallbackSlot) return await executeCustomAdCode(fallbackSlot.customCode);
-    return { done: true };
-}
-
-/* === 4. FIXED AD WATCHING LOGIC (NO FREEZE & NO HANG) === */
-function waitForMinTime(minSeconds) {
-    return new Promise((resolve) => {
-        let sec = 0;
-        const timer = setInterval(() => {
-            sec++;
-            if (sec >= minSeconds) {
-                clearInterval(timer);
-                resolve();
-            }
-        }, 1000);
     });
-}
 
-async function watchAd(i) {
-    if (slotLocks[i]) return;
-    if (isAdWatching) { toast('Please wait!'); return; }
-    if (!isOnline) { toast('No internet!'); return; }
-    slotLocks[i] = true; 
-    isAdWatching = true;
-    trackAdClick();
-    const loadingOverlay = document.getElementById('adLoadingOverlay');
-    const adStartTime = Date.now();
-    const targetKey = i === 0 ? 'adSlot1' : 'adSlot2';
-    try {
-        const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
-        if (!slot) throw new Error('Ad not configured');
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        if (!hasCustomCode && (!slot.network || slot.network === 'none')) throw new Error('Ad not configured');
-        
-        if (loadingOverlay) loadingOverlay.classList.add('active');
-        toast('Loading Ad...');
-        showAdWatchProgress(adStartTime);
-        
-        try {
-            await runSpecificCustomAd(targetKey);
-        } catch(err) {
-            console.log("Ad execution warning:", err);
+    const userRef = db.ref('users/' + tgUser.id);
+    userRef.once('value').then(async snap => {
+        const today = todayStr();
+        if (!snap.exists()) {
+            appState.user = {
+                id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
+                balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, adHistory: {}, referredUsers: {}, verifiedChannels: {},
+                totalCommission: 0, commissionHistory: {}, referredBy: null,
+                adsResetTime: 0, dailyBonusDate: '',
+                lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
+                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
+                referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
+                adClaimedCurrentCycle: false, claimWindowStartTime: 0,
+                extraRewardDate: '', extraRewardCount: 0,
+                referredByAdminCode: null
+            };
+            await userRef.set(appState.user);
+
+            let refBy = null;
+            if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
+            if (!refBy) {
+                const urlParams = new URLSearchParams(window.location.search);
+                refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref');
+            }
+
+            if (refBy && String(refBy) !== String(tgUser.id)) {
+                const deviceId = getDeviceId();
+                const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
+                if (deviceSnap.exists()) {
+                    toast('⚠️ This device already referred!');
+                } else {
+                    let handled = false;
+                    
+                    if (String(refBy).length >= 6) {
+                        try {
+                            const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
+                            if (adminsSnap.exists()) {
+                                let adminId = null;
+                                adminsSnap.forEach(child => { adminId = child.key; });
+                                if (adminId) {
+                                    await userRef.update({ referredByAdminCode: String(refBy) });
+                                    appState.user.referredByAdminCode = String(refBy);
+                                    await db.ref('admins/' + adminId + '/referredUsers/' + tgUser.id).set({
+                                        name: tgUser.first_name || 'User',
+                                        username: tgUser.username || '',
+                                        joinedAt: Date.now()
+                                    });
+                                    await db.ref('deviceReferrals/' + deviceId).set({
+                                        referrerAdminId: adminId,
+                                        referrerAdminCode: String(refBy),
+                                        referredId: tgUser.id,
+                                        timestamp: Date.now()
+                                    });
+                                    await sendNotification(adminId, '🎉 New User Joined!\n' + (tgUser.first_name || 'User') + '\nYour referral link is working!');
+                                    handled = true;
+                                    toast('🎉 Registered under admin!');
+                                }
+                            }
+                        } catch(e) { console.warn('[ADMIN REF]', e); }
+                    }
+                    
+                    if (!handled) {
+                        const refSnap = await db.ref('users/' + refBy).once('value');
+                        if (refSnap.exists()) {
+                            const r = refSnap.val();
+                            let cSnap = await db.ref('config').once('value');
+                            let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
+                            await userRef.update({ referredBy: String(refBy) });
+                            appState.user.referredBy = String(refBy);
+                            await db.ref('users/' + refBy).update({ referrals: (r.referrals || 0) + 1, balance: (r.balance || 0) + rBonus, totalEarned: (r.totalEarned || 0) + rBonus });
+                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', joinedAt: Date.now(), username: tgUser.username || '' });
+                            await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                            await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
+                            handled = true;
+                        }
+                    }
+                }
+            }
         }
-        
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-        await waitForMinTime(MIN_AD_WATCH_SECONDS);
-        hideAdWatchProgress();
-        
-        let newAds = Object.assign({}, appState.user.dailyAds || {});
-        newAds[i] = (newAds[i] || 0) + 1;
-        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds });
-        appState.user.dailyAds = newAds;
-        const remaining = Math.max(0, Number(appState.config.dailyAdLimit || 10) - newAds[i]);
-        toast('✅ Ad watched! ' + remaining + ' more for Slot ' + (i+1));
-        
-        setTimeout(async () => {
-            renderAds(); updateAdClaimUI();
-            if (isAllDisplayAdsWatched()) { await startClaimWindowIfNeeded(); startAdsResetCountdown(); }
-            else updateCycleUI();
-            updateClaimWindowUI();
-        }, 500);
-    } catch (e) {
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-        hideAdWatchProgress();
-        showAdError('⚠️ Ad Notice', e.message || 'Please try watching again.');
-    } finally {
-        slotLocks[i] = false; isAdWatching = false;
-        if (loadingOverlay) loadingOverlay.classList.remove('active');
-        hideAdWatchProgress();
-    }
-}
-function startAdWatch(i) { watchAd(i); }
 
-/* === 5. EXTRA REWARDS LOGIC === */
-function getTodayExtraRewardCount() {
-    const today = todayStr();
-    if (appState.user.extraRewardDate !== today) return 0;
-    return Number(appState.user.extraRewardCount || 0);
-}
-function updateExtraRewardUI() {
-    const card = document.getElementById('extraRewardsCard');
-    if (!card) return;
-    if (!extraRewardConfig.enabled) { card.style.display = 'none'; return; }
-    card.style.display = 'block';
-    const count = getTodayExtraRewardCount();
-    const limit = extraRewardConfig.dailyLimit;
-    const remaining = Math.max(0, limit - count);
-    const countEl = document.getElementById('erCount');
-    const titleEl = document.getElementById('erTitle');
-    const amountEl = document.getElementById('erAmount');
-    const infoEl = document.getElementById('erInfoText');
-    const btn = document.getElementById('erBtn');
-    const btnText = document.getElementById('erBtnText');
-    if (countEl) countEl.textContent = count + '/' + limit;
-    if (titleEl) titleEl.textContent = extraRewardConfig.title;
-    if (amountEl) amountEl.textContent = Number(extraRewardConfig.amount || 0).toFixed(2);
-    if (infoEl) infoEl.textContent = extraRewardConfig.infoText;
-    if (remaining <= 0) {
-        if (btn) btn.disabled = true;
-        if (btnText) btnText.textContent = 'আজকের লিমিট শেষ ✓';
-    } else {
-        if (btn) btn.disabled = false;
-        if (btnText) btnText.textContent = 'Watch Ad & Earn +' + Number(extraRewardConfig.amount || 0).toFixed(2) + ' TK';
-    }
-}
-async function watchExtraRewardAd() {
-    if (!isOnline) { toast('No internet!'); return; }
-    if (!extraRewardConfig.enabled) { toast('❌ Feature disabled'); return; }
-    const today = todayStr();
-    const count = getTodayExtraRewardCount();
-    if (count >= extraRewardConfig.dailyLimit) { toast('❌ আজকের লিমিট শেষ!'); updateExtraRewardUI(); return; }
-    if (isAdWatching) { toast('Please wait!'); return; }
-    const btn = document.getElementById('erBtn');
-    const btnText = document.getElementById('erBtnText');
-    isAdWatching = true;
-    if (btn) btn.disabled = true;
-    if (btnText) btnText.innerHTML = '<span class="er-loading"></span> Loading...';
-    const adStartTime = Date.now();
-    showAdWatchProgress(adStartTime);
-    try {
-        try { await runSpecificCustomAd('extraReward'); } catch(e){}
-        await waitForMinTime(MIN_AD_WATCH_SECONDS);
-        hideAdWatchProgress();
-        const rewardAmount = Number(extraRewardConfig.amount || 0);
-        const split = computeCommissionSplit(rewardAmount);
-        const userReward = split.userReward;
-        const referrerCommission = split.referrerCommission;
-        const newCount = count + 1;
-        const newBal = Number(appState.user.balance || 0) + userReward;
-        const newEarn = Number(appState.user.totalEarned || 0) + userReward;
-        let adHist = Object.assign({}, appState.user.adHistory || {});
-        adHist['extra_' + Date.now()] = { slot: 'Extra Reward', amount: userReward, timestamp: Date.now(), type: 'extra' };
-        const keys = Object.keys(adHist).sort((a,b) => (adHist[b].timestamp||0) - (adHist[a].timestamp||0));
-        if (keys.length > 100) keys.slice(100).forEach(k => delete adHist[k]);
-        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, extraRewardDate: today, extraRewardCount: newCount, adHistory: adHist });
-        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
-        appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount; appState.user.adHistory = adHist;
-        if (referrerCommission > 0) await creditReferrerCommission(referrerCommission, rewardAmount, 'Extra Reward Ad');
-        await giveAdminCommission(userReward, 'extra_reward');
-        await updateTextElements(); updateExtraRewardUI();
-        toast('✅ +' + userReward.toFixed(2) + ' TK (' + newCount + '/' + extraRewardConfig.dailyLimit + ')');
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-    } catch (e) {
-        hideAdWatchProgress();
-        showAdError('⚠️ Ad Error', e.message || 'Ad লোড হয়নি।');
-    } finally { isAdWatching = false; updateExtraRewardUI(); hideAdWatchProgress(); }
-}
+        userRef.on('value', async liveSnap => {
+            if (liveSnap.exists()) {
+                appState.user = liveSnap.val();
+                if (!appState.user.dailyAds) appState.user.dailyAds = {};
+                if (!appState.user.taskHistory) appState.user.taskHistory = {};
+                if (!appState.user.adHistory) appState.user.adHistory = {};
+                if (!appState.user.referredUsers) appState.user.referredUsers = {};
+                if (!appState.user.verifiedChannels) appState.user.verifiedChannels = {};
+                if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
+                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+                if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+                if (appState.user.adsResetTime === undefined) appState.user.adsResetTime = 0;
+                if (appState.user.dailyBonusDate === undefined) appState.user.dailyBonusDate = '';
+                if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
+                if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
+                if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
+                if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
+                if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
+                if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
+                if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
+                if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
+                if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
+                if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
+
+                if (appState.user.isBanned) {
+                    document.getElementById('bannedOverlay').classList.add('active');
+                    document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
+                    document.getElementById('app').style.display = 'none';
+                    return;
+                } else document.getElementById('bannedOverlay').classList.remove('active');
+
+                const resetTime = Number(appState.user.adsResetTime || 0);
+                if (resetTime > 0 && resetTime <= Date.now()) await forceCycleReset();
+
+                await updateTextElements();
+                renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
+
+                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
+                if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+
+                if (!isBooted) {
+                    isBooted = true;
+                    if (checkMaintenance()) { setLoading(false); return; }
+                    if (checkBan()) { setLoading(false); return; }
+                    setupUserSubmissionsListener();
+                    await fetchTaskStatuses();
+                    const needs = await needsVerification();
+                    if (needs) {
+                        document.getElementById('joinModal').classList.add('active');
+                        renderChannelButtons();
+                    } else {
+                        channelVerified = true;
+                        if (channelLinks && channelLinks.length > 0) { try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {} }
+                        if (isOnline) {
+                            document.getElementById('app').style.display = 'block';
+                            setLoading(false);
+                            startPeriodicRecheck();
+                            updateLastActive();
+                            if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
+                                if (!appState.user.claimWindowStartTime) await startClaimWindowIfNeeded();
+                                startClaimWindowTicker();
+                            }
+                            updateClaimWindowUI(); updateExtraRewardUI();
+                            if (appState.user.dailyBonusDate !== today) showBonus();
+                            startAdminSlider();
+                            startMonetagInAppInterstitial(MONETAG_ZONE);
+                        } else document.getElementById('offlineOverlay').classList.add('active');
+                    }
+                    const pendingSurvey = checkPendingSurveyReward();
+                    if (pendingSurvey) setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500);
+                    const pendingYoutube = checkPendingYoutubeReward();
+                    if (pendingYoutube) setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500);
+                }
+            }
+        });
+    });
+};
+</script>
+</body>
+</html>
