@@ -671,16 +671,10 @@ if (tg) { try { tg.ready(); tg.expand(); } catch (e) {} }
 const BOT_USERNAME = "TaskHubBD24Bot";
 const MINI_APP_NAME = "taskhub";
 
-/* ⚠️ SECURITY: BOT_TOKEN & IMGBB_API_KEY ক্লায়েন্ট সাইডে রাখা বিপজ্জনক।
-   প্রোডাকশনে এগুলো Cloud Function / Backend Server-এ সরান।
-   এখানে শুধু ফিচার কাজ চালু রাখতে রাখা হয়েছে। */
+/* ⚠️ SECURITY WARNING: Client-side tokens are risky. Move to Backend/Cloud Functions in production. */
 const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
-
-/* ✅ OPTIONAL: চ্যানেল চেকিং-এর জন্য Cloud Function URL
-   এটা সেট করলে client-side BOT_TOKEN কল হবে না।
-   উদাহরণ: "https://us-central1-cat-coins-34d4c.cloudfunctions.net/checkChannel" */
-const CHANNEL_CHECK_API = ""; // e.g., "https://...cloudfunctions.net/checkChannel"
+const CHANNEL_CHECK_API = ""; 
 
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
@@ -745,6 +739,7 @@ let channelLinks = [];
 let verifyInterval = null;
 let isOnline = navigator.onLine;
 let isAdWatching = false;
+let adWatchTimeout = null; // FIXED: Ad stuck flag reset
 let slotLocks = {};
 let maintenanceTimer = null;
 let maintenanceEndTime = null;
@@ -793,7 +788,6 @@ function toast(msg) {
     setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-/* ✅ FIX #4: Timezone-aware date (Asia/Dhaka) */
 function todayStr() {
     try {
         return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' });
@@ -806,8 +800,6 @@ function shortDate(ts) {
     return d.getDate() + '/' + (d.getMonth() + 1) + ' ' +
         d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 }
-
-/* ✅ FIX #3: esc() with single-quote escape — attribute-safe */
 function esc(s) {
     return String(s == null ? '' : s).replace(/[<>&"'`]/g, c => ({
         '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;',
@@ -906,7 +898,6 @@ function hideAdWatchProgress() {
     if (adWatchProgressTimer) { clearInterval(adWatchProgressTimer); adWatchProgressTimer = null; }
 }
 
-/* ✅ FIX: Cleanup all globals used by custom ad code */
 function cleanupAdGlobals() {
     try {
         delete window.resolve; delete window.reject;
@@ -922,14 +913,10 @@ function cleanupAdGlobals() {
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
 }
-
-/* ✅ FIX #6: reloadMonetagSDK with proper dedupe */
 function reloadMonetagSDK(zoneId) {
     zoneId = String(zoneId || '').trim();
     if (!zoneId) return;
-    // Skip if already loaded for this zone
     if (lastReloadZone === zoneId && isMonetagSDKReady(zoneId)) { MONETAG_ZONE = zoneId; return; }
-    // Remove all OTHER zone scripts (but keep the current zone if already loaded)
     document.querySelectorAll('script[data-zone]').forEach(s => {
         if (s.dataset.zone !== zoneId) s.remove();
     });
@@ -1011,7 +998,6 @@ async function executeCustomAdCode(code) {
         const wrappedResolve = () => finish(true);
         const wrappedReject = (msg) => finish(false, msg || 'Ad closed');
 
-        // ✅ FIX #5: only set globals AFTER activeAdSDK is set
         window.resolve = wrappedResolve;
         window.reject = wrappedReject;
         window.adResolve = window.resolve;
@@ -1038,20 +1024,20 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
-    // ✅ FIX: এরর না দেখিয়ে চুপচাপ রিলিজ করার ব্যবস্থা
+    // ✅ FIXED: Auto Release Flag timeout
     if (isAdWatching) {
-        if (!window.adWatchTimeout) {
-            window.adWatchTimeout = setTimeout(() => {
+        if (!adWatchTimeout) {
+            adWatchTimeout = setTimeout(() => {
                 isAdWatching = false;
-                window.adWatchTimeout = null;
-            }, 15000); // ১৫ সেকেন্ড পর অটো রিলিজ
+                adWatchTimeout = null;
+            }, 15000); // 15 seconds auto release
         }
         throw new Error('Already watching an ad. Please wait.');
     }
 
-    if (window.adWatchTimeout) {
-        clearTimeout(window.adWatchTimeout);
-        window.adWatchTimeout = null;
+    if (adWatchTimeout) {
+        clearTimeout(adWatchTimeout);
+        adWatchTimeout = null;
     }
 
     const buttons = appState.config.customAdButtons || [];
@@ -1100,6 +1086,7 @@ async function runSpecificCustomAd(targetKey) {
 
     throw new Error('No ads configured by Admin');
 }
+
 /* =========================================================
    === 5. AD WATCHING LOGIC
    ========================================================= */
@@ -1345,7 +1332,6 @@ async function startClaimWindowIfNeeded() {
     if (appState.user.claimWindowStartTime && appState.user.claimWindowStartTime > 0) return;
     const now = Date.now();
     try {
-        // ✅ FIX #12: only set if still null
         const result = await db.ref('users/' + appState.user.id + '/claimWindowStartTime')
             .transaction(cur => (cur && cur > 0) ? cur : now);
         if (result.committed) appState.user.claimWindowStartTime = result.snapshot.val();
@@ -1663,8 +1649,6 @@ function startTaskExpiryTicker() {
 }
 function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
-/* ⚠️ NOTE: Anti-hack below is only deterrence — NOT security.
-   Real security is in Firebase Rules. */
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
@@ -1866,8 +1850,6 @@ async function startAdsResetCountdown() {
     try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
     toast('🎉 Ads complete! Reset in ' + AD_RESET_HOURS + ' hours.');
 }
-
-/* ✅ FIX #17: transaction-based reset */
 async function forceCycleReset() {
     if (!tgUser || !tgUser.id) return;
     appState.user.dailyAds = {};
@@ -1920,7 +1902,6 @@ function getDeviceId() {
     return deviceId;
 }
 
-/* ✅ FIX #10: user-specific localStorage keys */
 function userLSKey(key) {
     return 'nexearn_' + String(tgUser && tgUser.id ? tgUser.id : 'guest') + '_' + key;
 }
@@ -2079,7 +2060,6 @@ function handleFilePreview(input, type) {
     toast('✅ File selected');
 }
 
-/* ✅ FIX #10: per-user localStorage for pending tasks */
 function checkPendingSurveyReward() {
     const done = localStorage.getItem(userLSKey('survey_done_task'));
     const pendingRaw = localStorage.getItem(userLSKey('pending_survey'));
@@ -2270,11 +2250,8 @@ function getCurrentChannelLinks() {
     return channelLinks && channelLinks.length > 0 ? channelLinks : null;
 }
 
-/* ✅ FIX #9: channel check returns { status: 'joined'|'not_joined'|'unknown' } */
 async function checkChannelMembership(userId, chatId, retries = 2) {
     if (!userId || !chatId) return 'unknown';
-
-    // ✅ Try Cloud Function first (SECURE)
     if (CHANNEL_CHECK_API) {
         try {
             const url = CHANNEL_CHECK_API + '?userId=' + encodeURIComponent(userId) + '&chatId=' + encodeURIComponent(chatId);
@@ -2283,8 +2260,6 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
             if (data && data.status) return data.status;
         } catch(e) {}
     }
-
-    // Fallback: client-side (⚠️ INSECURE — move to server in production)
     if (!BOT_TOKEN || String(BOT_TOKEN).indexOf('REPLACE') === 0) return 'unknown';
     const rawChatId = String(chatId).trim();
     const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
@@ -2299,7 +2274,6 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
                 if (status === 'restricted') return data.result.is_member === true ? 'joined' : 'not_joined';
                 return ['member', 'administrator', 'creator'].includes(status) ? 'joined' : 'not_joined';
             }
-            // 400 = user not found, 403 = bot has no access. Treat as UNKNOWN (don't block).
             if (data.error_code === 400 || data.error_code === 403) return 'unknown';
             if (attempt < retries) { await new Promise(r => setTimeout(r, 700 * (attempt + 1))); continue; }
             return 'unknown';
@@ -2686,7 +2660,6 @@ function openTaskSubmit(taskId) {
     document.getElementById('taskSubmitCategory').textContent = task.category || getTaskTypeLabel(task.type);
     document.getElementById('taskSubmitReward').textContent = task.reward + ' ' + sym;
     document.getElementById('taskSubmitTimeLeft').textContent = task.timeLimit || '';
-    /* ✅ FIX #8: XSS-safe task description */
     document.getElementById('taskSubmitDesc').textContent = task.description || '';
     const contentArea = document.getElementById('taskContentArea');
     const actionBtn = document.getElementById('taskSubmitActionBtn');
@@ -3069,7 +3042,6 @@ function renderChannelButtons() {
     setTimeout(checkAndUpdateStatus, 2000);
 }
 
-/* ✅ FIX #9: handle 'unknown' state gracefully (don't block user) */
 async function checkAndUpdateStatus() {
     if (isCheckingChannel) return;
     isCheckingChannel = true;
@@ -3095,7 +3067,6 @@ async function checkAndUpdateStatus() {
                 hasUnknown = true;
             }
         }
-        // ✅ Only block if at least one is definitively not joined
         if (allJoined && !hasUnknown && buttons.length > 0) {
             statusEl.textContent = '✅ All joined!';
             statusEl.className = 'verify-status success';
@@ -3110,7 +3081,6 @@ async function checkAndUpdateStatus() {
             statusEl.textContent = '❌ Join ' + remaining + ' more';
             statusEl.className = 'verify-status error';
         } else {
-            // All unknown — don't block, assume joined
             statusEl.textContent = '⏳ Checking...';
             statusEl.className = 'verify-status loading';
         }
@@ -3186,7 +3156,6 @@ window.onload = () => {
         if (verifyInterval) clearInterval(verifyInterval);
     });
 
-    /* ✅ FIX #7: throttle config listener to avoid repeated heavy re-renders */
     let configDebounce = null;
     db.ref('config').on('value', snap => {
         if (!snap.exists()) return;
@@ -3365,12 +3334,10 @@ window.onload = () => {
             }
         }
 
-        /* ✅ FIX #7: userRef.on('value') is now debounced for UI updates */
         let uiDebounce = null;
         userRef.on('value', liveSnap => {
             if (!liveSnap.exists()) return;
             appState.user = liveSnap.val();
-            // Ensure fields
             if (!appState.user.dailyAds) appState.user.dailyAds = {};
             if (!appState.user.taskHistory) appState.user.taskHistory = {};
             if (!appState.user.adHistory) appState.user.adHistory = {};
@@ -3421,7 +3388,14 @@ window.onload = () => {
                     if (checkBan()) { setLoading(false); return; }
                     setupUserSubmissionsListener();
                     await fetchTaskStatuses();
-                    const needs = await needsVerification();
+                    
+                    // FIXED: Loader stuck timeout - proceed after 4 seconds max
+                    const verifyTimeout = new Promise(resolve => setTimeout(() => resolve('timeout'), 4000));
+                    const verifyPromise = needsVerification().catch(() => 'error');
+                    
+                    const verifyResult = await Promise.race([verifyPromise, verifyTimeout]);
+                    const needs = (verifyResult === true);
+
                     if (needs) {
                         document.getElementById('joinModal').classList.add('active');
                         renderChannelButtons();
