@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="referrer" content="no-referrer" />
 <title>Earn Wallet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" />
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -27,9 +31,9 @@
 <style>
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
+body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;}
 #app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;display:none;transition:filter .25s ease;}
-#app.blurred{filter:blur(10px);}
+#app.blurred{filter:blur(10px);pointer-events:none;}
 .page-section{display:none;animation:fadeIn 0.3s ease;}
 .page-section.active{display:block;}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
@@ -62,8 +66,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .user-info h3{font-size:.95rem;font-weight:700;line-height:1.1;}
 .user-info p{font-size:.7rem;opacity:.8;}
 .header-right-btns{display:flex;align-items:center;gap:8px;}
-.support-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
-.dots-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
+.support-btn,.dots-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
 .balance-card{background:linear-gradient(135deg,#f7f3ff,#e3d6ff);width:88%;margin:-70px auto 25px;padding:25px;border-radius:25px;box-shadow:0 18px 35px rgba(76,62,224,.35);text-align:center;position:relative;z-index:10;color:#3b2b6b;border:2px solid rgba(255,255,255,.9);overflow:hidden;}
 .balance-card::before{content:"";position:absolute;width:150px;height:150px;background:rgba(255,255,255,.6);border-radius:50%;top:-70px;right:-40px;}
 .balance-card::after{content:"";position:absolute;width:110px;height:110px;background:rgba(255,255,255,.4);border-radius:50%;bottom:-50px;left:-30px;}
@@ -215,7 +218,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);width:92%;max-width:420px;background:#2d3436;display:flex;justify-content:space-around;padding:15px 5px;border-radius:25px;box-shadow:0 10px 30px rgba(0,0,0,.3);z-index:100;}
 .nav i{font-size:1.25rem;color:rgba(255,255,255,.4);cursor:pointer;transition:.3s;padding:0 5px;}
 .nav i.active{color:#fff;transform:translateY(-5px);text-shadow:0 0 15px #fff;}
-.toast{position:fixed;top:40px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:12px 25px;border-radius:30px;font-size:.9rem;opacity:0;transition:.3s;z-index:10000;font-weight:600;max-width:90%;text-align:center;}
+.toast{position:fixed;top:40px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:12px 25px;border-radius:30px;font-size:.9rem;opacity:0;transition:.3s;z-index:10000;font-weight:600;max-width:90%;text-align:center;pointer-events:none;}
 .toast.show{opacity:1;top:50px;}
 .bonus-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:12000;padding:18px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);}
 .bonus-overlay.show{display:flex;}
@@ -302,7 +305,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .comm-item-info p{font-size:.68rem;color:#10b981;font-weight:600;}
 .comm-item-amt{font-weight:900;font-size:.95rem;color:#00b894;text-align:right;}
 .comm-item-amt small{display:block;font-size:.62rem;color:#888;margin-top:2px;}
-.status-badge{padding:4px 12px;border-radius:20px;font-size:0.75rem;font-weight:700;}
 #taskSubmitModal{display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 15px;}
 #taskSubmitModal.active{display:block;}
 .task-shell{max-width:460px;margin:20px auto;background:#fff;border-radius:24px;overflow:hidden;}
@@ -320,7 +322,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .task-content input[type="file"]{width:100%;padding:12px;border:2px dashed #c7c9d9;border-radius:12px;background:#fafaff;font-size:0.82rem;cursor:pointer;font-weight:600;}
 .task-content textarea{width:100%;padding:12px;border:1.5px solid #e1e1e1;border-radius:12px;font-size:0.88rem;background:#f9f9f9;outline:none;font-weight:500;resize:vertical;}
 .task-content small{display:block;font-size:0.7rem;color:#9ca3af;margin-top:6px;font-weight:600;}
-.task-hint-box{padding:10px 14px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:8px;font-size:0.76rem;color:#92400e;font-weight:600;margin-top:14px;}
 .task-status-warning{padding:14px 18px;background:#FFF3CD;border-left:4px solid #f39c12;border-radius:10px;font-size:0.85rem;color:#856404;font-weight:700;display:flex;gap:10px;}
 .task-status-info{padding:14px 18px;background:#D1FAE5;border-left:4px solid #10b981;border-radius:10px;font-size:0.85rem;color:#065f46;font-weight:700;display:flex;gap:10px;}
 .task-status-cancelled{padding:14px 18px;background:#FEE2E2;border-left:4px solid #ef4444;border-radius:10px;font-size:0.85rem;color:#991b1b;font-weight:700;display:flex;gap:10px;}
@@ -435,9 +436,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .share-app-btn i{font-size:1.5rem;}
 .share-copy-btn{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:.92rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px;}
 .share-close-btn{width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;}
-@media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
-
-/* ============ NEW: PACKAGES CSS ============ */
 .packages-container{padding:0 20px 20px}
 .pkg-grid{display:grid;grid-template-columns:1fr;gap:14px}
 .pkg-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:20px;padding:18px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(108,92,231,.08);transition:all .25s}
@@ -466,8 +464,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pkg-buy-btn.active-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35);cursor:pointer}
 .pkg-buy-btn.claimed-btn{background:#e5e7eb;color:#64748b;cursor:not-allowed}
 .pkg-buy-btn:disabled{opacity:.6;cursor:not-allowed}
-
-/* ============ NEW: ACTIVE PACKAGE DETAILS ============ */
 .pkg-details-card{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border-radius:20px;padding:20px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,184,148,.35)}
 .pkg-details-card::before{content:'';position:absolute;width:150px;height:150px;background:rgba(255,255,255,.15);border-radius:50%;top:-60px;right:-40px}
 .pkg-details-card .pd-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
@@ -478,10 +474,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pkg-details-card .pd-item .lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;opacity:.9;margin-top:2px}
 .pkg-claim-btn{width:100%;padding:16px;border-radius:14px;border:none;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;background:#fff;color:#00b894;margin-top:16px;box-shadow:0 10px 24px rgba(0,0,0,.15);position:relative;z-index:1}
 .pkg-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed}
-.pkg-claim-btn.ready{animation:pulseGlow 2s infinite}
 @keyframes pulseGlow{0%,100%{box-shadow:0 10px 24px rgba(0,0,0,.15)}50%{box-shadow:0 10px 24px rgba(0,184,148,.6)}}
-
-/* ============ NEW: DEPOSIT CSS ============ */
 .deposit-provider-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:18px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;transition:all .25s}
 .deposit-provider-card:active{transform:scale(.98)}
 .deposit-provider-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px}
@@ -504,8 +497,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .deposit-instructions{font-size:.72rem;color:#64748b;font-weight:600;background:#f8fafc;padding:10px 12px;border-radius:10px;border-left:3px solid #3b82f6;margin-bottom:10px;line-height:1.5}
 .deposit-send-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 6px 16px rgba(0,184,148,.3)}
 .deposit-send-btn:active{transform:scale(.97)}
-
-/* ============ NEW: CLAIM PAGE ============ */
 .claim-hero{background:linear-gradient(135deg,#f39c12,#e84393);color:#fff;padding:22px;border-radius:22px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(232,67,147,.35)}
 .claim-hero::before{content:'';position:absolute;width:180px;height:180px;background:rgba(255,255,255,.12);border-radius:50%;top:-80px;right:-50px}
 .claim-hero .ch-label{font-size:.72rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
@@ -524,8 +515,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .claim-btn-single.ready{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
 .claim-btn-single.wait{background:#f1f5f9;color:#64748b;cursor:not-allowed}
 .claim-btn-single.expired{background:#fee2e2;color:#991b1b;cursor:not-allowed}
-
-/* ============ NEW: Package Buy Confirmation Modal ============ */
 .pkg-confirm-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px}
 .pkg-confirm-overlay.active{display:flex}
 .pkg-confirm-box{background:#fff;border-radius:22px;padding:24px;max-width:380px;width:100%;text-align:center}
@@ -541,8 +530,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pkg-confirm-box .pci-btn{flex:1;padding:14px;border-radius:12px;border:none;font-weight:900;font-size:.88rem;cursor:pointer;font-family:inherit}
 .pkg-confirm-box .pci-btn.cancel{background:#f1f5f9;color:#64748b}
 .pkg-confirm-box .pci-btn.confirm{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35)}
-
-/* ============ NEW: Deposit Submit Form ============ */
 .deposit-form-card{background:#fff;border-radius:18px;padding:20px;margin:0 20px 16px;border:1.5px solid #e5e7eb}
 .deposit-form-card h4{font-size:1rem;font-weight:900;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .deposit-form-card .df-group{margin-bottom:12px}
@@ -551,8 +538,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .deposit-form-card input:focus{border-color:#6C5CE7;background:#fff;box-shadow:0 0 0 4px rgba(108,92,231,.1)}
 .deposit-form-card .df-submit{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-top:6px}
 .deposit-form-card .df-note{font-size:.7rem;color:#92400e;font-weight:700;background:#fef3c7;padding:10px 12px;border-radius:10px;border-left:3px solid #f59e0b;margin-bottom:12px;line-height:1.5}
-
-/* ============ CHAT SYSTEM (USER) ============ */
 .chat-fab{position:fixed;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 10px 26px rgba(108,92,231,.5);z-index:9997;display:flex;align-items:center;justify-content:center;transition:transform .2s}
 .chat-fab:active{transform:scale(.92)}
 .chat-fab .chat-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:900;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #fff}
@@ -582,12 +567,13 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;transition:transform .2s}
 .chat-send:active{transform:scale(.9)}
 .chat-send:disabled{opacity:.5;cursor:not-allowed}
-.chat-attach{width:44px;height:44px;border-radius:50%;background:#f1f5f9;color:var(--text-secondary);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.chat-attach{width:44px;height:44px;border-radius:50%;background:#f1f5f9;color:var(--text-light);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
 .chat-attach:hover{background:#e2e8f0}
-.chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-secondary)}
+.chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-light)}
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.1)}}
+@media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
 </style>
 </head>
 <body>
@@ -676,7 +662,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     </div>
 </div>
 
-<!-- ============ NEW: Package Buy Confirmation Modal ============ -->
 <div class="pkg-confirm-overlay" id="pkgConfirmOverlay" onclick="if(event.target===this)closePkgConfirm()">
     <div class="pkg-confirm-box">
         <div class="pci-icon" id="pciIcon"><i class="fas fa-box-open"></i></div>
@@ -740,7 +725,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div id="tasksPaneHistory" class="tasks-inner-pane"><div id="taskHistoryArea"></div></div>
     </div>
 
-    <!-- ============ NEW: PACKAGES PAGE ============ -->
     <div id="page-packages" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-box-open"></i> Investment Packages</div>
         <div class="packages-container">
@@ -750,7 +734,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 
-    <!-- ============ NEW: CLAIM PAGE ============ -->
     <div id="page-claim" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-hand-holding-usd"></i> Daily Income Claim</div>
         <div id="claimPageContent">
@@ -765,7 +748,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 
-    <!-- ============ NEW: DEPOSIT PAGE ============ -->
     <div id="page-deposit" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-money-bill-wave"></i> Deposit Money</div>
         <div class="packages-container">
@@ -783,7 +765,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
             <div class="card-title"><i class="fas fa-link" style="color:#0984e3;"></i> Your Referral Link</div>
             <p style="font-size:0.85rem;color:#555;margin-bottom:12px;font-weight:600;">শেয়ার করুন। যোগ দিলে <b id="ref-bonus-txt" style="color:var(--primary);">...</b> পাবেন।</p>
             <div class="ref-link-box" id="ref-link-text">Loading...</div>
-            <div class="flex-btns"><button class="btn-blue" onclick="openShareModal()"><i class="fas fa-share-alt"></i> শেয়ার</button><button class="btn-dark" onclick="copyLink()"><i class="fas fa-copy"></i></button></div>
+            <div class="flex-btns"><button class="btn-blue" onclick="openShareModal()"><i class="fas fa-share-alt"></i> শেয়ার</button><button class="btn-dark" onclick="copyShareLink()"><i class="fas fa-copy"></i></button></div>
         </div>
 
         <div class="premium-card">
@@ -855,7 +837,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
 </div>
 
-<!-- ============ CHAT SYSTEM (USER) ============ -->
 <button class="chat-fab" id="chatFab" onclick="openChatModal()" style="display:none;">
     <i class="fas fa-comment-dots"></i>
     <span class="chat-badge" id="chatFabBadge" style="display:none;">0</span>
@@ -885,8 +866,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 </div>
-    
-    <script>
+<script>
 /* =========================================================
    === 1. INITIAL SETUP & FIREBASE CONFIG ===
    ========================================================= */
@@ -903,8 +883,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
-const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
+/* ⚠️ SECURITY WARNING:
+ * কখনো production-এ client-side এ BOT_TOKEN বা IMGBB_API_KEY রাখবেন না।
+ * নিচের placeholder গুলো আপনার server-side (Cloud Function / VPS) proxy endpoint দিয়ে replace করুন।
+ * উদাহরণ: BOT_TOKEN_PROXY = "https://your-domain.com/api/telegram"
+ *          IMGBB_PROXY = "https://your-domain.com/api/upload"
+ * ========================================================= */
+const BOT_TOKEN = ""; // ⚠️ NEVER put real token here in production
+const IMGBB_API_KEY = ""; // ⚠️ NEVER put real key here in production
+const BOT_TOKEN_PROXY = ""; // optional: your own server proxy URL
+const IMGBB_PROXY = ""; // optional: your own server proxy URL
 const CHANNEL_CHECK_API = "";
 
 const BOT_USERNAME = "TaskHubBD24Bot";
@@ -920,8 +908,9 @@ let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
 const REFERRAL_REFRESH_INTERVAL = 15000;
-const CHANNEL_RECHECK_INTERVAL = 20000;
+const CHANNEL_RECHECK_INTERVAL = 60000;
 const VERIFY_DEBOUNCE_MS = 5000;
+const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes instead of 30s
 
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
@@ -1024,6 +1013,7 @@ function toast(msg) {
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
 }
+/* Single consistent timezone-aware date function */
 function todayStr() {
     try { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }); }
     catch(e) { return new Date().toISOString().slice(0, 10); }
@@ -1061,7 +1051,6 @@ function tryHaptic(type) {
 function clearAdWatchTimeout() {
     if (adWatchTimeout) { clearTimeout(adWatchTimeout); adWatchTimeout = null; }
 }
-
 function showAdError(title, msg) {
     const t = document.getElementById('adErrorTitle');
     const m = document.getElementById('adErrorMsg');
@@ -1074,14 +1063,18 @@ function closeAdError() {
     const p = document.getElementById('adErrorPopup');
     if (p) p.classList.remove('active');
 }
+/* Safe async fire-and-forget wrapper */
+function fireAsync(promise) {
+    if (promise && typeof promise.catch === 'function') promise.catch(() => {});
+}
 
 /* =========================================================
-   === 3. AD WATCH PROGRESS & UI SETUP
+   === 3. UI HELPERS
    ========================================================= */
 function updateLastActive() {
     if (!tgUser || !tgUser.id) return;
     if (!isOnline) return;
-    try { db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()).catch(() => {}); } catch(e) {}
+    fireAsync(db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()));
 }
 function getRefLink() {
     return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id;
@@ -1109,8 +1102,6 @@ function copyShareLink() {
         document.body.removeChild(ta);
     });
 }
-function copyLink() { copyShareLink(); }
-function shareLink() { openShareModal(); }
 function shareViaWhatsApp() {
     const link = getRefLink();
     const text = encodeURIComponent('🎉 Join this amazing earning app!\n\n👇 Click here:\n' + link);
@@ -1162,7 +1153,7 @@ function cleanupAdGlobals() {
 }
 
 /* =========================================================
-   === 4. CUSTOM AD ENGINE (4 PROVIDERS SUPPORT)
+   === 4. AD ENGINE
    ========================================================= */
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
@@ -1225,19 +1216,26 @@ function startMonetagInAppInterstitial(zoneId, settings) {
 
 async function showAdsgramAd(blockId) {
     if (typeof window.Adsgram === 'undefined') {
-        if (!document.getElementById('adsgram-sdk-script')) {
-            await new Promise((resolve, reject) => {
-                const sc = document.createElement('script');
-                sc.id = 'adsgram-sdk-script';
-                sc.src = 'https://sad.adsgram.ai/js/sad.min.js';
-                sc.async = true;
-                sc.onload = () => resolve();
-                sc.onerror = () => reject(new Error('Adsgram SDK failed'));
-                document.head.appendChild(sc);
-            });
-        } else {
-            await new Promise(r => setTimeout(r, 1500));
-        }
+        await new Promise((resolve, reject) => {
+            const existing = document.getElementById('adsgram-sdk-script');
+            if (existing) {
+                // SDK script tag already there — wait for it to load
+                let attempts = 0;
+                const iv = setInterval(() => {
+                    attempts++;
+                    if (typeof window.Adsgram !== 'undefined') { clearInterval(iv); resolve(); }
+                    else if (attempts > 30) { clearInterval(iv); reject(new Error('Adsgram SDK timeout')); }
+                }, 200);
+                return;
+            }
+            const sc = document.createElement('script');
+            sc.id = 'adsgram-sdk-script';
+            sc.src = 'https://sad.adsgram.ai/js/sad.min.js';
+            sc.async = true;
+            sc.onload = () => resolve();
+            sc.onerror = () => reject(new Error('Adsgram SDK failed'));
+            document.head.appendChild(sc);
+        });
     }
     if (typeof window.Adsgram === 'undefined') throw new Error('Adsgram not available');
     const adCtrl = window.Adsgram.init({ blockId: String(blockId) });
@@ -1247,9 +1245,7 @@ async function showAdsgramAd(blockId) {
 }
 
 async function showAdexiumAd(zoneId) {
-    if (typeof window.AdexiumWidget === 'undefined') {
-        throw new Error('Adexium not available');
-    }
+    if (typeof window.AdexiumWidget === 'undefined') throw new Error('Adexium not available');
     return new Promise((resolve, reject) => {
         try {
             const widget = new window.AdexiumWidget({
@@ -1345,7 +1341,6 @@ async function executeCustomAdCode(code) {
     });
 }
 
-// NEW: 4-provider ad engine
 async function showAdByProvider(provider, code) {
     if (!provider || provider === 'none') throw new Error('No provider configured');
     const codeStr = String(code || '').trim();
@@ -1354,7 +1349,6 @@ async function showAdByProvider(provider, code) {
     if (provider === 'monetag') return await showMonetagRewardedPopup(codeStr);
     if (provider === 'adexium') return await showAdexiumAd(codeStr);
     if (provider === 'gigapub') return await showGigapubAd(codeStr);
-    // fallback: try as custom code
     return await executeCustomAdCode(codeStr);
 }
 
@@ -1382,11 +1376,11 @@ async function runAdForSlot(slotIndex) {
 }
 
 /* =========================================================
-   === 5. AD WATCHING LOGIC
+   === 5. MIN WATCH TIME
    ========================================================= */
 function waitForMinTime(minSeconds) {
     return new Promise((resolve, reject) => {
-        let awayTime = 0, wentAwayAt = 0, lastReturnAt = 0, hasWatchedEnough = false;
+        let awayTime = 0, wentAwayAt = 0, hasWatchedEnough = false;
         let isCurrentlyHidden = false, isSettled = false, pollId = null;
         const startTime = Date.now();
         const maxWait = 120;
@@ -1405,10 +1399,8 @@ function waitForMinTime(minSeconds) {
             if (!isCurrentlyHidden) return;
             isCurrentlyHidden = false;
             if (wentAwayAt) {
-                const away = (Date.now() - wentAwayAt) / 1000;
-                awayTime += away;
+                awayTime += (Date.now() - wentAwayAt) / 1000;
                 wentAwayAt = 0;
-                lastReturnAt = Date.now();
                 if (awayTime >= minSeconds) { hasWatchedEnough = true; settle(true); }
             }
         };
@@ -1417,14 +1409,10 @@ function waitForMinTime(minSeconds) {
         const onFocus = () => markVisible();
         const check = () => {
             if (isSettled) return;
-            const elapsed = (Date.now() - startTime) / 1000;
-            const isVisible = !document.hidden;
             if (hasWatchedEnough || awayTime >= minSeconds) { settle(true); return; }
-            if (lastReturnAt && awayTime > 0 && awayTime < minSeconds && isVisible) {
-                const sinceReturn = (Date.now() - lastReturnAt) / 1000;
-                if (sinceReturn >= 2) { settle(false, 'Ad Skipped Too Early'); return; }
-            }
-            if (!isCurrentlyHidden && !wentAwayAt && elapsed >= minSeconds && awayTime === 0) { settle(true); return; }
+            if (document.hidden) markHidden(); else markVisible();
+            const elapsed = (Date.now() - startTime) / 1000;
+            if (!isCurrentlyHidden && !wentAwayAt && elapsed >= minSeconds) { settle(true); return; }
             if (elapsed >= maxWait) {
                 if (awayTime >= minSeconds) settle(true);
                 else settle(false, 'Ad timeout');
@@ -1464,9 +1452,11 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
+        /* Use transaction to avoid race on dailyAds */
+        const dailyAdsRef = db.ref('users/' + appState.user.id + '/dailyAds/' + i);
+        await dailyAdsRef.transaction(cur => (cur || 0) + 1);
         let newAds = appState.user.dailyAds || {};
         newAds[i] = (newAds[i] || 0) + 1;
-        await db.ref('users/' + appState.user.id).update({ dailyAds: newAds });
         appState.user.dailyAds = newAds;
         const remaining = Number(appState.config.dailyAdLimit || 10) - newAds[i];
         toast('✅ Ad watched! ' + Math.max(0, remaining) + ' more for Slot ' + (i+1));
@@ -1494,10 +1484,8 @@ async function watchAd(i) {
 }
 function startAdWatch(i) { watchAd(i); }
 
-// ✅ END OF PART 2A
-</script>
 /* =========================================================
-   === 6. EXTRA REWARDS LOGIC
+   === 6. EXTRA REWARDS
    ========================================================= */
 function getTodayExtraRewardCount() {
     const today = todayStr();
@@ -1545,7 +1533,6 @@ async function watchExtraRewardAd() {
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
     try {
-        // Use any active ad slot for extra rewards
         const slots = appState.config.adSlots || [];
         let usedSlot = -1;
         for (let i = 0; i < slots.length; i++) {
@@ -1594,7 +1581,7 @@ async function watchExtraRewardAd() {
 }
 
 /* =========================================================
-   === 7. AD CLAIM LOGIC
+   === 7. AD CLAIM
    ========================================================= */
 function calculateAdTotalEarnings() {
     const slots = appState.config.adSlots || [];
@@ -1752,7 +1739,7 @@ async function claimAdEarnings() {
         tryHaptic('success');
     } catch (e) {
         if (claimed) {
-            try { await db.ref('users/' + appState.user.id + '/adClaimedCurrentCycle').set(false); } catch(err) {}
+            fireAsync(db.ref('users/' + appState.user.id + '/adClaimedCurrentCycle').set(false));
             appState.user.adClaimedCurrentCycle = false;
         }
         toast('❌ Failed: ' + e.message); updateAdClaimUI();
@@ -1760,23 +1747,21 @@ async function claimAdEarnings() {
 }
 
 /* =========================================================
-   === 8. ADMIN COMMISSION LOGIC
+   === 8. ADMIN COMMISSION
    ========================================================= */
 let adminCodeCache = {};
 async function giveAdminCommission(userEarnedAmount, sourceType) {
     try {
         const adminCode = appState.user.referredByAdminCode;
         if (!adminCode) {
-            try {
-                await db.ref('superAdminRevenue').push({
-                    source: 'user_earning_no_admin_ref',
-                    userId: String(appState.user.id),
-                    userEarned: Number(userEarnedAmount),
-                    adminShare: 0,
-                    superShare: Number(userEarnedAmount),
-                    timestamp: Date.now()
-                });
-            } catch(e) {}
+            fireAsync(db.ref('superAdminRevenue').push({
+                source: 'user_earning_no_admin_ref',
+                userId: String(appState.user.id),
+                userEarned: Number(userEarnedAmount),
+                adminShare: 0,
+                superShare: Number(userEarnedAmount),
+                timestamp: Date.now()
+            }));
             return false;
         }
         const mode = adminRevenueConfig.mode;
@@ -1798,42 +1783,50 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
             if (!adminId || !adminData) return false;
             adminCodeCache[adminCode] = adminId;
         }
-        const today = new Date().toDateString();
-        const logs = adminData.commissionLogs || {};
-        let todayTotal = 0;
-        Object.values(logs).forEach(log => {
-            if (log.type === 'referral' && new Date(log.timestamp).toDateString() === today) todayTotal += Number(log.amount || 0);
-        });
-        const maxDaily = Number(adminRevenueConfig.refMaxDaily || 50);
-        const finalCommission = Math.min(commission, Math.max(0, maxDaily - todayTotal));
-        if (finalCommission <= 0) return false;
-        const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7);
-        logs[logId] = {
-            type: 'referral', source: sourceType || 'user_earning',
-            fromUserId: String(appState.user.id), fromUserName: appState.user.name || 'User',
-            userEarned: Number(userEarnedAmount), amount: finalCommission, rate: rate,
-            timestamp: Date.now()
-        };
-        const logKeys = Object.keys(logs).sort((a,b) => (logs[b].timestamp||0) - (logs[a].timestamp||0));
-        if (logKeys.length > 200) logKeys.slice(200).forEach(k => delete logs[k]);
-        await db.ref('admins/' + adminId).update({
-            balance: Number(adminData.balance || 0) + finalCommission,
-            totalRevenue: Number(adminData.totalRevenue || 0) + finalCommission,
-            totalRefCommission: Number(adminData.totalRefCommission || 0) + finalCommission,
-            commissionLogs: logs
-        });
-        try {
-            await db.ref('superAdminRevenue').push({
-                source: 'admin_referral_commission', adminId, adminCode,
-                userId: String(appState.user.id), userEarned: Number(userEarnedAmount),
-                adminShare: finalCommission, superShare: Number(userEarnedAmount) - finalCommission,
-                timestamp: Date.now()
+        /* Use transaction to safely compute daily cap */
+        let finalCommission = 0;
+        const adminRef = db.ref('admins/' + adminId);
+        const result = await adminRef.transaction(cur => {
+            if (!cur) return cur;
+            const logs = cur.commissionLogs || {};
+            const today = new Date().toDateString();
+            let todayTotal = 0;
+            Object.values(logs).forEach(log => {
+                if (log.type === 'referral' && new Date(log.timestamp).toDateString() === today) todayTotal += Number(log.amount || 0);
             });
-        } catch(e) {}
+            const maxDaily = Number(adminRevenueConfig.refMaxDaily || 50);
+            const fc = Math.min(commission, Math.max(0, maxDaily - todayTotal));
+            if (fc <= 0) return cur;
+            finalCommission = fc;
+            const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+            logs[logId] = {
+                type: 'referral', source: sourceType || 'user_earning',
+                fromUserId: String(appState.user.id), fromUserName: appState.user.name || 'User',
+                userEarned: Number(userEarnedAmount), amount: fc, rate: rate,
+                timestamp: Date.now()
+            };
+            const logKeys = Object.keys(logs).sort((a,b) => (logs[b].timestamp||0) - (logs[a].timestamp||0));
+            if (logKeys.length > 200) logKeys.slice(200).forEach(k => delete logs[k]);
+            cur.commissionLogs = logs;
+            cur.balance = Number(cur.balance || 0) + fc;
+            cur.totalRevenue = Number(cur.totalRevenue || 0) + fc;
+            cur.totalRefCommission = Number(cur.totalRefCommission || 0) + fc;
+            return cur;
+        });
+        if (!result.committed || finalCommission <= 0) return false;
+        fireAsync(db.ref('superAdminRevenue').push({
+            source: 'admin_referral_commission', adminId, adminCode,
+            userId: String(appState.user.id), userEarned: Number(userEarnedAmount),
+            adminShare: finalCommission, superShare: Number(userEarnedAmount) - finalCommission,
+            timestamp: Date.now()
+        }));
         return true;
     } catch(e) { return false; }
 }
 
+/* =========================================================
+   === 9. REFERRAL UI
+   ========================================================= */
 function switchRefTab(tab) {
     currentRefTab = tab;
     const tabs = ['refTabTotal','refTabQualified','refTabIncome'];
@@ -1841,14 +1834,14 @@ function switchRefTab(tab) {
     tabs.forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
     panes.forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
     if (tab === 'total') {
-        const t = document.getElementById('refTabTotal'); if (t) t.classList.add('active');
-        const p = document.getElementById('refPaneTotal'); if (p) p.classList.add('active');
+        document.getElementById('refTabTotal')?.classList.add('active');
+        document.getElementById('refPaneTotal')?.classList.add('active');
     } else if (tab === 'qualified') {
-        const t = document.getElementById('refTabQualified'); if (t) t.classList.add('active');
-        const p = document.getElementById('refPaneQualified'); if (p) p.classList.add('active');
+        document.getElementById('refTabQualified')?.classList.add('active');
+        document.getElementById('refPaneQualified')?.classList.add('active');
     } else {
-        const t = document.getElementById('refTabIncome'); if (t) t.classList.add('active');
-        const p = document.getElementById('refPaneIncome'); if (p) p.classList.add('active');
+        document.getElementById('refTabIncome')?.classList.add('active');
+        document.getElementById('refPaneIncome')?.classList.add('active');
     }
     tryHaptic('light');
 }
@@ -1915,17 +1908,27 @@ async function claimReferralIncome() {
     const btn = document.getElementById('refClaimBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
     try {
-        const newMainBal = Number(appState.user.balance || 0) + bal;
-        await db.ref('users/' + appState.user.id).update({ balance: newMainBal, referralBalance: 0 });
-        appState.user.balance = newMainBal; appState.user.referralBalance = 0;
-        await updateTextElements(); renderReferralList();
-        toast('✅ ' + bal.toFixed(2) + ' TK added!');
+        const userRef = db.ref('users/' + appState.user.id);
+        const result = await userRef.transaction(cur => {
+            if (!cur) return cur;
+            const rb = Number(cur.referralBalance || 0);
+            if (rb < REFERRAL_CLAIM_MIN) return cur;
+            cur.balance = Number(cur.balance || 0) + rb;
+            cur.referralBalance = 0;
+            return cur;
+        });
+        if (result.committed) {
+            appState.user.balance = Number(appState.user.balance || 0) + bal;
+            appState.user.referralBalance = 0;
+            await updateTextElements(); renderReferralList();
+            toast('✅ ' + bal.toFixed(2) + ' TK added!');
+        }
     } catch (e) { toast('❌ ' + e.message); }
     finally { updateRefClaimButton(); }
 }
-
+    <script>
 /* =========================================================
-   === NEW: PACKAGES SYSTEM
+   === 10. PACKAGES SYSTEM
    ========================================================= */
 async function loadPackages() {
     const grid = document.getElementById('packagesGrid');
@@ -1939,21 +1942,20 @@ async function loadPackages() {
         list.sort((a, b) => (a.price || 0) - (b.price || 0));
         const activeList = list.filter(p => p.status === 'active');
         if (activeList.length === 0) {
-            grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages available</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Please check back later</p></div>';
+            grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages available</p></div>';
             return;
         }
         let html = '';
         activeList.forEach(p => {
             const userPkg = (appState.userPackages || {})[p.id];
-            const isActive = userPkg && !userPkg.expired && userPkg.status !== 'expired';
-            const canBuy = Number(appState.user.balance || 0) >= Number(p.price || 0);
+            const isActive = userPkg && userPkg.expiresAt > Date.now() && userPkg.status !== 'expired';
             let btnHtml = '';
             if (isActive) {
-                btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${p.id}')"><i class="fas fa-check-circle"></i> একটিভ — বিস্তারিত দেখুন</button>`;
+                btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${esc(p.id)}')"><i class="fas fa-check-circle"></i> একটিভ — বিস্তারিত দেখুন</button>`;
             } else {
-                btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${p.id}')"><i class="fas fa-rocket"></i> Upgrade — ${Number(p.price || 0).toFixed(2)} TK</button>`;
+                btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${esc(p.id)}')"><i class="fas fa-rocket"></i> Upgrade — ${Number(p.price || 0).toFixed(2)} TK</button>`;
             }
-            html += `<div class="pkg-card ${isActive ? 'active-pkg' : ''}" onclick="${isActive ? `openPackageDetails('${p.id}')` : ''}">
+            html += `<div class="pkg-card ${isActive ? 'active-pkg' : ''}">
                 <div class="pkg-head">
                     <div class="pkg-title"><div class="pkg-title-icon"><i class="fas fa-box"></i></div>${esc(p.name)}</div>
                     <span class="pkg-badge ${isActive ? 'active' : 'available'}">${isActive ? 'একটিভ' : 'Available'}</span>
@@ -1961,14 +1963,14 @@ async function loadPackages() {
                 <div class="pkg-stats">
                     <div class="pkg-stat price"><div class="val">${Number(p.price || 0).toFixed(2)}</div><div class="lbl">Price TK</div></div>
                     <div class="pkg-stat daily"><div class="val">${Number(p.dailyIncome || 0).toFixed(2)}</div><div class="lbl">Daily TK</div></div>
-                    <div class="pkg-stat duration"><div class="val">${p.duration || 0}d</div><div class="lbl">Duration</div></div>
+                    <div class="pkg-stat duration"><div class="val">${Number(p.duration || 0)}d</div><div class="lbl">Duration</div></div>
                 </div>
                 <div class="pkg-meta">
                     <span><i class="fas fa-coins"></i> Total: ${Number((p.dailyIncome || 0) * (p.duration || 0)).toFixed(2)} TK</span>
-                    <span><i class="fas fa-percent"></i> ${p.rate || 0}% Rate</span>
+                    <span><i class="fas fa-percent"></i> ${Number(p.rate || 0)}% Rate</span>
                 </div>
                 ${p.description ? `<div style="font-size:.72rem;color:#64748b;margin-bottom:12px;font-weight:600;">${esc(p.description)}</div>` : ''}
-                <div onclick="event.stopPropagation()">${btnHtml}</div>
+                ${btnHtml}
             </div>`;
         });
         grid.innerHTML = html;
@@ -1987,8 +1989,8 @@ function openBuyConfirm(pkgId) {
     document.getElementById('pciSub').textContent = 'আপনি কি এই প্যাকেজটি কিনতে চান?';
     document.getElementById('pciInfo').innerHTML = `
         <div class="pci-row"><span>Package:</span><span class="val">${esc(pkg.name)}</span></div>
-        <div class="pci-row"><span>Duration:</span><span class="val">${pkg.duration} days</span></div>
-        <div class="pci-row"><span>Daily Income:</span><span class="val">${Number(pkg.dailyIncome).toFixed(2)} TK</span></div>
+        <div class="pci-row"><span>Duration:</span><span class="val">${Number(pkg.duration || 0)} days</span></div>
+        <div class="pci-row"><span>Daily Income:</span><span class="val">${Number(pkg.dailyIncome || 0).toFixed(2)} TK</span></div>
         <div class="pci-row"><span>Your Balance:</span><span class="val">${userBal.toFixed(2)} TK</span></div>
         <div class="pci-row total"><span>Total Price:</span><span class="val">${price.toFixed(2)} TK</span></div>
         ${userBal < price ? `<div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;color:#991b1b;font-size:.75rem;font-weight:700;border-left:3px solid #ef4444;">⚠️ অপর্যাপ্ত ব্যালেন্স! আরও ${(price-userBal).toFixed(2)} TK প্রয়োজন।</div>` : ''}
@@ -2011,7 +2013,6 @@ function closePkgConfirm() {
     document.getElementById('pkgConfirmOverlay').classList.remove('active');
     selectedPkgForBuy = null;
 }
-
 async function confirmBuyPackage() {
     if (!selectedPkgForBuy) return;
     const pkg = allPackagesCache[selectedPkgForBuy];
@@ -2022,10 +2023,19 @@ async function confirmBuyPackage() {
     const btn = document.getElementById('pciConfirmBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     try {
+        /* Atomically deduct balance */
+        const userRef = db.ref('users/' + appState.user.id);
+        const result = await userRef.transaction(cur => {
+            if (!cur) return cur;
+            if (Number(cur.balance || 0) < price) return; // abort
+            cur.balance = Number(cur.balance || 0) - price;
+            return cur;
+        });
+        if (!result.committed) { toast('❌ অপর্যাপ্ত ব্যালেন্স'); btn.disabled = false; btn.textContent = 'Confirm Purchase'; return; }
         const now = Date.now();
         const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
         const upId = 'up_' + Date.now() + '_' + appState.user.id;
-        const userPkgData = {
+        await db.ref('userPackages/' + upId).set({
             userId: String(appState.user.id),
             userName: appState.user.name || tgUser.first_name || 'User',
             username: tgUser.username || '',
@@ -2040,23 +2050,15 @@ async function confirmBuyPackage() {
             totalEarned: 0,
             claimCount: 0,
             status: 'active'
-        };
-        // Deduct balance & save package
-        const newBalance = userBal - price;
-        await db.ref('users/' + appState.user.id).update({ balance: newBalance });
-        await db.ref('userPackages/' + upId).set(userPkgData);
-        appState.user.balance = newBalance;
-        // Refresh UI
+        });
+        appState.user.balance = Number(appState.user.balance || 0) - price;
         await updateTextElements();
-        loadPackages();
-        loadClaimPage();
+        loadPackages(); loadClaimPage();
         toast('✅ প্যাকেজ কেনা সফল!');
-        closePkgConfirm();
-        tryHaptic('success');
+        closePkgConfirm(); tryHaptic('success');
     } catch (e) {
         toast('❌ ' + e.message);
-        btn.disabled = false;
-        btn.textContent = 'Confirm Purchase';
+        btn.disabled = false; btn.textContent = 'Confirm Purchase';
     }
 }
 
@@ -2074,6 +2076,16 @@ function openPackageDetails(pkgId) {
     const canClaim = !isExpired && (lastClaim === 0 || (now - lastClaim) >= 24 * 60 * 60 * 1000);
     const price = Number(pkg.price || 0);
     const totalReturn = daily * Number(pkg.duration || 0);
+    let claimBtnHtml = '';
+    if (!isExpired) {
+        const hours = Math.ceil((24*60*60*1000 - (now-lastClaim))/(60*60*1000));
+        claimBtnHtml = `<button class="pkg-claim-btn ${canClaim ? 'ready' : ''}" onclick="claimPackageIncomeById('${esc(up._upId || '')}')" ${canClaim ? '' : 'disabled'}>
+            <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
+            ${canClaim ? `Claim ${daily.toFixed(2)} TK` : `Next claim in ${hours}h`}
+        </button>`;
+    } else {
+        claimBtnHtml = `<button class="pkg-claim-btn" disabled><i class="fas fa-times-circle"></i> Package Expired</button>`;
+    }
     const html = `
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-box-open"></i> Package Details</div>
         <div class="pkg-details-card">
@@ -2089,18 +2101,10 @@ function openPackageDetails(pkgId) {
                 <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:800;opacity:.9;margin-bottom:6px;"><span>Total Return</span><span>${totalReturn.toFixed(2)} TK</span></div>
                 <div style="height:8px;background:rgba(255,255,255,.25);border-radius:20px;overflow:hidden;"><div style="height:100%;background:#fff;width:${Math.min(100, (totalEarned/(totalReturn||1))*100)}%;border-radius:20px;"></div></div>
             </div>
-            ${!isExpired ? `
-                <button class="pkg-claim-btn ${canClaim ? 'ready' : ''}" onclick="claimPackageIncome('${pkgId}')" ${canClaim ? '' : 'disabled'}>
-                    <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
-                    ${canClaim ? `Claim ${daily.toFixed(2)} TK` : `Next claim in ${Math.ceil((24*60*60*1000 - (now-lastClaim))/(60*60*1000))}h`}
-                </button>
-            ` : `
-                <button class="pkg-claim-btn" disabled><i class="fas fa-times-circle"></i> Package Expired</button>
-            `}
+            ${claimBtnHtml}
             <button onclick="closePkgDetails()" style="width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.25);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:10px;font-family:inherit;">Close</button>
         </div>
     `;
-    // Show as modal
     let modal = document.getElementById('pkgDetailsModal');
     if (!modal) {
         modal = document.createElement('div');
@@ -2116,53 +2120,45 @@ function closePkgDetails() {
     if (m) m.style.display = 'none';
 }
 
-async function claimPackageIncome(pkgId) {
-    const up = (appState.userPackages || {})[pkgId];
-    const pkg = allPackagesCache[pkgId];
-    if (!up || !pkg) { toast('❌ Not found'); return; }
-    const now = Date.now();
-    if (now > (up.expiresAt || 0)) { toast('❌ Package expired'); return; }
-    const lastClaim = Number(up.lastClaimAt || 0);
-    if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) {
-        toast('⏳ Please wait 24 hours between claims');
-        return;
-    }
-    const daily = Number(pkg.dailyIncome || 0);
-    if (daily <= 0) { toast('❌ Invalid income'); return; }
+async function claimPackageIncomeById(upId) {
+    if (!upId) return;
     try {
-        const newBal = Number(appState.user.balance || 0) + daily;
-        const newEarned = Number(up.totalEarned || 0) + daily;
-        const newCount = Number(up.claimCount || 0) + 1;
-        // Find upId for this pkg
-        const updates = { lastClaimAt: now, totalEarned: newEarned, claimCount: newCount };
-        let targetUpId = null;
-        // find by scanning userPackages
-        const ups = appState.userPackages || {};
-        for (const upId in ups) {
-            if (ups[upId].packageId === pkgId) { targetUpId = upId; break; }
-        }
-        if (!targetUpId) { toast('❌ Package record not found'); return; }
-        await db.ref('userPackages/' + targetUpId).update(updates);
-        await db.ref('users/' + appState.user.id).update({
-            balance: newBal,
-            totalEarned: Number(appState.user.totalEarned || 0) + daily
+        const snap = await db.ref('userPackages/' + upId).once('value');
+        if (!snap.exists()) { toast('❌ Not found'); return; }
+        const up = snap.val();
+        const now = Date.now();
+        if (now > (up.expiresAt || 0)) { toast('❌ Expired'); return; }
+        const lastClaim = Number(up.lastClaimAt || 0);
+        if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) { toast('⏳ Please wait'); return; }
+        const daily = Number(up.dailyIncome || 0);
+        if (daily <= 0) return;
+        /* Transaction on up lastClaimAt */
+        const upRef = db.ref('userPackages/' + upId);
+        const result = await upRef.transaction(cur => {
+            if (!cur) return cur;
+            const n = Date.now();
+            if (n > (cur.expiresAt || 0)) return;
+            const lc = Number(cur.lastClaimAt || 0);
+            if (lc > 0 && (n - lc) < 24 * 60 * 60 * 1000) return;
+            cur.lastClaimAt = n;
+            cur.totalEarned = Number(cur.totalEarned || 0) + daily;
+            cur.claimCount = Number(cur.claimCount || 0) + 1;
+            return cur;
         });
-        appState.user.balance = newBal;
-        appState.user.totalEarned = Number(appState.user.totalEarned || 0) + daily;
-        if (appState.userPackages[pkgId]) {
-            appState.userPackages[pkgId].lastClaimAt = now;
-            appState.userPackages[pkgId].totalEarned = newEarned;
-            appState.userPackages[pkgId].claimCount = newCount;
-        }
+        if (!result.committed) { toast('⏳ Please wait'); return; }
+        const userRef = db.ref('users/' + appState.user.id);
+        await userRef.transaction(cur => {
+            if (!cur) return cur;
+            cur.balance = Number(cur.balance || 0) + daily;
+            cur.totalEarned = Number(cur.totalEarned || 0) + daily;
+            return cur;
+        });
         await updateTextElements();
-        loadClaimPage();
-        loadPackages();
+        loadClaimPage(); loadPackages();
         closePkgDetails();
         toast('✅ ' + daily.toFixed(2) + ' TK claimed!');
         tryHaptic('success');
-    } catch (e) {
-        toast('❌ ' + e.message);
-    }
+    } catch (e) { toast('❌ ' + e.message); }
 }
 
 async function loadUserPackages() {
@@ -2175,13 +2171,12 @@ async function loadUserPackages() {
             map[v.packageId] = { ...v, _upId: child.key };
         });
         appState.userPackages = map;
-        loadPackages();
-        loadClaimPage();
+        loadPackages(); loadClaimPage();
     });
 }
 
 /* =========================================================
-   === NEW: CLAIM PAGE
+   === 11. CLAIM PAGE
    ========================================================= */
 function loadClaimPage() {
     const listEl = document.getElementById('claimPackagesList');
@@ -2218,7 +2213,7 @@ function loadClaimPage() {
                 </div>
                 <span class="claim-pkg-badge ${canClaim ? 'ready' : 'wait'}">${canClaim ? '✅ Ready' : '⏳ Wait ' + nextHours + 'h'}</span>
             </div>
-            <button class="claim-btn-single ${canClaim ? 'ready' : 'wait'}" onclick="claimPackageIncomeById('${u._upId}')" ${canClaim ? '' : 'disabled'}>
+            <button class="claim-btn-single ${canClaim ? 'ready' : 'wait'}" onclick="claimPackageIncomeById('${esc(u._upId || '')}')" ${canClaim ? '' : 'disabled'}>
                 <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
                 ${canClaim ? `Claim ${Number(u.dailyIncome || 0).toFixed(2)} TK` : `Next claim in ${nextHours}h`}
             </button>
@@ -2227,34 +2222,8 @@ function loadClaimPage() {
     listEl.innerHTML = html;
 }
 
-async function claimPackageIncomeById(upId) {
-    if (!upId) return;
-    try {
-        const snap = await db.ref('userPackages/' + upId).once('value');
-        if (!snap.exists()) { toast('❌ Not found'); return; }
-        const up = snap.val();
-        const now = Date.now();
-        if (now > (up.expiresAt || 0)) { toast('❌ Expired'); return; }
-        const lastClaim = Number(up.lastClaimAt || 0);
-        if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) { toast('⏳ Please wait'); return; }
-        const daily = Number(up.dailyIncome || 0);
-        if (daily <= 0) return;
-        const newBal = Number(appState.user.balance || 0) + daily;
-        const newEarned = Number(up.totalEarned || 0) + daily;
-        const newCount = Number(up.claimCount || 0) + 1;
-        await db.ref('userPackages/' + upId).update({ lastClaimAt: now, totalEarned: newEarned, claimCount: newCount });
-        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: Number(appState.user.totalEarned || 0) + daily });
-        appState.user.balance = newBal;
-        appState.user.totalEarned = Number(appState.user.totalEarned || 0) + daily;
-        await updateTextElements();
-        loadClaimPage();
-        toast('✅ ' + daily.toFixed(2) + ' TK claimed!');
-        tryHaptic('success');
-    } catch (e) { toast('❌ ' + e.message); }
-}
-
 /* =========================================================
-   === NEW: DEPOSIT PAGE
+   === 12. DEPOSIT PAGE
    ========================================================= */
 function renderDepositPage() {
     const c = document.getElementById('depositProvidersList');
@@ -2267,7 +2236,7 @@ function renderDepositPage() {
         { key: 'upay', name: 'Upay', icon: 'U', num: dp.upay, cls: 'upay' }
     ].filter(p => p.num && String(p.num).trim().length > 0);
     if (providers.length === 0) {
-        c.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods available</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Admin has not configured any numbers yet</p></div>';
+        c.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods available</p></div>';
         return;
     }
     const minDep = Number(dp.minDeposit || 50);
@@ -2276,8 +2245,8 @@ function renderDepositPage() {
         html += `<div class="deposit-provider-card ${p.cls}">
             <div class="deposit-provider-head">
                 <div class="deposit-provider-name">
-                    <div class="deposit-provider-icon ${p.cls}">${p.icon}</div>
-                    <div>${p.name}</div>
+                    <div class="deposit-provider-icon ${p.cls}">${esc(p.icon)}</div>
+                    <div>${esc(p.name)}</div>
                 </div>
                 <div class="deposit-min-badge">Min ${minDep.toFixed(0)} TK</div>
             </div>
@@ -2286,14 +2255,13 @@ function renderDepositPage() {
                 <button class="copy-mini" onclick="copyDepositNumber('${esc(p.num)}')">Copy</button>
             </div>
             ${dp.instructions ? `<div class="deposit-instructions">${esc(dp.instructions)}</div>` : ''}
-            <button class="deposit-send-btn" onclick="openDepositForm('${p.key}','${esc(p.name)}','${esc(p.num)}')">
+            <button class="deposit-send-btn" onclick="openDepositForm('${esc(p.key)}','${esc(p.name)}','${esc(p.num)}')">
                 <i class="fas fa-paper-plane"></i> I've Sent Money
             </button>
         </div>`;
     });
     c.innerHTML = html;
 }
-
 function copyDepositNumber(num) {
     navigator.clipboard.writeText(num).then(() => toast('📋 Number copied!')).catch(() => {
         const ta = document.createElement('textarea');
@@ -2303,7 +2271,6 @@ function copyDepositNumber(num) {
         document.body.removeChild(ta);
     });
 }
-
 function openDepositForm(key, name, num) {
     let modal = document.getElementById('depositFormModal');
     if (!modal) {
@@ -2327,7 +2294,6 @@ function openDepositForm(key, name, num) {
     </div>`;
     setTimeout(() => { const i = document.getElementById('dfAmount'); if (i) i.focus(); }, 100);
 }
-
 async function submitDepositRequest(methodName, methodAccount) {
     const amountEl = document.getElementById('dfAmount');
     const txnEl = document.getElementById('dfTxnId');
@@ -2356,8 +2322,9 @@ async function submitDepositRequest(methodName, methodAccount) {
         document.getElementById('depositFormModal').style.display = 'none';
     } catch (e) { toast('❌ ' + e.message); }
 }
-        /* =========================================================
-   === 9. TASKS LOGIC
+
+/* =========================================================
+   === 13. TASKS
    ========================================================= */
 function getTaskDaysFromLimit(task) {
     const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/);
@@ -2412,22 +2379,20 @@ function startTaskExpiryTicker() {
 }
 function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
+/* Anti-hack: only block contextmenu & devtools keys — NOT selectstart/dragstart */
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
         const isBlocked = e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','i','J','j','C','c','K','k'].includes(e.key)) || (e.ctrlKey && ['U','u'].includes(e.key));
         if (isBlocked) { e.preventDefault(); e.stopPropagation(); return false; }
     }, true);
-    document.addEventListener('selectstart', (e) => { e.preventDefault(); });
-    document.addEventListener('dragstart', (e) => e.preventDefault());
 })();
 
 function toggleMenuPopup(e) {
     if (e) e.stopPropagation();
     const popup = document.getElementById('menuPopup');
     if (!popup) return;
-    if (popup.classList.contains('show')) popup.classList.remove('show');
-    else popup.classList.add('show');
+    popup.classList.toggle('show');
 }
 function closeMenuPopup() {
     const popup = document.getElementById('menuPopup');
@@ -2442,7 +2407,7 @@ document.addEventListener('click', function(e) {
 });
 
 /* =========================================================
-   === 10. LEGAL & ADMIN SLIDER
+   === 14. LEGAL & ADMIN SLIDER
    ========================================================= */
 const LEGAL_CONTENT = {
     privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><h2>১২. যোগাযোগ</h2><ul><li>Telegram Support: <a href="https://t.me/NexEarn2Support" target="_blank" rel="noopener">Support</a></li></ul><hr><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
@@ -2468,7 +2433,6 @@ function closeLegalModal() {
     if (modal) modal.classList.remove('active');
     document.body.style.overflow = '';
 }
-
 async function checkIfUserIsAdmin() {
     if (!tgUser || !tgUser.id) return false;
     try {
@@ -2601,7 +2565,7 @@ function setupUserSubmissionsListener() {
             }
         });
         renderNewTasks();
-        if (document.getElementById('tasksPaneHistory') && document.getElementById('tasksPaneHistory').classList.contains('active')) loadTaskHistory();
+        if (document.getElementById('tasksPaneHistory')?.classList.contains('active')) loadTaskHistory();
     });
 }
 
@@ -2610,7 +2574,7 @@ async function startAdsResetCountdown() {
     const resetTime = Date.now() + (AD_RESET_HOURS * 60 * 60 * 1000);
     appState.user.adsResetTime = resetTime;
     updateCycleUI();
-    try { await db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime); } catch(e) {}
+    fireAsync(db.ref('users/' + tgUser.id + '/adsResetTime').set(resetTime));
     toast('🎉 Ads complete! Reset in ' + AD_RESET_HOURS + ' hours.');
 }
 async function forceCycleReset() {
@@ -2622,18 +2586,14 @@ async function forceCycleReset() {
     stopClaimWindowTicker();
     renderAds(); updateCycleUI(); updateClaimWindowUI();
     toast('🔄 Ads reset!');
-    try {
-        await db.ref('users/' + tgUser.id).update({
-            dailyAds: {}, adsResetTime: 0,
-            adClaimedCurrentCycle: false, claimWindowStartTime: 0
-        });
-    } catch (e) {}
+    fireAsync(db.ref('users/' + tgUser.id).update({
+        dailyAds: {}, adsResetTime: 0,
+        adClaimedCurrentCycle: false, claimWindowStartTime: 0
+    }));
     if (appState.user.extraRewardDate !== todayStr()) {
         appState.user.extraRewardDate = '';
         appState.user.extraRewardCount = 0;
-        try {
-            await db.ref('users/' + tgUser.id).update({ extraRewardDate: '', extraRewardCount: 0 });
-        } catch(e) {}
+        fireAsync(db.ref('users/' + tgUser.id).update({ extraRewardDate: '', extraRewardCount: 0 }));
     }
 }
 function startCycleTimer() { if (cycleTimerInterval) return; updateCycleUI(); cycleTimerInterval = setInterval(updateCycleUI, 1000); }
@@ -2672,7 +2632,7 @@ function userLSKey(key) {
 }
 
 /* =========================================================
-   === 11. FILE UPLOAD HELPERS
+   === 15. FILE UPLOAD HELPERS (via proxy when available)
    ========================================================= */
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
     const controller = new AbortController();
@@ -2716,31 +2676,41 @@ function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.82) 
     });
 }
 async function uploadToImgBB(file) {
-    if (!IMGBB_API_KEY || String(IMGBB_API_KEY).trim().length < 20) throw new Error('ImgBB API key missing');
     if (!file || !(file instanceof Blob)) throw new Error('No file');
     if (file.size > 32 * 1024 * 1024) throw new Error('File > 32MB');
     let uploadFile = file;
     try { uploadFile = await compressImage(file); } catch(e) { uploadFile = file; }
-    try {
-        const fd = new FormData();
-        fd.append('image', uploadFile);
-        fd.append('name', 'task_' + Date.now());
-        const res = await fetchWithTimeout('https://api.imgbb.com/1/upload?key=' + IMGBB_API_KEY, { method: 'POST', body: fd }, 45000);
-        const data = await res.json();
-        if (data && data.success && data.data && data.data.url) return data.data.url;
-    } catch(e) {}
+
+    /* Preferred: proxy endpoint (keeps API key server-side) */
+    if (IMGBB_PROXY) {
+        try {
+            const fd = new FormData();
+            fd.append('image', uploadFile);
+            const res = await fetchWithTimeout(IMGBB_PROXY, { method: 'POST', body: fd }, 45000);
+            const data = await res.json();
+            if (data && (data.url || (data.data && data.data.url))) return data.url || data.data.url;
+        } catch(e) {}
+        throw new Error('Upload failed');
+    }
+
+    /* Legacy: direct ImgBB (only if key present — not recommended) */
+    if (IMGBB_API_KEY && String(IMGBB_API_KEY).trim().length >= 20) {
+        try {
+            const fd = new FormData();
+            fd.append('image', uploadFile);
+            fd.append('name', 'task_' + Date.now());
+            const res = await fetchWithTimeout('https://api.imgbb.com/1/upload?key=' + IMGBB_API_KEY, { method: 'POST', body: fd }, 45000);
+            const data = await res.json();
+            if (data && data.success && data.data && data.data.url) return data.data.url;
+        } catch(e) {}
+    }
+
+    /* Fallbacks */
     try {
         const fd = new FormData();
         fd.append('reqtype', 'fileupload');
         fd.append('fileToUpload', uploadFile);
         const res = await fetchWithTimeout('https://catbox.moe/user/api.php', { method: 'POST', body: fd }, 45000);
-        const url = (await res.text()).trim();
-        if (url && url.startsWith('http')) return url;
-    } catch(e) {}
-    try {
-        const fd = new FormData();
-        fd.append('file', uploadFile);
-        const res = await fetchWithTimeout('https://0x0.st', { method: 'POST', body: fd }, 45000);
         const url = (await res.text()).trim();
         if (url && url.startsWith('http')) return url;
     } catch(e) {}
@@ -2827,6 +2797,70 @@ function handleFilePreview(input, type) {
     toast('✅ File selected');
 }
 
+/* =========================================================
+   === 16. BONUS & EXTERNAL TASK REWARDS
+   ========================================================= */
+function showBonus() {
+    if (!isOnline) { toast('No internet!'); return; }
+    if (appState.user.dailyBonusDate === todayStr()) { toast('Already claimed today!'); return; }
+    document.getElementById('bonusOverlay').classList.add('show');
+    document.getElementById('app').classList.add('blurred');
+}
+function hideBonus() {
+    document.getElementById('bonusOverlay').classList.remove('show');
+    document.getElementById('app').classList.remove('blurred');
+}
+async function claimDailyBonus() {
+    if (!isOnline) { toast('No internet!'); return; }
+    if (isAdWatching) { toast('Please wait, another ad is running!'); return; }
+    const btn = document.getElementById('btnClaimBonus');
+    const btnCancel = document.getElementById('btnCancelBonus');
+    const subText = document.getElementById('bonusSubText');
+    btn.disabled = true; btnCancel.disabled = true;
+    isAdWatching = true;
+    try {
+        const slots = appState.config.adSlots || [];
+        const activeSlots = [];
+        for (let i = 0; i < slots.length && activeSlots.length < 2; i++) {
+            const s = slots[i];
+            if (s && s.provider && s.provider !== 'none' && s.code && s.status !== 'inactive') activeSlots.push(i);
+        }
+        if (activeSlots.length === 0) throw new Error('No ads configured');
+        for (let i = 0; i < activeSlots.length; i++) {
+            subText.innerText = 'Loading ad ' + (i + 1) + ' of ' + activeSlots.length + '...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ad ' + (i + 1) + ' of ' + activeSlots.length;
+            await runAdForSlot(activeSlots[i]);
+            await waitForMinTime(MIN_AD_WATCH_SECONDS);
+        }
+        btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
+        const baseBonus = Number(appState.config.dailyBonusAmount || 20);
+        const split = computeCommissionSplit(baseBonus);
+        const newBal = (appState.user.balance || 0) + split.userReward;
+        const newEarn = (appState.user.totalEarned || 0) + split.userReward;
+        let adHist = appState.user.adHistory || {};
+        adHist['bonus_' + Date.now()] = { slot: 'Bonus', amount: split.userReward, timestamp: Date.now(), type: 'bonus' };
+        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, dailyBonusDate: todayStr(), adHistory: adHist });
+        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
+        appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
+        await Promise.allSettled([
+            split.referrerCommission > 0 ? creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus') : Promise.resolve(),
+            giveAdminCommission(split.userReward, 'daily_bonus')
+        ]);
+        await updateTextElements(); hideBonus();
+        toast('✅ Bonus claimed! +' + split.userReward.toFixed(2) + ' TK');
+    } catch (e) {
+        toast(e.message === 'Ad Closed' ? '❌ Ad not completed!' : '❌ Error: ' + e.message);
+    } finally {
+        isAdWatching = false;
+        clearAdWatchTimeout();
+        btn.disabled = false; btnCancel.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
+        subText.innerText = 'Watch 2 short ads to get bonus.';
+        cleanupAdGlobals();
+    }
+}
+
+/* Auto-reward for external (survey/youtube) tasks */
 function checkPendingSurveyReward() {
     const done = localStorage.getItem(userLSKey('survey_done_task'));
     const pendingRaw = localStorage.getItem(userLSKey('pending_survey'));
@@ -2859,7 +2893,6 @@ function checkPendingYoutubeReward() {
     localStorage.removeItem(userLSKey('pending_youtube'));
     return null;
 }
-
 async function awardExternalTaskReward(p, taskTypeLabel) {
     const taskId = p.taskId;
     if (!taskId) return;
@@ -2902,7 +2935,7 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
         appState.user.taskStatuses[taskId] = 'approved';
         appState.user.taskHistory[taskId] = taskTimestamp;
         appState.user.taskCooldowns[taskId] = taskTimestamp;
-        await db.ref('config/newTasks/' + taskId + '/submittedCount').transaction(c => (c || 0) + 1);
+        fireAsync(db.ref('config/newTasks/' + taskId + '/submittedCount').transaction(c => (c || 0) + 1));
         await Promise.allSettled([
             referrerCommission > 0 ? creditReferrerCommission(referrerCommission, baseReward, 'Task: ' + (p.taskTitle || taskId)) : Promise.resolve(),
             giveAdminCommission(userReward, 'task_reward')
@@ -2913,67 +2946,9 @@ async function awardExternalTaskReward(p, taskTypeLabel) {
     } catch (e) { toast('❌ Reward error'); }
 }
 
-function showBonus() {
-    if (!isOnline) { toast('No internet!'); return; }
-    if (appState.user.dailyBonusDate === todayStr()) { toast('Already claimed today!'); return; }
-    document.getElementById('bonusOverlay').classList.add('show');
-    document.getElementById('app').classList.add('blurred');
-}
-function hideBonus() {
-    document.getElementById('bonusOverlay').classList.remove('show');
-    document.getElementById('app').classList.remove('blurred');
-}
-async function claimDailyBonus() {
-    if (!isOnline) { toast('No internet!'); return; }
-    if (isAdWatching) { toast('Please wait, another ad is running!'); return; }
-    const btn = document.getElementById('btnClaimBonus');
-    const btnCancel = document.getElementById('btnCancelBonus');
-    const subText = document.getElementById('bonusSubText');
-    btn.disabled = true; btnCancel.disabled = true;
-    isAdWatching = true;
-    try {
-        // Use first two active slots
-        const slots = appState.config.adSlots || [];
-        const activeSlots = [];
-        for (let i = 0; i < slots.length && activeSlots.length < 2; i++) {
-            const s = slots[i];
-            if (s && s.provider && s.provider !== 'none' && s.code && s.status !== 'inactive') activeSlots.push(i);
-        }
-        if (activeSlots.length === 0) throw new Error('No ads configured');
-        for (let i = 0; i < activeSlots.length; i++) {
-            subText.innerText = 'Loading ad ' + (i + 1) + ' of ' + activeSlots.length + '...';
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ad ' + (i + 1) + ' of ' + activeSlots.length;
-            await runAdForSlot(activeSlots[i]);
-            await waitForMinTime(MIN_AD_WATCH_SECONDS);
-        }
-        btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
-        const baseBonus = Number(appState.config.dailyBonusAmount || 20);
-        const split = computeCommissionSplit(baseBonus);
-        const newBal = (appState.user.balance || 0) + split.userReward;
-        const newEarn = (appState.user.totalEarned || 0) + split.userReward;
-        let adHist = appState.user.adHistory || {};
-        adHist['bonus_' + Date.now()] = { slot: 'Bonus', amount: split.userReward, timestamp: Date.now(), type: 'bonus' };
-        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: newEarn, dailyBonusDate: todayStr(), adHistory: adHist });
-        appState.user.balance = newBal; appState.user.totalEarned = newEarn;
-        appState.user.dailyBonusDate = todayStr(); appState.user.adHistory = adHist;
-        await Promise.allSettled([
-            split.referrerCommission > 0 ? creditReferrerCommission(split.referrerCommission, baseBonus, 'Daily Bonus') : Promise.resolve(),
-            giveAdminCommission(split.userReward, 'daily_bonus')
-        ]);
-        await updateTextElements(); hideBonus();
-        toast('✅ Bonus claimed! +' + split.userReward.toFixed(2) + ' TK');
-    } catch (e) {
-        toast(e.message === 'Ad Closed' ? '❌ Ad not completed!' : '❌ Error: ' + e.message);
-    } finally {
-        isAdWatching = false;
-        clearAdWatchTimeout();
-        btn.disabled = false; btnCancel.disabled = false;
-        btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch Ads & Claim';
-        subText.innerText = 'Watch 2 short ads to get bonus.';
-        cleanupAdGlobals();
-    }
-}
-
+/* =========================================================
+   === 17. REFERRER COMMISSION
+   ========================================================= */
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
         const referrerId = appState.user.referredBy;
@@ -3010,7 +2985,6 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
         return true;
     } catch(e) { return false; }
 }
-
 function computeCommissionSplit(earnedAmount) {
     const referrerId = appState.user.referredBy;
     const rate = Number(REF_COMMISSION_RATE || 0);
@@ -3024,10 +2998,10 @@ function computeCommissionSplit(earnedAmount) {
     return { userReward: Number(earnedAmount), referrerCommission: commission, mode };
 }
 
-function getCurrentChannelLinks() {
-    return channelLinks && channelLinks.length > 0 ? channelLinks : null;
-}
-
+/* =========================================================
+   === 18. TELEGRAM CHANNEL VERIFICATION
+   ========================================================= */
+function getCurrentChannelLinks() { return channelLinks && channelLinks.length > 0 ? channelLinks : null; }
 async function checkChannelMembership(userId, chatId, retries = 2) {
     if (!userId || !chatId) return 'unknown';
     if (CHANNEL_CHECK_API) {
@@ -3038,6 +3012,7 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
             if (data && data.status) return data.status;
         } catch(e) {}
     }
+    /* If BOT_TOKEN is present (legacy), use it. Otherwise unknown. */
     if (!BOT_TOKEN || String(BOT_TOKEN).trim().length < 20) return 'unknown';
     const rawChatId = String(chatId).trim();
     const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
@@ -3062,7 +3037,6 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
     }
     return 'unknown';
 }
-
 async function needsVerification() {
     if (!tgUser || !tgUser.id) return false;
     const links = getCurrentChannelLinks();
@@ -3073,24 +3047,24 @@ async function needsVerification() {
     }
     return false;
 }
-
 async function markVerified() {
     const links = getCurrentChannelLinks() || [];
     const verifiedMap = {};
     links.forEach(l => { verifiedMap[l.chatId] = true; });
-    try {
-        await db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap);
-        await db.ref('users/' + tgUser.id + '/channelVerified').set(true);
-        await db.ref('users/' + tgUser.id + '/verifiedAt').set(Date.now());
-    } catch(e) {}
+    fireAsync(db.ref('users/' + tgUser.id + '/verifiedChannels').set(verifiedMap));
+    fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true));
+    fireAsync(db.ref('users/' + tgUser.id + '/verifiedAt').set(Date.now()));
     appState.user.verifiedChannels = verifiedMap; channelVerified = true;
 }
 
+/* =========================================================
+   === 19. PERIODIC RECHECK
+   ========================================================= */
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
     updateClaimWindowUI(); updateExtraRewardUI();
-    lastActiveInterval = setInterval(updateLastActive, 30000);
+    lastActiveInterval = setInterval(updateLastActive, LAST_ACTIVE_INTERVAL_MS);
     referralRefreshInterval = setInterval(async () => {
         if (!isOnline || !isBooted || document.hidden) return;
         try {
@@ -3112,7 +3086,7 @@ function startPeriodicRecheck() {
             const needs = await needsVerification();
             if (needs) {
                 channelVerified = false;
-                try { await db.ref('users/' + tgUser.id + '/channelVerified').set(false); } catch(e) {}
+                fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false));
                 document.getElementById('app').style.display = 'none';
                 document.getElementById('joinModal').classList.add('active');
                 renderChannelButtons();
@@ -3132,10 +3106,8 @@ function stopPeriodicRecheck() {
 }
 function trackAdClick() {
     if (!tgUser || !tgUser.id) return;
-    try {
-        db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1);
-        db.ref('users/' + tgUser.id + '/lastActive').set(Date.now());
-    } catch(e) {}
+    fireAsync(db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1));
+    fireAsync(db.ref('users/' + tgUser.id + '/lastActive').set(Date.now()));
 }
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
@@ -3159,7 +3131,7 @@ window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Rec
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
 
 /* =========================================================
-   === 12. SWITCH TAB (UPDATED FOR NEW TABS)
+   === 20. TAB SWITCHER
    ========================================================= */
 function switchTab(tabId, el) {
     if (!isOnline) { toast('No internet!'); return; }
@@ -3182,7 +3154,7 @@ function switchTab(tabId, el) {
 }
 
 /* =========================================================
-   === 13. RENDER ADS (UPDATED - 4 PROVIDERS)
+   === 21. RENDER ADS
    ========================================================= */
 function renderAds() {
     const el = document.getElementById('ad-area');
@@ -3203,7 +3175,7 @@ function renderAds() {
         const extraClass = `slot-${(i % 2) + 1}`;
         const icon = (i === 0 ? 'fa-play' : 'fa-circle-play');
         const clickAttr = max ? '' : `onclick="startAdWatch(${i})"`;
-        const providerBadge = `<div class="provider-badge provider-${slot.provider}">${providerLabels[slot.provider] || slot.provider.toUpperCase()}</div>`;
+        const providerBadge = `<div class="provider-badge provider-${esc(slot.provider)}">${esc(providerLabels[slot.provider] || String(slot.provider).toUpperCase())}</div>`;
         el.innerHTML += `
             <div class="ad-card ${extraClass} ${cardClass}" ${clickAttr}>
                 ${!max ? `<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> ${MIN_AD_WATCH_SECONDS}s</div>` : ''}
@@ -3225,7 +3197,7 @@ function renderAds() {
 }
 
 /* =========================================================
-   === 14. TASK RENDERER
+   === 22. TASK RENDERER & SUBMISSION
    ========================================================= */
 function getTaskTypeIcon(type) {
     const m = { survey:'📊', image:'🖼️', voice:'🎤', audio:'🎤', text:'📝', youtube_video_view:'▶️', youtube_like:'👍', youtube_comment:'💬', youtube_subscribe:'🔔', app_download:'📱', app_install:'📲', website_visit:'🌐', telegram_join:'✈️', telegram_channel:'📢', facebook_like:'👍', facebook_follow:'👥', instagram_follow:'👥', instagram_like:'❤️', twitter_follow:'🐦', tiktok_follow:'🎵', voice_recording:'🎙️', image_upload:'📷', text_writing:'✍️', sign_up:'📝', general:'📋', other:'🔧' };
@@ -3364,16 +3336,17 @@ function openTaskSubmit(taskId) {
             bannerWrap.innerHTML = `<div class="task-status-cancelled"><i class="fas fa-ban"></i><div><b>❌ No more re-submit</b></div></div>`;
         }
     }
+    const previewHtml = `<div id="filePreviewWrap" class="file-preview-wrap"><img id="filePreview" class="file-preview-img" alt="" style="display:none;"/><audio id="fileAudioPreview" class="file-preview-audio" controls style="display:none;"></audio><div id="filePreviewInfo" class="file-preview-info"></div></div>`;
     if (type === 'image' || type === 'image_upload') {
-        contentArea.innerHTML = `<label>📷 Upload Image *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/><div id="filePreviewWrap" class="file-preview-wrap"><img id="filePreview" class="file-preview-img"/><div id="filePreviewInfo" class="file-preview-info"></div></div><small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+        contentArea.innerHTML = `<label>📷 Upload Image *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/>${previewHtml}<small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     } else if (type === 'voice' || type === 'audio' || type === 'voice_recording') {
-        contentArea.innerHTML = `<label>🎤 Upload Audio *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'audio')"/><div id="filePreviewWrap" class="file-preview-wrap"><audio id="filePreview" class="file-preview-audio" controls></audio><div id="filePreviewInfo" class="file-preview-info"></div></div><small>MP3 / WAV / M4A (Max 500 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+        contentArea.innerHTML = `<label>🎤 Upload Audio *</label><input type="file" id="taskVoiceInput" accept="audio/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'audio')"/>${previewHtml}<small>MP3 / WAV / M4A (Max 500 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     } else if (type === 'text' || type === 'text_writing') {
         contentArea.innerHTML = `<label>📝 Your Answer *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     } else if (isScreenshotTask(type)) {
         const taskUrl = task.url || task.link || '';
         const hasUrl = taskUrl && taskUrl !== '#' && taskUrl !== 'undefined';
-        contentArea.innerHTML = `<div class="task-open-link-box"><div class="task-open-link-label">🔗 Task Link</div><button class="task-open-link-btn" data-task-url="${esc(taskUrl)}" onclick="openTaskLink(this.dataset.taskUrl)" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;"' : ''}><i class="fas fa-external-link-alt"></i> Open Link</button><small>👆 Complete task and take screenshot.</small></div><label>📷 Upload Screenshot *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/><div id="filePreviewWrap" class="file-preview-wrap"><img id="filePreview" class="file-preview-img"/><div id="filePreviewInfo" class="file-preview-info"></div></div><small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
+        contentArea.innerHTML = `<div class="task-open-link-box"><div class="task-open-link-label">🔗 Task Link</div><button class="task-open-link-btn" data-task-url="${esc(taskUrl)}" onclick="openTaskLink(this.dataset.taskUrl)" ${(!hasUrl || lockedOut) ? 'disabled style="opacity:0.55;"' : ''}><i class="fas fa-external-link-alt"></i> Open Link</button><small>👆 Complete task and take screenshot.</small></div><label>📷 Upload Screenshot *</label><input type="file" id="taskImageInput" accept="image/*" ${lockedOut ? 'disabled' : ''} onchange="handleFilePreview(this, 'image')"/>${previewHtml}<small>JPG / PNG / WEBP (Max 32 MB)</small><label>📝 Description</label><textarea id="taskTextInput" rows="2" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     } else {
         contentArea.innerHTML = `<label>📝 Your Answer *</label><textarea id="taskTextInput" rows="5" placeholder="..." ${lockedOut ? 'disabled' : ''}></textarea>`;
     }
@@ -3504,6 +3477,9 @@ async function loadTaskHistory() {
 }
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
+/* =========================================================
+   === 23. WITHDRAW
+   ========================================================= */
 async function requestWithdraw() {
     if (!isOnline) { toast('No internet!'); return; }
     const method = document.getElementById('wd-method').value;
@@ -3524,6 +3500,15 @@ async function requestWithdraw() {
     const feeAmount = (amount * (level.fee || 5)) / 100;
     try {
         const wdId = 'WD' + Date.now();
+        /* Atomically deduct balance and create request */
+        const userRef = db.ref('users/' + appState.user.id);
+        const result = await userRef.transaction(cur => {
+            if (!cur) return cur;
+            if (Number(cur.balance || 0) < amount) return; // abort
+            cur.balance = Number(cur.balance || 0) - amount;
+            return cur;
+        });
+        if (!result.committed) { toast('❌ Insufficient balance'); return; }
         await db.ref('withdrawals/' + wdId).set({
             userId: appState.user.id, userName: appState.user.name || 'User',
             method, account, amount, fee: feeAmount, netAmount: amount - feeAmount,
@@ -3532,8 +3517,7 @@ async function requestWithdraw() {
             countedAtRequest: false,
             status: 'pending', timestamp: Date.now()
         });
-        await db.ref('users/' + appState.user.id).update({ balance: appState.user.balance - amount });
-        appState.user.balance -= amount;
+        appState.user.balance = Number(appState.user.balance || 0) - amount;
         document.getElementById('wd-account').value = '';
         document.getElementById('wd-amount').value = '';
         toast('✅ Withdraw sent! Fee: ' + feeAmount.toFixed(2) + ' TK');
@@ -3694,7 +3678,7 @@ async function loadLeaderboard() {
         const bal = u.balance.toFixed(2);
         const statsHtml = `<div class="rank-stats-col"><div class="rank-badge badge-bal">${bal} ${sym}</div><div class="rank-badge badge-ref"><i class="fas fa-users"></i> ${esc(String(u.referrals))} Refs</div></div>`;
         const crownIcon = u._isCustom ? '👑' : '';
-        const safeImg = 'onerror="this.src=\'https://via.placeholder.com/100\'"';
+        const safeImg = `onerror="this.src='https://via.placeholder.com/100'"`;
         if (i === 0) p1 = `<div class="podium-item rank-1"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
         else if (i === 1) p2 = `<div class="podium-item rank-2"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
         else if (i === 2) p3 = `<div class="podium-item rank-3"><i class="fas fa-crown crown"></i><img src="${esc(pic)}" class="podium-img" ${safeImg}><div class="rank-name">${esc(name)} ${crownIcon}</div>${statsHtml}</div>`;
@@ -3785,15 +3769,13 @@ function openLink(url) {
 }
 
 /* =========================================================
-   === CHAT SYSTEM (USER PANEL)
+   === 24. CHAT SYSTEM
    ========================================================= */
 let chatMessagesListener = null;
 let chatUnreadListener = null;
 let chatSelectedFile = null;
 
-function getChatThreadKey() {
-    return 'user_' + String(tgUser.id);
-}
+function getChatThreadKey() { return 'user_' + String(tgUser.id); }
 function openChatModal() {
     document.getElementById('chatOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -3818,8 +3800,8 @@ function markChatAsRead() {
             const m = c.val();
             if (m.from === 'admin' && !m.read) updates[c.key + '/read'] = true;
         });
-        if (Object.keys(updates).length) ref.update(updates).catch(() => {});
-        db.ref('chats/' + tKey + '/meta/unreadForUser').set(0).catch(() => {});
+        if (Object.keys(updates).length) fireAsync(ref.update(updates));
+        fireAsync(db.ref('chats/' + tKey + '/meta/unreadForUser').set(0));
     }).catch(() => {});
 }
 function startChatListeners() {
@@ -3905,7 +3887,7 @@ async function sendChatMessage() {
             timestamp: Date.now(),
             read: false
         };
-        await db.ref('chats/' + tKey + '/meta').update({
+        fireAsync(db.ref('chats/' + tKey + '/meta').update({
             userId: String(tgUser.id),
             userName: tgUser.first_name || 'User',
             userPhoto: tgUser.photo_url || '',
@@ -3913,7 +3895,7 @@ async function sendChatMessage() {
             lastMessagePreview: (text || (fileUrl ? '📷 Image' : '')).substring(0, 60),
             lastMessageFrom: 'user',
             unreadForUser: 0
-        }).catch(() => {});
+        }));
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         input.value = '';
         clearChatFile();
@@ -3924,7 +3906,6 @@ async function sendChatMessage() {
         btn.innerHTML = '<i class="fas fa-paper-plane"></i>';
     }
 }
-
 function initUserChatSystem() {
     const fab = document.getElementById('chatFab');
     if (fab) fab.style.display = 'flex';
@@ -3932,7 +3913,7 @@ function initUserChatSystem() {
 }
 
 /* =========================================================
-   === 15. MAIN BOOT (DOMContentLoaded)
+   === 25. BOOT
    ========================================================= */
 window.addEventListener('DOMContentLoaded', () => {
     const legalModal = document.getElementById('legalModal');
@@ -3980,7 +3961,7 @@ window.addEventListener('DOMContentLoaded', () => {
                         needsVerification().then(needs => {
                             if (needs) {
                                 channelVerified = false;
-                                try { db.ref('users/' + tgUser.id + '/channelVerified').set(false); } catch(e) {}
+                                fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false));
                                 document.getElementById('app').style.display = 'none';
                                 document.getElementById('joinModal').classList.add('active');
                                 renderChannelButtons();
@@ -4012,7 +3993,6 @@ window.addEventListener('DOMContentLoaded', () => {
             if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
             REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
             REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
-
             if (appState.config.adminRevenue) {
                 const ar = appState.config.adminRevenue;
                 adminRevenueConfig = {
@@ -4023,7 +4003,6 @@ window.addEventListener('DOMContentLoaded', () => {
                     taskMaxDaily: Number(ar.taskMaxDaily) || 20
                 };
             }
-
             const parsedMinBal = Number(appState.config.minReferralBalance);
             MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
             if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
@@ -4231,7 +4210,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     } else {
                         channelVerified = true;
                         if (channelLinks && channelLinks.length > 0) {
-                            try { await db.ref('users/' + tgUser.id + '/channelVerified').set(true); } catch(e) {}
+                            fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true));
                         }
                         if (isOnline) {
                             document.getElementById('app').style.display = 'block';
@@ -4247,9 +4226,7 @@ window.addEventListener('DOMContentLoaded', () => {
                             startAdminSlider();
                             startMonetagInAppInterstitial(MONETAG_ZONE);
                             try { initUserChatSystem(); } catch(e) {}
-                            // NEW: Load user packages
                             try { await loadUserPackages(); } catch(e) {}
-                            // NEW: Load packages, claim, deposit on first render
                             try { await loadPackages(); } catch(e) {}
                             try { await loadClaimPage(); } catch(e) {}
                             try { renderDepositPage(); } catch(e) {}
@@ -4271,7 +4248,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =========================================================
-   === 16. HELPER: WITH DRAW LEVEL & INFO
+   === 26. WITHDRAW LEVEL HELPERS
    ========================================================= */
 function getWithdrawLevel() {
     if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
@@ -4359,7 +4336,6 @@ function checkBan() {
         return false;
     }
 }
-
 async function calculateValidReferrals() {
     try {
         const refs = appState.user.referredUsers || {};
@@ -4373,7 +4349,7 @@ async function calculateValidReferrals() {
         let count = 0;
         const allData = [], qualifiedData = [];
         const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
-        const CHUNK = 8;
+        const CHUNK = 20;
         for (let i = 0; i < keys.length; i += CHUNK) {
             const slice = keys.slice(i, i + CHUNK);
             await Promise.all(slice.map(async (rid) => {
@@ -4400,6 +4376,8 @@ async function calculateValidReferrals() {
         return 0;
     }
 }
+
+
 </script>
 </body>
 </html>
