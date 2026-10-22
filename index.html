@@ -9,7 +9,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
-
 <script type="text/javascript" src="https://cdn.tgads.space/assets/js/adexium-widget.min.js"></script>
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {
@@ -22,7 +21,6 @@
         } catch(e) {}
     });
 </script>
-
 <script src='//libtl.com/sdk.js' data-zone='11878844' data-sdk='show_11878844'></script>
 <script src="https://ad.gigapub.tech/script?id=8758"></script>
 
@@ -89,6 +87,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .ad-inner i{font-size:2rem;margin:0;display:block;}
 .ad-inner h4{font-size:.95rem;font-weight:800;margin:0;color:#111827;line-height:1.1;}
 .ad-inner .progress-pill{font-size:.72rem;color:#4b5563;background:rgba(15,23,42,.06);padding:5px 12px;border-radius:999px;display:inline-block;font-weight:700;}
+.ad-inner .provider-badge{position:absolute;top:6px;right:6px;font-size:.55rem;font-weight:900;padding:3px 8px;border-radius:10px;color:#fff;text-transform:uppercase;letter-spacing:.5px;}
+.provider-adsgram{background:linear-gradient(135deg,#6366f1,#818cf8);}
+.provider-monetag{background:linear-gradient(135deg,#10b981,#34d399);}
+.provider-adexium{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
+.provider-gigapub{background:linear-gradient(135deg,#ec4899,#f472b6);}
 .slot-1 .ad-inner{background:linear-gradient(145deg,#fff7f0,#ffe5d0);}.slot-1 .ad-inner i{color:#ff8b3d;}
 .slot-2 .ad-inner{background:linear-gradient(145deg,#edf5ff,#dde6ff);}.slot-2 .ad-inner i{color:#4f8cff;}
 .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
@@ -434,6 +437,121 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .share-close-btn{width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;}
 @media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
 
+/* ============ NEW: PACKAGES CSS ============ */
+.packages-container{padding:0 20px 20px}
+.pkg-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.pkg-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:20px;padding:18px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(108,92,231,.08);transition:all .25s}
+.pkg-card:active{transform:scale(.98)}
+.pkg-card.active-pkg{border-color:#00b894;background:linear-gradient(135deg,#f0fff9,#e6fff5)}
+.pkg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#6C5CE7,#A29BFE,#00cec9)}
+.pkg-card.active-pkg::before{background:linear-gradient(90deg,#00b894,#00cec9)}
+.pkg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
+.pkg-title{font-size:1.1rem;font-weight:900;color:#1a1a2e;display:flex;align-items:center;gap:8px}
+.pkg-title-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;box-shadow:0 6px 14px rgba(108,92,231,.3);flex-shrink:0}
+.pkg-badge{font-size:.65rem;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.pkg-badge.active{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
+.pkg-badge.available{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff}
+.pkg-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.pkg-stat{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px 6px;text-align:center}
+.pkg-stat .val{font-weight:900;font-size:.95rem;line-height:1.1}
+.pkg-stat .lbl{font-size:.6rem;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-top:4px;letter-spacing:.05em}
+.pkg-stat.price .val{color:#f39c12}
+.pkg-stat.daily .val{color:#00b894}
+.pkg-stat.duration .val{color:#6C5CE7}
+.pkg-meta{font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pkg-meta span{display:inline-flex;align-items:center;gap:5px}
+.pkg-buy-btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:all .2s}
+.pkg-buy-btn.upgrade{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;box-shadow:0 8px 20px rgba(108,92,231,.35)}
+.pkg-buy-btn.upgrade:active{transform:scale(.97)}
+.pkg-buy-btn.active-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35);cursor:pointer}
+.pkg-buy-btn.claimed-btn{background:#e5e7eb;color:#64748b;cursor:not-allowed}
+.pkg-buy-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* ============ NEW: ACTIVE PACKAGE DETAILS ============ */
+.pkg-details-card{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border-radius:20px;padding:20px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,184,148,.35)}
+.pkg-details-card::before{content:'';position:absolute;width:150px;height:150px;background:rgba(255,255,255,.15);border-radius:50%;top:-60px;right:-40px}
+.pkg-details-card .pd-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
+.pkg-details-card .pd-title{font-size:1.5rem;font-weight:900;margin:6px 0;position:relative;z-index:1}
+.pkg-details-card .pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:relative;z-index:1}
+.pkg-details-card .pd-item{background:rgba(255,255,255,.2);padding:10px 12px;border-radius:12px;backdrop-filter:blur(10px)}
+.pkg-details-card .pd-item .num{font-size:1.15rem;font-weight:900}
+.pkg-details-card .pd-item .lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;opacity:.9;margin-top:2px}
+.pkg-claim-btn{width:100%;padding:16px;border-radius:14px;border:none;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;background:#fff;color:#00b894;margin-top:16px;box-shadow:0 10px 24px rgba(0,0,0,.15);position:relative;z-index:1}
+.pkg-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed}
+.pkg-claim-btn.ready{animation:pulseGlow 2s infinite}
+@keyframes pulseGlow{0%,100%{box-shadow:0 10px 24px rgba(0,0,0,.15)}50%{box-shadow:0 10px 24px rgba(0,184,148,.6)}}
+
+/* ============ NEW: DEPOSIT CSS ============ */
+.deposit-provider-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:18px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;transition:all .25s}
+.deposit-provider-card:active{transform:scale(.98)}
+.deposit-provider-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px}
+.deposit-provider-card.bkash::before{background:linear-gradient(180deg,#e2136e,#f472b6)}
+.deposit-provider-card.nagad::before{background:linear-gradient(180deg,#ec1c24,#f87171)}
+.deposit-provider-card.rocket::before{background:linear-gradient(180deg,#8b2f8e,#c084fc)}
+.deposit-provider-card.upay::before{background:linear-gradient(180deg,#f59e0b,#fbbf24)}
+.deposit-provider-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.deposit-provider-name{font-weight:900;font-size:1.05rem;display:flex;align-items:center;gap:10px}
+.deposit-provider-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:900;flex-shrink:0;box-shadow:0 6px 14px rgba(0,0,0,.15)}
+.deposit-provider-icon.bkash{background:linear-gradient(135deg,#e2136e,#f472b6)}
+.deposit-provider-icon.nagad{background:linear-gradient(135deg,#ec1c24,#f87171)}
+.deposit-provider-icon.rocket{background:linear-gradient(135deg,#8b2f8e,#c084fc)}
+.deposit-provider-icon.upay{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+.deposit-min-badge{font-size:.68rem;font-weight:800;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;padding:5px 12px;border-radius:20px;border:1px solid rgba(245,158,11,.3);white-space:nowrap}
+.deposit-number-row{background:#fef3f2;padding:10px 14px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;border:1.5px dashed #fecaca}
+.deposit-number-row .lbl{font-size:.72rem;font-weight:800;color:#991b1b;text-transform:uppercase}
+.deposit-number-row .val{font-weight:900;color:#dc2626;font-family:'Courier New',monospace;letter-spacing:.5px;font-size:.9rem;word-break:break-all}
+.deposit-number-row .copy-mini{background:#dc2626;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:.68rem;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0}
+.deposit-instructions{font-size:.72rem;color:#64748b;font-weight:600;background:#f8fafc;padding:10px 12px;border-radius:10px;border-left:3px solid #3b82f6;margin-bottom:10px;line-height:1.5}
+.deposit-send-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;box-shadow:0 6px 16px rgba(0,184,148,.3)}
+.deposit-send-btn:active{transform:scale(.97)}
+
+/* ============ NEW: CLAIM PAGE ============ */
+.claim-hero{background:linear-gradient(135deg,#f39c12,#e84393);color:#fff;padding:22px;border-radius:22px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(232,67,147,.35)}
+.claim-hero::before{content:'';position:absolute;width:180px;height:180px;background:rgba(255,255,255,.12);border-radius:50%;top:-80px;right:-50px}
+.claim-hero .ch-label{font-size:.72rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
+.claim-hero .ch-amt{font-size:2.4rem;font-weight:900;margin:6px 0;text-shadow:0 3px 12px rgba(0,0,0,.2);position:relative;z-index:1}
+.claim-hero .ch-info{font-size:.72rem;font-weight:700;background:rgba(0,0,0,.15);padding:8px 14px;border-radius:10px;display:inline-block;position:relative;z-index:1}
+.claim-pkg-item{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:14px;margin:0 20px 12px;border-left:5px solid #6C5CE7}
+.claim-pkg-item.ready{border-left-color:#00b894;background:linear-gradient(135deg,#f0fff9,#fff)}
+.claim-pkg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.claim-pkg-name{font-weight:900;font-size:.95rem;color:#1a1a2e}
+.claim-pkg-daily{font-size:.72rem;color:#64748b;font-weight:700;margin-top:3px}
+.claim-pkg-badge{font-size:.62rem;font-weight:900;padding:4px 10px;border-radius:20px;text-transform:uppercase}
+.claim-pkg-badge.ready{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
+.claim-pkg-badge.wait{background:#fef3c7;color:#92400e}
+.claim-pkg-badge.expired{background:#fee2e2;color:#991b1b}
+.claim-btn-single{width:100%;padding:12px;border-radius:10px;border:none;font-weight:800;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+.claim-btn-single.ready{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
+.claim-btn-single.wait{background:#f1f5f9;color:#64748b;cursor:not-allowed}
+.claim-btn-single.expired{background:#fee2e2;color:#991b1b;cursor:not-allowed}
+
+/* ============ NEW: Package Buy Confirmation Modal ============ */
+.pkg-confirm-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px}
+.pkg-confirm-overlay.active{display:flex}
+.pkg-confirm-box{background:#fff;border-radius:22px;padding:24px;max-width:380px;width:100%;text-align:center}
+.pkg-confirm-box .pci-icon{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#A29BFE);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;box-shadow:0 10px 26px rgba(108,92,231,.4)}
+.pkg-confirm-box h3{font-size:1.15rem;font-weight:900;margin-bottom:6px;color:#1a1a2e}
+.pkg-confirm-box .pci-sub{font-size:.82rem;color:#64748b;margin-bottom:16px;font-weight:600}
+.pkg-confirm-box .pci-info{background:#f8fafc;padding:14px;border-radius:12px;margin-bottom:16px;text-align:left}
+.pkg-confirm-box .pci-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.82rem;font-weight:700;color:#475569}
+.pkg-confirm-box .pci-row .val{font-weight:900;color:#6C5CE7}
+.pkg-confirm-box .pci-row.total{border-top:2px dashed #e5e7eb;margin-top:6px;padding-top:10px;font-size:.95rem}
+.pkg-confirm-box .pci-row.total .val{color:#00b894;font-size:1.05rem}
+.pkg-confirm-box .pci-actions{display:flex;gap:10px}
+.pkg-confirm-box .pci-btn{flex:1;padding:14px;border-radius:12px;border:none;font-weight:900;font-size:.88rem;cursor:pointer;font-family:inherit}
+.pkg-confirm-box .pci-btn.cancel{background:#f1f5f9;color:#64748b}
+.pkg-confirm-box .pci-btn.confirm{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35)}
+
+/* ============ NEW: Deposit Submit Form ============ */
+.deposit-form-card{background:#fff;border-radius:18px;padding:20px;margin:0 20px 16px;border:1.5px solid #e5e7eb}
+.deposit-form-card h4{font-size:1rem;font-weight:900;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.deposit-form-card .df-group{margin-bottom:12px}
+.deposit-form-card label{font-size:.75rem;font-weight:800;color:#475569;display:block;margin-bottom:6px}
+.deposit-form-card input{width:100%;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:.9rem;font-family:inherit;outline:none;background:#f8fafc;font-weight:600;transition:all .2s}
+.deposit-form-card input:focus{border-color:#6C5CE7;background:#fff;box-shadow:0 0 0 4px rgba(108,92,231,.1)}
+.deposit-form-card .df-submit{width:100%;padding:14px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;margin-top:6px}
+.deposit-form-card .df-note{font-size:.7rem;color:#92400e;font-weight:700;background:#fef3c7;padding:10px 12px;border-radius:10px;border-left:3px solid #f59e0b;margin-bottom:12px;line-height:1.5}
+
 /* ============ CHAT SYSTEM (USER) ============ */
 .chat-fab{position:fixed;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 10px 26px rgba(108,92,231,.5);z-index:9997;display:flex;align-items:center;justify-content:center;transition:transform .2s}
 .chat-fab:active{transform:scale(.92)}
@@ -469,6 +587,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-secondary)}
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.1)}}
 </style>
 </head>
 <body>
@@ -518,7 +637,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <div class="share-apps-grid">
       <button class="share-app-btn wa" onclick="shareViaWhatsApp()"><i class="fab fa-whatsapp"></i> WhatsApp</button>
       <button class="share-app-btn tg" onclick="shareViaTelegram()"><i class="fab fa-telegram"></i> Telegram</button>
-      <button class="share-app-btn ms" onclick="shareViaMessenger()"><i class="fab fa-facebook-messenger"></i> Messenger</button>
+      <button class="share-app-btn ms" onclick="shareViaFacebook()"><i class="fab fa-facebook-messenger"></i> Messenger</button>
     </div>
     <button class="share-copy-btn" onclick="copyShareLink()"><i class="fas fa-copy"></i> Copy Link</button>
     <button class="share-close-btn" onclick="closeShareModal()">Close</button>
@@ -554,6 +673,20 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div id="taskStatusBannerWrap" style="padding:14px 18px 0;"></div>
         <div class="task-content" id="taskContentArea"></div>
         <div class="task-actions"><button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button><button class="task-btn task-btn-submit" id="taskSubmitActionBtn" onclick="submitGenericTask()"><i class="fas fa-paper-plane"></i> জমা দিন</button></div>
+    </div>
+</div>
+
+<!-- ============ NEW: Package Buy Confirmation Modal ============ -->
+<div class="pkg-confirm-overlay" id="pkgConfirmOverlay" onclick="if(event.target===this)closePkgConfirm()">
+    <div class="pkg-confirm-box">
+        <div class="pci-icon" id="pciIcon"><i class="fas fa-box-open"></i></div>
+        <h3 id="pciTitle">Confirm Purchase</h3>
+        <p class="pci-sub" id="pciSub">আপনি কি এই প্যাকেজটি কিনতে চান?</p>
+        <div class="pci-info" id="pciInfo"></div>
+        <div class="pci-actions">
+            <button class="pci-btn cancel" onclick="closePkgConfirm()">Cancel</button>
+            <button class="pci-btn confirm" onclick="confirmBuyPackage()" id="pciConfirmBtn">Confirm</button>
+        </div>
     </div>
 </div>
 
@@ -605,6 +738,41 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div class="tasks-inner-tabs"><button class="tasks-inner-tab active" id="tabBtnAvailable" onclick="switchTasksInnerTab('available')"><i class="fas fa-list-check"></i> Available</button><button class="tasks-inner-tab" id="tabBtnHistory" onclick="switchTasksInnerTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button></div>
         <div id="tasksPaneAvailable" class="tasks-inner-pane active"><div id="task-area" class="task-list"></div></div>
         <div id="tasksPaneHistory" class="tasks-inner-pane"><div id="taskHistoryArea"></div></div>
+    </div>
+
+    <!-- ============ NEW: PACKAGES PAGE ============ -->
+    <div id="page-packages" class="page-section">
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-box-open"></i> Investment Packages</div>
+        <div class="packages-container">
+            <div id="packagesGrid" class="pkg-grid">
+                <div class="empty-state"><i class="fas fa-box"></i><p>Loading packages...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ NEW: CLAIM PAGE ============ -->
+    <div id="page-claim" class="page-section">
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-hand-holding-usd"></i> Daily Income Claim</div>
+        <div id="claimPageContent">
+            <div class="claim-hero">
+                <div class="ch-label">💰 TOTAL CLAIMABLE TODAY</div>
+                <div class="ch-amt"><span id="claimTotalAmount">0.00</span> <small style="font-size:1rem;">TK</small></div>
+                <div class="ch-info" id="claimInfoText">You have 0 active packages</div>
+            </div>
+            <div id="claimPackagesList">
+                <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Buy a package to start earning daily</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ NEW: DEPOSIT PAGE ============ -->
+    <div id="page-deposit" class="page-section">
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-money-bill-wave"></i> Deposit Money</div>
+        <div class="packages-container">
+            <div id="depositProvidersList">
+                <div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods configured</p></div>
+            </div>
+        </div>
     </div>
 
     <div id="page-referral" class="page-section">
@@ -680,9 +848,10 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 <div class="nav">
     <i class="fas fa-home active nav-item" onclick="switchTab('home', this)"></i>
     <i class="fas fa-tasks nav-item" onclick="switchTab('tasks', this)"></i>
+    <i class="fas fa-box-open nav-item" onclick="switchTab('packages', this)"></i>
+    <i class="fas fa-hand-holding-usd nav-item" onclick="switchTab('claim', this)"></i>
+    <i class="fas fa-money-bill-wave nav-item" onclick="switchTab('deposit', this)"></i>
     <i class="fas fa-users nav-item" onclick="switchTab('referral', this)"></i>
-    <i class="fas fa-receipt nav-item" onclick="switchTab('history', this)"></i>
-    <i class="fas fa-trophy nav-item" onclick="switchTab('leaderboard', this)"></i>
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
 </div>
 
@@ -716,7 +885,8 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 </div>
-<script>
+    
+    <script>
 /* =========================================================
    === 1. INITIAL SETUP & FIREBASE CONFIG ===
    ========================================================= */
@@ -733,14 +903,11 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-/* 🔐 SECURITY NOTE: Fill via backend API in production.
-   For quick testing, uncomment below: */
 const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const CHANNEL_CHECK_API = "";
 
 const BOT_USERNAME = "TaskHubBD24Bot";
-const MINI_APP_NAME = "taskhub";
 const ADMIN_ID = "7755558465";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
@@ -748,7 +915,7 @@ let MIN_REFERRAL_BALANCE = 20;
 const AD_RESET_HOURS = 12;
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
-const AD_DISPLAY_SLOTS = 2;
+const AD_DISPLAY_SLOTS = 4;
 let MIN_AD_WATCH_SECONDS = 10;
 const CLAIM_WINDOW_MS = 60 * 60 * 1000;
 const HISTORY_LIMIT = 25;
@@ -793,7 +960,8 @@ let appState = {
         extraRewardDate: '', extraRewardCount: 0,
         referredByAdminCode: null
     },
-    config: { adSlots: [], customAdButtons: [], newTasks: {} }
+    config: { adSlots: [], newTasks: {}, depositPayment: {}, packages: {} },
+    userPackages: {}
 };
 
 let isBooted = false;
@@ -830,6 +998,10 @@ let currentRefTab = 'total';
 let allReferralDataCache = { all: [], qualified: [] };
 let isUserAdmin = false;
 let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
+
+let allPackagesCache = {};
+let userPackagesListener = null;
+let selectedPkgForBuy = null;
 
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
@@ -957,6 +1129,7 @@ function shareViaMessenger() {
                 '&app_id=1234567890&redirect_uri=' + encodeURIComponent(link);
     window.open(url, '_blank');
 }
+function shareViaFacebook() { shareViaMessenger(); }
 
 function showAdWatchProgress(startTime) {
     const el = document.getElementById('adWatchProgress');
@@ -989,7 +1162,7 @@ function cleanupAdGlobals() {
 }
 
 /* =========================================================
-   === 4. CUSTOM AD ENGINE
+   === 4. CUSTOM AD ENGINE (4 PROVIDERS SUPPORT)
    ========================================================= */
 function isMonetagSDKReady(zoneId) {
     return typeof window['show_' + String(zoneId)] === 'function';
@@ -1050,6 +1223,80 @@ function startMonetagInAppInterstitial(zoneId, settings) {
     start();
 }
 
+async function showAdsgramAd(blockId) {
+    if (typeof window.Adsgram === 'undefined') {
+        if (!document.getElementById('adsgram-sdk-script')) {
+            await new Promise((resolve, reject) => {
+                const sc = document.createElement('script');
+                sc.id = 'adsgram-sdk-script';
+                sc.src = 'https://sad.adsgram.ai/js/sad.min.js';
+                sc.async = true;
+                sc.onload = () => resolve();
+                sc.onerror = () => reject(new Error('Adsgram SDK failed'));
+                document.head.appendChild(sc);
+            });
+        } else {
+            await new Promise(r => setTimeout(r, 1500));
+        }
+    }
+    if (typeof window.Adsgram === 'undefined') throw new Error('Adsgram not available');
+    const adCtrl = window.Adsgram.init({ blockId: String(blockId) });
+    let res = await adCtrl.show();
+    if (!res || res.done !== true) throw new Error('Ad Closed');
+    return { done: true };
+}
+
+async function showAdexiumAd(zoneId) {
+    if (typeof window.AdexiumWidget === 'undefined') {
+        throw new Error('Adexium not available');
+    }
+    return new Promise((resolve, reject) => {
+        try {
+            const widget = new window.AdexiumWidget({
+                wid: String(zoneId || '6f532c8b-6a2a-45b3-89ec-3ae0e3c82604'),
+                adFormat: 'interstitial'
+            });
+            let finished = false;
+            const timer = setTimeout(() => {
+                if (!finished) { finished = true; reject(new Error('Ad timeout')); }
+            }, 60000);
+            if (typeof widget.autoMode === 'function') {
+                widget.autoMode({
+                    onAdComplete: () => { if (!finished) { finished = true; clearTimeout(timer); resolve({ done: true }); } },
+                    onAdError: () => { if (!finished) { finished = true; clearTimeout(timer); reject(new Error('Ad closed')); } },
+                    onAdClose: () => { if (!finished) { finished = true; clearTimeout(timer); resolve({ done: true }); } }
+                });
+            } else {
+                widget.autoMode();
+                setTimeout(() => { if (!finished) { finished = true; clearTimeout(timer); resolve({ done: true }); } }, 15000);
+            }
+        } catch (e) { reject(new Error(e.message || 'Adexium error')); }
+    });
+}
+
+async function showGigapubAd(placementId) {
+    if (typeof window.showGiga === 'function') {
+        return await new Promise((resolve, reject) => {
+            try {
+                window.showGiga().then(() => resolve({ done: true })).catch(() => reject(new Error('Ad closed')));
+            } catch (e) { reject(new Error(e.message || 'Gigapub error')); }
+        });
+    }
+    if (typeof window.gigaPub !== 'undefined' && typeof window.gigaPub.showAd === 'function') {
+        return await new Promise((resolve, reject) => {
+            try {
+                window.gigaPub.showAd({
+                    type: 'inAppInterstitial',
+                    placementId: String(placementId || '8758'),
+                    onAdComplete: () => resolve({ done: true }),
+                    onAdError: (e) => reject(new Error(String(e)))
+                });
+            } catch (e) { reject(new Error(e.message || 'Gigapub error')); }
+        });
+    }
+    throw new Error('Gigapub not available');
+}
+
 let activeAdSDK = null;
 let adSDKTimer = null;
 
@@ -1098,7 +1345,20 @@ async function executeCustomAdCode(code) {
     });
 }
 
-async function runSpecificCustomAd(targetKey) {
+// NEW: 4-provider ad engine
+async function showAdByProvider(provider, code) {
+    if (!provider || provider === 'none') throw new Error('No provider configured');
+    const codeStr = String(code || '').trim();
+    if (!codeStr) throw new Error('No ad code');
+    if (provider === 'adsgram') return await showAdsgramAd(codeStr);
+    if (provider === 'monetag') return await showMonetagRewardedPopup(codeStr);
+    if (provider === 'adexium') return await showAdexiumAd(codeStr);
+    if (provider === 'gigapub') return await showGigapubAd(codeStr);
+    // fallback: try as custom code
+    return await executeCustomAdCode(codeStr);
+}
+
+async function runAdForSlot(slotIndex) {
     if (isAdWatching) {
         if (!adWatchTimeout) {
             adWatchTimeout = setTimeout(() => {
@@ -1112,41 +1372,13 @@ async function runSpecificCustomAd(targetKey) {
     }
     clearAdWatchTimeout();
     currentAdId++;
-    const buttons = appState.config.customAdButtons || [];
-    let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
-    if (!btn && (targetKey === 'adSlot1' || targetKey === 'adSlot2')) {
-        btn = buttons.find(b => b.target === 'adSlot1' && b.status === 'active');
-    }
-    if (btn && btn.code && String(btn.code).trim()) return await executeCustomAdCode(btn.code);
-
-    if (targetKey === 'adSlot1' || targetKey === 'adSlot2' || targetKey === 'extraReward' || targetKey === 'dailyBonus') {
-        let slotIndex = -1;
-        if (targetKey === 'adSlot1' || targetKey === 'extraReward' || targetKey === 'dailyBonus') slotIndex = 0;
-        if (targetKey === 'adSlot2') slotIndex = 1;
-        const slots = appState.config.adSlots || [];
-        const slot = slots[slotIndex];
-        if (slot) {
-            if (slot.customCode && String(slot.customCode).trim().length > 0) return await executeCustomAdCode(slot.customCode);
-            if (slot.network === 'monetag') return await showMonetagRewardedPopup(String(slot.id || MONETAG_ZONE));
-            if (slot.network === 'gigapub') {
-                if (typeof window.showGiga !== 'function') throw new Error('Ad network not ready');
-                return await new Promise((resolve, reject) => {
-                    window.showGiga().then(() => resolve({ done: true })).catch(() => reject(new Error('Ad closed or failed')));
-                });
-            }
-            if (slot.network === 'adsgram') {
-                if (typeof window.Adsgram === 'undefined') throw new Error('Ad network not ready');
-                const adCtrl = window.Adsgram.init({ blockId: slot.id ? String(slot.id) : '23393' });
-                let res = await adCtrl.show();
-                if (!res || res.done !== true) throw new Error('Ad Closed');
-                return { done: true };
-            }
-        }
-    }
     const slots = appState.config.adSlots || [];
-    let fallbackSlot = slots.find(s => s && s.customCode && String(s.customCode).trim().length > 0);
-    if (fallbackSlot) return await executeCustomAdCode(fallbackSlot.customCode);
-    throw new Error('No ads configured by Admin');
+    const slot = slots[slotIndex];
+    if (!slot) throw new Error('Ad slot not configured');
+    if (!slot.provider || slot.provider === 'none') throw new Error('Ad provider not set');
+    if (slot.status && slot.status !== 'active') throw new Error('Ad slot inactive');
+    if (!slot.code || !String(slot.code).trim()) throw new Error('Ad code missing');
+    return await showAdByProvider(slot.provider, slot.code);
 }
 
 /* =========================================================
@@ -1221,15 +1453,14 @@ async function watchAd(i) {
     const slot = appState.config.adSlots && appState.config.adSlots[i] ? appState.config.adSlots[i] : null;
     const loadingOverlay = document.getElementById('adLoadingOverlay');
     const adStartTime = Date.now();
-    const targetKey = i === 0 ? 'adSlot1' : 'adSlot2';
     try {
         if (!slot) throw new Error('Ad not configured');
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        if (!hasCustomCode && (!slot.network || slot.network === 'none')) throw new Error('Ad not configured');
+        if (!slot.provider || slot.provider === 'none') throw new Error('Ad not configured');
+        if (!slot.code || !String(slot.code).trim()) throw new Error('Ad code missing');
         if (loadingOverlay) loadingOverlay.classList.add('active');
         toast('Loading Ad...');
         showAdWatchProgress(adStartTime);
-        await runSpecificCustomAd(targetKey);
+        await runAdForSlot(i);
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
@@ -1263,6 +1494,8 @@ async function watchAd(i) {
 }
 function startAdWatch(i) { watchAd(i); }
 
+// ✅ END OF PART 2A
+</script>
 /* =========================================================
    === 6. EXTRA REWARDS LOGIC
    ========================================================= */
@@ -1312,7 +1545,15 @@ async function watchExtraRewardAd() {
     const adStartTime = Date.now();
     showAdWatchProgress(adStartTime);
     try {
-        await runSpecificCustomAd('extraReward');
+        // Use any active ad slot for extra rewards
+        const slots = appState.config.adSlots || [];
+        let usedSlot = -1;
+        for (let i = 0; i < slots.length; i++) {
+            const s = slots[i];
+            if (s && s.provider && s.provider !== 'none' && s.code && s.status !== 'inactive') { usedSlot = i; break; }
+        }
+        if (usedSlot === -1) throw new Error('No ad configured');
+        await runAdForSlot(usedSlot);
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
         const rewardAmount = Number(extraRewardConfig.amount || 0);
@@ -1361,8 +1602,7 @@ function calculateAdTotalEarnings() {
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i];
         if (!slot) continue;
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        if (hasCustomCode || (slot.network && slot.network !== 'none')) totalSlots++;
+        if (slot.provider && slot.provider !== 'none' && slot.code && slot.status !== 'inactive') totalSlots++;
     }
     const limit = Number(appState.config.dailyAdLimit || 10);
     const reward = Number(appState.config.adReward || 0.5);
@@ -1375,8 +1615,7 @@ function isAllDisplayAdsWatched() {
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i];
         if (!slot) continue;
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        const configured = hasCustomCode || (slot.network && slot.network !== 'none');
+        const configured = slot.provider && slot.provider !== 'none' && slot.code && slot.status !== 'inactive';
         if (!configured) continue;
         hasConfigured = true;
         if (Number((appState.user.dailyAds || {})[i] || 0) < limit) return false;
@@ -1453,8 +1692,7 @@ function updateAdClaimUI() {
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
         const slot = slots[i];
         if (!slot) continue;
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        const configured = hasCustomCode || (slot.network && slot.network !== 'none');
+        const configured = slot.provider && slot.provider !== 'none' && slot.code && slot.status !== 'inactive';
         if (!configured) continue;
         totalPossible += limit;
         watchedCount += Number((appState.user.dailyAds || {})[i] || 0);
@@ -1687,6 +1925,438 @@ async function claimReferralIncome() {
 }
 
 /* =========================================================
+   === NEW: PACKAGES SYSTEM
+   ========================================================= */
+async function loadPackages() {
+    const grid = document.getElementById('packagesGrid');
+    if (!grid) return;
+    grid.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading packages...</p></div>';
+    try {
+        const snap = await db.ref('packages').once('value');
+        allPackagesCache = {};
+        const list = [];
+        snap.forEach(x => { const p = { id: x.key, ...x.val() }; allPackagesCache[x.key] = p; list.push(p); });
+        list.sort((a, b) => (a.price || 0) - (b.price || 0));
+        const activeList = list.filter(p => p.status === 'active');
+        if (activeList.length === 0) {
+            grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages available</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Please check back later</p></div>';
+            return;
+        }
+        let html = '';
+        activeList.forEach(p => {
+            const userPkg = (appState.userPackages || {})[p.id];
+            const isActive = userPkg && !userPkg.expired && userPkg.status !== 'expired';
+            const canBuy = Number(appState.user.balance || 0) >= Number(p.price || 0);
+            let btnHtml = '';
+            if (isActive) {
+                btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${p.id}')"><i class="fas fa-check-circle"></i> একটিভ — বিস্তারিত দেখুন</button>`;
+            } else {
+                btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${p.id}')"><i class="fas fa-rocket"></i> Upgrade — ${Number(p.price || 0).toFixed(2)} TK</button>`;
+            }
+            html += `<div class="pkg-card ${isActive ? 'active-pkg' : ''}" onclick="${isActive ? `openPackageDetails('${p.id}')` : ''}">
+                <div class="pkg-head">
+                    <div class="pkg-title"><div class="pkg-title-icon"><i class="fas fa-box"></i></div>${esc(p.name)}</div>
+                    <span class="pkg-badge ${isActive ? 'active' : 'available'}">${isActive ? 'একটিভ' : 'Available'}</span>
+                </div>
+                <div class="pkg-stats">
+                    <div class="pkg-stat price"><div class="val">${Number(p.price || 0).toFixed(2)}</div><div class="lbl">Price TK</div></div>
+                    <div class="pkg-stat daily"><div class="val">${Number(p.dailyIncome || 0).toFixed(2)}</div><div class="lbl">Daily TK</div></div>
+                    <div class="pkg-stat duration"><div class="val">${p.duration || 0}d</div><div class="lbl">Duration</div></div>
+                </div>
+                <div class="pkg-meta">
+                    <span><i class="fas fa-coins"></i> Total: ${Number((p.dailyIncome || 0) * (p.duration || 0)).toFixed(2)} TK</span>
+                    <span><i class="fas fa-percent"></i> ${p.rate || 0}% Rate</span>
+                </div>
+                ${p.description ? `<div style="font-size:.72rem;color:#64748b;margin-bottom:12px;font-weight:600;">${esc(p.description)}</div>` : ''}
+                <div onclick="event.stopPropagation()">${btnHtml}</div>
+            </div>`;
+        });
+        grid.innerHTML = html;
+    } catch (e) {
+        grid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>';
+    }
+}
+
+function openBuyConfirm(pkgId) {
+    const pkg = allPackagesCache[pkgId];
+    if (!pkg) { toast('❌ Package not found'); return; }
+    const userBal = Number(appState.user.balance || 0);
+    const price = Number(pkg.price || 0);
+    selectedPkgForBuy = pkgId;
+    document.getElementById('pciTitle').textContent = 'Confirm Purchase';
+    document.getElementById('pciSub').textContent = 'আপনি কি এই প্যাকেজটি কিনতে চান?';
+    document.getElementById('pciInfo').innerHTML = `
+        <div class="pci-row"><span>Package:</span><span class="val">${esc(pkg.name)}</span></div>
+        <div class="pci-row"><span>Duration:</span><span class="val">${pkg.duration} days</span></div>
+        <div class="pci-row"><span>Daily Income:</span><span class="val">${Number(pkg.dailyIncome).toFixed(2)} TK</span></div>
+        <div class="pci-row"><span>Your Balance:</span><span class="val">${userBal.toFixed(2)} TK</span></div>
+        <div class="pci-row total"><span>Total Price:</span><span class="val">${price.toFixed(2)} TK</span></div>
+        ${userBal < price ? `<div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;color:#991b1b;font-size:.75rem;font-weight:700;border-left:3px solid #ef4444;">⚠️ অপর্যাপ্ত ব্যালেন্স! আরও ${(price-userBal).toFixed(2)} TK প্রয়োজন।</div>` : ''}
+    `;
+    const confirmBtn = document.getElementById('pciConfirmBtn');
+    if (userBal < price) {
+        confirmBtn.disabled = true;
+        confirmBtn.style.opacity = '0.5';
+        confirmBtn.style.cursor = 'not-allowed';
+        confirmBtn.textContent = 'Insufficient Balance';
+    } else {
+        confirmBtn.disabled = false;
+        confirmBtn.style.opacity = '1';
+        confirmBtn.style.cursor = 'pointer';
+        confirmBtn.textContent = 'Confirm Purchase';
+    }
+    document.getElementById('pkgConfirmOverlay').classList.add('active');
+}
+function closePkgConfirm() {
+    document.getElementById('pkgConfirmOverlay').classList.remove('active');
+    selectedPkgForBuy = null;
+}
+
+async function confirmBuyPackage() {
+    if (!selectedPkgForBuy) return;
+    const pkg = allPackagesCache[selectedPkgForBuy];
+    if (!pkg) return;
+    const price = Number(pkg.price || 0);
+    const userBal = Number(appState.user.balance || 0);
+    if (userBal < price) { toast('❌ অপর্যাপ্ত ব্যালেন্স'); return; }
+    const btn = document.getElementById('pciConfirmBtn');
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    try {
+        const now = Date.now();
+        const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
+        const upId = 'up_' + Date.now() + '_' + appState.user.id;
+        const userPkgData = {
+            userId: String(appState.user.id),
+            userName: appState.user.name || tgUser.first_name || 'User',
+            username: tgUser.username || '',
+            packageId: selectedPkgForBuy,
+            packageName: pkg.name || 'Package',
+            dailyIncome: Number(pkg.dailyIncome || 0),
+            price: price,
+            duration: Number(pkg.duration || 0),
+            purchasedAt: now,
+            expiresAt: expiresAt,
+            lastClaimAt: 0,
+            totalEarned: 0,
+            claimCount: 0,
+            status: 'active'
+        };
+        // Deduct balance & save package
+        const newBalance = userBal - price;
+        await db.ref('users/' + appState.user.id).update({ balance: newBalance });
+        await db.ref('userPackages/' + upId).set(userPkgData);
+        appState.user.balance = newBalance;
+        // Refresh UI
+        await updateTextElements();
+        loadPackages();
+        loadClaimPage();
+        toast('✅ প্যাকেজ কেনা সফল!');
+        closePkgConfirm();
+        tryHaptic('success');
+    } catch (e) {
+        toast('❌ ' + e.message);
+        btn.disabled = false;
+        btn.textContent = 'Confirm Purchase';
+    }
+}
+
+function openPackageDetails(pkgId) {
+    const pkg = allPackagesCache[pkgId];
+    const up = (appState.userPackages || {})[pkgId];
+    if (!pkg || !up) { toast('❌ Not found'); return; }
+    const now = Date.now();
+    const isExpired = now > (up.expiresAt || 0);
+    const remainMs = Math.max(0, (up.expiresAt || 0) - now);
+    const remainDays = Math.ceil(remainMs / (24 * 60 * 60 * 1000));
+    const daily = Number(pkg.dailyIncome || 0);
+    const totalEarned = Number(up.totalEarned || 0);
+    const lastClaim = Number(up.lastClaimAt || 0);
+    const canClaim = !isExpired && (lastClaim === 0 || (now - lastClaim) >= 24 * 60 * 60 * 1000);
+    const price = Number(pkg.price || 0);
+    const totalReturn = daily * Number(pkg.duration || 0);
+    const html = `
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-box-open"></i> Package Details</div>
+        <div class="pkg-details-card">
+            <div class="pd-label">🎯 ACTIVE PACKAGE</div>
+            <div class="pd-title">${esc(pkg.name)}</div>
+            <div class="pd-grid">
+                <div class="pd-item"><div class="num">${price.toFixed(2)}</div><div class="lbl">Price TK</div></div>
+                <div class="pd-item"><div class="num">${daily.toFixed(2)}</div><div class="lbl">Daily TK</div></div>
+                <div class="pd-item"><div class="num">${totalEarned.toFixed(2)}</div><div class="lbl">Earned So Far</div></div>
+                <div class="pd-item"><div class="num">${remainDays}d</div><div class="lbl">Days Left</div></div>
+            </div>
+            <div style="margin-top:14px;position:relative;z-index:1;">
+                <div style="display:flex;justify-content:space-between;font-size:.75rem;font-weight:800;opacity:.9;margin-bottom:6px;"><span>Total Return</span><span>${totalReturn.toFixed(2)} TK</span></div>
+                <div style="height:8px;background:rgba(255,255,255,.25);border-radius:20px;overflow:hidden;"><div style="height:100%;background:#fff;width:${Math.min(100, (totalEarned/(totalReturn||1))*100)}%;border-radius:20px;"></div></div>
+            </div>
+            ${!isExpired ? `
+                <button class="pkg-claim-btn ${canClaim ? 'ready' : ''}" onclick="claimPackageIncome('${pkgId}')" ${canClaim ? '' : 'disabled'}>
+                    <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
+                    ${canClaim ? `Claim ${daily.toFixed(2)} TK` : `Next claim in ${Math.ceil((24*60*60*1000 - (now-lastClaim))/(60*60*1000))}h`}
+                </button>
+            ` : `
+                <button class="pkg-claim-btn" disabled><i class="fas fa-times-circle"></i> Package Expired</button>
+            `}
+            <button onclick="closePkgDetails()" style="width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.25);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:10px;font-family:inherit;">Close</button>
+        </div>
+    `;
+    // Show as modal
+    let modal = document.getElementById('pkgDetailsModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'pkgDetailsModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 0;display:block;';
+        modal.innerHTML = `<div id="pkgDetailsBody" style="max-width:480px;margin:20px auto;"></div>`;
+        document.body.appendChild(modal);
+    } else { modal.style.display = 'block'; }
+    document.getElementById('pkgDetailsBody').innerHTML = html;
+}
+function closePkgDetails() {
+    const m = document.getElementById('pkgDetailsModal');
+    if (m) m.style.display = 'none';
+}
+
+async function claimPackageIncome(pkgId) {
+    const up = (appState.userPackages || {})[pkgId];
+    const pkg = allPackagesCache[pkgId];
+    if (!up || !pkg) { toast('❌ Not found'); return; }
+    const now = Date.now();
+    if (now > (up.expiresAt || 0)) { toast('❌ Package expired'); return; }
+    const lastClaim = Number(up.lastClaimAt || 0);
+    if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) {
+        toast('⏳ Please wait 24 hours between claims');
+        return;
+    }
+    const daily = Number(pkg.dailyIncome || 0);
+    if (daily <= 0) { toast('❌ Invalid income'); return; }
+    try {
+        const newBal = Number(appState.user.balance || 0) + daily;
+        const newEarned = Number(up.totalEarned || 0) + daily;
+        const newCount = Number(up.claimCount || 0) + 1;
+        // Find upId for this pkg
+        const updates = { lastClaimAt: now, totalEarned: newEarned, claimCount: newCount };
+        let targetUpId = null;
+        // find by scanning userPackages
+        const ups = appState.userPackages || {};
+        for (const upId in ups) {
+            if (ups[upId].packageId === pkgId) { targetUpId = upId; break; }
+        }
+        if (!targetUpId) { toast('❌ Package record not found'); return; }
+        await db.ref('userPackages/' + targetUpId).update(updates);
+        await db.ref('users/' + appState.user.id).update({
+            balance: newBal,
+            totalEarned: Number(appState.user.totalEarned || 0) + daily
+        });
+        appState.user.balance = newBal;
+        appState.user.totalEarned = Number(appState.user.totalEarned || 0) + daily;
+        if (appState.userPackages[pkgId]) {
+            appState.userPackages[pkgId].lastClaimAt = now;
+            appState.userPackages[pkgId].totalEarned = newEarned;
+            appState.userPackages[pkgId].claimCount = newCount;
+        }
+        await updateTextElements();
+        loadClaimPage();
+        loadPackages();
+        closePkgDetails();
+        toast('✅ ' + daily.toFixed(2) + ' TK claimed!');
+        tryHaptic('success');
+    } catch (e) {
+        toast('❌ ' + e.message);
+    }
+}
+
+async function loadUserPackages() {
+    if (!tgUser || !tgUser.id) return;
+    if (userPackagesListener) db.ref('userPackages').off('value', userPackagesListener);
+    userPackagesListener = db.ref('userPackages').orderByChild('userId').equalTo(String(tgUser.id)).on('value', snap => {
+        const map = {};
+        snap.forEach(child => {
+            const v = child.val();
+            map[v.packageId] = { ...v, _upId: child.key };
+        });
+        appState.userPackages = map;
+        loadPackages();
+        loadClaimPage();
+    });
+}
+
+/* =========================================================
+   === NEW: CLAIM PAGE
+   ========================================================= */
+function loadClaimPage() {
+    const listEl = document.getElementById('claimPackagesList');
+    const totalEl = document.getElementById('claimTotalAmount');
+    const infoEl = document.getElementById('claimInfoText');
+    if (!listEl) return;
+    const ups = appState.userPackages || {};
+    const now = Date.now();
+    const activeUps = Object.values(ups).filter(u => u.expiresAt > now && u.status !== 'expired');
+    let claimableTotal = 0;
+    activeUps.forEach(u => {
+        const lastClaim = Number(u.lastClaimAt || 0);
+        const canClaim = lastClaim === 0 || (now - lastClaim) >= 24 * 60 * 60 * 1000;
+        if (canClaim) claimableTotal += Number(u.dailyIncome || 0);
+    });
+    if (totalEl) totalEl.textContent = claimableTotal.toFixed(2);
+    if (infoEl) infoEl.textContent = activeUps.length === 0 ? 'You have 0 active packages' : `You have ${activeUps.length} active package${activeUps.length>1?'s':''}`;
+    if (activeUps.length === 0) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Buy a package to start earning daily</p></div>';
+        return;
+    }
+    let html = '';
+    activeUps.forEach(u => {
+        const lastClaim = Number(u.lastClaimAt || 0);
+        const canClaim = lastClaim === 0 || (now - lastClaim) >= 24 * 60 * 60 * 1000;
+        const remainMs = Math.max(0, (u.expiresAt || 0) - now);
+        const remainDays = Math.ceil(remainMs / (24 * 60 * 60 * 1000));
+        const nextHours = lastClaim > 0 ? Math.ceil((24 * 60 * 60 * 1000 - (now - lastClaim)) / (60 * 60 * 1000)) : 0;
+        html += `<div class="claim-pkg-item ${canClaim ? 'ready' : ''}">
+            <div class="claim-pkg-head">
+                <div>
+                    <div class="claim-pkg-name">${esc(u.packageName || 'Package')}</div>
+                    <div class="claim-pkg-daily">💰 ${Number(u.dailyIncome || 0).toFixed(2)} TK/day • ${remainDays}d left</div>
+                </div>
+                <span class="claim-pkg-badge ${canClaim ? 'ready' : 'wait'}">${canClaim ? '✅ Ready' : '⏳ Wait ' + nextHours + 'h'}</span>
+            </div>
+            <button class="claim-btn-single ${canClaim ? 'ready' : 'wait'}" onclick="claimPackageIncomeById('${u._upId}')" ${canClaim ? '' : 'disabled'}>
+                <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
+                ${canClaim ? `Claim ${Number(u.dailyIncome || 0).toFixed(2)} TK` : `Next claim in ${nextHours}h`}
+            </button>
+        </div>`;
+    });
+    listEl.innerHTML = html;
+}
+
+async function claimPackageIncomeById(upId) {
+    if (!upId) return;
+    try {
+        const snap = await db.ref('userPackages/' + upId).once('value');
+        if (!snap.exists()) { toast('❌ Not found'); return; }
+        const up = snap.val();
+        const now = Date.now();
+        if (now > (up.expiresAt || 0)) { toast('❌ Expired'); return; }
+        const lastClaim = Number(up.lastClaimAt || 0);
+        if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) { toast('⏳ Please wait'); return; }
+        const daily = Number(up.dailyIncome || 0);
+        if (daily <= 0) return;
+        const newBal = Number(appState.user.balance || 0) + daily;
+        const newEarned = Number(up.totalEarned || 0) + daily;
+        const newCount = Number(up.claimCount || 0) + 1;
+        await db.ref('userPackages/' + upId).update({ lastClaimAt: now, totalEarned: newEarned, claimCount: newCount });
+        await db.ref('users/' + appState.user.id).update({ balance: newBal, totalEarned: Number(appState.user.totalEarned || 0) + daily });
+        appState.user.balance = newBal;
+        appState.user.totalEarned = Number(appState.user.totalEarned || 0) + daily;
+        await updateTextElements();
+        loadClaimPage();
+        toast('✅ ' + daily.toFixed(2) + ' TK claimed!');
+        tryHaptic('success');
+    } catch (e) { toast('❌ ' + e.message); }
+}
+
+/* =========================================================
+   === NEW: DEPOSIT PAGE
+   ========================================================= */
+function renderDepositPage() {
+    const c = document.getElementById('depositProvidersList');
+    if (!c) return;
+    const dp = appState.config.depositPayment || {};
+    const providers = [
+        { key: 'bkash', name: 'bKash', icon: 'bKash', num: dp.bkash, cls: 'bkash' },
+        { key: 'nagad', name: 'Nagad', icon: 'নগদ', num: dp.nagad, cls: 'nagad' },
+        { key: 'rocket', name: 'Rocket', icon: 'R', num: dp.rocket, cls: 'rocket' },
+        { key: 'upay', name: 'Upay', icon: 'U', num: dp.upay, cls: 'upay' }
+    ].filter(p => p.num && String(p.num).trim().length > 0);
+    if (providers.length === 0) {
+        c.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods available</p><p style="margin-top:8px;font-size:0.75rem;color:#94a3b8;">Admin has not configured any numbers yet</p></div>';
+        return;
+    }
+    const minDep = Number(dp.minDeposit || 50);
+    let html = '';
+    providers.forEach(p => {
+        html += `<div class="deposit-provider-card ${p.cls}">
+            <div class="deposit-provider-head">
+                <div class="deposit-provider-name">
+                    <div class="deposit-provider-icon ${p.cls}">${p.icon}</div>
+                    <div>${p.name}</div>
+                </div>
+                <div class="deposit-min-badge">Min ${minDep.toFixed(0)} TK</div>
+            </div>
+            <div class="deposit-number-row">
+                <div><div class="lbl">SEND MONEY TO</div><div class="val">${esc(p.num)}</div></div>
+                <button class="copy-mini" onclick="copyDepositNumber('${esc(p.num)}')">Copy</button>
+            </div>
+            ${dp.instructions ? `<div class="deposit-instructions">${esc(dp.instructions)}</div>` : ''}
+            <button class="deposit-send-btn" onclick="openDepositForm('${p.key}','${esc(p.name)}','${esc(p.num)}')">
+                <i class="fas fa-paper-plane"></i> I've Sent Money
+            </button>
+        </div>`;
+    });
+    c.innerHTML = html;
+}
+
+function copyDepositNumber(num) {
+    navigator.clipboard.writeText(num).then(() => toast('📋 Number copied!')).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = num;
+        document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); toast('📋 Copied!'); } catch(e) {}
+        document.body.removeChild(ta);
+    });
+}
+
+function openDepositForm(key, name, num) {
+    let modal = document.getElementById('depositFormModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'depositFormModal';
+        modal.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 0;display:block;';
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+        document.body.appendChild(modal);
+    } else { modal.style.display = 'block'; }
+    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 50);
+    modal.innerHTML = `<div style="max-width:420px;margin:20px auto;padding:0 20px;">
+        <div class="deposit-form-card">
+            <h4><i class="fas fa-paper-plane" style="color:#6C5CE7;"></i> Submit Deposit Request</h4>
+            <div class="df-note"><b>${esc(name)}</b> নাম্বারে <b>${esc(num)}</b> এ টাকা পাঠিয়ে নিচের ফর্ম পূরণ করুন।</div>
+            <div class="df-group"><label>Amount Sent (TK) *</label><input type="number" id="dfAmount" placeholder="e.g. ${minDep}" step="0.01"></div>
+            <div class="df-group"><label>Transaction ID *</label><input type="text" id="dfTxnId" placeholder="e.g. 8N7A2K9XYZ"></div>
+            <div class="df-group"><label>Optional Note</label><input type="text" id="dfNote" placeholder=""></div>
+            <button class="df-submit" onclick="submitDepositRequest('${esc(name)}','${esc(num)}')"><i class="fas fa-check"></i> Submit Request</button>
+            <button onclick="document.getElementById('depositFormModal').style.display='none'" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:8px;font-family:inherit;">Cancel</button>
+        </div>
+    </div>`;
+    setTimeout(() => { const i = document.getElementById('dfAmount'); if (i) i.focus(); }, 100);
+}
+
+async function submitDepositRequest(methodName, methodAccount) {
+    const amountEl = document.getElementById('dfAmount');
+    const txnEl = document.getElementById('dfTxnId');
+    const noteEl = document.getElementById('dfNote');
+    const amt = parseFloat(amountEl?.value || 0);
+    const txn = (txnEl?.value || '').trim();
+    const note = (noteEl?.value || '').trim();
+    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 50);
+    if (!amt || amt <= 0) return toast('❌ Valid amount');
+    if (amt < minDep) return toast(`❌ Min ${minDep} TK`);
+    if (!txn || txn.length < 4) return toast('❌ Valid Transaction ID');
+    try {
+        const reqId = 'depreq_' + Date.now() + '_' + appState.user.id;
+        await db.ref('depositRequests/' + reqId).set({
+            adminId: 'USER_' + appState.user.id,
+            adminName: appState.user.name || tgUser.first_name || 'User',
+            userId: String(appState.user.id),
+            userName: tgUser.first_name || 'User',
+            username: tgUser.username || '',
+            methodName, methodAccount,
+            amount: amt, txnId: txn, note,
+            status: 'pending',
+            timestamp: Date.now()
+        });
+        toast('✅ Request submitted! Wait for approval.');
+        document.getElementById('depositFormModal').style.display = 'none';
+    } catch (e) { toast('❌ ' + e.message); }
+}
+        /* =========================================================
    === 9. TASKS LOGIC
    ========================================================= */
 function getTaskDaysFromLimit(task) {
@@ -2262,11 +2932,18 @@ async function claimDailyBonus() {
     btn.disabled = true; btnCancel.disabled = true;
     isAdWatching = true;
     try {
-        const dailyBonusAdTargets = ['adSlot1', 'adSlot2'];
-        for (let i = 0; i < dailyBonusAdTargets.length; i++) {
-            subText.innerText = 'Loading ad ' + (i + 1) + ' of ' + dailyBonusAdTargets.length + '...';
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ad ' + (i + 1) + ' of ' + dailyBonusAdTargets.length;
-            await runSpecificCustomAd(dailyBonusAdTargets[i]);
+        // Use first two active slots
+        const slots = appState.config.adSlots || [];
+        const activeSlots = [];
+        for (let i = 0; i < slots.length && activeSlots.length < 2; i++) {
+            const s = slots[i];
+            if (s && s.provider && s.provider !== 'none' && s.code && s.status !== 'inactive') activeSlots.push(i);
+        }
+        if (activeSlots.length === 0) throw new Error('No ads configured');
+        for (let i = 0; i < activeSlots.length; i++) {
+            subText.innerText = 'Loading ad ' + (i + 1) + ' of ' + activeSlots.length + '...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ad ' + (i + 1) + ' of ' + activeSlots.length;
+            await runAdForSlot(activeSlots[i]);
             await waitForMinTime(MIN_AD_WATCH_SECONDS);
         }
         btn.innerHTML = '<i class="fas fa-check"></i> Claiming...';
@@ -2481,6 +3158,9 @@ function updateNetworkStatus() {
 window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); });
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
 
+/* =========================================================
+   === 12. SWITCH TAB (UPDATED FOR NEW TABS)
+   ========================================================= */
 function switchTab(tabId, el) {
     if (!isOnline) { toast('No internet!'); return; }
     if (!el) return;
@@ -2495,169 +3175,58 @@ function switchTab(tabId, el) {
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
     if (tabId === 'history') { loadAdHistory(); }
     if (tabId === 'home') { updateClaimWindowUI(); updateExtraRewardUI(); }
+    if (tabId === 'packages') { loadPackages(); }
+    if (tabId === 'claim') { loadClaimPage(); }
+    if (tabId === 'deposit') { renderDepositPage(); }
     tryHaptic('light');
 }
 
-async function calculateValidReferrals() {
-    try {
-        const refs = appState.user.referredUsers || {};
-        const keys = Object.keys(refs);
-        if (keys.length === 0) {
-            validReferralCount = 0;
-            allReferralDataCache.all = [];
-            allReferralDataCache.qualified = [];
-            return 0;
-        }
-        let count = 0;
-        const allData = [], qualifiedData = [];
-        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
-        const CHUNK = 8;
-        for (let i = 0; i < keys.length; i += CHUNK) {
-            const slice = keys.slice(i, i + CHUNK);
-            await Promise.all(slice.map(async (rid) => {
-                const uSnap = await db.ref('users/' + rid).once('value');
-                const u = uSnap.exists() ? uSnap.val() : {};
-                const bal = Number(u.balance || 0);
-                const qualified = bal >= safeMinBal;
-                if (qualified) count++;
-                const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
-                allData.push(entry);
-                if (qualified) qualifiedData.push(entry);
-            }));
-        }
-        allData.sort((a, b) => b.joinedAt - a.joinedAt);
-        qualifiedData.sort((a, b) => b.balance - a.balance);
-        validReferralCount = count;
-        allReferralDataCache.all = allData;
-        allReferralDataCache.qualified = qualifiedData;
-        return count;
-    } catch(e) {
-        validReferralCount = 0;
-        allReferralDataCache.all = [];
-        allReferralDataCache.qualified = [];
-        return 0;
-    }
-}
-
-function getWithdrawLevel() {
-    if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
-    const completedWithdraws = Number(appState.user.withdrawCount || 0);
-    const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
-    const currentLevel = withdrawLevels[levelIndex];
-    return { ...currentLevel, level: currentLevel.level || (levelIndex + 1), _index: levelIndex };
-}
-function updateWithdrawInfo() {
-    const level = getWithdrawLevel();
-    const reqRefs = level.requiredRefs || 5;
-    const currentLevelNum = level.level || 1;
-    const totalLevels = withdrawLevels.length || 1;
-    const el1 = document.getElementById('wdLevel'); if (el1) el1.textContent = 'Level ' + currentLevelNum + ' / ' + totalLevels;
-    const el2 = document.getElementById('wdQualifiedRefs'); if (el2) el2.textContent = validReferralCount + '/' + reqRefs;
-    const el3 = document.getElementById('wdFee'); if (el3) el3.textContent = (level.fee || 5) + '%';
-    const el4 = document.getElementById('wdTime'); if (el4) el4.textContent = level.time || '30 Min-1 Hours';
-    const el5 = document.getElementById('wdRange'); if (el5) el5.textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
-    updateLevelProgressCard(currentLevelNum, totalLevels);
-    const canWithdraw = validReferralCount >= reqRefs;
-    const notice = document.getElementById('wd-notice');
-    if (!notice) return;
-    if (!canWithdraw) {
-        notice.textContent = '⚠️ Level ' + currentLevelNum + ' requires ' + (reqRefs - validReferralCount) + ' more qualified refs';
-        notice.style.color = '#ff4757';
-    } else {
-        const remainingLevels = totalLevels - currentLevelNum;
-        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' eligible! (' + remainingLevels + ' more)';
-        else notice.textContent = '🏆 Max level!';
-        notice.style.color = '#00b894';
-    }
-}
-function updateLevelProgressCard(currentLevelNum, totalLevels) {
-    const titleEl = document.getElementById('lpcTitle');
-    const trackEl = document.getElementById('lpcTrack');
-    const countEl = document.getElementById('lpcCount');
-    if (!titleEl || !trackEl || !countEl) return;
-    titleEl.textContent = 'Level ' + currentLevelNum;
-    let trackHtml = '';
-    for (let i = 1; i <= totalLevels; i++) {
-        let cls = 'lpc-dot';
-        if (i < currentLevelNum) cls += ' done';
-        else if (i === currentLevelNum) cls += ' current';
-        trackHtml += '<div class="' + cls + '"></div>';
-    }
-    trackEl.innerHTML = trackHtml;
-    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 Max level!';
-    else countEl.innerHTML = '✅ ' + (currentLevelNum - 1) + ' / ' + totalLevels + ' • Next: Level ' + (currentLevelNum + 1);
-}
-function checkMaintenance() {
-    if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
-        document.getElementById('maintenanceOverlay').classList.add('active');
-        document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
-        if (appState.config.maintenance.estimatedMinutes) {
-            const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
-            maintenanceEndTime = Date.now() + (mins * 60 * 1000);
-            updateMaintenanceTimer();
-            if (maintenanceTimer) clearInterval(maintenanceTimer);
-            maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
-        }
-        document.getElementById('app').style.display = 'none';
-        return true;
-    } else {
-        document.getElementById('maintenanceOverlay').classList.remove('active');
-        if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
-        return false;
-    }
-}
-function updateMaintenanceTimer() {
-    if (!maintenanceEndTime) return;
-    const diff = Math.max(0, Math.floor((maintenanceEndTime - Date.now()) / 1000));
-    const mins = Math.floor(diff / 60), secs = diff % 60;
-    const el = document.getElementById('maintenanceTime');
-    if (el) el.textContent = '⏳ ' + mins + 'm ' + secs + 's remaining';
-    if (diff <= 0) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
-}
-function checkBan() {
-    if (appState.user && appState.user.isBanned) {
-        document.getElementById('bannedOverlay').classList.add('active');
-        document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
-        document.getElementById('app').style.display = 'none';
-        return true;
-    } else {
-        document.getElementById('bannedOverlay').classList.remove('active');
-        return false;
-    }
-}
-
+/* =========================================================
+   === 13. RENDER ADS (UPDATED - 4 PROVIDERS)
+   ========================================================= */
 function renderAds() {
     const el = document.getElementById('ad-area');
     if (!el) return;
     el.innerHTML = '';
     const slots = appState.config.adSlots || [];
     const limit = Number(appState.config.dailyAdLimit || 10);
+    const providerLabels = { adsgram: 'ADSGRAM', monetag: 'MONETAG', adexium: 'ADEXIUM', gigapub: 'GIGAPUB' };
+    let renderedCount = 0;
     for (let i = 0; i < AD_DISPLAY_SLOTS; i++) {
-        const slot = slots[i] || { network: 'none', id: '' };
-        const hasCustomCode = slot.customCode && String(slot.customCode).trim().length > 0;
-        const configured = slot && (hasCustomCode || (slot.network && slot.network !== 'none'));
+        const slot = slots[i];
+        if (!slot || !slot.provider || slot.provider === 'none' || !slot.code) continue;
+        if (slot.status === 'inactive') continue;
+        renderedCount++;
         const done = (appState.user.dailyAds && appState.user.dailyAds[i]) ? appState.user.dailyAds[i] : 0;
         const max = done >= limit;
-        const cardClass = !configured ? 'not-set disabled' : (max ? 'disabled' : '');
+        const cardClass = max ? 'disabled' : '';
         const extraClass = `slot-${(i % 2) + 1}`;
         const icon = (i === 0 ? 'fa-play' : 'fa-circle-play');
-        const clickAttr = (!configured || max) ? '' : `onclick="startAdWatch(${i})"`;
+        const clickAttr = max ? '' : `onclick="startAdWatch(${i})"`;
+        const providerBadge = `<div class="provider-badge provider-${slot.provider}">${providerLabels[slot.provider] || slot.provider.toUpperCase()}</div>`;
         el.innerHTML += `
             <div class="ad-card ${extraClass} ${cardClass}" ${clickAttr}>
-                ${(configured && !max) ? `<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> ${MIN_AD_WATCH_SECONDS}s</div>` : ''}
+                ${!max ? `<div class="ad-badge-timer"><i class="fas fa-hourglass-start"></i> ${MIN_AD_WATCH_SECONDS}s</div>` : ''}
                 <div class="ad-inner">
+                    ${providerBadge}
                     <i class="fas ${icon}"></i>
                     <h4>Ad Slot ${i+1}</h4>
-                    ${configured ? `<div class="progress-pill">${done}/${limit} Watched</div>` : '<div class="progress-pill">Not Configured</div>'}
+                    <div class="progress-pill">${done}/${limit} Watched</div>
                 </div>
             </div>
         `;
+    }
+    if (renderedCount === 0) {
+        el.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:#94a3b8;font-weight:700;font-size:.85rem;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>No ads configured by Admin</div>';
     }
     updateAdClaimUI();
     updateClaimWindowUI();
     updateExtraRewardUI();
 }
 
+/* =========================================================
+   === 14. TASK RENDERER
+   ========================================================= */
 function getTaskTypeIcon(type) {
     const m = { survey:'📊', image:'🖼️', voice:'🎤', audio:'🎤', text:'📝', youtube_video_view:'▶️', youtube_like:'👍', youtube_comment:'💬', youtube_subscribe:'🔔', app_download:'📱', app_install:'📲', website_visit:'🌐', telegram_join:'✈️', telegram_channel:'📢', facebook_like:'👍', facebook_follow:'👥', instagram_follow:'👥', instagram_like:'❤️', twitter_follow:'🐦', tiktok_follow:'🎵', voice_recording:'🎙️', image_upload:'📷', text_writing:'✍️', sign_up:'📝', general:'📋', other:'🔧' };
     return m[(type || '').toLowerCase()] || '📋';
@@ -3032,9 +3601,9 @@ function loadAdHistory() {
     items.forEach(it => { if (it.type !== 'bonus') adCount++; totalEarned += Number(it.amount || 0); });
     let html = '';
     items.slice(0, HISTORY_LIMIT).forEach(it => {
-        const isBonus = it.type === 'bonus', isClaim = it.type === 'adclaim', isExtra = it.type === 'extra';
-        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : (isExtra ? 'fa-bolt' : 'fa-play-circle'));
-        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : 'Ad Slot ' + esc(String(it.slot))));
+        const isBonus = it.type === 'bonus', isClaim = it.type === 'adclaim', isExtra = it.type === 'extra', isPkg = it.type === 'package_claim';
+        const icon = isBonus ? 'fa-gift' : (isClaim ? 'fa-hand-holding-usd' : (isExtra ? 'fa-bolt' : (isPkg ? 'fa-box-open' : 'fa-play-circle')));
+        const title = isBonus ? 'Daily Bonus' : (isClaim ? 'Ad Claim' : (isExtra ? 'Extra Reward' : (isPkg ? 'Package Income' : 'Ad Slot ' + esc(String(it.slot)))));
         html += `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ${icon}"></i></div><div class="history-info"><h5>${title}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount || 0).toFixed(2)} TK</div></div>`;
     });
     container.innerHTML = html;
@@ -3225,7 +3794,6 @@ let chatSelectedFile = null;
 function getChatThreadKey() {
     return 'user_' + String(tgUser.id);
 }
-
 function openChatModal() {
     document.getElementById('chatOverlay').classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -3233,17 +3801,14 @@ function openChatModal() {
     startChatListeners();
     markChatAsRead();
 }
-
 function closeChatModal() {
     document.getElementById('chatOverlay').classList.remove('active');
     document.body.style.overflow = '';
 }
-
 function scrollChatToBottom() {
     const b = document.getElementById('chatBody');
     if (b) b.scrollTop = b.scrollHeight;
 }
-
 function markChatAsRead() {
     const tKey = getChatThreadKey();
     const ref = db.ref('chats/' + tKey + '/messages');
@@ -3257,7 +3822,6 @@ function markChatAsRead() {
         db.ref('chats/' + tKey + '/meta/unreadForUser').set(0).catch(() => {});
     }).catch(() => {});
 }
-
 function startChatListeners() {
     const tKey = getChatThreadKey();
     if (chatMessagesListener) db.ref('chats/' + tKey + '/messages').off('value', chatMessagesListener);
@@ -3267,7 +3831,6 @@ function startChatListeners() {
         renderChatMessages(messages);
         if (document.getElementById('chatOverlay').classList.contains('active')) markChatAsRead();
     });
-
     if (chatUnreadListener) db.ref('chats/' + tKey + '/meta').off('value', chatUnreadListener);
     chatUnreadListener = db.ref('chats/' + tKey + '/meta').on('value', snap => {
         const m = snap.val() || {};
@@ -3279,7 +3842,6 @@ function startChatListeners() {
         }
     });
 }
-
 function renderChatMessages(messages) {
     const body = document.getElementById('chatBody');
     if (!body) return;
@@ -3303,7 +3865,6 @@ function renderChatMessages(messages) {
     body.innerHTML = html;
     scrollChatToBottom();
 }
-
 function handleChatFileSelect(input) {
     const f = input.files && input.files[0];
     if (!f) return;
@@ -3314,13 +3875,11 @@ function handleChatFileSelect(input) {
     wrap.style.display = 'flex';
     wrap.innerHTML = `<i class="fas fa-image"></i> <span>${esc(f.name)} (${(f.size/1024).toFixed(1)} KB)</span> <i class="fas fa-times remove" onclick="clearChatFile()"></i>`;
 }
-
 function clearChatFile() {
     chatSelectedFile = null;
     document.getElementById('chatFileInput').value = '';
     document.getElementById('chatFilePreview').style.display = 'none';
 }
-
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const btn = document.getElementById('chatSendBtn');
@@ -3373,7 +3932,7 @@ function initUserChatSystem() {
 }
 
 /* =========================================================
-   === 12. MAIN BOOT
+   === 15. MAIN BOOT (DOMContentLoaded)
    ========================================================= */
 window.addEventListener('DOMContentLoaded', () => {
     const legalModal = document.getElementById('legalModal');
@@ -3500,29 +4059,12 @@ window.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('maintenanceOverlay').classList.remove('active');
                 if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
             }
-            const slots = appState.config.adSlots || [];
-            slots.forEach(slot => {
-                if (!slot) return;
-                if (slot.customCode && String(slot.customCode).trim()) return;
-                if (slot.network === 'monetag' && slot.id) {
-                    if (String(slot.id) !== MONETAG_DEFAULT_ZONE) reloadMonetagSDK(slot.id);
-                } else if (slot.network === 'adsgram' && !document.getElementById('adsg-script')) {
-                    const sc = document.createElement('script');
-                    sc.id = 'adsg-script';
-                    sc.src = 'https://sad.adsgram.ai/js/sad.min.js';
-                    sc.async = true;
-                    document.body.appendChild(sc);
-                } else if (slot.network === 'gigapub' && !document.getElementById('giga-script')) {
-                    const sc = document.createElement('script');
-                    sc.id = 'giga-script';
-                    sc.src = 'https://ad.gigapub.tech/script?id=1';
-                    sc.async = true;
-                    document.body.appendChild(sc);
-                }
-            });
             if (isBooted) {
                 updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
                 if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
+                if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
+                if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
             }
         }, 250);
     });
@@ -3661,6 +4203,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
                 if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
                 if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+                if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
+                if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
+                if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
             }, 150);
 
             if (!isBooted) {
@@ -3702,6 +4247,12 @@ window.addEventListener('DOMContentLoaded', () => {
                             startAdminSlider();
                             startMonetagInAppInterstitial(MONETAG_ZONE);
                             try { initUserChatSystem(); } catch(e) {}
+                            // NEW: Load user packages
+                            try { await loadUserPackages(); } catch(e) {}
+                            // NEW: Load packages, claim, deposit on first render
+                            try { await loadPackages(); } catch(e) {}
+                            try { await loadClaimPage(); } catch(e) {}
+                            try { renderDepositPage(); } catch(e) {}
                         } else {
                             document.getElementById('offlineOverlay').classList.add('active');
                         }
@@ -3718,6 +4269,137 @@ window.addEventListener('DOMContentLoaded', () => {
         setLoading(false);
     });
 });
+
+/* =========================================================
+   === 16. HELPER: WITH DRAW LEVEL & INFO
+   ========================================================= */
+function getWithdrawLevel() {
+    if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
+    const completedWithdraws = Number(appState.user.withdrawCount || 0);
+    const levelIndex = Math.min(completedWithdraws, withdrawLevels.length - 1);
+    const currentLevel = withdrawLevels[levelIndex];
+    return { ...currentLevel, level: currentLevel.level || (levelIndex + 1), _index: levelIndex };
+}
+function updateWithdrawInfo() {
+    const level = getWithdrawLevel();
+    const reqRefs = level.requiredRefs || 5;
+    const currentLevelNum = level.level || 1;
+    const totalLevels = withdrawLevels.length || 1;
+    const el1 = document.getElementById('wdLevel'); if (el1) el1.textContent = 'Level ' + currentLevelNum + ' / ' + totalLevels;
+    const el2 = document.getElementById('wdQualifiedRefs'); if (el2) el2.textContent = validReferralCount + '/' + reqRefs;
+    const el3 = document.getElementById('wdFee'); if (el3) el3.textContent = (level.fee || 5) + '%';
+    const el4 = document.getElementById('wdTime'); if (el4) el4.textContent = level.time || '30 Min-1 Hours';
+    const el5 = document.getElementById('wdRange'); if (el5) el5.textContent = (level.minAmount || 10) + ' - ' + (level.maxAmount || 100) + ' TK';
+    updateLevelProgressCard(currentLevelNum, totalLevels);
+    const canWithdraw = validReferralCount >= reqRefs;
+    const notice = document.getElementById('wd-notice');
+    if (!notice) return;
+    if (!canWithdraw) {
+        notice.textContent = '⚠️ Level ' + currentLevelNum + ' requires ' + (reqRefs - validReferralCount) + ' more qualified refs';
+        notice.style.color = '#ff4757';
+    } else {
+        const remainingLevels = totalLevels - currentLevelNum;
+        if (remainingLevels > 0) notice.textContent = '✅ Level ' + currentLevelNum + ' eligible! (' + remainingLevels + ' more)';
+        else notice.textContent = '🏆 Max level!';
+        notice.style.color = '#00b894';
+    }
+}
+function updateLevelProgressCard(currentLevelNum, totalLevels) {
+    const titleEl = document.getElementById('lpcTitle');
+    const trackEl = document.getElementById('lpcTrack');
+    const countEl = document.getElementById('lpcCount');
+    if (!titleEl || !trackEl || !countEl) return;
+    titleEl.textContent = 'Level ' + currentLevelNum;
+    let trackHtml = '';
+    for (let i = 1; i <= totalLevels; i++) {
+        let cls = 'lpc-dot';
+        if (i < currentLevelNum) cls += ' done';
+        else if (i === currentLevelNum) cls += ' current';
+        trackHtml += '<div class="' + cls + '"></div>';
+    }
+    trackEl.innerHTML = trackHtml;
+    if (currentLevelNum >= totalLevels) countEl.innerHTML = '🏆 Max level!';
+    else countEl.innerHTML = '✅ ' + (currentLevelNum - 1) + ' / ' + totalLevels + ' • Next: Level ' + (currentLevelNum + 1);
+}
+function checkMaintenance() {
+    if (appState.config && appState.config.maintenance && appState.config.maintenance.active) {
+        document.getElementById('maintenanceOverlay').classList.add('active');
+        document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
+        if (appState.config.maintenance.estimatedMinutes) {
+            const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
+            maintenanceEndTime = Date.now() + (mins * 60 * 1000);
+            updateMaintenanceTimer();
+            if (maintenanceTimer) clearInterval(maintenanceTimer);
+            maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
+        }
+        document.getElementById('app').style.display = 'none';
+        return true;
+    } else {
+        document.getElementById('maintenanceOverlay').classList.remove('active');
+        if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+        return false;
+    }
+}
+function updateMaintenanceTimer() {
+    if (!maintenanceEndTime) return;
+    const diff = Math.max(0, Math.floor((maintenanceEndTime - Date.now()) / 1000));
+    const mins = Math.floor(diff / 60), secs = diff % 60;
+    const el = document.getElementById('maintenanceTime');
+    if (el) el.textContent = '⏳ ' + mins + 'm ' + secs + 's remaining';
+    if (diff <= 0) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+}
+function checkBan() {
+    if (appState.user && appState.user.isBanned) {
+        document.getElementById('bannedOverlay').classList.add('active');
+        document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
+        document.getElementById('app').style.display = 'none';
+        return true;
+    } else {
+        document.getElementById('bannedOverlay').classList.remove('active');
+        return false;
+    }
+}
+
+async function calculateValidReferrals() {
+    try {
+        const refs = appState.user.referredUsers || {};
+        const keys = Object.keys(refs);
+        if (keys.length === 0) {
+            validReferralCount = 0;
+            allReferralDataCache.all = [];
+            allReferralDataCache.qualified = [];
+            return 0;
+        }
+        let count = 0;
+        const allData = [], qualifiedData = [];
+        const safeMinBal = (typeof MIN_REFERRAL_BALANCE === 'number' && MIN_REFERRAL_BALANCE > 0) ? MIN_REFERRAL_BALANCE : 20;
+        const CHUNK = 8;
+        for (let i = 0; i < keys.length; i += CHUNK) {
+            const slice = keys.slice(i, i + CHUNK);
+            await Promise.all(slice.map(async (rid) => {
+                const uSnap = await db.ref('users/' + rid).once('value');
+                const u = uSnap.exists() ? uSnap.val() : {};
+                const bal = Number(u.balance || 0);
+                const qualified = bal >= safeMinBal;
+                if (qualified) count++;
+                const entry = { id: rid, name: u.name || refs[rid].name || 'User', balance: bal, qualified, joinedAt: refs[rid].joinedAt || 0 };
+                allData.push(entry);
+                if (qualified) qualifiedData.push(entry);
+            }));
+        }
+        allData.sort((a, b) => b.joinedAt - a.joinedAt);
+        qualifiedData.sort((a, b) => b.balance - a.balance);
+        validReferralCount = count;
+        allReferralDataCache.all = allData;
+        allReferralDataCache.qualified = qualifiedData;
+        return count;
+    } catch(e) {
+        validReferralCount = 0;
+        allReferralDataCache.all = [];
+        allReferralDataCache.qualified = [];
+        return 0;
+    }
+}
 </script>
 </body>
 </html>
