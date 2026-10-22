@@ -1024,13 +1024,16 @@ async function executeCustomAdCode(code) {
 }
 
 async function runSpecificCustomAd(targetKey) {
-    // ✅ FIXED: Auto Release Flag timeout
+    // ✅ FIX: প্রতিবার নতুন ক্লিকে অ্যাড লোড হবে, ৩ সেকেন্ডের বেশি আটকে থাকলে বাতিল হবে
     if (isAdWatching) {
         if (!adWatchTimeout) {
             adWatchTimeout = setTimeout(() => {
                 isAdWatching = false;
                 adWatchTimeout = null;
-            }, 15000); // 15 seconds auto release
+                // স্ক্রিনে থাকা লোডিং ওভারলে বন্ধ করবে
+                const loadingOverlay = document.getElementById('adLoadingOverlay');
+                if (loadingOverlay) loadingOverlay.classList.remove('active');
+            }, 3000); // ৩ সেকেন্ড পর অটো রিলিজ
         }
         throw new Error('Already watching an ad. Please wait.');
     }
@@ -1039,6 +1042,10 @@ async function runSpecificCustomAd(targetKey) {
         clearTimeout(adWatchTimeout);
         adWatchTimeout = null;
     }
+
+    // নতুন অ্যাডের জন্য আইডি বাড়ানো হলো
+    currentAdId++;
+    const myAdId = currentAdId;
 
     const buttons = appState.config.customAdButtons || [];
     let btn = buttons.find(b => b.target === targetKey && b.status === 'active');
