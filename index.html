@@ -557,9 +557,8 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-msg.from-user{align-self:flex-end;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border-bottom-right-radius:4px}
 .chat-msg.from-admin{align-self:flex-start;background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
 .chat-msg .msg-time{font-size:.62rem;opacity:.75;margin-top:4px;display:block;text-align:right}
-.chat-msg.from-admin .msg-time{text-align:left;color:var(--text-muted)}
 .chat-msg .msg-img{max-width:100%;border-radius:8px;margin-top:4px;display:block;cursor:pointer}
-.chat-empty{text-align:center;padding:40px 20px;color:var(--text-muted);font-size:.85rem;font-weight:600}
+.chat-empty{text-align:center;padding:40px 20px;color:var(--text-light);font-size:.85rem;font-weight:600}
 .chat-empty i{font-size:2.5rem;display:block;margin-bottom:10px;color:var(--border)}
 .chat-input-wrap{padding:12px 14px;border-top:1px solid var(--border);background:#fff;display:flex;gap:8px;align-items:center}
 .chat-input{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:24px;font-size:.88rem;outline:none;font-family:inherit;background:#f8fafc;transition:all .2s}
@@ -568,7 +567,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-send:active{transform:scale(.9)}
 .chat-send:disabled{opacity:.5;cursor:not-allowed}
 .chat-attach{width:44px;height:44px;border-radius:50%;background:#f1f5f9;color:var(--text-light);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-.chat-attach:hover{background:#e2e8f0}
 .chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-light)}
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
@@ -866,6 +864,55 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 </div>
+
+<script>
+/* =========================================================
+   === 0. GLOBAL SAFETY GUARDS (prevents loader stuck)
+   ========================================================= */
+(function() {
+    window.__loaderFailsafe = setTimeout(function() {
+        try {
+            const loader = document.getElementById('loader');
+            if (loader && loader.style.display !== 'none') {
+                console.warn('[SAFETY] Forcing loader hide after 15s timeout');
+                loader.style.display = 'none';
+                const blocked = ['maintenanceOverlay','bannedOverlay','offlineOverlay','joinModal'].some(function(id){
+                    const o = document.getElementById(id);
+                    return o && o.classList.contains('active');
+                });
+                if (!blocked) {
+                    const app = document.getElementById('app');
+                    if (app) app.style.display = 'block';
+                }
+                if (!navigator.onLine) {
+                    const off = document.getElementById('offlineOverlay');
+                    if (off) off.classList.add('active');
+                }
+            }
+        } catch(e) { console.error(e); }
+    }, 15000);
+
+    window.addEventListener('error', function(ev) {
+        console.error('[GLOBAL ERROR]', ev.message, ev.filename, ev.lineno);
+    });
+    window.addEventListener('unhandledrejection', function(ev) {
+        console.error('[UNHANDLED PROMISE]', ev.reason);
+    });
+
+    // Immediate offline check on load
+    if (!navigator.onLine) {
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const loader = document.getElementById('loader');
+                if (loader) loader.style.display = 'none';
+                const off = document.getElementById('offlineOverlay');
+                if (off) off.classList.add('active');
+            }, 50);
+        });
+    }
+})();
+</script>
+
 <script>
 /* =========================================================
    === 1. INITIAL SETUP & FIREBASE CONFIG ===
@@ -883,16 +930,10 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-/* ⚠️ SECURITY WARNING:
- * কখনো production-এ client-side এ BOT_TOKEN বা IMGBB_API_KEY রাখবেন না।
- * নিচের placeholder গুলো আপনার server-side (Cloud Function / VPS) proxy endpoint দিয়ে replace করুন।
- * উদাহরণ: BOT_TOKEN_PROXY = "https://your-domain.com/api/telegram"
- *          IMGBB_PROXY = "https://your-domain.com/api/upload"
- * ========================================================= */
-const BOT_TOKEN = ""; // ⚠️ NEVER put real token here in production
-const IMGBB_API_KEY = ""; // ⚠️ NEVER put real key here in production
-const BOT_TOKEN_PROXY = ""; // optional: your own server proxy URL
-const IMGBB_PROXY = ""; // optional: your own server proxy URL
+const BOT_TOKEN = "";
+const IMGBB_API_KEY = "";
+const BOT_TOKEN_PROXY = "";
+const IMGBB_PROXY = "";
 const CHANNEL_CHECK_API = "";
 
 const BOT_USERNAME = "TaskHubBD24Bot";
@@ -910,7 +951,7 @@ const HISTORY_LIMIT = 25;
 const REFERRAL_REFRESH_INTERVAL = 15000;
 const CHANNEL_RECHECK_INTERVAL = 60000;
 const VERIFY_DEBOUNCE_MS = 5000;
-const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes instead of 30s
+const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 
 const MONETAG_DEFAULT_ZONE = '11878844';
 let MONETAG_ZONE = MONETAG_DEFAULT_ZONE;
@@ -954,9 +995,7 @@ let appState = {
 };
 
 let isBooted = false;
-let tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
-    ? tg.initDataUnsafe.user
-    : null;
+let tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
 
 let channelVerified = false;
 let channelLinks = [];
@@ -996,7 +1035,7 @@ const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'v
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
 
 /* =========================================================
-   === 2. UTILITY HELPERS (SAFE)
+   === 2. UTILITY HELPERS
    ========================================================= */
 function isScreenshotTask(type) {
     const t = String(type || '').toLowerCase();
@@ -1013,7 +1052,6 @@ function toast(msg) {
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 3500);
 }
-/* Single consistent timezone-aware date function */
 function todayStr() {
     try { return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Dhaka' }); }
     catch(e) { return new Date().toISOString().slice(0, 10); }
@@ -1063,7 +1101,6 @@ function closeAdError() {
     const p = document.getElementById('adErrorPopup');
     if (p) p.classList.remove('active');
 }
-/* Safe async fire-and-forget wrapper */
 function fireAsync(promise) {
     if (promise && typeof promise.catch === 'function') promise.catch(() => {});
 }
@@ -1219,7 +1256,6 @@ async function showAdsgramAd(blockId) {
         await new Promise((resolve, reject) => {
             const existing = document.getElementById('adsgram-sdk-script');
             if (existing) {
-                // SDK script tag already there — wait for it to load
                 let attempts = 0;
                 const iv = setInterval(() => {
                     attempts++;
@@ -1452,7 +1488,6 @@ async function watchAd(i) {
         if (loadingOverlay) loadingOverlay.classList.remove('active');
         await waitForMinTime(MIN_AD_WATCH_SECONDS);
         hideAdWatchProgress();
-        /* Use transaction to avoid race on dailyAds */
         const dailyAdsRef = db.ref('users/' + appState.user.id + '/dailyAds/' + i);
         await dailyAdsRef.transaction(cur => (cur || 0) + 1);
         let newAds = appState.user.dailyAds || {};
@@ -1783,7 +1818,6 @@ async function giveAdminCommission(userEarnedAmount, sourceType) {
             if (!adminId || !adminData) return false;
             adminCodeCache[adminCode] = adminId;
         }
-        /* Use transaction to safely compute daily cap */
         let finalCommission = 0;
         const adminRef = db.ref('admins/' + adminId);
         const result = await adminRef.transaction(cur => {
@@ -1834,14 +1868,14 @@ function switchRefTab(tab) {
     tabs.forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
     panes.forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
     if (tab === 'total') {
-        document.getElementById('refTabTotal')?.classList.add('active');
-        document.getElementById('refPaneTotal')?.classList.add('active');
+        const t = document.getElementById('refTabTotal'); if (t) t.classList.add('active');
+        const p = document.getElementById('refPaneTotal'); if (p) p.classList.add('active');
     } else if (tab === 'qualified') {
-        document.getElementById('refTabQualified')?.classList.add('active');
-        document.getElementById('refPaneQualified')?.classList.add('active');
+        const t = document.getElementById('refTabQualified'); if (t) t.classList.add('active');
+        const p = document.getElementById('refPaneQualified'); if (p) p.classList.add('active');
     } else {
-        document.getElementById('refTabIncome')?.classList.add('active');
-        document.getElementById('refPaneIncome')?.classList.add('active');
+        const t = document.getElementById('refTabIncome'); if (t) t.classList.add('active');
+        const p = document.getElementById('refPaneIncome'); if (p) p.classList.add('active');
     }
     tryHaptic('light');
 }
@@ -1926,7 +1960,7 @@ async function claimReferralIncome() {
     } catch (e) { toast('❌ ' + e.message); }
     finally { updateRefClaimButton(); }
 }
-    <script>
+
 /* =========================================================
    === 10. PACKAGES SYSTEM
    ========================================================= */
@@ -1978,7 +2012,6 @@ async function loadPackages() {
         grid.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Failed to load</p></div>';
     }
 }
-
 function openBuyConfirm(pkgId) {
     const pkg = allPackagesCache[pkgId];
     if (!pkg) { toast('❌ Package not found'); return; }
@@ -2023,11 +2056,10 @@ async function confirmBuyPackage() {
     const btn = document.getElementById('pciConfirmBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     try {
-        /* Atomically deduct balance */
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => {
             if (!cur) return cur;
-            if (Number(cur.balance || 0) < price) return; // abort
+            if (Number(cur.balance || 0) < price) return;
             cur.balance = Number(cur.balance || 0) - price;
             return cur;
         });
@@ -2061,7 +2093,6 @@ async function confirmBuyPackage() {
         btn.disabled = false; btn.textContent = 'Confirm Purchase';
     }
 }
-
 function openPackageDetails(pkgId) {
     const pkg = allPackagesCache[pkgId];
     const up = (appState.userPackages || {})[pkgId];
@@ -2119,7 +2150,6 @@ function closePkgDetails() {
     const m = document.getElementById('pkgDetailsModal');
     if (m) m.style.display = 'none';
 }
-
 async function claimPackageIncomeById(upId) {
     if (!upId) return;
     try {
@@ -2132,7 +2162,6 @@ async function claimPackageIncomeById(upId) {
         if (lastClaim > 0 && (now - lastClaim) < 24 * 60 * 60 * 1000) { toast('⏳ Please wait'); return; }
         const daily = Number(up.dailyIncome || 0);
         if (daily <= 0) return;
-        /* Transaction on up lastClaimAt */
         const upRef = db.ref('userPackages/' + upId);
         const result = await upRef.transaction(cur => {
             if (!cur) return cur;
@@ -2160,7 +2189,6 @@ async function claimPackageIncomeById(upId) {
         tryHaptic('success');
     } catch (e) { toast('❌ ' + e.message); }
 }
-
 async function loadUserPackages() {
     if (!tgUser || !tgUser.id) return;
     if (userPackagesListener) db.ref('userPackages').off('value', userPackagesListener);
@@ -2379,7 +2407,6 @@ function startTaskExpiryTicker() {
 }
 function stopTaskExpiryTicker() { if (taskExpiryTickerInterval) { clearInterval(taskExpiryTickerInterval); taskExpiryTickerInterval = null; } }
 
-/* Anti-hack: only block contextmenu & devtools keys — NOT selectstart/dragstart */
 (function initAntiHack() {
     document.addEventListener('contextmenu', (e) => { e.preventDefault(); return false; }, false);
     document.addEventListener('keydown', (e) => {
@@ -2478,7 +2505,6 @@ function handleBecomeAdmin() {
         else window.open(link, '_blank');
     } catch(e) { window.open(link, '_blank'); }
 }
-
 function getCooldownRemaining(taskId) {
     const cool = appState.user.taskCooldowns || {};
     const last = Number(cool[taskId] || 0);
@@ -2507,7 +2533,6 @@ function startCooldownTicker() {
         if (needsRerender) renderNewTasks();
     }, 1000);
 }
-
 function openTaskLink(url) {
     if (!url || url === '#' || url === 'undefined') { toast('⚠️ No link'); return; }
     try {
@@ -2565,10 +2590,10 @@ function setupUserSubmissionsListener() {
             }
         });
         renderNewTasks();
-        if (document.getElementById('tasksPaneHistory')?.classList.contains('active')) loadTaskHistory();
+        const histPane = document.getElementById('tasksPaneHistory');
+        if (histPane && histPane.classList.contains('active')) loadTaskHistory();
     });
 }
-
 async function startAdsResetCountdown() {
     if (appState.user.adsResetTime && appState.user.adsResetTime > Date.now()) return;
     const resetTime = Date.now() + (AD_RESET_HOURS * 60 * 60 * 1000);
@@ -2632,7 +2657,7 @@ function userLSKey(key) {
 }
 
 /* =========================================================
-   === 15. FILE UPLOAD HELPERS (via proxy when available)
+   === 15. FILE UPLOAD HELPERS
    ========================================================= */
 async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
     const controller = new AbortController();
@@ -2680,8 +2705,6 @@ async function uploadToImgBB(file) {
     if (file.size > 32 * 1024 * 1024) throw new Error('File > 32MB');
     let uploadFile = file;
     try { uploadFile = await compressImage(file); } catch(e) { uploadFile = file; }
-
-    /* Preferred: proxy endpoint (keeps API key server-side) */
     if (IMGBB_PROXY) {
         try {
             const fd = new FormData();
@@ -2692,8 +2715,6 @@ async function uploadToImgBB(file) {
         } catch(e) {}
         throw new Error('Upload failed');
     }
-
-    /* Legacy: direct ImgBB (only if key present — not recommended) */
     if (IMGBB_API_KEY && String(IMGBB_API_KEY).trim().length >= 20) {
         try {
             const fd = new FormData();
@@ -2704,8 +2725,6 @@ async function uploadToImgBB(file) {
             if (data && data.success && data.data && data.data.url) return data.data.url;
         } catch(e) {}
     }
-
-    /* Fallbacks */
     try {
         const fd = new FormData();
         fd.append('reqtype', 'fileupload');
@@ -2859,8 +2878,6 @@ async function claimDailyBonus() {
         cleanupAdGlobals();
     }
 }
-
-/* Auto-reward for external (survey/youtube) tasks */
 function checkPendingSurveyReward() {
     const done = localStorage.getItem(userLSKey('survey_done_task'));
     const pendingRaw = localStorage.getItem(userLSKey('pending_survey'));
@@ -3012,7 +3029,6 @@ async function checkChannelMembership(userId, chatId, retries = 2) {
             if (data && data.status) return data.status;
         } catch(e) {}
     }
-    /* If BOT_TOKEN is present (legacy), use it. Otherwise unknown. */
     if (!BOT_TOKEN || String(BOT_TOKEN).trim().length < 20) return 'unknown';
     const rawChatId = String(chatId).trim();
     const formattedChatId = (rawChatId.startsWith('-') || /^\d+$/.test(rawChatId)) ? rawChatId : '@' + rawChatId.replace(/^@/, '');
@@ -3113,22 +3129,32 @@ function updateNetworkStatus() {
     isOnline = navigator.onLine;
     const offlineOverlay = document.getElementById('offlineOverlay');
     const indicator = document.getElementById('offlineIndicator');
+    const loader = document.getElementById('loader');
+    const app = document.getElementById('app');
     if (!isOnline) {
         if (offlineOverlay) offlineOverlay.classList.add('active');
         if (indicator) indicator.classList.add('show');
-        const app = document.getElementById('app');
+        if (loader) loader.style.display = 'none';
         if (app) app.style.display = 'none';
+        stopPeriodicRecheck();
     } else {
         if (offlineOverlay) offlineOverlay.classList.remove('active');
         if (indicator) indicator.classList.remove('show');
-        const app = document.getElementById('app');
         if (app && isBooted && !document.getElementById('joinModal').classList.contains('active')) {
             app.style.display = 'block';
+            if (loader) loader.style.display = 'none';
         }
     }
 }
-window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); });
-window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
+window.addEventListener('online', () => {
+    updateNetworkStatus();
+    toast('🔄 Reconnected!');
+    if (!isBooted) setTimeout(() => location.reload(), 800);
+});
+window.addEventListener('offline', () => {
+    updateNetworkStatus();
+    toast('⚠️ No internet!');
+});
 
 /* =========================================================
    === 20. TAB SWITCHER
@@ -3488,7 +3514,6 @@ async function requestWithdraw() {
     const level = getWithdrawLevel();
     const reqRefs = level.requiredRefs || 5;
     const currentLevelNum = level.level || 1;
-    const totalLevels = withdrawLevels.length || 1;
     await calculateValidReferrals();
     if (validReferralCount < reqRefs) { toast('❌ Level ' + currentLevelNum + ' requires ' + reqRefs + ' refs!'); return; }
     if (!method) return toast('Select method');
@@ -3500,11 +3525,10 @@ async function requestWithdraw() {
     const feeAmount = (amount * (level.fee || 5)) / 100;
     try {
         const wdId = 'WD' + Date.now();
-        /* Atomically deduct balance and create request */
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => {
             if (!cur) return cur;
-            if (Number(cur.balance || 0) < amount) return; // abort
+            if (Number(cur.balance || 0) < amount) return;
             cur.balance = Number(cur.balance || 0) - amount;
             return cur;
         });
@@ -3512,7 +3536,7 @@ async function requestWithdraw() {
         await db.ref('withdrawals/' + wdId).set({
             userId: appState.user.id, userName: appState.user.name || 'User',
             method, account, amount, fee: feeAmount, netAmount: amount - feeAmount,
-            level: currentLevelNum, totalLevels,
+            level: currentLevelNum, totalLevels: withdrawLevels.length || 1,
             requiredRefs: reqRefs, validRefsAtRequest: validReferralCount,
             countedAtRequest: false,
             status: 'pending', timestamp: Date.now()
@@ -3548,7 +3572,6 @@ function openSupport() {
     const link = appState.config.supportLink || SUPPORT_LINK;
     if (tg && tg.openTelegramLink) tg.openTelegramLink(link); else window.open(link, '_blank');
 }
-
 async function loadMyReferrals() {
     const container = document.getElementById('myReferralsList');
     if (container) container.innerHTML = '<p style="text-align:center;color:#999;padding:15px;">Loading...</p>';
@@ -3594,7 +3617,6 @@ function loadAdHistory() {
     const c = document.getElementById('histAdCount'); if (c) c.textContent = adCount;
     const t = document.getElementById('histAdTotal'); if (t) t.textContent = totalEarned.toFixed(2);
 }
-
 async function sendNotification(userId, message) {
     if (!BOT_TOKEN || String(BOT_TOKEN).trim().length < 20) return;
     try {
@@ -3605,7 +3627,6 @@ async function sendNotification(userId, message) {
         });
     } catch (e) {}
 }
-
 async function updateTextElements() {
     const sym = appState.config.currencySymbol || 'TK';
     const b = document.getElementById('u-bal'); if (b) b.innerText = (appState.user.balance || 0).toFixed(2);
@@ -3633,10 +3654,16 @@ async function updateTextElements() {
     updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts();
     updateAdClaimUI(); updateClaimWindowUI(); updateExtraRewardUI();
 }
-
 function setLoading(isLoading) {
     const loader = document.getElementById('loader'), app = document.getElementById('app');
     if (!loader || !app) return;
+    if (!navigator.onLine) {
+        loader.style.display = 'none';
+        app.style.display = 'none';
+        const off = document.getElementById('offlineOverlay');
+        if (off) off.classList.add('active');
+        return;
+    }
     if (isLoading) { loader.style.display = 'flex'; app.style.display = 'none'; }
     else {
         loader.style.display = 'none';
@@ -3648,7 +3675,6 @@ function setLoading(isLoading) {
         app.style.display = isBlocked ? 'none' : 'block';
     }
 }
-
 async function loadLeaderboard() {
     if (!isOnline) return;
     const sym = appState.config.currencySymbol || 'TK';
@@ -3687,7 +3713,6 @@ async function loadLeaderboard() {
     document.getElementById('podium-area').innerHTML = p2 + p1 + p3;
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users yet</p>';
 }
-
 function renderChannelButtons() {
     const container = document.getElementById('channelLinks');
     if (!container) return;
@@ -3717,7 +3742,6 @@ function renderChannelButtons() {
     verifyInterval = setInterval(checkAndUpdateStatus, 3000);
     setTimeout(checkAndUpdateStatus, 2000);
 }
-
 async function checkAndUpdateStatus() {
     if (isCheckingChannel) return;
     isCheckingChannel = true;
@@ -3749,7 +3773,6 @@ async function checkAndUpdateStatus() {
         }
     } finally { isCheckingChannel = false; }
 }
-
 async function showAppAfterVerify() {
     if (!isOnline) { document.getElementById('offlineOverlay').classList.add('active'); return; }
     if (checkMaintenance()) return;
@@ -3757,6 +3780,7 @@ async function showAppAfterVerify() {
     channelVerified = true;
     document.getElementById('app').style.display = 'block';
     setLoading(false);
+    if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
     startPeriodicRecheck();
     updateLastActive();
     if (appState.user.dailyBonusDate !== todayStr()) showBonus();
@@ -3774,7 +3798,6 @@ function openLink(url) {
 let chatMessagesListener = null;
 let chatUnreadListener = null;
 let chatSelectedFile = null;
-
 function getChatThreadKey() { return 'user_' + String(tgUser.id); }
 function openChatModal() {
     document.getElementById('chatOverlay').classList.add('active');
@@ -3913,7 +3936,7 @@ function initUserChatSystem() {
 }
 
 /* =========================================================
-   === 25. BOOT
+   === 25. BOOT (FIXED - Offline detection + Timeout + Safety)
    ========================================================= */
 window.addEventListener('DOMContentLoaded', () => {
     const legalModal = document.getElementById('legalModal');
@@ -3922,329 +3945,358 @@ window.addEventListener('DOMContentLoaded', () => {
     if (shareModal) shareModal.addEventListener('click', function(e) { if (e.target === this) closeShareModal(); });
 
     if (!tgUser || !tgUser.id) {
-        const loader = document.getElementById('loader');
-        if (loader) loader.style.display = 'none';
-        document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;font-family:Poppins,sans-serif;"><div><h2 style="color:#6C5CE7;">⚠️ Open in Telegram</h2><p style="color:#666;margin-top:10px;">Please open this mini app from Telegram.</p></div></div>';
+        setTimeout(() => {
+            tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
+            if (!tgUser || !tgUser.id) {
+                const loader = document.getElementById('loader');
+                if (loader) loader.style.display = 'none';
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;font-family:Poppins,sans-serif;"><div><h2 style="color:#6C5CE7;">⚠️ Open in Telegram</h2><p style="color:#666;margin-top:10px;">Please open this mini app from Telegram.</p></div></div>';
+                return;
+            }
+            startApp();
+        }, 800);
         return;
     }
+    startApp();
 
-    try { tg.ready(); tg.expand(); } catch (e) {}
-    setLoading(true);
-    updateNetworkStatus();
-    document.getElementById('u-name').innerText = tgUser.first_name || 'User';
-    document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
-    if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
+    function startApp() {
+        try { if (tg) { tg.ready(); tg.expand(); } } catch (e) {}
 
-    if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
-    else setTimeout(() => {
+        if (!navigator.onLine) {
+            const loader = document.getElementById('loader');
+            if (loader) loader.style.display = 'none';
+            const off = document.getElementById('offlineOverlay');
+            if (off) off.classList.add('active');
+            window.addEventListener('online', function onOnlineOnce() {
+                window.removeEventListener('online', onOnlineOnce);
+                location.reload();
+            });
+            return;
+        }
+
+        setLoading(true);
+        updateNetworkStatus();
+        document.getElementById('u-name').innerText = tgUser.first_name || 'User';
+        document.getElementById('u-id').innerText = 'ID: ' + tgUser.id;
+        if (tgUser.photo_url) document.getElementById('u-img').src = tgUser.photo_url;
+
         if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
-    }, 1500);
+        else setTimeout(() => {
+            if (typeof window['show_' + MONETAG_ZONE] === 'function') monetagSDKReady = true;
+        }, 1500);
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            stopPeriodicRecheck();
-            stopAdminSlider();
-            closeMenuPopup();
-        } else {
-            updateLastActive();
-            if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
-                const resetTime = Number(appState.user.adsResetTime || 0);
-                if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
-                else updateCycleUI();
-                updateExtraRewardUI();
-                startPeriodicRecheck();
-                startAdminSlider();
-                if (channelVerified) {
-                    const now = Date.now();
-                    if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
-                        lastVerifyCheckTime = now;
-                        needsVerification().then(needs => {
-                            if (needs) {
-                                channelVerified = false;
-                                fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false));
-                                document.getElementById('app').style.display = 'none';
-                                document.getElementById('joinModal').classList.add('active');
-                                renderChannelButtons();
-                            }
-                        }).catch(() => {});
-                    }
-                }
-            }
-        }
-    });
-
-    window.addEventListener('beforeunload', () => {
-        updateLastActive();
-        stopPeriodicRecheck();
-        stopAdminSlider();
-        if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
-        if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
-        document.body.style.overflow = '';
-    });
-
-    let configDebounce = null;
-    db.ref('config').on('value', snap => {
-        if (!snap.exists()) return;
-        const newConfig = snap.val();
-        if (configDebounce) clearTimeout(configDebounce);
-        configDebounce = setTimeout(() => {
-            appState.config = newConfig;
-            if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
-            if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
-            REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
-            REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
-            if (appState.config.adminRevenue) {
-                const ar = appState.config.adminRevenue;
-                adminRevenueConfig = {
-                    mode: ar.mode || 'referral_commission',
-                    refCommissionRate: Number(ar.refCommissionRate) || 5,
-                    refMaxDaily: Number(ar.refMaxDaily) || 50,
-                    perTaskBonus: Number(ar.perTaskBonus) || 0.10,
-                    taskMaxDaily: Number(ar.taskMaxDaily) || 20
-                };
-            }
-            const parsedMinBal = Number(appState.config.minReferralBalance);
-            MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
-            if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
-            if (appState.config.minAdWatchSeconds !== undefined && appState.config.minAdWatchSeconds !== null) {
-                const v = Number(appState.config.minAdWatchSeconds);
-                if (!isNaN(v) && v >= 3 && v <= 120) MIN_AD_WATCH_SECONDS = v;
-            }
-            if (appState.config.extraReward) {
-                extraRewardConfig = {
-                    enabled: appState.config.extraReward.enabled !== false,
-                    amount: Number(appState.config.extraReward.amount || 0.5),
-                    dailyLimit: Number(appState.config.extraReward.dailyLimit || 5),
-                    title: appState.config.extraReward.title || 'Pop-up Ad দেখে আয় করুন',
-                    infoText: appState.config.extraReward.infoText || 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
-                };
-                updateExtraRewardUI();
-            }
-            if (appState.config.monetagZone) {
-                const zone = String(appState.config.monetagZone);
-                if (zone !== MONETAG_ZONE) { MONETAG_ZONE = zone; reloadMonetagSDK(zone); }
-            }
-            if (appState.config.maintenance && appState.config.maintenance.active) {
-                document.getElementById('maintenanceOverlay').classList.add('active');
-                document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
-                if (appState.config.maintenance.estimatedMinutes) {
-                    const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
-                    maintenanceEndTime = Date.now() + (mins * 60 * 1000);
-                    updateMaintenanceTimer();
-                    if (maintenanceTimer) clearInterval(maintenanceTimer);
-                    maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
-                }
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopPeriodicRecheck();
+                stopAdminSlider();
+                closeMenuPopup();
             } else {
-                document.getElementById('maintenanceOverlay').classList.remove('active');
-                if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
-            }
-            if (isBooted) {
-                updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
-                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
-                if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
-                if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
-                if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
-            }
-        }, 250);
-    });
-
-    const userRef = db.ref('users/' + tgUser.id);
-    userRef.once('value').then(async snap => {
-        const today = todayStr();
-        if (!snap.exists()) {
-            appState.user = {
-                id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
-                balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, adHistory: {},
-                referredUsers: {}, verifiedChannels: {},
-                totalCommission: 0, commissionHistory: {}, referredBy: null,
-                adsResetTime: 0, dailyBonusDate: '',
-                lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
-                withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
-                referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
-                adClaimedCurrentCycle: false, claimWindowStartTime: 0,
-                extraRewardDate: '', extraRewardCount: 0,
-                referredByAdminCode: null
-            };
-            await userRef.set(appState.user);
-
-            let refBy = null;
-            if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
-            if (!refBy) {
-                const urlParams = new URLSearchParams(window.location.search);
-                refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref');
-            }
-
-            if (refBy && String(refBy) !== String(tgUser.id)) {
-                const deviceId = getDeviceId();
-                const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
-                if (deviceSnap.exists()) {
-                    toast('⚠️ This device already referred!');
-                } else {
-                    let handled = false;
-                    if (String(refBy).length >= 6) {
-                        try {
-                            const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
-                            if (adminsSnap.exists()) {
-                                let adminId = null;
-                                adminsSnap.forEach(child => { adminId = child.key; });
-                                if (adminId) {
-                                    await userRef.update({ referredByAdminCode: String(refBy) });
-                                    appState.user.referredByAdminCode = String(refBy);
-                                    await db.ref('admins/' + adminId + '/referredUsers/' + tgUser.id).set({
-                                        name: tgUser.first_name || 'User',
-                                        username: tgUser.username || '',
-                                        joinedAt: Date.now()
-                                    });
-                                    await db.ref('deviceReferrals/' + deviceId).set({
-                                        referrerAdminId: adminId,
-                                        referrerAdminCode: String(refBy),
-                                        referredId: tgUser.id,
-                                        timestamp: Date.now()
-                                    });
-                                    await sendNotification(adminId, '🎉 New User Joined!\n' + (tgUser.first_name || 'User') + '\nYour referral link is working!');
-                                    handled = true;
-                                    toast('🎉 Registered under admin!');
+                updateLastActive();
+                if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
+                    const resetTime = Number(appState.user.adsResetTime || 0);
+                    if (resetTime > 0 && resetTime <= Date.now()) forceCycleReset();
+                    else updateCycleUI();
+                    updateExtraRewardUI();
+                    startPeriodicRecheck();
+                    startAdminSlider();
+                    if (channelVerified) {
+                        const now = Date.now();
+                        if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
+                            lastVerifyCheckTime = now;
+                            needsVerification().then(needs => {
+                                if (needs) {
+                                    channelVerified = false;
+                                    fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false));
+                                    document.getElementById('app').style.display = 'none';
+                                    document.getElementById('joinModal').classList.add('active');
+                                    renderChannelButtons();
                                 }
-                            }
-                        } catch(e) {}
-                    }
-                    if (!handled) {
-                        const refSnap = await db.ref('users/' + refBy).once('value');
-                        if (refSnap.exists()) {
-                            const r = refSnap.val();
-                            let cSnap = await db.ref('config').once('value');
-                            let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
-                            await userRef.update({ referredBy: String(refBy) });
-                            appState.user.referredBy = String(refBy);
-                            await db.ref('users/' + refBy).update({
-                                referrals: (r.referrals || 0) + 1,
-                                balance: (r.balance || 0) + rBonus,
-                                totalEarned: (r.totalEarned || 0) + rBonus
-                            });
-                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({
-                                name: tgUser.first_name || 'User',
-                                joinedAt: Date.now(),
-                                username: tgUser.username || ''
-                            });
-                            await db.ref('deviceReferrals/' + deviceId).set({
-                                referrerId: refBy,
-                                referredId: tgUser.id,
-                                timestamp: Date.now()
-                            });
-                            await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
-                            handled = true;
+                            }).catch(() => {});
                         }
                     }
                 }
-            }
-        }
-
-        let uiDebounce = null;
-        userRef.on('value', liveSnap => {
-            if (!liveSnap.exists()) return;
-            appState.user = liveSnap.val();
-            if (!appState.user.dailyAds) appState.user.dailyAds = {};
-            if (!appState.user.taskHistory) appState.user.taskHistory = {};
-            if (!appState.user.adHistory) appState.user.adHistory = {};
-            if (!appState.user.referredUsers) appState.user.referredUsers = {};
-            if (!appState.user.verifiedChannels) appState.user.verifiedChannels = {};
-            if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
-            if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
-            if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
-            if (appState.user.adsResetTime === undefined) appState.user.adsResetTime = 0;
-            if (appState.user.dailyBonusDate === undefined) appState.user.dailyBonusDate = '';
-            if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
-            if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
-            if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
-            if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
-            if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
-            if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
-            if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
-            if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
-            if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
-            if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
-
-            if (appState.user.isBanned) {
-                document.getElementById('bannedOverlay').classList.add('active');
-                document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
-                document.getElementById('app').style.display = 'none';
-                return;
-            } else {
-                document.getElementById('bannedOverlay').classList.remove('active');
-            }
-
-            if (uiDebounce) clearTimeout(uiDebounce);
-            uiDebounce = setTimeout(async () => {
-                const resetTime = Number(appState.user.adsResetTime || 0);
-                if (resetTime > 0 && resetTime <= Date.now()) await forceCycleReset();
-                await updateTextElements();
-                renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
-                if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
-                if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
-                if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
-                if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
-                if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
-                if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
-            }, 150);
-
-            if (!isBooted) {
-                isBooted = true;
-                (async () => {
-                    if (checkMaintenance()) { setLoading(false); return; }
-                    if (checkBan()) { setLoading(false); return; }
-                    setupUserSubmissionsListener();
-                    await fetchTaskStatuses();
-
-                    let verifyResult = 'error';
-                    try {
-                        verifyResult = await Promise.race([
-                            needsVerification().catch(() => 'error'),
-                            new Promise(resolve => setTimeout(() => resolve('timeout'), 4000))
-                        ]);
-                    } catch(e) { verifyResult = 'error'; }
-                    const needs = (verifyResult === true);
-
-                    if (needs) {
-                        document.getElementById('joinModal').classList.add('active');
-                        renderChannelButtons();
-                    } else {
-                        channelVerified = true;
-                        if (channelLinks && channelLinks.length > 0) {
-                            fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true));
-                        }
-                        if (isOnline) {
-                            document.getElementById('app').style.display = 'block';
-                            setLoading(false);
-                            startPeriodicRecheck();
-                            updateLastActive();
-                            if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
-                                if (!appState.user.claimWindowStartTime) await startClaimWindowIfNeeded();
-                                startClaimWindowTicker();
-                            }
-                            updateClaimWindowUI(); updateExtraRewardUI();
-                            if (appState.user.dailyBonusDate !== today) showBonus();
-                            startAdminSlider();
-                            startMonetagInAppInterstitial(MONETAG_ZONE);
-                            try { initUserChatSystem(); } catch(e) {}
-                            try { await loadUserPackages(); } catch(e) {}
-                            try { await loadPackages(); } catch(e) {}
-                            try { await loadClaimPage(); } catch(e) {}
-                            try { renderDepositPage(); } catch(e) {}
-                        } else {
-                            document.getElementById('offlineOverlay').classList.add('active');
-                        }
-                    }
-                    const pendingSurvey = checkPendingSurveyReward();
-                    if (pendingSurvey) setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500);
-                    const pendingYoutube = checkPendingYoutubeReward();
-                    if (pendingYoutube) setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500);
-                })();
             }
         });
-    }).catch(err => {
-        toast('❌ Failed to load user');
-        setLoading(false);
-    });
+
+        window.addEventListener('beforeunload', () => {
+            updateLastActive();
+            stopPeriodicRecheck();
+            stopAdminSlider();
+            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
+            if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+            document.body.style.overflow = '';
+        });
+
+        let configDebounce = null;
+        db.ref('config').on('value', snap => {
+            if (!snap.exists()) return;
+            const newConfig = snap.val();
+            if (configDebounce) clearTimeout(configDebounce);
+            configDebounce = setTimeout(() => {
+                appState.config = newConfig;
+                if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
+                if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
+                REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
+                REF_COMMISSION_MODE = appState.config.refCommissionMode || 'bonus';
+                if (appState.config.adminRevenue) {
+                    const ar = appState.config.adminRevenue;
+                    adminRevenueConfig = {
+                        mode: ar.mode || 'referral_commission',
+                        refCommissionRate: Number(ar.refCommissionRate) || 5,
+                        refMaxDaily: Number(ar.refMaxDaily) || 50,
+                        perTaskBonus: Number(ar.perTaskBonus) || 0.10,
+                        taskMaxDaily: Number(ar.taskMaxDaily) || 20
+                    };
+                }
+                const parsedMinBal = Number(appState.config.minReferralBalance);
+                MIN_REFERRAL_BALANCE = (!isNaN(parsedMinBal) && parsedMinBal > 0) ? parsedMinBal : 20;
+                if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
+                if (appState.config.minAdWatchSeconds !== undefined && appState.config.minAdWatchSeconds !== null) {
+                    const v = Number(appState.config.minAdWatchSeconds);
+                    if (!isNaN(v) && v >= 3 && v <= 120) MIN_AD_WATCH_SECONDS = v;
+                }
+                if (appState.config.extraReward) {
+                    extraRewardConfig = {
+                        enabled: appState.config.extraReward.enabled !== false,
+                        amount: Number(appState.config.extraReward.amount || 0.5),
+                        dailyLimit: Number(appState.config.extraReward.dailyLimit || 5),
+                        title: appState.config.extraReward.title || 'Pop-up Ad দেখে আয় করুন',
+                        infoText: appState.config.extraReward.infoText || 'Pop-up Ad সম্পূর্ণ দেখলেই রিওয়ার্ড পাবেন।'
+                    };
+                    updateExtraRewardUI();
+                }
+                if (appState.config.monetagZone) {
+                    const zone = String(appState.config.monetagZone);
+                    if (zone !== MONETAG_ZONE) { MONETAG_ZONE = zone; reloadMonetagSDK(zone); }
+                }
+                if (appState.config.maintenance && appState.config.maintenance.active) {
+                    document.getElementById('maintenanceOverlay').classList.add('active');
+                    document.getElementById('maintenanceMsg').textContent = appState.config.maintenance.message || "Updating.";
+                    if (appState.config.maintenance.estimatedMinutes) {
+                        const mins = parseInt(appState.config.maintenance.estimatedMinutes) || 30;
+                        maintenanceEndTime = Date.now() + (mins * 60 * 1000);
+                        updateMaintenanceTimer();
+                        if (maintenanceTimer) clearInterval(maintenanceTimer);
+                        maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
+                    }
+                } else {
+                    document.getElementById('maintenanceOverlay').classList.remove('active');
+                    if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; }
+                }
+                if (isBooted) {
+                    updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
+                    if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                    if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
+                    if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
+                    if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
+                }
+            }, 250);
+        });
+
+        const userRef = db.ref('users/' + tgUser.id);
+        userRef.once('value').then(async snap => {
+            const today = todayStr();
+            if (!snap.exists()) {
+                appState.user = {
+                    id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
+                    balance: 0, totalEarned: 0, referrals: 0, dailyAds: {}, taskHistory: {}, adHistory: {},
+                    referredUsers: {}, verifiedChannels: {},
+                    totalCommission: 0, commissionHistory: {}, referredBy: null,
+                    adsResetTime: 0, dailyBonusDate: '',
+                    lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
+                    withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
+                    referralBalance: 0, adClaimedTotal: 0, adPendingEarnings: 0,
+                    adClaimedCurrentCycle: false, claimWindowStartTime: 0,
+                    extraRewardDate: '', extraRewardCount: 0,
+                    referredByAdminCode: null
+                };
+                await userRef.set(appState.user);
+
+                let refBy = null;
+                if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
+                if (!refBy) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref');
+                }
+                if (refBy && String(refBy) !== String(tgUser.id)) {
+                    const deviceId = getDeviceId();
+                    const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
+                    if (deviceSnap.exists()) {
+                        toast('⚠️ This device already referred!');
+                    } else {
+                        let handled = false;
+                        if (String(refBy).length >= 6) {
+                            try {
+                                const adminsSnap = await db.ref('admins').orderByChild('referralCode').equalTo(String(refBy)).once('value');
+                                if (adminsSnap.exists()) {
+                                    let adminId = null;
+                                    adminsSnap.forEach(child => { adminId = child.key; });
+                                    if (adminId) {
+                                        await userRef.update({ referredByAdminCode: String(refBy) });
+                                        appState.user.referredByAdminCode = String(refBy);
+                                        await db.ref('admins/' + adminId + '/referredUsers/' + tgUser.id).set({
+                                            name: tgUser.first_name || 'User',
+                                            username: tgUser.username || '',
+                                            joinedAt: Date.now()
+                                        });
+                                        await db.ref('deviceReferrals/' + deviceId).set({
+                                            referrerAdminId: adminId,
+                                            referrerAdminCode: String(refBy),
+                                            referredId: tgUser.id,
+                                            timestamp: Date.now()
+                                        });
+                                        await sendNotification(adminId, '🎉 New User Joined!\n' + (tgUser.first_name || 'User') + '\nYour referral link is working!');
+                                        handled = true;
+                                        toast('🎉 Registered under admin!');
+                                    }
+                                }
+                            } catch(e) {}
+                        }
+                        if (!handled) {
+                            const refSnap = await db.ref('users/' + refBy).once('value');
+                            if (refSnap.exists()) {
+                                const r = refSnap.val();
+                                let cSnap = await db.ref('config').once('value');
+                                let rBonus = (cSnap.exists() && cSnap.val().refBonus) ? Number(cSnap.val().refBonus) : 5;
+                                await userRef.update({ referredBy: String(refBy) });
+                                appState.user.referredBy = String(refBy);
+                                await db.ref('users/' + refBy).update({
+                                    referrals: (r.referrals || 0) + 1,
+                                    balance: (r.balance || 0) + rBonus,
+                                    totalEarned: (r.totalEarned || 0) + rBonus
+                                });
+                                await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({
+                                    name: tgUser.first_name || 'User',
+                                    joinedAt: Date.now(),
+                                    username: tgUser.username || ''
+                                });
+                                await db.ref('deviceReferrals/' + deviceId).set({
+                                    referrerId: refBy,
+                                    referredId: tgUser.id,
+                                    timestamp: Date.now()
+                                });
+                                await sendNotification(refBy, '🎉 New Referral! ' + tgUser.first_name + ' joined. +' + rBonus + ' TK');
+                                handled = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            let uiDebounce = null;
+            userRef.on('value', liveSnap => {
+                if (!liveSnap.exists()) return;
+                appState.user = liveSnap.val();
+                if (!appState.user.dailyAds) appState.user.dailyAds = {};
+                if (!appState.user.taskHistory) appState.user.taskHistory = {};
+                if (!appState.user.adHistory) appState.user.adHistory = {};
+                if (!appState.user.referredUsers) appState.user.referredUsers = {};
+                if (!appState.user.verifiedChannels) appState.user.verifiedChannels = {};
+                if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
+                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+                if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+                if (appState.user.adsResetTime === undefined) appState.user.adsResetTime = 0;
+                if (appState.user.dailyBonusDate === undefined) appState.user.dailyBonusDate = '';
+                if (appState.user.totalCommission === undefined) appState.user.totalCommission = 0;
+                if (appState.user.withdrawCount === undefined) appState.user.withdrawCount = 0;
+                if (appState.user.adClicks === undefined) appState.user.adClicks = 0;
+                if (appState.user.referralBalance === undefined) appState.user.referralBalance = 0;
+                if (appState.user.adClaimedTotal === undefined) appState.user.adClaimedTotal = 0;
+                if (appState.user.adClaimedCurrentCycle === undefined) appState.user.adClaimedCurrentCycle = false;
+                if (appState.user.claimWindowStartTime === undefined) appState.user.claimWindowStartTime = 0;
+                if (appState.user.extraRewardDate === undefined) appState.user.extraRewardDate = '';
+                if (appState.user.extraRewardCount === undefined) appState.user.extraRewardCount = 0;
+                if (appState.user.referredByAdminCode === undefined) appState.user.referredByAdminCode = null;
+
+                if (appState.user.isBanned) {
+                    document.getElementById('bannedOverlay').classList.add('active');
+                    document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
+                    document.getElementById('app').style.display = 'none';
+                    document.getElementById('loader').style.display = 'none';
+                    return;
+                } else {
+                    document.getElementById('bannedOverlay').classList.remove('active');
+                }
+
+                if (uiDebounce) clearTimeout(uiDebounce);
+                uiDebounce = setTimeout(async () => {
+                    const resetTime = Number(appState.user.adsResetTime || 0);
+                    if (resetTime > 0 && resetTime <= Date.now()) await forceCycleReset();
+                    await updateTextElements();
+                    renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
+                    if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                    if (document.getElementById('page-history').classList.contains('active')) loadAdHistory();
+                    if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+                    if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
+                    if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
+                    if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
+                }, 150);
+
+                if (!isBooted) {
+                    isBooted = true;
+                    (async () => {
+                        if (checkMaintenance()) { setLoading(false); return; }
+                        if (checkBan()) { setLoading(false); return; }
+                        setupUserSubmissionsListener();
+                        await fetchTaskStatuses();
+
+                        let verifyResult = 'error';
+                        try {
+                            verifyResult = await Promise.race([
+                                needsVerification().catch(() => 'error'),
+                                new Promise(resolve => setTimeout(() => resolve('timeout'), 4000))
+                            ]);
+                        } catch(e) { verifyResult = 'error'; }
+                        const needs = (verifyResult === true);
+
+                        if (needs) {
+                            document.getElementById('loader').style.display = 'none';
+                            document.getElementById('joinModal').classList.add('active');
+                            renderChannelButtons();
+                        } else {
+                            channelVerified = true;
+                            if (channelLinks && channelLinks.length > 0) {
+                                fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true));
+                            }
+                            if (isOnline) {
+                                document.getElementById('app').style.display = 'block';
+                                setLoading(false);
+                                if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
+                                startPeriodicRecheck();
+                                updateLastActive();
+                                if (isAllDisplayAdsWatched() && !appState.user.adClaimedCurrentCycle) {
+                                    if (!appState.user.claimWindowStartTime) await startClaimWindowIfNeeded();
+                                    startClaimWindowTicker();
+                                }
+                                updateClaimWindowUI(); updateExtraRewardUI();
+                                if (appState.user.dailyBonusDate !== today) showBonus();
+                                startAdminSlider();
+                                startMonetagInAppInterstitial(MONETAG_ZONE);
+                                try { initUserChatSystem(); } catch(e) {}
+                                try { await loadUserPackages(); } catch(e) {}
+                                try { await loadPackages(); } catch(e) {}
+                                try { await loadClaimPage(); } catch(e) {}
+                                try { renderDepositPage(); } catch(e) {}
+                            } else {
+                                document.getElementById('loader').style.display = 'none';
+                                document.getElementById('offlineOverlay').classList.add('active');
+                            }
+                        }
+                        const pendingSurvey = checkPendingSurveyReward();
+                        if (pendingSurvey) setTimeout(() => awardExternalTaskReward(pendingSurvey, 'Survey'), 1500);
+                        const pendingYoutube = checkPendingYoutubeReward();
+                        if (pendingYoutube) setTimeout(() => awardExternalTaskReward(pendingYoutube, 'YouTube Video View'), 1500);
+                    })();
+                }
+            });
+        }).catch(err => {
+            console.error('[USER LOAD FAILED]', err);
+            toast('❌ Failed to load user');
+            setLoading(false);
+            const loader = document.getElementById('loader');
+            if (loader) loader.style.display = 'none';
+        });
+    }
 });
 
 /* =========================================================
@@ -4310,6 +4362,7 @@ function checkMaintenance() {
             maintenanceTimer = setInterval(updateMaintenanceTimer, 1000);
         }
         document.getElementById('app').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
         return true;
     } else {
         document.getElementById('maintenanceOverlay').classList.remove('active');
@@ -4330,6 +4383,7 @@ function checkBan() {
         document.getElementById('bannedOverlay').classList.add('active');
         document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.';
         document.getElementById('app').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
         return true;
     } else {
         document.getElementById('bannedOverlay').classList.remove('active');
@@ -4376,8 +4430,6 @@ async function calculateValidReferrals() {
         return 0;
     }
 }
-
-
 </script>
 </body>
 </html>
