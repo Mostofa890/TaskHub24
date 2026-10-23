@@ -65,23 +65,25 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .header-right-btns{display:flex;align-items:center;gap:8px;}
 .support-btn,.dots-btn{background:rgba(255,255,255,.2);color:#fff;width:42px;height:42px;border-radius:50%;border:none;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);}
 
-/* ===== NEW: Balance Card with Ad/Withdraw split ===== */
 .balance-card{background:linear-gradient(135deg,#f7f3ff,#e3d6ff);width:92%;margin:-70px auto 20px;padding:20px;border-radius:25px;box-shadow:0 18px 35px rgba(76,62,224,.35);position:relative;z-index:10;color:#3b2b6b;border:2px solid rgba(255,255,255,.9);overflow:hidden;}
 .balance-card::before{content:"";position:absolute;width:150px;height:150px;background:rgba(255,255,255,.6);border-radius:50%;top:-70px;right:-40px;pointer-events:none;}
 .bal-title{position:relative;font-size:.72rem;text-transform:uppercase;color:rgba(59,43,107,.7);letter-spacing:1.5px;font-weight:800;text-align:center;margin-bottom:12px;z-index:2;}
 .balance-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:2;}
 .balance-item{background:rgba(255,255,255,.85);border-radius:14px;padding:12px 10px;text-align:center;border:1.5px solid rgba(255,255,255,.9);}
-.balance-item.ad-balance{background:linear-gradient(135deg,#fff7ed,#fed7aa);border-color:rgba(245,158,11,.4);}
+.balance-item.ad-balance{background:linear-gradient(135deg,#eef2ff,#c7d2fe);border-color:rgba(99,102,241,.4);}
+.balance-item.ad-balance .bi-amount{color:#4338ca;}
+.balance-item.ad-balance .bi-label{color:#4338ca;}
 .balance-item.withdrawable{background:linear-gradient(135deg,#f0fdf4,#bbf7d0);border-color:rgba(0,184,148,.4);}
 .balance-item .bi-icon{font-size:1.15rem;margin-bottom:4px;}
 .balance-item .bi-label{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#64748b;margin-bottom:3px;}
 .balance-item .bi-amount{font-size:1.2rem;font-weight:900;color:#1a1a2e;}
-.balance-item.ad-balance .bi-amount{color:#ea580c;}
 .balance-item.withdrawable .bi-amount{color:#059669;}
 .balance-stats{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:2px dashed rgba(93,71,163,.25);position:relative;z-index:2;}
 .balance-stats .stat-box{text-align:center;flex:1;}
 .balance-stats .stat-box h4{font-size:.9rem;color:#3b2b6b;font-weight:900;}
 .balance-stats .stat-box p{font-size:.62rem;color:rgba(59,43,107,.75);font-weight:700;margin-top:2px;}
+.deposit-countdown-live{margin-top:8px;background:rgba(0,0,0,.08);padding:5px 8px;border-radius:8px;font-size:.6rem;font-weight:800;color:#7c2d12;text-align:center;font-variant-numeric:tabular-nums;}
+.deposit-countdown-live .dc-time{font-size:.78rem;color:#c2410c;display:block;margin-top:2px;}
 
 .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
 .sec-head i{color:var(--primary);font-size:1.2rem;}
@@ -107,15 +109,14 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
 .ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
 
-/* NEW: Ad claim box (orange for Ad Balance) */
-.ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(245,158,11,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(67,56,202,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
 .ad-claim-box::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;top:-50px;right:-30px;}
 .ad-claim-box .ac-left{flex:1;min-width:0;position:relative;z-index:1;}
 .ad-claim-box .ac-label{font-size:0.68rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
 .ad-claim-box .ac-amt{font-size:1.85rem;font-weight:900;margin-top:3px;text-shadow:0 3px 10px rgba(0,0,0,.15);}
 .ad-claim-box .ac-amt small{font-size:0.9rem;font-weight:700;opacity:0.9;}
 .ad-claim-box .ac-note{font-size:0.62rem;font-weight:700;opacity:.95;margin-top:4px;background:rgba(0,0,0,.15);padding:4px 8px;border-radius:8px;display:inline-block;}
-.ad-claim-btn{position:relative;z-index:1;background:#fff;color:#ea580c;border:none;padding:12px 20px;border-radius:14px;font-weight:900;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;box-shadow:0 8px 20px rgba(0,0,0,.15);transition:transform .15s;white-space:nowrap;flex-shrink:0;}
+.ad-claim-btn{position:relative;z-index:1;background:#fff;color:#4338ca;border:none;padding:12px 20px;border-radius:14px;font-weight:900;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;box-shadow:0 8px 20px rgba(0,0,0,.15);transition:transform .15s;white-space:nowrap;flex-shrink:0;}
 .ad-claim-btn:active{transform:scale(0.96);}
 .ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
 
@@ -498,7 +499,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pkg-confirm-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px}
 .pkg-confirm-overlay.active{display:flex}
 .pkg-confirm-box{background:#fff;border-radius:22px;padding:24px;max-width:380px;width:100%;text-align:center}
-.pkg-confirm-box .pci-icon{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#f97316);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;box-shadow:0 10px 26px rgba(245,158,11,.4)}
+.pkg-confirm-box .pci-icon{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#4338ca,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;box-shadow:0 10px 26px rgba(67,56,202,.4)}
 .pkg-confirm-box h3{font-size:1.15rem;font-weight:900;margin-bottom:6px;color:#1a1a2e}
 .pkg-confirm-box .pci-sub{font-size:.82rem;color:#64748b;margin-bottom:16px;font-weight:600}
 .pkg-confirm-box .pci-info{background:#f8fafc;padding:14px;border-radius:12px;margin-bottom:16px;text-align:left}
@@ -617,7 +618,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
 
-/* NEW: Live countdown badge */
 .pkg-countdown-live{display:inline-flex;align-items:center;gap:5px;background:rgba(243,156,18,.12);color:#d97706;padding:6px 12px;border-radius:20px;font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:8px;}
 .pkg-countdown-live i{font-size:.68rem;}
 
@@ -728,14 +728,18 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div class="header-right-btns"><button class="support-btn" onclick="openSupport()"><i class="fas fa-headset"></i></button><button class="dots-btn" onclick="toggleMenuPopup(event)"><i class="fas fa-ellipsis-vertical"></i></button></div>
     </div></div>
 
-    <!-- NEW: Balance split card -->
+    <!-- Balance Card with Deposit Balance + Countdown -->
     <div class="balance-card">
         <div class="bal-title">আমার ব্যালেন্স <span class="offline-indicator" id="offlineIndicator"><i class="fas fa-wifi-slash"></i> Offline</span></div>
         <div class="balance-split">
             <div class="balance-item ad-balance">
-                <div class="bi-icon">📺</div>
-                <div class="bi-label">Ad Balance</div>
+                <div class="bi-icon">🏦</div>
+                <div class="bi-label">Deposit Balance</div>
                 <div class="bi-amount"><span id="u-adbal">0.00</span> ৳</div>
+                <div id="depositCountdown" class="deposit-countdown-live" style="display:none;">
+                    <i class="fas fa-clock"></i> <span id="depositCountdownTime" class="dc-time">00:00:00</span>
+                    <span style="font-size:.55rem;opacity:.8;"><span id="depositPendingAmt">0.00</span>৳ converting</span>
+                </div>
             </div>
             <div class="balance-item withdrawable">
                 <div class="bi-icon">💵</div>
@@ -775,12 +779,12 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 
         <div class="claim-window-timer" id="claimWindowTimer"><div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div><div class="cwt-time" id="cwtTime">01:00:00</div></div>
 
-        <!-- NEW: Ad claim box with warning -->
+        <!-- Ad Claim Box - Now renamed to Deposit Balance -->
         <div class="ad-claim-box">
             <div class="ac-left">
-                <div class="ac-label">💰 AD BALANCE (PACKAGE ONLY)</div>
+                <div class="ac-label">🏦 DEPOSIT BALANCE (PACKAGE ONLY)</div>
                 <div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>৳</small></div>
-                <div class="ac-note">⚠️ এই টাকা withdraw হবে না, শুধু প্যাকেজ কিনতে পারবেন</div>
+                <div class="ac-note">⏱️ ২৪ ঘন্টা পর Withdrawable এ কনভার্ট হবে</div>
             </div>
             <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled><i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All</span></button>
         </div>
@@ -802,10 +806,14 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 
-    <!-- NEW: Claim page with history -->
+    <!-- Claim Page with Tabs -->
     <div id="page-claim" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-hand-holding-usd"></i> Daily Income Claim</div>
-        <div id="claimPageContent">
+        <div class="tasks-inner-tabs">
+            <button class="tasks-inner-tab active" id="tabBtnClaimNow" onclick="switchClaimTab('now')"><i class="fas fa-hand-holding-usd"></i> Claim</button>
+            <button class="tasks-inner-tab" id="tabBtnClaimHist" onclick="switchClaimTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+        </div>
+        <div id="claimPaneNow" class="tasks-inner-pane active">
             <div class="claim-hero">
                 <div class="ch-label">💰 TOTAL CLAIMABLE TODAY</div>
                 <div class="ch-amt"><span id="claimTotalAmount">0.00</span> <small style="font-size:1rem;">TK</small></div>
@@ -815,25 +823,31 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p></div>
             </div>
         </div>
-        <!-- NEW: Claim History -->
-        <div class="sec-head" style="margin:20px 0 15px;"><i class="fas fa-clock-rotate-left"></i> Claim History</div>
-        <div id="claimHistoryList" style="padding:0 20px 20px;">
-            <div class="empty-state"><i class="fas fa-receipt"></i><p>No claims yet</p></div>
+        <div id="claimPaneHist" class="tasks-inner-pane">
+            <div id="claimHistoryList" style="padding:0 20px 20px;">
+                <div class="empty-state"><i class="fas fa-receipt"></i><p>No claims yet</p></div>
+            </div>
         </div>
     </div>
 
-    <!-- NEW: Deposit page with history -->
+    <!-- Deposit Page with Tabs -->
     <div id="page-deposit" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-money-bill-wave"></i> Deposit Money</div>
-        <div class="packages-container">
-            <div id="depositProvidersList">
-                <div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods configured</p></div>
+        <div class="tasks-inner-tabs">
+            <button class="tasks-inner-tab active" id="tabBtnDepNow" onclick="switchDepositTab('now')"><i class="fas fa-credit-card"></i> Deposit</button>
+            <button class="tasks-inner-tab" id="tabBtnDepHist" onclick="switchDepositTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+        </div>
+        <div id="depositPaneNow" class="tasks-inner-pane active">
+            <div class="packages-container">
+                <div id="depositProvidersList">
+                    <div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods configured</p></div>
+                </div>
             </div>
         </div>
-        <!-- NEW: Deposit History -->
-        <div class="sec-head" style="margin:20px 0 15px;"><i class="fas fa-history"></i> Deposit History</div>
-        <div id="depositHistoryList" style="padding:0 20px 20px;">
-            <div class="empty-state"><i class="fas fa-receipt"></i><p>No deposits yet</p></div>
+        <div id="depositPaneHist" class="tasks-inner-pane">
+            <div id="depositHistoryList" style="padding:0 20px 20px;">
+                <div class="empty-state"><i class="fas fa-receipt"></i><p>No deposits yet</p></div>
+            </div>
         </div>
     </div>
 
@@ -872,11 +886,31 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div class="premium-card"><div class="card-title"><i class="fas fa-video" style="color:#ff4757;"></i> টিউটোরিয়াল</div><p style="font-size:0.85rem;color:#555;">কাজ বুঝতে ভিডিও দেখুন।</p><button class="btn-red" onclick="openTutorial()"><i class="fab fa-youtube"></i> টিউটোরিয়াল দেখুন</button></div>
     </div>
 
+    <!-- History Page with Tabs -->
     <div id="page-history" class="page-section">
-        <div class="premium-card">
-            <div class="card-title"><i class="fas fa-history" style="color:var(--primary);"></i> Ad Earning History</div>
-            <div class="stat-mini-grid"><div class="stat-mini"><div class="num" id="histAdCount">0</div><div class="lbl">Ads Watched</div></div><div class="stat-mini"><div class="num green" id="histAdTotal">0</div><div class="lbl">Total Earned</div></div></div>
-            <div id="adHistoryList"><div class="empty-state"><i class="fas fa-play-circle"></i><p>এখনো কোনো অ্যাড দেখা হয়নি</p></div></div>
+        <div class="tasks-inner-tabs" style="padding-top:10px;">
+            <button class="tasks-inner-tab active" id="tabBtnHistAds" onclick="switchHistoryTab('ads')"><i class="fas fa-play-circle"></i> Ads</button>
+            <button class="tasks-inner-tab" id="tabBtnHistPkg" onclick="switchHistoryTab('packages')"><i class="fas fa-box-open"></i> Packages</button>
+            <button class="tasks-inner-tab" id="tabBtnHistAll" onclick="switchHistoryTab('all')"><i class="fas fa-list"></i> All</button>
+        </div>
+        <div id="histPaneAds" class="tasks-inner-pane active">
+            <div class="premium-card">
+                <div class="card-title"><i class="fas fa-history" style="color:var(--primary);"></i> Ad Earning History</div>
+                <div class="stat-mini-grid"><div class="stat-mini"><div class="num" id="histAdCount">0</div><div class="lbl">Ads Watched</div></div><div class="stat-mini"><div class="num green" id="histAdTotal">0</div><div class="lbl">Total Earned</div></div></div>
+                <div id="adHistoryList"><div class="empty-state"><i class="fas fa-play-circle"></i><p>এখনো কোনো অ্যাড দেখা হয়নি</p></div></div>
+            </div>
+        </div>
+        <div id="histPanePkg" class="tasks-inner-pane">
+            <div class="premium-card">
+                <div class="card-title"><i class="fas fa-box-open" style="color:#00b894;"></i> Package Claim History</div>
+                <div id="pkgHistoryList"><div class="empty-state"><p>No package claims yet</p></div></div>
+            </div>
+        </div>
+        <div id="histPaneAll" class="tasks-inner-pane">
+            <div class="premium-card">
+                <div class="card-title"><i class="fas fa-list" style="color:#6C5CE7;"></i> All History</div>
+                <div id="allHistoryList"><div class="empty-state"><p>Loading...</p></div></div>
+            </div>
         </div>
     </div>
 
@@ -886,8 +920,14 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div class="leader-list" id="leader-list-area"></div>
     </div>
 
+    <!-- Withdraw Page with Tabs -->
     <div id="page-withdraw" class="page-section">
-        <div class="premium-card">
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-wallet"></i> Withdraw</div>
+        <div class="tasks-inner-tabs">
+            <button class="tasks-inner-tab active" id="tabBtnWdNow" onclick="switchWithdrawTab('now')"><i class="fas fa-wallet"></i> Withdraw</button>
+            <button class="tasks-inner-tab" id="tabBtnWdHist" onclick="switchWithdrawTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+        </div>
+        <div id="withdrawPaneNow" class="premium-card tasks-inner-pane active">
             <div class="card-title"><i class="fas fa-wallet" style="color:var(--primary);"></i> Withdraw Funds</div>
             <div class="level-progress-card" id="levelProgressCard"><div class="lpc-label">🎯 CURRENT WITHDRAW LEVEL</div><div class="lpc-title" id="lpcTitle">Level 1</div><div class="lpc-track" id="lpcTrack"></div><div class="lpc-count" id="lpcCount">Complete this level</div></div>
             <div id="withdrawInfo" style="background:var(--bg);padding:14px;border-radius:12px;margin-bottom:15px;border:1px solid var(--border);">
@@ -903,7 +943,10 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
             <button class="btn-main" onclick="requestWithdraw()"><i class="fas fa-paper-plane"></i> Request Withdraw</button>
             <div style="font-size:0.8rem;text-align:center;margin-top:15px;font-weight:700;" id="wd-notice">Minimum withdraw: ...</div>
         </div>
-        <div class="premium-card" style="margin-top:20px;"><div class="card-title"><i class="fas fa-history" style="color:#f39c12;"></i> Withdraw History</div><div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading...</p></div></div>
+        <div id="withdrawPaneHist" class="premium-card tasks-inner-pane">
+            <div class="card-title"><i class="fas fa-history" style="color:#f39c12;"></i> Withdraw History</div>
+            <div id="historyList"><p style="text-align:center;color:#999;padding:20px 0;">Loading...</p></div>
+        </div>
     </div>
 </div>
 
@@ -1016,6 +1059,7 @@ const CHANNEL_RECHECK_INTERVAL = 60000;
 const VERIFY_DEBOUNCE_MS = 5000;
 const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 const PACKAGE_CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+const CONVERSION_MS = 24 * 60 * 60 * 1000; // ⏱️ 24 hours for deposit→withdrawable conversion
 
 let MONETAG_ZONE = '11878844';
 let monetagSDKReady = false;
@@ -1039,7 +1083,8 @@ let appState = {
         adClaimedTotal: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0,
         extraRewardDate: '', extraRewardCount: 0,
         referredByAdminCode: null,
-        claimHistory: {}
+        claimHistory: {},
+        pendingConversions: {}
     },
     config: { adSlots: [], newTasks: {}, depositPayment: {}, packages: {} },
     userPackages: {}
@@ -1058,6 +1103,7 @@ let isRechecking = false, isCheckingChannel = false, lastVerifyCheckTime = 0;
 let cycleTimerInterval = null, cooldownTimerInterval = null, taskExpiryTickerInterval = null;
 let claimWindowTimerInterval = null, adWatchProgressTimer = null, lastActiveInterval = null;
 let liveCountdownInterval = null;
+let pendingConversionTimer = null;
 
 let taskState = { taskId: null, task: null, type: 'text', submitting: false };
 let userSubmissionsCache = {};
@@ -1180,7 +1226,7 @@ async function watchAd(i) {
 function startAdWatch(i) { watchAd(i); }
 
 /* =========================================================
-   === 6. EXTRA REWARDS → adBalance
+   === 6. EXTRA REWARDS → Deposit Balance + Pending Conversion
    ========================================================= */
 function getTodayExtraRewardCount() { if (appState.user.extraRewardDate !== todayStr()) return 0; return Number(appState.user.extraRewardCount || 0); }
 function updateExtraRewardUI() {
@@ -1227,7 +1273,6 @@ async function watchExtraRewardAd() {
         hideAdWatchProgress();
         const reward = Number(extraRewardConfig.amount || 0);
         const newCount = count + 1;
-        // 🔑 Ad Balance এ যোগ
         const newAdBal = Number(appState.user.adBalance || 0) + reward;
         const newEarn = Number(appState.user.totalEarned || 0) + reward;
         await db.ref('users/' + appState.user.id).update({
@@ -1236,8 +1281,10 @@ async function watchExtraRewardAd() {
         });
         appState.user.adBalance = newAdBal; appState.user.totalEarned = newEarn;
         appState.user.extraRewardDate = today; appState.user.extraRewardCount = newCount;
+        // ⏱️ Push to pending conversions (24h timer)
+        await pushPendingConversion(reward, 'extra_reward');
         await updateTextElements(); updateExtraRewardUI();
-        toast('✅ +' + reward.toFixed(2) + ' ৳ Ad Balance');
+        toast('✅ +' + reward.toFixed(2) + ' ৳ Deposit Balance');
         tryHaptic('success');
     } catch (e) {
         hideAdWatchProgress();
@@ -1252,7 +1299,7 @@ async function watchExtraRewardAd() {
 }
 
 /* =========================================================
-   === 7. AD CLAIM → adBalance
+   === 7. AD CLAIM → Deposit Balance + Pending Conversion
    ========================================================= */
 function calculateAdTotalEarnings() { const slots = appState.config.adSlots || []; let totalSlots = 0; for (let i = 0; i < AD_DISPLAY_SLOTS; i++) { const slot = slots[i]; if (!slot) continue; if (slot.provider && slot.provider !== 'none' && slot.code && slot.status !== 'inactive') totalSlots++; } const limit = Number(appState.config.dailyAdLimit || 10); const reward = Number(appState.config.adReward || 0.5); return totalSlots * limit * reward; }
 function isAllDisplayAdsWatched() { const slots = appState.config.adSlots || []; const limit = Number(appState.config.dailyAdLimit || 10); let hasConfigured = false; for (let i = 0; i < AD_DISPLAY_SLOTS; i++) { const slot = slots[i]; if (!slot) continue; const configured = slot.provider && slot.provider !== 'none' && slot.code && slot.status !== 'inactive'; if (!configured) continue; hasConfigured = true; if (Number((appState.user.dailyAds || {})[i] || 0) < limit) return false; } return hasConfigured; }
@@ -1298,7 +1345,6 @@ async function claimAdEarnings() {
         const flagRef = db.ref('users/' + appState.user.id + '/adClaimedCurrentCycle');
         const flagResult = await flagRef.transaction(cur => cur === true ? cur : true);
         if (!flagResult.committed) { toast('❌ Already claimed'); updateAdClaimUI(); return; }
-        // 🔑 Ad Balance এ যোগ
         const newAdBal = Number(appState.user.adBalance || 0) + total;
         const newEarn = Number(appState.user.totalEarned || 0) + total;
         const newClaimed = Number(appState.user.adClaimedTotal || 0) + total;
@@ -1309,8 +1355,10 @@ async function claimAdEarnings() {
         appState.user.adBalance = newAdBal; appState.user.totalEarned = newEarn;
         appState.user.adClaimedTotal = newClaimed;
         appState.user.adClaimedCurrentCycle = true;
+        // ⏱️ Push to pending conversions (24h timer)
+        await pushPendingConversion(total, 'ad_claim');
         await updateTextElements(); renderAds(); updateClaimWindowUI();
-        toast('✅ +' + total.toFixed(2) + ' ৳ Ad Balance');
+        toast('✅ +' + total.toFixed(2) + ' ৳ Deposit Balance');
         tryHaptic('success');
     } catch (e) {
         toast('❌ ' + e.message);
@@ -1318,7 +1366,7 @@ async function claimAdEarnings() {
 }
 
 /* =========================================================
-   === 8. DAILY BONUS → adBalance
+   === 8. DAILY BONUS → Deposit Balance + Pending Conversion
    ========================================================= */
 function showBonus() { if (!isOnline) return; if (appState.user.dailyBonusDate === todayStr()) { toast('Already claimed!'); return; } document.getElementById('bonusOverlay').classList.add('show'); document.getElementById('app').classList.add('blurred'); }
 function hideBonus() { document.getElementById('bonusOverlay').classList.remove('show'); document.getElementById('app').classList.remove('blurred'); }
@@ -1340,16 +1388,96 @@ async function claimDailyBonus() {
             await waitForMinTime(MIN_AD_WATCH_SECONDS);
         }
         const bonus = Number(appState.config.dailyBonusAmount || 20);
-        // 🔑 Ad Balance এ যোগ
         const newAdBal = (appState.user.adBalance || 0) + bonus;
         const newEarn = (appState.user.totalEarned || 0) + bonus;
         await db.ref('users/' + appState.user.id).update({ adBalance: newAdBal, totalEarned: newEarn, dailyBonusDate: todayStr() });
         appState.user.adBalance = newAdBal; appState.user.totalEarned = newEarn;
         appState.user.dailyBonusDate = todayStr();
+        // ⏱️ Push to pending conversions (24h timer)
+        await pushPendingConversion(bonus, 'daily_bonus');
         await updateTextElements(); hideBonus();
-        toast('✅ +' + bonus.toFixed(2) + ' ৳ Ad Balance');
+        toast('✅ +' + bonus.toFixed(2) + ' ৳ Deposit Balance');
     } catch (e) { toast('❌ ' + e.message); }
     finally { isAdWatching = false; clearAdWatchTimeout(); btn.disabled = false; btnCancel.disabled = false; btn.innerHTML = '<i class="fas fa-play-circle"></i> Watch & Claim'; document.getElementById('bonusSubText').innerText = 'Watch 2 ads.'; cleanupAdGlobals(); }
+}
+
+/* =========================================================
+   === 8.5. PENDING CONVERSION ENGINE (24h → Withdrawable)
+   ========================================================= */
+function startPendingConversionTimer() {
+    if (pendingConversionTimer) return;
+    processPendingConversions();
+    pendingConversionTimer = setInterval(processPendingConversions, 1000);
+}
+function stopPendingConversionTimer() {
+    if (pendingConversionTimer) { clearInterval(pendingConversionTimer); pendingConversionTimer = null; }
+}
+async function processPendingConversions() {
+    if (!isBooted || !isOnline || !tgUser || !tgUser.id) return;
+    const pending = appState.user.pendingConversions || {};
+    const now = Date.now();
+    const toConvert = [];
+    let oldestTs = null, totalPending = 0;
+
+    for (const [id, entry] of Object.entries(pending)) {
+        if (!entry || !entry.timestamp) continue;
+        if (now - entry.timestamp >= CONVERSION_MS) {
+            toConvert.push({ id, ...entry });
+        } else {
+            totalPending += Number(entry.amount || 0);
+            if (oldestTs === null || entry.timestamp < oldestTs) oldestTs = entry.timestamp;
+        }
+    }
+    updateDepositCountdown(totalPending, oldestTs);
+
+    if (toConvert.length === 0) return;
+
+    for (const entry of toConvert) {
+        const amt = Number(entry.amount || 0);
+        if (amt <= 0) {
+            // Cleanup zero entry
+            try { await db.ref('users/' + appState.user.id + '/pendingConversions/' + entry.id).remove(); } catch(e) {}
+            continue;
+        }
+        try {
+            const res = await db.ref('users/' + appState.user.id).transaction(cur => {
+                if (!cur) return cur;
+                const adBal = Number(cur.adBalance || 0);
+                const convertAmt = Math.min(amt, adBal);
+                if (convertAmt > 0) {
+                    cur.adBalance = adBal - convertAmt;
+                    cur.balance = Number(cur.balance || 0) + convertAmt;
+                }
+                if (cur.pendingConversions) delete cur.pendingConversions[entry.id];
+                return cur;
+            });
+            if (res.committed && amt > 0) {
+                const converted = Math.min(amt, Number(appState.user.adBalance || 0));
+                toast('✅ ' + converted.toFixed(2) + '৳ Withdrawable এ কনভার্ট হয়েছে');
+                tryHaptic('success');
+            }
+        } catch(e) {}
+    }
+}
+function updateDepositCountdown(totalPending, oldestTs) {
+    const wrap = document.getElementById('depositCountdown');
+    const timeEl = document.getElementById('depositCountdownTime');
+    const amtEl = document.getElementById('depositPendingAmt');
+    if (!wrap || !timeEl) return;
+    if (totalPending <= 0 || !oldestTs) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    const remain = Math.max(0, (oldestTs + CONVERSION_MS) - Date.now());
+    timeEl.textContent = fmtHHMMSS(remain);
+    if (amtEl) amtEl.textContent = totalPending.toFixed(2);
+}
+async function pushPendingConversion(amount, source) {
+    if (!tgUser || !tgUser.id) return;
+    const id = 'pc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    try {
+        await db.ref('users/' + tgUser.id + '/pendingConversions/' + id).set({
+            amount: Number(amount), timestamp: Date.now(), source: source || 'earning'
+        });
+    } catch(e) {}
 }
 
 /* =========================================================
@@ -1378,7 +1506,7 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
 }
 
 /* =========================================================
-   === 10. REFERRAL UI (only count if activePackageCount > 0)
+   === 10. REFERRAL UI
    ========================================================= */
 function switchRefTab(tab) {
     currentRefTab = tab;
@@ -1470,7 +1598,7 @@ async function claimReferralIncome() {
 }
 
 /* =========================================================
-   === 11. PACKAGES → buy with adBalance, claim to balance
+   === 11. PACKAGES (buy with Deposit Balance)
    ========================================================= */
 async function loadPackages() {
     const grid = document.getElementById('packagesGrid');
@@ -1527,17 +1655,17 @@ function openBuyConfirm(pkgId) {
     const adBal = Number(appState.user.adBalance || 0);
     const price = Number(pkg.price || 0);
     selectedPkgForBuy = pkgId;
-    document.getElementById('pciSub').textContent = 'Ad Balance দিয়ে প্যাকেজ কিনবেন?';
+    document.getElementById('pciSub').textContent = 'Deposit Balance দিয়ে প্যাকেজ কিনবেন?';
     document.getElementById('pciInfo').innerHTML = `
         <div class="pci-row"><span>Package:</span><span class="val">${esc(pkg.name)}</span></div>
         <div class="pci-row"><span>Duration:</span><span class="val">${Number(pkg.duration || 0)} days</span></div>
         <div class="pci-row"><span>Daily Income:</span><span class="val">${Number(pkg.dailyIncome || 0).toFixed(2)} ৳</span></div>
-        <div class="pci-row"><span>Your Ad Balance:</span><span class="val">${adBal.toFixed(2)} ৳</span></div>
+        <div class="pci-row"><span>Your Deposit Balance:</span><span class="val">${adBal.toFixed(2)} ৳</span></div>
         <div class="pci-row total"><span>Price:</span><span class="val">${price.toFixed(2)} ৳</span></div>
-        ${adBal < price ? `<div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;color:#991b1b;font-size:.75rem;font-weight:700;">⚠️ Ad Balance কম! ${(price-adBal).toFixed(2)} ৳ দরকার।</div>` : ''}
+        ${adBal < price ? `<div style="margin-top:10px;padding:10px;background:#fef2f2;border-radius:8px;color:#991b1b;font-size:.75rem;font-weight:700;">⚠️ Deposit Balance কম! ${(price-adBal).toFixed(2)} ৳ দরকার।</div>` : ''}
     `;
     const btn = document.getElementById('pciConfirmBtn');
-    if (adBal < price) { btn.disabled = true; btn.textContent = 'Ad Balance কম'; }
+    if (adBal < price) { btn.disabled = true; btn.textContent = 'Deposit Balance কম'; }
     else { btn.disabled = false; btn.textContent = 'কিনুন'; }
     document.getElementById('pkgConfirmOverlay').classList.add('active');
 }
@@ -1547,7 +1675,7 @@ async function confirmBuyPackage() {
     const pkg = allPackagesCache[selectedPkgForBuy];
     if (!pkg) return;
     const price = Number(pkg.price || 0);
-    if (Number(appState.user.adBalance || 0) < price) { toast('❌ Ad Balance কম'); return; }
+    if (Number(appState.user.adBalance || 0) < price) { toast('❌ Deposit Balance কম'); return; }
     const btn = document.getElementById('pciConfirmBtn');
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     try {
@@ -1558,7 +1686,7 @@ async function confirmBuyPackage() {
             cur.adBalance = Number(cur.adBalance || 0) - price;
             return cur;
         });
-        if (!result.committed) { toast('❌ Ad Balance কম'); btn.disabled = false; return; }
+        if (!result.committed) { toast('❌ Deposit Balance কম'); btn.disabled = false; return; }
         const now = Date.now();
         const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
         const upId = 'up_' + now + '_' + appState.user.id;
@@ -1589,7 +1717,6 @@ function openPackageDetails(pkgId) {
     const lastClaim = Number(up.lastClaimAt || 0);
     const canClaim = !isExpired && (lastClaim === 0 || (now - lastClaim) >= PACKAGE_CLAIM_COOLDOWN_MS);
     const price = Number(pkg.price || 0);
-    const totalReturn = daily * Number(pkg.duration || 0);
     let claimBtnHtml;
     if (!isExpired) {
         const remainClaimMs = lastClaim > 0 ? Math.max(0, PACKAGE_CLAIM_COOLDOWN_MS - (now - lastClaim)) : 0;
@@ -1645,7 +1772,7 @@ async function claimPackageIncomeById(upId) {
             return cur;
         });
         if (!result.committed) { toast('⏳ Wait'); return; }
-        // 🔑 Claim → withdrawable balance
+        // Package income → straight to withdrawable balance (no pending)
         const claimId = 'ch_' + now;
         const userRef = db.ref('users/' + appState.user.id);
         await userRef.transaction(cur => {
@@ -1686,8 +1813,15 @@ async function loadUserPackages() {
 }
 
 /* =========================================================
-   === 12. CLAIM PAGE (with live countdown + history)
+   === 12. CLAIM PAGE + HISTORY TAB
    ========================================================= */
+function switchClaimTab(which) {
+    const a = document.getElementById('tabBtnClaimNow'), b = document.getElementById('tabBtnClaimHist');
+    const pa = document.getElementById('claimPaneNow'), pb = document.getElementById('claimPaneHist');
+    if (!a || !b || !pa || !pb) return;
+    if (which === 'history') { a.classList.remove('active'); b.classList.add('active'); pa.classList.remove('active'); pb.classList.add('active'); loadClaimHistory(); }
+    else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); loadClaimPage(); }
+}
 function loadClaimPage() {
     const listEl = document.getElementById('claimPackagesList');
     const totalEl = document.getElementById('claimTotalAmount');
@@ -1705,7 +1839,6 @@ function loadClaimPage() {
     if (infoEl) infoEl.textContent = activeUps.length === 0 ? 'No active packages' : `${activeUps.length} active package${activeUps.length > 1 ? 's' : ''}`;
     if (activeUps.length === 0) {
         listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages</p></div>';
-        loadClaimHistory();
         return;
     }
     let html = '';
@@ -1735,7 +1868,6 @@ function loadClaimPage() {
         </div>`;
     });
     listEl.innerHTML = html;
-    loadClaimHistory();
     if (liveCountdownInterval) clearInterval(liveCountdownInterval);
     liveCountdownInterval = setInterval(() => {
         if (!isBooted) return;
@@ -1771,8 +1903,15 @@ function loadClaimHistory() {
 }
 
 /* =========================================================
-   === 13. DEPOSIT PAGE
+   === 13. DEPOSIT PAGE + HISTORY TAB
    ========================================================= */
+function switchDepositTab(which) {
+    const a = document.getElementById('tabBtnDepNow'), b = document.getElementById('tabBtnDepHist');
+    const pa = document.getElementById('depositPaneNow'), pb = document.getElementById('depositPaneHist');
+    if (!a || !b || !pa || !pb) return;
+    if (which === 'history') { a.classList.remove('active'); b.classList.add('active'); pa.classList.remove('active'); pb.classList.add('active'); loadDepositHistory(); }
+    else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); renderDepositPage(); }
+}
 function renderDepositPage() {
     const c = document.getElementById('depositProvidersList');
     if (!c) return;
@@ -1800,7 +1939,6 @@ function renderDepositPage() {
         });
         c.innerHTML = html;
     }
-    loadDepositHistory();
 }
 function copyDepositNumber(num) { navigator.clipboard.writeText(num).then(() => toast('📋 Copied!')).catch(() => {}); }
 function openDepositForm(key, name, num) {
@@ -1809,7 +1947,7 @@ function openDepositForm(key, name, num) {
     const minDep = Number((appState.config.depositPayment || {}).minDeposit || 50);
     modal.innerHTML = `<div style="max-width:420px;margin:20px auto;padding:0 20px;"><div class="deposit-form-card">
         <h4><i class="fas fa-paper-plane"></i> Deposit Request</h4>
-        <div class="df-note"><b>${esc(name)}</b> → <b>${esc(num)}</b> এ টাকা পাঠিয়ে ফর্ম পূরণ করুন।</div>
+        <div class="df-note"><b>${esc(name)}</b> → <b>${esc(num)}</b> এ টাকা পাঠিয়ে ফর্ম পূরণ করুন। টাকা Deposit Balance এ যোগ হবে (Withdraw করা যাবে না, শুধু প্যাকেজ কেনা যাবে)।</div>
         <div class="df-group"><label>Amount (৳) *</label><input type="number" id="dfAmount" placeholder="e.g. ${minDep}" step="0.01"></div>
         <div class="df-group"><label>Transaction ID *</label><input type="text" id="dfTxnId" placeholder="e.g. 8N7A2K9X"></div>
         <div class="df-group"><label>Note</label><input type="text" id="dfNote" placeholder=""></div>
@@ -1848,7 +1986,6 @@ function loadDepositHistory() {
         let html = '';
         items.slice(0, 50).forEach(item => {
             const st = (item.status || 'pending').toLowerCase();
-            const colors = st === 'approved' ? '#10b981' : st === 'rejected' ? '#ef4444' : '#f59e0b';
             const labels = st === 'approved' ? '✅ Approved' : st === 'rejected' ? '❌ Rejected' : '⏳ Pending';
             html += `<div class="deposit-history-item ${st}">
                 <div class="dhi-left">
@@ -1866,7 +2003,7 @@ function loadDepositHistory() {
 
 <script>
 /* =========================================================
-   === 14. TASKS (rest of code)
+   === 14. TASKS
    ========================================================= */
 function getTaskDaysFromLimit(task) { const daysMatch = String(task.timeLimit || '7 days').match(/(\d+)/); return daysMatch ? parseInt(daysMatch[1]) : 7; }
 function getTaskTimeRemaining(task) { if (!task || !task.createdAt) return null; const days = getTaskDaysFromLimit(task); return (task.createdAt + days * 24 * 60 * 60 * 1000) - Date.now(); }
@@ -2146,7 +2283,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
                     withdrawCount: 0, adClicks: 0, taskStatuses: {}, taskCooldowns: {},
                     adClaimedTotal: 0, adClaimedCurrentCycle: false, claimWindowStartTime: 0,
-                    extraRewardDate: '', extraRewardCount: 0, referredByAdminCode: null, claimHistory: {}
+                    extraRewardDate: '', extraRewardCount: 0, referredByAdminCode: null, claimHistory: {},
+                    pendingConversions: {}
                 };
                 await userRef.set(appState.user);
                 let refBy = null;
@@ -2181,6 +2319,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
                 if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
                 if (!appState.user.claimHistory) appState.user.claimHistory = {};
+                if (!appState.user.pendingConversions) appState.user.pendingConversions = {};
 
                 if (appState.user.isBanned) { document.getElementById('bannedOverlay').classList.add('active'); document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.'; document.getElementById('app').style.display = 'none'; document.getElementById('loader').style.display = 'none'; return; }
                 else { document.getElementById('bannedOverlay').classList.remove('active'); }
@@ -2245,6 +2384,7 @@ window.addEventListener('DOMContentLoaded', () => {
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCycleTimer(); startCooldownTicker(); startTaskExpiryTicker(); startClaimWindowTicker();
+    startPendingConversionTimer();
     updateClaimWindowUI(); updateExtraRewardUI();
     lastActiveInterval = setInterval(updateLastActive, LAST_ACTIVE_INTERVAL_MS);
     referralRefreshInterval = setInterval(async () => {
@@ -2270,6 +2410,7 @@ function stopPeriodicRecheck() {
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
     stopTaskExpiryTicker();
     stopClaimWindowTicker();
+    stopPendingConversionTimer();
 }
 function trackAdClick() { if (!tgUser || !tgUser.id) return; fireAsync(db.ref('users/' + tgUser.id + '/adClicks').transaction(c => (c || 0) + 1)); fireAsync(db.ref('users/' + tgUser.id + '/lastActive').set(Date.now())); }
 function updateNetworkStatus() {
@@ -2282,7 +2423,7 @@ window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Rec
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
 
 /* =========================================================
-   === 19. TAB SWITCHER + RENDER ADS
+   === 19. TAB SWITCHER
    ========================================================= */
 function switchTab(tabId, el) {
     if (!isOnline) { toast('No internet!'); return; }
@@ -2292,7 +2433,7 @@ function switchTab(tabId, el) {
     const target = document.getElementById('page-' + tabId);
     if (target) target.classList.add('active');
     el.classList.add('active');
-    if (tabId === 'tasks') { renderNewTasks(); loadTaskHistory(); }
+    if (tabId === 'tasks') { renderNewTasks(); }
     if (tabId === 'leaderboard') loadLeaderboard();
     if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
@@ -2507,8 +2648,15 @@ async function loadTaskHistory() {
 async function fetchTaskStatuses() { renderNewTasks(); loadTaskHistory(); }
 
 /* =========================================================
-   === 21. WITHDRAW
+   === 21. WITHDRAW + HISTORY TAB
    ========================================================= */
+function switchWithdrawTab(which) {
+    const a = document.getElementById('tabBtnWdNow'), b = document.getElementById('tabBtnWdHist');
+    const pa = document.getElementById('withdrawPaneNow'), pb = document.getElementById('withdrawPaneHist');
+    if (!a || !b || !pa || !pb) return;
+    if (which === 'history') { a.classList.remove('active'); b.classList.add('active'); pa.classList.remove('active'); pb.classList.add('active'); loadWithdrawHistory(); }
+    else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); updateWithdrawInfo(); }
+}
 async function requestWithdraw() {
     if (!isOnline) return;
     const method = document.getElementById('wd-method').value;
@@ -2568,6 +2716,17 @@ function loadCommissionHistory() {
     });
     container.innerHTML = html;
 }
+
+/* =========================================================
+   === 21.5. HISTORY PAGE TABS + Loaders
+   ========================================================= */
+function switchHistoryTab(which) {
+    ['tabBtnHistAds','tabBtnHistPkg','tabBtnHistAll'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('active'); });
+    ['histPaneAds','histPanePkg','histPaneAll'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('active'); });
+    if (which === 'ads') { document.getElementById('tabBtnHistAds')?.classList.add('active'); document.getElementById('histPaneAds')?.classList.add('active'); loadAdHistory(); }
+    else if (which === 'packages') { document.getElementById('tabBtnHistPkg')?.classList.add('active'); document.getElementById('histPanePkg')?.classList.add('active'); loadPkgHistory(); }
+    else { document.getElementById('tabBtnHistAll')?.classList.add('active'); document.getElementById('histPaneAll')?.classList.add('active'); loadAllHistory(); }
+}
 function loadAdHistory() {
     const container = document.getElementById('adHistoryList');
     if (!container) return;
@@ -2587,10 +2746,30 @@ function loadAdHistory() {
     const c = document.getElementById('histAdCount'); if (c) c.textContent = adCount;
     const t = document.getElementById('histAdTotal'); if (t) t.textContent = totalEarned.toFixed(2);
 }
-async function sendNotification(userId, message) {
-    if (!BOT_TOKEN || String(BOT_TOKEN).trim().length < 20) return;
-    try { await fetch('https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: userId, text: message, parse_mode: 'HTML' }) }); } catch (e) {}
+function loadPkgHistory() {
+    const c = document.getElementById('pkgHistoryList');
+    if (!c) return;
+    const hist = appState.user.claimHistory || {};
+    const items = Object.entries(hist).map(([id,v]) => ({id,...v})).sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+    if (!items.length) { c.innerHTML = '<div class="empty-state"><p>No package claims</p></div>'; return; }
+    c.innerHTML = items.map(it => `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon" style="background:rgba(0,184,148,.15);color:#00b894;"><i class="fas fa-box-open"></i></div><div class="history-info"><h5>${esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`).join('');
 }
+function loadAllHistory() {
+    const c = document.getElementById('allHistoryList');
+    if (!c) return;
+    const ads = Object.values(appState.user.adHistory || {}).map(x => ({...x, _type:'ad'}));
+    const pkgs = Object.values(appState.user.claimHistory || {}).map(x => ({...x, _type:'pkg'}));
+    const all = [...ads, ...pkgs].sort((a,b) => (b.timestamp||0)-(a.timestamp||0)).slice(0, 50);
+    if (!all.length) { c.innerHTML = '<div class="empty-state"><p>No history</p></div>'; return; }
+    c.innerHTML = all.map(it => {
+        const isAd = it._type === 'ad';
+        return `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon"><i class="fas ${isAd?'fa-play-circle':'fa-box-open'}"></i></div><div class="history-info"><h5>${isAd?(it.type==='bonus'?'Daily Bonus':it.type==='adclaim'?'Ad Claim':'Ad Slot '+(it.slot||'')):esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`;
+    }).join('');
+}
+
+/* =========================================================
+   === 22. Update Text Elements
+   ========================================================= */
 async function updateTextElements() {
     const sym = appState.config.currencySymbol || 'TK';
     const adb = document.getElementById('u-adbal'); if (adb) adb.innerText = (appState.user.adBalance || 0).toFixed(2);
@@ -2698,7 +2877,7 @@ async function showAppAfterVerify() {
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
 /* =========================================================
-   === 22. CHAT SYSTEM
+   === 23. CHAT SYSTEM + ADMIN NOTIFICATION
    ========================================================= */
 function getChatThreadKey() { return 'user_' + String(tgUser.id); }
 function openChatModal() { document.getElementById('chatOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; scrollChatToBottom(); startChatListeners(); markChatAsRead(); }
@@ -2748,7 +2927,19 @@ async function sendChatMessage() {
         let fileUrl = null;
         if (chatSelectedFile) { try { fileUrl = await uploadToImgBB(chatSelectedFile); } catch (err) { toast('❌ Upload failed'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; return; } }
         const msgData = { from: 'user', userId: String(tgUser.id), userName: tgUser.first_name || 'User', text: text || '', type: chatSelectedFile ? 'image' : 'text', fileUrl, timestamp: Date.now(), read: false };
+        // 🔔 Chat metadata
         fireAsync(db.ref('chats/' + tKey + '/meta').update({ userId: String(tgUser.id), userName: tgUser.first_name || 'User', lastMessageAt: Date.now(), lastMessagePreview: (text || (fileUrl ? '📷' : '')).substring(0, 60), lastMessageFrom: 'user', unreadForUser: 0 }));
+        // 🔔 Admin notification
+        fireAsync(db.ref('adminNotifications').push({
+            type: 'chat',
+            fromUserId: String(tgUser.id),
+            fromUserName: tgUser.first_name || 'User',
+            fromUsername: tgUser.username || '',
+            preview: (text || (chatSelectedFile ? '📷 Image' : '')).substring(0, 120),
+            chatKey: tKey,
+            timestamp: Date.now(),
+            read: false
+        }));
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         input.value = '';
         clearChatFile();
@@ -2758,7 +2949,7 @@ async function sendChatMessage() {
 function initUserChatSystem() { const fab = document.getElementById('chatFab'); if (fab) fab.style.display = 'flex'; startChatListeners(); }
 
 /* =========================================================
-   === 23. MAINTAIN + BAN + REFERRALS
+   === 24. MAINTAIN + BAN + REFERRALS
    ========================================================= */
 function getWithdrawLevel() {
     if (!withdrawLevels || withdrawLevels.length === 0) return { level: 1, requiredRefs: 5, fee: 5, minAmount: 10, maxAmount: 100, time: '30 Min-1 Hours' };
@@ -2828,7 +3019,6 @@ async function calculateValidReferrals() {
             await Promise.all(slice.map(async (rid) => {
                 const uSnap = await db.ref('users/' + rid).once('value');
                 const u = uSnap.exists() ? uSnap.val() : {};
-                // 🔑 Only count if user has activePackageCount > 0
                 const activePkgs = Number(u.activePackageCount || 0);
                 const qualified = activePkgs > 0;
                 if (qualified) count++;
