@@ -807,28 +807,37 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     </div>
 
     <!-- Claim Page with Tabs -->
-    <div id="page-claim" class="page-section">
-        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-hand-holding-usd"></i> Daily Income Claim</div>
-        <div class="tasks-inner-tabs">
-            <button class="tasks-inner-tab active" id="tabBtnClaimNow" onclick="switchClaimTab('now')"><i class="fas fa-hand-holding-usd"></i> Claim</button>
-            <button class="tasks-inner-tab" id="tabBtnClaimHist" onclick="switchClaimTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+<div id="page-claim" class="page-section">
+    <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-hand-holding-usd"></i> Daily Income Claim</div>
+    <div class="tasks-inner-tabs">
+        <button class="tasks-inner-tab active" id="tabBtnClaimNow" onclick="switchClaimTab('now')"><i class="fas fa-hand-holding-usd"></i> Claim</button>
+        <button class="tasks-inner-tab" id="tabBtnClaimHist" onclick="switchClaimTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
+    </div>
+    <div id="claimPaneNow" class="tasks-inner-pane active">
+        
+        <div class="claim-hero" style="padding: 24px 20px;">
+            <!-- Today's Claimed -->
+            <div class="ch-label">💰 TODAY'S CLAIMED AMOUNT</div>
+            <div class="ch-amt"><span id="claimTotalAmount">0.00</span> <small style="font-size:1rem;">TK</small></div>
+            <div class="ch-info" id="claimInfoText">You have 0 active packages</div>
+
+            <!-- Total Package Income -->
+            <div style="margin-top: 18px; padding-top: 18px; border-top: 1px dashed rgba(255,255,255,0.4); position: relative; z-index: 2;">
+                <div class="ch-label" style="font-size: 0.72rem;">📦 TOTAL PACKAGE INCOME</div>
+                <div class="ch-amt" style="font-size: 1.8rem; margin: 6px 0 0;"><span id="totalPackageIncome">0.00</span> <small style="font-size:1rem;">TK</small></div>
+            </div>
         </div>
-        <div id="claimPaneNow" class="tasks-inner-pane active">
-            <div class="claim-hero">
-                <div class="ch-label">💰 TOTAL CLAIMABLE TODAY</div>
-                <div class="ch-amt"><span id="claimTotalAmount">0.00</span> <small style="font-size:1rem;">TK</small></div>
-                <div class="ch-info" id="claimInfoText">You have 0 active packages</div>
-            </div>
-            <div id="claimPackagesList">
-                <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p></div>
-            </div>
-        </div>
-        <div id="claimPaneHist" class="tasks-inner-pane">
-            <div id="claimHistoryList" style="padding:0 20px 20px;">
-                <div class="empty-state"><i class="fas fa-receipt"></i><p>No claims yet</p></div>
-            </div>
+
+        <div id="claimPackagesList">
+            <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p></div>
         </div>
     </div>
+    <div id="claimPaneHist" class="tasks-inner-pane">
+        <div id="claimHistoryList" style="padding:0 20px 20px;">
+            <div class="empty-state"><i class="fas fa-receipt"></i><p>No claims yet</p></div>
+        </div>
+    </div>
+</div>
 
     <!-- Deposit Page with Tabs -->
     <div id="page-deposit" class="page-section">
@@ -1826,21 +1835,44 @@ function loadClaimPage() {
     const listEl = document.getElementById('claimPackagesList');
     const totalEl = document.getElementById('claimTotalAmount');
     const infoEl = document.getElementById('claimInfoText');
+    const totalPkgIncomeEl = document.getElementById('totalPackageIncome');
     if (!listEl) return;
+    
     const ups = appState.userPackages || {};
     const now = Date.now();
+    
+    // শুধুমাত্র একটিভ প্যাকেজগুলো ফিল্টার করা
     const activeUps = Object.values(ups).filter(u => u.expiresAt > now && u.status !== 'expired');
-    let claimableTotal = 0;
-    activeUps.forEach(u => {
-        const lastClaim = Number(u.lastClaimAt || 0);
-        if (lastClaim === 0 || (now - lastClaim) >= PACKAGE_CLAIM_COOLDOWN_MS) claimableTotal += Number(u.dailyIncome || 0);
+    
+    // ১. আজকের ক্লেইম করা টাকা হিসাব
+    let todayClaimed = 0;
+    const todayDate = new Date().setHours(0, 0, 0, 0);
+    const claimHist = appState.user.claimHistory || {};
+    
+    Object.values(claimHist).forEach(item => {
+        if (item.timestamp >= todayDate) {
+            todayClaimed += Number(item.amount || 0);
+        }
     });
-    if (totalEl) totalEl.textContent = claimableTotal.toFixed(2);
+
+    // ২. একটিভ প্যাকেজগুলোর মোট ইনকাম হিসাব (Total Return)
+    let totalActiveIncome = 0;
+    activeUps.forEach(u => {
+        // totalReturn না থাকলে (daily * duration) হিসাব করবে
+        const pkgTotal = u.totalReturn || (Number(u.dailyIncome || 0) * Number(u.duration || 0));
+        totalActiveIncome += pkgTotal;
+    });
+
+    // UI তে আপডেট করা
+    if (totalEl) totalEl.textContent = todayClaimed.toFixed(2);
+    if (totalPkgIncomeEl) totalPkgIncomeEl.textContent = totalActiveIncome.toFixed(2);
     if (infoEl) infoEl.textContent = activeUps.length === 0 ? 'No active packages' : `${activeUps.length} active package${activeUps.length > 1 ? 's' : ''}`;
+    
     if (activeUps.length === 0) {
         listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages</p></div>';
         return;
     }
+    
     let html = '';
     activeUps.forEach(u => {
         const lastClaim = Number(u.lastClaimAt || 0);
@@ -1848,10 +1880,12 @@ function loadClaimPage() {
         const remainMs = Math.max(0, (u.expiresAt || 0) - now);
         const remainDays = Math.ceil(remainMs / (24 * 60 * 60 * 1000));
         const nextClaimMs = lastClaim > 0 ? Math.max(0, (lastClaim + PACKAGE_CLAIM_COOLDOWN_MS) - now) : 0;
+        
         let countdownHtml = '';
         if (!canClaim && nextClaimMs > 0) {
             countdownHtml = `<div class="pkg-countdown-live" data-claim-live="${esc(u._upId || '')}" style="width:100%;"><i class="fas fa-hourglass-half"></i> Next claim in <strong>${fmtHHMMSS(nextClaimMs)}</strong></div>`;
         }
+        
         html += `<div class="claim-pkg-item ${canClaim ? 'ready' : ''}">
             <div class="claim-pkg-head">
                 <div>
@@ -1868,6 +1902,7 @@ function loadClaimPage() {
         </div>`;
     });
     listEl.innerHTML = html;
+    
     if (liveCountdownInterval) clearInterval(liveCountdownInterval);
     liveCountdownInterval = setInterval(() => {
         if (!isBooted) return;
