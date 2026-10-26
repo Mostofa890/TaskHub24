@@ -87,63 +87,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 
 .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
 .sec-head i{color:var(--primary);font-size:1.2rem;}
-.ad-reset-compact{position:absolute;right:20px;top:50%;transform:translateY(-50%);background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;padding:6px 12px;border-radius:20px;font-size:0.68rem;font-weight:800;display:flex;align-items:center;gap:6px;box-shadow:0 6px 14px rgba(108,92,231,.35);font-variant-numeric:tabular-nums;}
-.ad-reset-compact i{font-size:0.7rem;opacity:0.9;}
-.ad-reset-compact.expired{background:linear-gradient(135deg,#00b894,#00cec9);}
-.ad-reset-compact .rst-label{opacity:0.85;font-size:0.6rem;letter-spacing:0.3px;}
-.ad-reset-compact .rst-time{font-weight:900;font-size:0.72rem;}
-.ad-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;padding:0 20px;}
-.ad-card{position:relative;padding:3px;border-radius:22px;background:conic-gradient(from 0deg,#ff9a3d,#ff5e7a,#4f8cff,#38d6ff,#ff9a3d);animation:spinBorder 6s linear infinite;cursor:pointer;box-shadow:0 10px 24px rgba(0,0,0,.08);height:135px;}
-@keyframes spinBorder{0%{background-position:0 0;}100%{background-position:360px 0;}}
-.ad-inner{border-radius:19px;padding:14px 10px;text-align:center;position:relative;background:#fff;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;}
-.ad-inner i{font-size:2rem;margin:0;display:block;}
-.ad-inner h4{font-size:.95rem;font-weight:800;margin:0;color:#111827;line-height:1.1;}
-.ad-inner .progress-pill{font-size:.72rem;color:#4b5563;background:rgba(15,23,42,.06);padding:5px 12px;border-radius:999px;display:inline-block;font-weight:700;}
-.ad-inner .provider-badge{position:absolute;top:6px;right:6px;font-size:.55rem;font-weight:900;padding:3px 8px;border-radius:10px;color:#fff;text-transform:uppercase;letter-spacing:.5px;}
-.provider-adsgram{background:linear-gradient(135deg,#6366f1,#818cf8);}
-.provider-monetag{background:linear-gradient(135deg,#10b981,#34d399);}
-.provider-adexium{background:linear-gradient(135deg,#f59e0b,#fbbf24);}
-.provider-gigapub{background:linear-gradient(135deg,#ec4899,#f472b6);}
-.slot-1 .ad-inner{background:linear-gradient(145deg,#fff7f0,#ffe5d0);}.slot-1 .ad-inner i{color:#ff8b3d;}
-.slot-2 .ad-inner{background:linear-gradient(145deg,#edf5ff,#dde6ff);}.slot-2 .ad-inner i{color:#4f8cff;}
-.ad-card.disabled{opacity:.6;filter:grayscale(1);pointer-events:none;}
-.ad-card .ad-badge-timer{position:absolute;top:-6px;right:-6px;background:var(--primary);color:#fff;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:20px;z-index:5;box-shadow:0 3px 10px rgba(108,92,231,.4);display:flex;align-items:center;gap:4px;}
-
-.ad-claim-box{margin:16px 20px 20px;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(67,56,202,.35);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:14px;}
-.ad-claim-box::before{content:'';position:absolute;width:120px;height:120px;background:rgba(255,255,255,.15);border-radius:50%;top:-50px;right:-30px;}
-.ad-claim-box .ac-left{flex:1;min-width:0;position:relative;z-index:1;}
-.ad-claim-box .ac-label{font-size:0.68rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:0.9;}
-.ad-claim-box .ac-amt{font-size:1.85rem;font-weight:900;margin-top:3px;text-shadow:0 3px 10px rgba(0,0,0,.15);}
-.ad-claim-box .ac-amt small{font-size:0.9rem;font-weight:700;opacity:0.9;}
-.ad-claim-box .ac-note{font-size:0.62rem;font-weight:700;opacity:.95;margin-top:4px;background:rgba(0,0,0,.15);padding:4px 8px;border-radius:8px;display:inline-block;}
-.ad-claim-btn{position:relative;z-index:1;background:#fff;color:#4338ca;border:none;padding:12px 20px;border-radius:14px;font-weight:900;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:inherit;box-shadow:0 8px 20px rgba(0,0,0,.15);transition:transform .15s;white-space:nowrap;flex-shrink:0;}
-.ad-claim-btn:active{transform:scale(0.96);}
-.ad-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed;box-shadow:none;}
-
-.claim-window-timer{display:none;margin:0 20px 10px;background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:14px;padding:10px 14px;position:relative;overflow:hidden;box-shadow:0 6px 16px rgba(245,158,11,.25);}
-.claim-window-timer.active{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.claim-window-timer.expired{background:linear-gradient(135deg,#fee2e2,#fecaca);border-color:#ef4444;}
-.claim-window-timer .cwt-left{display:flex;align-items:center;gap:8px;font-size:0.75rem;font-weight:800;color:#92400e;}
-.claim-window-timer .cwt-time{font-size:1.15rem;font-weight:900;color:#b45309;font-variant-numeric:tabular-nums;}
-.ad-progress-wrap{margin:0 20px 12px;background:#fff;padding:14px 16px;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.04);}
-.ad-progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.78rem;font-weight:800;}
-.ad-progress-header .aph-left{color:#334155;}
-.ad-progress-header .aph-right{color:#00b894;}
-.ad-progress-bar{height:8px;background:#f1f5f9;border-radius:20px;overflow:hidden;position:relative;}
-.ad-progress-bar-fill{height:100%;background:linear-gradient(90deg,#6C5CE7,#00cec9);border-radius:20px;transition:width .5s ease;}
-
-.extra-rewards-card{margin:16px 20px 20px;background:linear-gradient(135deg,#f39c12,#e84393);color:#fff;padding:18px 20px;border-radius:18px;box-shadow:0 14px 32px rgba(232,67,147,.4);position:relative;overflow:hidden;}
-.extra-rewards-card::before{content:'';position:absolute;width:150px;height:150px;background:rgba(255,255,255,.15);border-radius:50%;top:-70px;right:-50px;}
-.er-header{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1;margin-bottom:8px;}
-.er-label{font-size:0.7rem;font-weight:900;letter-spacing:1.3px;text-transform:uppercase;}
-.er-count{background:rgba(255,255,255,.25);padding:4px 10px;border-radius:20px;font-size:0.7rem;font-weight:900;}
-.er-title{font-size:1.15rem;font-weight:900;margin:2px 0 6px;position:relative;z-index:1;}
-.er-amt{font-size:2rem;font-weight:900;margin:2px 0 6px;position:relative;z-index:1;}
-.er-amt small{font-size:0.9rem;font-weight:700;opacity:0.9;}
-.er-info{font-size:0.75rem;font-weight:700;opacity:0.95;position:relative;z-index:1;background:rgba(0,0,0,.15);padding:8px 12px;border-radius:10px;display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.extra-rewards-btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;font-family:inherit;background:#fff;color:#e84393;box-shadow:0 10px 24px rgba(0,0,0,.2);}
-.extra-rewards-btn:disabled{background:rgba(255,255,255,.3);color:rgba(255,255,255,.8);cursor:not-allowed;}
-.er-loading{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin 0.8s linear infinite;}
 
 .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
 .task-item{position:relative;padding:3px;border-radius:22px;background:linear-gradient(135deg,#6C5CE7 0%,#A29BFE 25%,#00cec9 50%,#f39c12 75%,#6C5CE7 100%);background-size:300% 300%;animation:taskBorderShift 8s ease-in-out infinite;box-shadow:0 12px 28px rgba(108,92,231,.18);}
@@ -537,12 +480,18 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .deposit-provider-icon.rocket{background:linear-gradient(135deg,#8b2f8e,#c084fc)}
 .deposit-provider-icon.upay{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
 .deposit-min-badge{font-size:.68rem;font-weight:800;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;padding:5px 12px;border-radius:20px;white-space:nowrap}
-.deposit-number-row{background:#fef3f2;padding:10px 14px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;border:1.5px dashed #fecaca}
-.deposit-number-row .lbl{font-size:.72rem;font-weight:800;color:#991b1b;text-transform:uppercase}
-.deposit-number-row .val{font-weight:900;color:#dc2626;font-family:'Courier New',monospace;letter-spacing:.5px;font-size:.9rem;word-break:break-all}
-.deposit-number-row .copy-mini{background:#dc2626;color:#fff;border:none;padding:6px 10px;border-radius:8px;font-size:.68rem;font-weight:800;cursor:pointer;flex-shrink:0}
-.deposit-instructions{font-size:.72rem;color:#64748b;font-weight:600;background:#f8fafc;padding:10px 12px;border-radius:10px;border-left:3px solid #3b82f6;margin-bottom:10px;line-height:1.5}
-.deposit-send-btn{width:100%;padding:13px;border-radius:12px;border:none;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;font-weight:900;font-size:.88rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;}
+
+/* New Deposit Steps Styling */
+.deposit-step-box{background:#fff;border-radius:18px;padding:20px;margin:0 20px 16px;border:1.5px solid #e5e7eb}
+.deposit-step-title{font-size:1rem;font-weight:900;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.deposit-type-selector{display:flex;gap:10px;margin-bottom:14px;}
+.deposit-type-btn{flex:1;padding:12px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;font-weight:800;font-size:0.9rem;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.deposit-type-btn.active{border-color:#6C5CE7;background:#f5f3ff;color:#6C5CE7;}
+.deposit-form-group{margin-bottom:14px;}
+.deposit-form-group label{font-size:.75rem;font-weight:800;color:#475569;display:block;margin-bottom:6px}
+.deposit-form-group input{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:.95rem;font-family:inherit;outline:none;background:#f8fafc;font-weight:600;}
+.deposit-note-box{font-size:.75rem;color:#92400e;font-weight:700;background:#fef3c7;padding:12px 14px;border-radius:10px;border-left:3px solid #f59e0b;margin-bottom:14px;line-height:1.5}
+.deposit-submit-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
 
 .deposit-history-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1.5px solid #e5e7eb;border-left:4px solid #f59e0b;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
 .deposit-history-item.approved{border-left-color:#10b981;}
@@ -753,38 +702,13 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
     </div>
 
+    <!-- Home Page: Now Only Investment Packages -->
     <div id="page-home" class="page-section active">
-        <div id="extraRewardsCard" class="extra-rewards-card" style="display:none;">
-            <div class="er-header"><div class="er-label"><i class="fas fa-bolt"></i> EXTRA REWARDS</div><div class="er-count" id="erCount">0/0</div></div>
-            <div class="er-title" id="erTitle">Pop-up Ad দেখে আয় করুন</div>
-            <div class="er-amt"><span id="erAmount">0.00</span> <small>TK / view</small></div>
-            <div class="er-info"><i class="fas fa-info-circle"></i><span id="erInfoText">Pop-up Ad দেখলেই রিওয়ার্ড।</span></div>
-            <button class="extra-rewards-btn" id="erBtn" onclick="watchExtraRewardAd()"><i class="fas fa-play-circle"></i><span id="erBtnText">Watch Ad & Earn</span></button>
-        </div>
-
-        <div class="sec-head"><i class="fas fa-gift"></i> Daily Rewards</div>
-        <div style="padding:0 20px 15px;"><button class="btn-main" onclick="showBonus()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-box-open"></i> Open Daily Bonus</button></div>
-
-        <div class="sec-head"><i class="fas fa-play-circle"></i> Daily Ads
-            <div class="ad-reset-compact" id="adResetCompact"><i class="fas fa-clock"></i><div><div class="rst-label">RESET IN</div><div class="rst-time" id="cycleResetTimer">Watch All</div></div></div>
-        </div>
-
-        <div id="ad-area" class="ad-grid"></div>
-
-        <div class="ad-progress-wrap">
-            <div class="ad-progress-header"><span class="aph-left"><i class="fas fa-chart-line" style="color:#6C5CE7;"></i> Ad Progress</span><span class="aph-right" id="adProgressText">0 / 0 Watched</span></div>
-            <div class="ad-progress-bar"><div class="ad-progress-bar-fill" id="adProgressFill" style="width:0%;"></div></div>
-        </div>
-
-        <div class="claim-window-timer" id="claimWindowTimer"><div class="cwt-left"><i class="fas fa-hourglass-half"></i> <span id="cwtLabel">Claim Window:</span></div><div class="cwt-time" id="cwtTime">01:00:00</div></div>
-
-        <div class="ad-claim-box">
-            <div class="ac-left">
-                <div class="ac-label">🏦 DEPOSIT BALANCE (PACKAGE ONLY)</div>
-                <div class="ac-amt"><span id="adTotalEarnings">0.00</span> <small>৳</small></div>
-                <div class="ac-note">⏱️ ২৪ ঘন্টা পর Withdrawable এ কনভার্ট হবে</div>
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-box-open"></i> Investment Packages</div>
+        <div class="packages-container">
+            <div id="homePackagesGrid" class="pkg-grid">
+                <div class="empty-state"><i class="fas fa-box"></i><p>Loading packages...</p></div>
             </div>
-            <button class="ad-claim-btn" id="adClaimBtn" onclick="claimAdEarnings()" disabled><i class="fas fa-lock"></i> <span id="adClaimBtnText">Watch All</span></button>
         </div>
     </div>
 
@@ -831,6 +755,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     </div>
 </div>
 
+    <!-- New Multi-Step Deposit Page -->
     <div id="page-deposit" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-money-bill-wave"></i> Deposit Money</div>
         <div class="tasks-inner-tabs">
@@ -838,10 +763,41 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
             <button class="tasks-inner-tab" id="tabBtnDepHist" onclick="switchDepositTab('history')"><i class="fas fa-clock-rotate-left"></i> History</button>
         </div>
         <div id="depositPaneNow" class="tasks-inner-pane active">
-            <div class="packages-container">
-                <div id="depositProvidersList">
-                    <div class="empty-state"><i class="fas fa-credit-card"></i><p>No deposit methods configured</p></div>
+            <!-- Step 1: Select Payment Method -->
+            <div id="depStep1" class="deposit-step-box">
+                <div class="deposit-step-title"><i class="fas fa-wallet" style="color:#6C5CE7;"></i> Select Payment Method</div>
+                <div id="depMethodList" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <!-- Rendered by JS -->
                 </div>
+            </div>
+            
+            <!-- Step 2: Enter Amount (Hidden by Default) -->
+            <div id="depStep2" class="deposit-step-box" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div class="deposit-step-title" style="margin-bottom:0;"><i class="fas fa-money-bill" style="color:#f39c12;"></i> Enter Amount</div>
+                    <button onclick="resetDepositSteps()" style="background:none;border:none;color:#ef4444;font-weight:700;font-size:0.8rem;cursor:pointer;"><i class="fas fa-arrow-left"></i> Back</button>
+                </div>
+                <div class="deposit-form-group">
+                    <label>Amount (৳)</label>
+                    <input type="number" id="depAmountInput" placeholder="Enter amount (Min 200)" min="200">
+                </div>
+                <button class="deposit-submit-btn" onclick="goToDepositStep3()">Next <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <!-- Step 3: Send Money & Fill TrxID (Hidden by Default) -->
+            <div id="depStep3" class="deposit-step-box" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <div class="deposit-step-title" style="margin-bottom:0;"><i class="fas fa-paper-plane" style="color:#00b894;"></i> Complete Payment</div>
+                    <button onclick="resetDepositSteps(2)" style="background:none;border:none;color:#ef4444;font-weight:700;font-size:0.8rem;cursor:pointer;"><i class="fas fa-arrow-left"></i> Back</button>
+                </div>
+                <div class="deposit-note-box" id="depInstructionText">
+                    <!-- Dynamic Text -->
+                </div>
+                <div class="deposit-form-group">
+                    <label>Transaction ID (TrxID)</label>
+                    <input type="text" id="depTrxInput" placeholder="Enter your Transaction ID">
+                </div>
+                <button class="deposit-submit-btn" onclick="submitFinalDeposit()" style="background:linear-gradient(135deg,#00b894,#00cec9);"><i class="fas fa-check-circle"></i> Submit Request</button>
             </div>
         </div>
         <div id="depositPaneHist" class="tasks-inner-pane">
@@ -1111,6 +1067,12 @@ let isUserAdmin = false;
 let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
 let allPackagesCache = {}, userPackagesListener = null, selectedPkgForBuy = null;
 let chatMessagesListener = null, chatUnreadListener = null, chatSelectedFile = null;
+
+// Deposit State
+let currentDepositStep = 1;
+let depositSelectedMethod = '';
+let depositSelectedAmount = 0;
+let depositPaymentType = 'Cash Out'; // Default
 
 const SPECIAL_TASK_TYPES = ['survey', 'youtube_video_view', 'voice', 'audio', 'voice_recording', 'image', 'image_upload', 'text', 'text_writing'];
 const COOLDOWN_TASK_TYPES = ['survey', 'youtube_video_view'];
@@ -1640,8 +1602,12 @@ async function claimReferralIncome() {
    ========================================================= */
 async function loadPackages() {
     const grid = document.getElementById('packagesGrid');
-    if (!grid) return;
-    grid.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+    const homeGrid = document.getElementById('homePackagesGrid');
+    
+    const loadingHtml = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+    if (grid) grid.innerHTML = loadingHtml;
+    if (homeGrid) homeGrid.innerHTML = loadingHtml;
+
     try {
         const snap = await db.ref('packages').once('value');
         allPackagesCache = {};
@@ -1649,7 +1615,14 @@ async function loadPackages() {
         snap.forEach(x => { const p = { id: x.key, ...x.val() }; allPackagesCache[x.key] = p; list.push(p); });
         list.sort((a, b) => (a.price || 0) - (b.price || 0));
         const activeList = list.filter(p => p.status === 'active');
-        if (activeList.length === 0) { grid.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages</p></div>'; return; }
+        
+        if (activeList.length === 0) {
+            const emptyHtml = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages</p></div>';
+            if (grid) grid.innerHTML = emptyHtml;
+            if (homeGrid) homeGrid.innerHTML = emptyHtml;
+            return;
+        }
+
         let html = '';
         activeList.forEach(p => {
             const userPkg = (appState.userPackages || {})[p.id];
@@ -1684,8 +1657,14 @@ async function loadPackages() {
                 ${btnHtml}
             </div>`;
         });
-        grid.innerHTML = html;
-    } catch (e) { grid.innerHTML = '<div class="empty-state"><p>Failed</p></div>'; }
+        
+        if (grid) grid.innerHTML = html;
+        if (homeGrid) homeGrid.innerHTML = html;
+    } catch (e) { 
+        const errHtml = '<div class="empty-state"><p>Failed to load</p></div>';
+        if (grid) grid.innerHTML = errHtml;
+        if (homeGrid) homeGrid.innerHTML = errHtml;
+    }
 }
 function openBuyConfirm(pkgId) {
     const pkg = allPackagesCache[pkgId];
@@ -1946,77 +1925,129 @@ function loadClaimHistory() {
 }
 
 /* =========================================================
-   === 13. DEPOSIT PAGE + HISTORY TAB
+   === 13. NEW MULTI-STEP DEPOSIT PAGE
    ========================================================= */
 function switchDepositTab(which) {
     const a = document.getElementById('tabBtnDepNow'), b = document.getElementById('tabBtnDepHist');
     const pa = document.getElementById('depositPaneNow'), pb = document.getElementById('depositPaneHist');
     if (!a || !b || !pa || !pb) return;
     if (which === 'history') { a.classList.remove('active'); b.classList.add('active'); pa.classList.remove('active'); pb.classList.add('active'); loadDepositHistory(); }
-    else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); renderDepositPage(); }
+    else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); resetDepositSteps(); }
 }
+
 function renderDepositPage() {
-    const c = document.getElementById('depositProvidersList');
+    resetDepositSteps();
+    const c = document.getElementById('depMethodList');
     if (!c) return;
     const dp = appState.config.depositPayment || {};
     const providers = [
         { key: 'bkash', name: 'bKash', icon: 'bKash', num: dp.bkash, cls: 'bkash' },
         { key: 'nagad', name: 'Nagad', icon: 'নগদ', num: dp.nagad, cls: 'nagad' },
-        { key: 'rocket', name: 'Rocket', icon: 'R', num: dp.rocket, cls: 'rocket' },
-        { key: 'upay', name: 'Upay', icon: 'U', num: dp.upay, cls: 'upay' }
+        { key: 'rocket', name: 'Rocket', icon: 'R', num: dp.rocket, cls: 'rocket' }
     ].filter(p => p.num && String(p.num).trim().length > 0);
-    if (providers.length === 0) { c.innerHTML = '<div class="empty-state"><i class="fas fa-credit-card"></i><p>No methods</p></div>'; }
-    else {
-        const minDep = Number(dp.minDeposit || 50);
+    
+    if (providers.length === 0) { 
+        c.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-credit-card"></i><p>No methods configured</p></div>'; 
+    } else {
         let html = '';
         providers.forEach(p => {
-            html += `<div class="deposit-provider-card ${p.cls}">
-                <div class="deposit-provider-head">
-                    <div class="deposit-provider-name"><div class="deposit-provider-icon ${p.cls}">${esc(p.icon)}</div><div>${esc(p.name)}</div></div>
-                    <div class="deposit-min-badge">Min ${minDep.toFixed(0)} ৳</div>
-                </div>
-                <div class="deposit-number-row"><div><div class="lbl">SEND TO</div><div class="val">${esc(p.num)}</div></div><button class="copy-mini" onclick="copyDepositNumber('${esc(p.num)}')">Copy</button></div>
-                ${dp.instructions ? `<div class="deposit-instructions">${esc(dp.instructions)}</div>` : ''}
-                <button class="deposit-send-btn" onclick="openDepositForm('${esc(p.key)}','${esc(p.name)}','${esc(p.num)}')"><i class="fas fa-paper-plane"></i> I've Sent</button>
+            html += `<div onclick="selectDepositMethod('${esc(p.key)}','${esc(p.name)}','${esc(p.num)}')" class="deposit-provider-card ${p.cls}" style="margin-bottom:0; cursor:pointer; padding:20px 14px; text-align:center; border-width: 2px;">
+                <div style="display:flex; justify-content:center; margin-bottom:8px;"><div class="deposit-provider-icon ${p.cls}" style="width:50px;height:50px;font-size:1.1rem;">${esc(p.icon)}</div></div>
+                <div style="font-weight:900; font-size:1rem; color:#1a1a2e;">${esc(p.name)}</div>
             </div>`;
         });
         c.innerHTML = html;
     }
 }
-function copyDepositNumber(num) { navigator.clipboard.writeText(num).then(() => toast('📋 Copied!')).catch(() => {}); }
-function openDepositForm(key, name, num) {
-    let modal = document.getElementById('depositFormModal');
-    if (!modal) { modal = document.createElement('div'); modal.id = 'depositFormModal'; modal.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 0;display:block;'; modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; }; document.body.appendChild(modal); } else { modal.style.display = 'block'; }
-    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 50);
-    modal.innerHTML = `<div style="max-width:420px;margin:20px auto;padding:0 20px;"><div class="deposit-form-card">
-        <h4><i class="fas fa-paper-plane"></i> Deposit Request</h4>
-        <div class="df-note"><b>${esc(name)}</b> → <b>${esc(num)}</b> এ টাকা পাঠিয়ে ফর্ম পূরণ করুন। টাকা Deposit Balance এ যোগ হবে (Withdraw করা যাবে না, শুধু প্যাকেজ কেনা যাবে)।</div>
-        <div class="df-group"><label>Amount (৳) *</label><input type="number" id="dfAmount" placeholder="e.g. ${minDep}" step="0.01"></div>
-        <div class="df-group"><label>Transaction ID *</label><input type="text" id="dfTxnId" placeholder="e.g. 8N7A2K9X"></div>
-        <div class="df-group"><label>Note</label><input type="text" id="dfNote" placeholder=""></div>
-        <button class="df-submit" onclick="submitDepositRequest('${esc(name)}','${esc(num)}')"><i class="fas fa-check"></i> Submit</button>
-        <button onclick="document.getElementById('depositFormModal').style.display='none'" style="width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:8px;">Cancel</button>
-    </div></div>`;
+
+function selectDepositMethod(key, name, num) {
+    depositSelectedMethod = { key, name, num };
+    document.getElementById('depStep1').style.display = 'none';
+    document.getElementById('depStep2').style.display = 'block';
+    document.getElementById('depStep3').style.display = 'none';
+    currentDepositStep = 2;
 }
-async function submitDepositRequest(methodName, methodAccount) {
-    const amt = parseFloat(document.getElementById('dfAmount')?.value || 0);
-    const txn = (document.getElementById('dfTxnId')?.value || '').trim();
-    const note = (document.getElementById('dfNote')?.value || '').trim();
-    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 50);
-    if (!amt || amt < minDep) return toast('❌ Min ' + minDep + ' ৳');
-    if (!txn || txn.length < 4) return toast('❌ Valid TXN');
+
+function resetDepositSteps(toStep = 1) {
+    if (toStep === 1 || toStep === undefined) {
+        currentDepositStep = 1;
+        depositSelectedMethod = '';
+        depositSelectedAmount = 0;
+        document.getElementById('depStep1').style.display = 'block';
+        document.getElementById('depStep2').style.display = 'none';
+        document.getElementById('depStep3').style.display = 'none';
+        document.getElementById('depAmountInput').value = '';
+        document.getElementById('depTrxInput').value = '';
+    } else if (toStep === 2) {
+        currentDepositStep = 2;
+        document.getElementById('depStep1').style.display = 'none';
+        document.getElementById('depStep2').style.display = 'block';
+        document.getElementById('depStep3').style.display = 'none';
+    }
+}
+
+function goToDepositStep3() {
+    const amtStr = document.getElementById('depAmountInput').value;
+    const amt = parseFloat(amtStr || 0);
+    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 200);
+    
+    if (!amt || amt < minDep) return toast(`❌ Minimum deposit ${minDep} ৳`);
+    
+    depositSelectedAmount = amt;
+    currentDepositStep = 3;
+    
+    document.getElementById('depStep1').style.display = 'none';
+    document.getElementById('depStep2').style.display = 'none';
+    document.getElementById('depStep3').style.display = 'block';
+    
+    const instructionBox = document.getElementById('depInstructionText');
+    instructionBox.innerHTML = `
+        <div style="margin-bottom:10px; font-weight:800; color:#1a1a2e;">পেমেন্ট ইনস্ট্রাকশন:</div>
+        <div style="margin-bottom:8px;">১. <b>${esc(depositSelectedMethod.name)}</b> অ্যাপে যান।</div>
+        <div style="margin-bottom:8px;">২. <b>Cash Out / Send Money</b> সিলেক্ট করুন।</div>
+        <div style="margin-bottom:8px;">৩. নিচের নাম্বারে <b>${depositSelectedAmount.toFixed(2)} ৳</b> পাঠান:</div>
+        <div style="background:#fff; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border:1px solid #fcd34d;">
+            <span style="font-family:monospace; font-size:1.1rem; color:#dc2626; font-weight:900;">${esc(depositSelectedMethod.num)}</span>
+            <button onclick="copyDepositNumber('${esc(depositSelectedMethod.num)}')" style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.75rem;cursor:pointer;"><i class="fas fa-copy"></i> Copy</button>
+        </div>
+        <div style="color:#ef4444; font-size:0.7rem; font-weight:700;">⚠️ নাম্বারটি কপি করে সঠিকভাবে সেন্ড মানি বা ক্যাশ আউট করুন।</div>
+    `;
+}
+
+function copyDepositNumber(num) { navigator.clipboard.writeText(num).then(() => toast('📋 Copied!')).catch(() => {}); }
+
+async function submitFinalDeposit() {
+    const txn = (document.getElementById('depTrxInput').value || '').trim();
+    if (!txn || txn.length < 4) return toast('❌ সঠিক ট্রানজেকশন আইডি দিন');
+    
+    const btn = document.querySelector('#depStep3 .deposit-submit-btn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+    
     try {
         const reqId = 'depreq_' + Date.now() + '_' + appState.user.id;
         await db.ref('depositRequests/' + reqId).set({
-            userId: String(appState.user.id), userName: tgUser.first_name || 'User',
-            username: tgUser.username || '', methodName, methodAccount,
-            amount: amt, txnId: txn, note, status: 'pending', timestamp: Date.now()
+            userId: String(appState.user.id), 
+            userName: tgUser.first_name || 'User',
+            username: tgUser.username || '', 
+            methodName: depositSelectedMethod.name, 
+            methodAccount: depositSelectedMethod.num,
+            amount: depositSelectedAmount, 
+            txnId: txn, 
+            status: 'pending', 
+            timestamp: Date.now()
         });
-        toast('✅ Submitted!');
-        document.getElementById('depositFormModal').style.display = 'none';
+        toast('✅ ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!');
+        resetDepositSteps();
         loadDepositHistory();
-    } catch (e) { toast('❌ ' + e.message); }
+        tryHaptic('success');
+    } catch (e) { 
+        toast('❌ ' + e.message); 
+    } finally {
+        btn.disabled = false; btn.innerHTML = originalHtml;
+    }
 }
+
 function loadDepositHistory() {
     const container = document.getElementById('depositHistoryList');
     if (!container || !tgUser || !tgUser.id) return;
@@ -2310,7 +2341,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
                 if (appState.config.minAdWatchSeconds !== undefined) { const v = Number(appState.config.minAdWatchSeconds); if (!isNaN(v) && v >= 3 && v <= 120) MIN_AD_WATCH_SECONDS = v; }
                 if (appState.config.extraReward) { extraRewardConfig = { ...extraRewardConfig, ...appState.config.extraReward }; updateExtraRewardUI(); }
-                if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI(); if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage(); if (document.getElementById('page-packages').classList.contains('active')) loadPackages(); if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage(); }
+                if (isBooted) { updateTextElements(); renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI(); if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage(); if (document.getElementById('page-packages').classList.contains('active') || document.getElementById('page-home').classList.contains('active')) loadPackages(); if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage(); }
             }, 250);
         });
 
@@ -2375,7 +2406,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     renderAds(); renderNewTasks(); updateCycleUI(); updateClaimWindowUI(); updateExtraRewardUI();
                     if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
                     if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
-                    if (document.getElementById('page-packages').classList.contains('active')) loadPackages();
+                    if (document.getElementById('page-packages').classList.contains('active') || document.getElementById('page-home').classList.contains('active')) loadPackages();
                     if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
                     if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
                 }, 150);
@@ -2481,7 +2512,7 @@ function switchTab(tabId, el) {
     if (tabId === 'withdraw') { loadWithdrawHistory(); updateWithdrawInfo(); }
     if (tabId === 'referral') { loadMyReferrals(); loadCommissionHistory(); }
     if (tabId === 'history') { loadAdHistory(); }
-    if (tabId === 'home') { updateClaimWindowUI(); updateExtraRewardUI(); }
+    if (tabId === 'home') { loadPackages(); }
     if (tabId === 'packages') { loadPackages(); }
     if (tabId === 'claim') { loadClaimPage(); }
     if (tabId === 'deposit') { renderDepositPage(); }
