@@ -690,9 +690,10 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                     <button onclick="resetDepositSteps()" style="background:none;border:none;color:#ef4444;font-weight:700;font-size:0.8rem;cursor:pointer;"><i class="fas fa-arrow-left"></i> Back</button>
                 </div>
                 <div class="deposit-form-group">
-                    <label>Amount (৳)</label>
-                    <input type="number" id="depAmountInput" placeholder="Enter amount (Min 200)" min="200">
-                </div>
+    <label>Amount (৳)</label>
+    <input type="number" id="depAmountInput" placeholder="Enter amount" min="1">
+    <small id="depAmountMinHint" style="display:block; margin-top:6px; font-size:.72rem; font-weight:700; color:#92400e;"></small>
+</div>
                 <button class="deposit-submit-btn" onclick="goToDepositStep3()">Next <i class="fas fa-arrow-right"></i></button>
             </div>
             <div id="depStep3" class="deposit-step-box" style="display:none;">
@@ -884,7 +885,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-const IMGBB_API_KEY = "";
+const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const CHANNEL_CHECK_API = "";
 const BOT_USERNAME = "TaskHubBD24Bot";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
@@ -1500,28 +1501,44 @@ function switchDepositTab(which) {
 }
 
 function renderDepositPage() {
-    resetDepositSteps();
-    const c = document.getElementById('depMethodList');
-    if (!c) return;
-    const dp = appState.config.depositPayment || {};
-    const providers = [
-        { key: 'bkash', name: 'bKash', icon: 'bKash', num: dp.bkash, cls: 'bkash' },
-        { key: 'nagad', name: 'Nagad', icon: 'নগদ', num: dp.nagad, cls: 'nagad' },
-        { key: 'rocket', name: 'Rocket', icon: 'R', num: dp.rocket, cls: 'rocket' }
-    ].filter(p => p.num && String(p.num).trim().length > 0);
-    if (providers.length === 0) {
-        c.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-credit-card"></i><p>No methods configured</p></div>';
-    } else {
-        let html = '';
-        providers.forEach(p => {
-            html += `<div onclick="selectDepositMethod('${esc(p.key)}','${esc(p.name)}','${esc(p.num)}')" class="deposit-provider-card ${p.cls}" style="margin-bottom:0; cursor:pointer; padding:20px 14px; text-align:center; border-width: 2px;">
-                <div style="display:flex; justify-content:center; margin-bottom:8px;"><div class="deposit-provider-icon ${p.cls}" style="width:50px;height:50px;font-size:1.1rem;">${esc(p.icon)}</div></div>
-                <div style="font-weight:900; font-size:1rem; color:#1a1a2e;">${esc(p.name)}</div>
-            </div>`;
-        });
-        c.innerHTML = html;
-    }
-    populatePaymentTypeDropdown();
+  resetDepositSteps();
+  const c = document.getElementById('depMethodList');
+  if (!c) return;
+
+  const dp = appState.config.depositPayment || {};
+  const methods = dp.methods || {};
+  const legacyMin = Number(dp.minDeposit || 200);
+
+  const legacy = {
+    bkash:  { number: dp.bkash,  minDeposit: legacyMin },
+    nagad:  { number: dp.nagad,  minDeposit: legacyMin },
+    rocket: { number: dp.rocket, minDeposit: legacyMin },
+    upay:   { number: dp.upay,   minDeposit: legacyMin }
+  };
+
+  const providers = [
+    { key: 'bkash',  name: 'bKash',  icon: 'bKash', data: methods.bkash  || legacy.bkash,  cls: 'bkash' },
+    { key: 'nagad',  name: 'Nagad',  icon: 'নগদ',  data: methods.nagad  || legacy.nagad,  cls: 'nagad' },
+    { key: 'rocket', name: 'Rocket', icon: 'R',    data: methods.rocket || legacy.rocket, cls: 'rocket' },
+    { key: 'upay',   name: 'Upay',   icon: 'U',    data: methods.upay   || legacy.upay,   cls: 'upay' }
+  ].filter(p => p.data && p.data.number && String(p.data.number).trim().length > 0);
+
+  if (providers.length === 0) {
+    c.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><i class="fas fa-credit-card"></i><p>No methods configured</p></div>';
+  } else {
+    let html = '';
+    providers.forEach(p => {
+      html += `<div onclick="selectDepositMethod('${esc(p.key)}','${esc(p.name)}','${esc(p.data.number)}',${Number(p.data.minDeposit || 0)})" class="deposit-provider-card ${p.cls}" style="margin-bottom:0; cursor:pointer; padding:20px 14px; text-align:center; border-width: 2px;">
+        <div style="display:flex; justify-content:center; margin-bottom:8px;">
+          <div class="deposit-provider-icon ${p.cls}" style="width:50px;height:50px;font-size:1.1rem;">${esc(p.icon)}</div>
+        </div>
+        <div style="font-weight:900; font-size:1rem; color:#1a1a2e;">${esc(p.name)}</div>
+        <div style="font-size:0.7rem; font-weight:700; color:#92400e; margin-top:4px;">Min ${Number(p.data.minDeposit || 0).toFixed(0)} ৳</div>
+      </div>`;
+    });
+    c.innerHTML = html;
+  }
+  populatePaymentTypeDropdown();
 }
 
 function populatePaymentTypeDropdown() {
@@ -1544,12 +1561,21 @@ function populatePaymentTypeDropdown() {
     if (types.includes('Cash Out')) sel.value = 'Cash Out';
 }
 
-function selectDepositMethod(key, name, num) {
-    depositSelectedMethod = { key, name, num };
-    document.getElementById('depStep1').style.display = 'none';
-    document.getElementById('depStep2').style.display = 'block';
-    document.getElementById('depStep3').style.display = 'none';
-    currentDepositStep = 2;
+function selectDepositMethod(key, name, num, minDep) {
+  depositSelectedMethod = { key, name, num, minDep: Number(minDep || 0) };
+  document.getElementById('depStep1').style.display = 'none';
+  document.getElementById('depStep2').style.display = 'block';
+  document.getElementById('depStep3').style.display = 'none';
+
+  const minEl = document.getElementById('depAmountMinHint');
+  if (minEl) minEl.textContent = `Minimum: ${Number(minDep || 0).toFixed(0)} ৳`;
+  const amtInput = document.getElementById('depAmountInput');
+  if (amtInput) {
+    amtInput.min = Number(minDep || 0);
+    amtInput.placeholder = `Enter amount (Min ${Number(minDep || 0).toFixed(0)})`;
+  }
+
+  currentDepositStep = 2;
 }
 
 function resetDepositSteps(toStep = 1) {
@@ -1571,59 +1597,72 @@ function resetDepositSteps(toStep = 1) {
 }
 
 function goToDepositStep3() {
-    const amtStr = document.getElementById('depAmountInput').value;
-    const amt = parseFloat(amtStr || 0);
-    const minDep = Number((appState.config.depositPayment || {}).minDeposit || 200);
-    if (!amt || amt < minDep) return toast(`❌ Minimum deposit ${minDep} ৳`);
-    depositSelectedAmount = amt;
-    currentDepositStep = 3;
-    document.getElementById('depStep1').style.display = 'none';
-    document.getElementById('depStep2').style.display = 'none';
-    document.getElementById('depStep3').style.display = 'block';
-    populatePaymentTypeDropdown();
-    const instructionBox = document.getElementById('depInstructionText');
-    instructionBox.innerHTML = `
-        <div style="margin-bottom:10px; font-weight:800; color:#1a1a2e;">পেমেন্ট ইনস্ট্রাকশন:</div>
-        <div style="margin-bottom:8px;">১. <b>${esc(depositSelectedMethod.name)}</b> অ্যাপে যান।</div>
-        <div style="margin-bottom:8px;">২. নিচের ড্রপডাউন থেকে <b>Send Money / Cash Out</b> সিলেক্ট করুন।</div>
-        <div style="margin-bottom:8px;">৩. নিচের নাম্বারে <b>${depositSelectedAmount.toFixed(2)} ৳</b> পাঠান:</div>
-        <div style="background:#fff; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border:1px solid #fcd34d;">
-            <span style="font-family:monospace; font-size:1.1rem; color:#dc2626; font-weight:900;">${esc(depositSelectedMethod.num)}</span>
-            <button onclick="copyDepositNumber('${esc(depositSelectedMethod.num)}')" style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.75rem;cursor:pointer;"><i class="fas fa-copy"></i> Copy</button>
-        </div>
-        <div style="color:#ef4444; font-size:0.7rem; font-weight:700;">⚠️ নাম্বারটি কপি করে সঠিকভাবে সেন্ড মানি বা ক্যাশ আউট করুন।</div>
-    `;
+  const amtStr = document.getElementById('depAmountInput').value;
+  const amt = parseFloat(amtStr || 0);
+  const minDep = Number((depositSelectedMethod && depositSelectedMethod.minDep) || 0);
+
+  if (!amt || amt < minDep) return toast(`❌ ${depositSelectedMethod.name} এর জন্য সর্বনিম্ন ${minDep.toFixed(0)} ৳`);
+
+  depositSelectedAmount = amt;
+  currentDepositStep = 3;
+
+  document.getElementById('depStep1').style.display = 'none';
+  document.getElementById('depStep2').style.display = 'none';
+  document.getElementById('depStep3').style.display = 'block';
+
+  populatePaymentTypeDropdown();
+
+  const instructionBox = document.getElementById('depInstructionText');
+  instructionBox.innerHTML = `
+    <div style="margin-bottom:10px; font-weight:800; color:#1a1a2e;">পেমেন্ট ইনস্ট্রাকশন:</div>
+    <div style="margin-bottom:8px;">১. <b>${esc(depositSelectedMethod.name)}</b> অ্যাপে যান।</div>
+    <div style="margin-bottom:8px;">২. নিচের ড্রপডাউন থেকে <b>Send Money / Cash Out</b> সিলেক্ট করুন।</div>
+    <div style="margin-bottom:8px;">৩. নিচের নাম্বারে <b>${depositSelectedAmount.toFixed(2)} ৳</b> পাঠান:</div>
+    <div style="background:#fff; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border:1px solid #fcd34d;">
+      <span style="font-family:monospace; font-size:1.1rem; color:#dc2626; font-weight:900;">${esc(depositSelectedMethod.num)}</span>
+      <button onclick="copyDepositNumber('${esc(depositSelectedMethod.num)}')" style="background:#dc2626;color:#fff;border:none;padding:6px 12px;border-radius:6px;font-weight:700;font-size:0.75rem;cursor:pointer;"><i class="fas fa-copy"></i> Copy</button>
+    </div>
+    <div style="color:#ef4444; font-size:0.7rem; font-weight:700;">⚠️ নাম্বারটি কপি করে সঠিকভাবে সেন্ড মানি বা ক্যাশ আউট করুন।</div>
+  `;
 }
 
 function copyDepositNumber(num) { navigator.clipboard.writeText(num).then(() => toast('📋 Copied!')).catch(() => {}); }
 
 async function submitFinalDeposit() {
-    const txn = (document.getElementById('depTrxInput').value || '').trim();
-    const ptype = (document.getElementById('depPaymentTypeSelect') || {}).value || 'Cash Out';
-    if (!txn || txn.length < 4) return toast('❌ সঠিক ট্রানজেকশন আইডি দিন');
-    const btn = document.querySelector('#depStep3 .deposit-submit-btn');
-    const originalHtml = btn.innerHTML;
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
-    try {
-        const reqId = 'depreq_' + Date.now() + '_' + appState.user.id;
-        await db.ref('depositRequests/' + reqId).set({
-            userId: String(appState.user.id),
-            userName: tgUser.first_name || 'User',
-            username: tgUser.username || '',
-            methodName: depositSelectedMethod.name,
-            methodAccount: depositSelectedMethod.num,
-            amount: depositSelectedAmount,
-            paymentType: ptype,
-            txnId: txn,
-            status: 'pending',
-            timestamp: Date.now()
-        });
-        toast('✅ ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!');
-        resetDepositSteps();
-        loadDepositHistory();
-        tryHaptic('success');
-    } catch (e) { toast('❌ ' + e.message); }
-    finally { btn.disabled = false; btn.innerHTML = originalHtml; }
+  const txn = (document.getElementById('depTrxInput').value || '').trim();
+  const ptype = (document.getElementById('depPaymentTypeSelect') || {}).value || 'Cash Out';
+  if (!txn || txn.length < 4) return toast('❌ সঠিক ট্রানজেকশন আইডি দিন');
+
+  const btn = document.querySelector('#depStep3 .deposit-submit-btn');
+  const originalHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+  try {
+    const reqId = 'depreq_' + Date.now() + '_' + appState.user.id;
+    await db.ref('depositRequests/' + reqId).set({
+      userId: String(appState.user.id),
+      userName: tgUser.first_name || 'User',
+      username: tgUser.username || '',
+      methodName: depositSelectedMethod.name,
+      methodAccount: depositSelectedMethod.num,
+      minDeposit: Number(depositSelectedMethod.minDep || 0),
+      amount: depositSelectedAmount,
+      paymentType: ptype,
+      txnId: txn,
+      status: 'pending',
+      timestamp: Date.now()
+    });
+    toast('✅ ডিপোজিট রিকোয়েস্ট সফলভাবে জমা হয়েছে!');
+    resetDepositSteps();
+    loadDepositHistory();
+    tryHaptic('success');
+  } catch (e) {
+    toast('❌ ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
+  }
 }
 
 function loadDepositHistory() {
