@@ -14,7 +14,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 <style>
-/* ... (আগের সব CSS একই আছে, কোনো পরিবর্তন নেই) ... */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;}
@@ -295,12 +294,13 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .legal-body a{color:#6366f1;font-weight:700;text-decoration:none;}
 .legal-footer{padding:14px 26px 20px;text-align:center;color:#94a3b8;font-size:.7rem;font-weight:700;border-top:1px solid #f1f5f9;}
 .ref-inner-tabs{display:flex;gap:6px;padding:0 0 14px;margin-bottom:10px;border-bottom:2px solid #f1f5f9;}
-.ref-inner-tab{flex:1;padding:10px 8px;border-radius:12px;background:#f8fafc;color:#6b7280;font-weight:800;font-size:0.76rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
-.ref-inner-tab .tab-count{font-size:0.68rem;font-weight:800;background:rgba(108,92,231,0.15);color:var(--primary);padding:2px 8px;border-radius:20px;}
+.ref-inner-tab{flex:1;padding:10px 4px;border-radius:12px;background:#f8fafc;color:#6b7280;font-weight:800;font-size:0.74rem;border:1.5px solid #e5e7eb;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.ref-inner-tab .tab-count{font-size:0.68rem;font-weight:800;background:rgba(108,92,231,0.15);color:var(--primary);padding:2px 6px;border-radius:20px;}
 .ref-inner-tab.active{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;border-color:transparent;}
 .ref-inner-tab.active .tab-count{background:rgba(255,255,255,.3);color:#fff;}
 .ref-inner-tab.tab-qualified.active{background:linear-gradient(135deg,#00b894,#00cec9);}
 .ref-inner-tab.tab-income.active{background:linear-gradient(135deg,#f39c12,#fbbf24);}
+.ref-inner-tab.tab-bonus.active{background:linear-gradient(135deg,#8b5cf6,#6C5CE7);}
 .ref-inner-pane{display:none;}
 .ref-inner-pane.active{display:block;}
 .ref-income-balance-card{background:linear-gradient(135deg,#f39c12,#fbbf24);color:#fff;padding:18px 20px;border-radius:16px;margin-bottom:14px;position:relative;overflow:hidden;}
@@ -464,8 +464,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pci-btn.cancel{background:#e5e7eb;color:#374151;}
 .pci-btn.confirm{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
 .pci-btn.confirm:disabled{opacity:.5;cursor:not-allowed;}
-
-/* নতুন যোগ করা প্যাকেজ ডিটেইলস মডাল CSS */
 .pkg-details-card{background:linear-gradient(135deg,#ffffff,#f8faff);border-radius:24px;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.2);text-align:center;position:relative;overflow:hidden;}
 .pkg-details-card::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#00b894,#00cec9);}
 .pd-label{font-size:.75rem;font-weight:900;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
@@ -476,7 +474,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .pd-item .lbl{font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-top:4px;}
 .pkg-claim-btn{width:100%;padding:16px;border-radius:16px;border:none;font-weight:900;font-size:1.05rem;cursor:pointer;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.4);display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;}
 .pkg-claim-btn:disabled{background:linear-gradient(135deg,#94a3b8,#cbd5e1);box-shadow:none;cursor:not-allowed;}
-
 @media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
 </style>
 </head>
@@ -702,6 +699,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <button class="ref-inner-tab active" id="refTabTotal" onclick="switchRefTab('total')"><i class="fas fa-user-friends"></i><span>টোটাল</span><span class="tab-count" id="refTabTotalCount">0</span></button>
                 <button class="ref-inner-tab tab-qualified" id="refTabQualified" onclick="switchRefTab('qualified')"><i class="fas fa-circle-check"></i><span>একটিভ</span><span class="tab-count" id="refTabQualifiedCount">0</span></button>
                 <button class="ref-inner-tab tab-income" id="refTabIncome" onclick="switchRefTab('income')"><i class="fas fa-coins"></i><span>ইনকাম</span><span class="tab-count" id="refTabIncomeCount">0.00</span></button>
+                <button class="ref-inner-tab tab-bonus" id="refTabBonus" onclick="switchRefTab('bonus')"><i class="fas fa-gift"></i><span>বোনাস</span><span class="tab-count" id="refTabBonusCount">0.00</span></button>
             </div>
             <div class="ref-inner-pane active" id="refPaneTotal"><div id="myReferralsList"><div class="empty-state"><i class="fas fa-user-friends"></i><p>এখনো কেউ যোগ দেয়নি</p></div></div></div>
             <div class="ref-inner-pane" id="refPaneQualified">
@@ -714,6 +712,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <button id="refClaimBtn" class="ref-claim-btn locked" onclick="claimReferralIncome()" disabled><i class="fas fa-lock"></i> <span id="refClaimBtnText">ক্লেইম করতে ১০ টাকা প্রয়োজন</span></button>
                 <div class="card-title" style="margin-top:22px; font-size:.95rem;"><i class="fas fa-coins" style="color:#f39c12;"></i> কমিশন হিস্ট্রি</div>
                 <div id="commissionHistoryList"><div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কমিশন পাইনি</p></div></div>
+            </div>
+            <div class="ref-inner-pane" id="refPaneBonus">
+                <div class="ref-income-balance-card" style="background:linear-gradient(135deg,#8b5cf6,#6C5CE7);"><div class="rib-label">🎁 Referral Bonus Balance</div><div class="rib-amt"><span id="refBonusBalance">0.00</span> <span style="font-size:1.2rem;">টাকা</span></div><div class="rib-info"><i class="fas fa-info-circle"></i> Min <b>১০০ টাকা</b> হলে ক্লেইম</div></div>
+                <div id="refBonusNoteWrap"></div>
+                <button id="refBonusClaimBtn" class="ref-claim-btn locked" onclick="claimReferralBonus()" disabled><i class="fas fa-lock"></i> <span id="refBonusClaimBtnText">ক্লেইম করতে ১০০ টাকা প্রয়োজন</span></button>
             </div>
         </div>
 
@@ -831,7 +834,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 if (!navigator.onLine) { const off = document.getElementById('offlineOverlay'); if (off) off.classList.add('active'); }
             }
         } catch(e) { console.error(e); }
-    }, 20000); // ১৫ থেকে বাড়িয়ে ২০ সেকেন্ড করা হলো স্লো ইন্টারনেটের জন্য
+    }, 20000);
     window.addEventListener('error', function(ev) { console.error('[GLOBAL ERROR]', ev.message); });
     window.addEventListener('unhandledrejection', function(ev) { console.error('[UNHANDLED]', ev.reason); });
 })();
@@ -864,6 +867,7 @@ const GEMINI_API_KEY = "AQ.Ab8RN6KeibVDZY19FHXs3eEBtc0PMr7JfmvNep5upsgHGzQVmg";
 
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
+const REFERRAL_BONUS_CLAIM_MIN = 100;
 const HISTORY_LIMIT = 25;
 const REFERRAL_REFRESH_INTERVAL = 15000;
 const CHANNEL_RECHECK_INTERVAL = 60000;
@@ -880,7 +884,7 @@ let withdrawLevels = [];
 
 let appState = {
     user: {
-        balance: 0, adBalance: 0, referralBalance: 0,
+        balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0,
         totalEarned: 0, referrals: 0, activePackageCount: 0,
         taskHistory: {}, withdrawCount: 0, referredUsers: {}, verifiedChannels: {},
         totalCommission: 0, commissionHistory: {}, referredBy: null,
@@ -1001,7 +1005,7 @@ async function handleAutoBotReply(tKey, text) {
     const meta = metaSnap.val() || {};
     if (meta.adminOnline === true || meta.adminTyping === true) return;
 
-    if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") return; // Key না থাকলে চুপচাপ থাকবে
+    if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") return;
 
     const currentCommRate = REF_COMMISSION_RATE || 2; 
     const refBonus = appState.config.refBonus || 5; 
@@ -1015,6 +1019,7 @@ async function handleAutoBotReply(tKey, text) {
     const uBalance = Number(appState.user.balance || 0).toFixed(2);
     const uAdBalance = Number(appState.user.adBalance || 0).toFixed(2);
     const uRefBalance = Number(appState.user.referralBalance || 0).toFixed(2);
+    const uBonusBalance = Number(appState.user.referralBonusBalance || 0).toFixed(2);
     const uActivePkgs = Number(appState.user.activePackageCount || 0);
     const uTotalRefs = Object.keys(appState.user.referredUsers || {}).length;
     const uActiveRefs = validReferralCount; 
@@ -1035,6 +1040,7 @@ async function handleAutoBotReply(tKey, text) {
     Withdrawable ব্যালেন্স: ${uBalance} টাকা
     Deposit ব্যালেন্স: ${uAdBalance} টাকা
     Referral ইনকাম: ${uRefBalance} টাকা
+    Referral বোনাস ব্যালেন্স: ${uBonusBalance} টাকা
     একটিভ প্যাকেজ: ${uActivePkgs} টি (${activePkgNames})
     মোট রেফারেল: ${uTotalRefs} জন (একটিভ: ${uActiveRefs} জন)
     পেন্ডিং টাস্ক: ${pendingTasksCount} টি
@@ -1047,6 +1053,7 @@ async function handleAutoBotReply(tKey, text) {
     ৫. উইথড্র: Withdraw করতে ${reqRefs} জন একটিভ রেফারেল লাগবে। উইথড্র লিমিট ${wdMin} থেকে ${wdMax} টাকা এবং ফি ${wdFee}%।
     ৬. রেফারেল: বন্ধুকে রেফার করলে সে জয়েন করলে বোনাস ${refBonus} টাকা। বন্ধু প্যাকেজ কিনলে তুমি ${currentCommRate}% কমিশন পাবেন।
     ৭. রেফারেল কাউন্ট না বাড়ার কারণ: একটি ডিভাইস থেকে কেবল একবারই রেফারেল গ্রহণ করা যায়। যদি আপনার বন্ধুর ফোনের ডিভাইস আইডি দিয়ে আগে থেকেই অ্যাকাউন্ট থাকে, তবে তাকে নতুন করে রেফার করা যাবে না।
+    ৮. রেফারেল বোনাস ক্লেইম: রেফার করে জয়েন করালে যে বোনাস আসে তা বোনাস কার্ডে জমা হয়। ক্লেইম করতে ১০০ টাকা হতে হবে এবং আপনার রেফার করা সবাইকে প্যাকেজ কিনতে হবে (একটিভ হতে হবে)। যেমন ২ জন রেফার করলে ২ জনকেই প্যাকেজ কিনতে হবে।
 
     [কঠোর আচরণবিধি]
     ১. গ্রিটিংস: "hi", "hello", "হ্যালো", "সালাম" দিলে বলবে: "হ্যালো! আমি ZARA বলছি। কিভাবে আপনাকে সহযোগিতা করতে পারি? অ্যাপস বিষয়ে কোনো তথ্য জানার থাকলে আমাকে বলতে পারেন, অথবা এডমিনের সাথে কথা বলতে চাইলে 'এডমিন' লিখুন।"
@@ -1124,20 +1131,27 @@ async function creditReferrerCommission(commissionAmount, originalEarned, source
    ========================================================= */
 function switchRefTab(tab) {
     currentRefTab = tab;
-    ['refTabTotal','refTabQualified','refTabIncome'].forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
-    ['refPaneTotal','refPaneQualified','refPaneIncome'].forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
+    ['refTabTotal','refTabQualified','refTabIncome','refTabBonus'].forEach(t => { const el = document.getElementById(t); if (el) el.classList.remove('active'); });
+    ['refPaneTotal','refPaneQualified','refPaneIncome','refPaneBonus'].forEach(p => { const el = document.getElementById(p); if (el) el.classList.remove('active'); });
+    
     if (tab === 'total') { const t = document.getElementById('refTabTotal'); if (t) t.classList.add('active'); const p = document.getElementById('refPaneTotal'); if (p) p.classList.add('active'); }
     else if (tab === 'qualified') { const t = document.getElementById('refTabQualified'); if (t) t.classList.add('active'); const p = document.getElementById('refPaneQualified'); if (p) p.classList.add('active'); }
-    else { const t = document.getElementById('refTabIncome'); if (t) t.classList.add('active'); const p = document.getElementById('refPaneIncome'); if (p) p.classList.add('active'); }
+    else if (tab === 'income') { const t = document.getElementById('refTabIncome'); if (t) t.classList.add('active'); const p = document.getElementById('refPaneIncome'); if (p) p.classList.add('active'); }
+    else if (tab === 'bonus') { const t = document.getElementById('refTabBonus'); if (t) t.classList.add('active'); const p = document.getElementById('refPaneBonus'); if (p) p.classList.add('active'); }
 }
+
 function updateRefTabCounts() {
     const totalEl = document.getElementById('refTabTotalCount');
     const qualEl = document.getElementById('refTabQualifiedCount');
     const incEl = document.getElementById('refTabIncomeCount');
+    const bonusEl = document.getElementById('refTabBonusCount');
+    
     if (totalEl) totalEl.textContent = allReferralDataCache.all.length;
     if (qualEl) qualEl.textContent = allReferralDataCache.qualified.length;
     if (incEl) incEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
+    if (bonusEl) bonusEl.textContent = Number(appState.user.referralBonusBalance || 0).toFixed(2);
 }
+
 function renderReferralList() {
     updateRefTabCounts();
     const totalContainer = document.getElementById('myReferralsList');
@@ -1165,11 +1179,17 @@ function renderReferralList() {
             qualContainer.innerHTML = html;
         }
     }
+    
     const ribEl = document.getElementById('refIncomeBalance');
     if (ribEl) ribEl.textContent = Number(appState.user.referralBalance || 0).toFixed(2);
     updateRefClaimButton();
     loadCommissionHistory();
+    
+    const bonusBalEl = document.getElementById('refBonusBalance');
+    if (bonusBalEl) bonusBalEl.textContent = Number(appState.user.referralBonusBalance || 0).toFixed(2);
+    updateBonusClaimButton();
 }
+
 function updateRefClaimButton() {
     const bal = Number(appState.user.referralBalance || 0);
     const btn = document.getElementById('refClaimBtn');
@@ -1186,6 +1206,40 @@ function updateRefClaimButton() {
         if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note"><i class="fas fa-info-circle"></i> Min ' + REFERRAL_CLAIM_MIN + ' ৳</div>';
     }
 }
+
+function updateBonusClaimButton() {
+    const bal = Number(appState.user.referralBonusBalance || 0);
+    const totalRefs = Object.keys(appState.user.referredUsers || {}).length;
+    const activeRefs = validReferralCount; 
+    const btn = document.getElementById('refBonusClaimBtn');
+    const noteWrap = document.getElementById('refBonusNoteWrap');
+    if (!btn) return;
+
+    let reason = '';
+    let canClaim = true;
+
+    if (bal < REFERRAL_BONUS_CLAIM_MIN) {
+        canClaim = false;
+        reason = `আরও ${(REFERRAL_BONUS_CLAIM_MIN - bal).toFixed(2)} ৳ বোনাস প্রয়োজন।`;
+    } else if (totalRefs === 0) {
+        canClaim = false;
+        reason = 'কোনো রেফারেল নেই।';
+    } else if (activeRefs < totalRefs) {
+        canClaim = false;
+        reason = `আপনার ${totalRefs} জন রেফারেলের মধ্যে ${activeRefs} জন একটিভ। সবগুলো রেফারেল (${totalRefs} জন) প্যাকেজ কিনলেই ক্লেইম করতে পারবেন।`;
+    }
+
+    if (canClaim) {
+        btn.classList.remove('locked'); btn.classList.add('ready'); btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> <span>বোনাস ক্লেইম (' + bal.toFixed(2) + ' ৳)</span>';
+        if (noteWrap) noteWrap.innerHTML = '<div class="ref-claim-note success"><i class="fas fa-check-circle"></i> আপনি ক্লেইম করার জন্য যোগ্য!</div>';
+    } else {
+        btn.classList.add('locked'); btn.classList.remove('ready'); btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-lock"></i> <span>লকড</span>';
+        if (noteWrap) noteWrap.innerHTML = `<div class="ref-claim-note"><i class="fas fa-info-circle"></i> ${reason}</div>`;
+    }
+}
+
 async function claimReferralIncome() {
     const bal = Number(appState.user.referralBalance || 0);
     if (bal < REFERRAL_CLAIM_MIN) return;
@@ -1209,6 +1263,37 @@ async function claimReferralIncome() {
         }
     } catch (e) { toast('❌ ' + e.message); }
     finally { updateRefClaimButton(); }
+}
+
+async function claimReferralBonus() {
+    const bal = Number(appState.user.referralBonusBalance || 0);
+    const totalRefs = Object.keys(appState.user.referredUsers || {}).length;
+    const activeRefs = validReferralCount;
+    
+    if (bal < REFERRAL_BONUS_CLAIM_MIN || totalRefs === 0 || activeRefs < totalRefs) return;
+
+    const btn = document.getElementById('refBonusClaimBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; }
+
+    try {
+        const userRef = db.ref('users/' + appState.user.id);
+        const result = await userRef.transaction(cur => {
+            if (!cur) return cur;
+            const rb = Number(cur.referralBonusBalance || 0);
+            if (rb < REFERRAL_BONUS_CLAIM_MIN) return cur;
+            cur.balance = Number(cur.balance || 0) + rb;
+            cur.referralBonusBalance = 0;
+            return cur;
+        });
+        if (result.committed) {
+            appState.user.balance = Number(appState.user.balance || 0) + bal;
+            appState.user.referralBonusBalance = 0;
+            await updateTextElements(); renderReferralList();
+            toast('✅ ' + bal.toFixed(2) + ' ৳ বোনাস Withdrawable এ যোগ হয়েছে!');
+            tryHaptic('success');
+        }
+    } catch (e) { toast('❌ ' + e.message); }
+    finally { updateBonusClaimButton(); }
 }
 
 /* =========================================================
@@ -2187,7 +2272,7 @@ async function updateTextElements() {
     }
     if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
     await calculateValidReferrals();
-    updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts();
+    updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts(); updateBonusClaimButton();
 }
 function setLoading(isLoading) {
     const loader = document.getElementById('loader'), app = document.getElementById('app');
@@ -2254,13 +2339,14 @@ async function checkAndUpdateStatus() {
         const statusEl = document.getElementById('verifyStatus');
         if (!userId || buttons.length === 0) return;
         
-        let joinedCount = 0, notJoinedCount = 0, errorCount = 0;
+        let joinedCount = 0, notJoinedCount = 0, errorBotAdmin = 0, errorChatId = 0;
         
         for (const btn of buttons) {
             const result = await checkChannelMembership(userId, btn.dataset.chatId);
             if (result === 'joined') { btn.classList.add('joined'); joinedCount++; }
             else if (result === 'not_joined') { btn.classList.remove('joined'); notJoinedCount++; }
-            else { btn.classList.remove('joined'); errorCount++; }
+            else if (result === 'error_bot') { errorBotAdmin++; }
+            else { errorChatId++; }
         }
         
         const total = buttons.length;
@@ -2273,10 +2359,12 @@ async function checkAndUpdateStatus() {
                 document.getElementById('joinModal').classList.remove('active');
                 showAppAfterVerify();
             }, 800);
-        } else if (errorCount > 0) {
-            if (statusEl) { statusEl.textContent = '⚠️ Verification error. Ask admin to add bot as Admin.'; statusEl.className = 'verify-status error'; }
+        } else if (errorBotAdmin > 0) {
+            if (statusEl) { statusEl.innerHTML = '❌ <b>বট চ্যানেলে অ্যাডমিন নেই!</b> দয়া করে চ্যানেল সেটিংস থেকে <b>@TaskHubBD24Bot</b> কে অ্যাডমিন বানান।'; statusEl.className = 'verify-status error'; }
+        } else if (errorChatId > 0) {
+            if (statusEl) { statusEl.innerHTML = '❌ <b>চ্যানেল আইডি ভুল!</b> Firebase-এ <b>@username</b> বা <b>-100...</b> ফরম্যাটে চ্যানেল আইডি দিন।'; statusEl.className = 'verify-status error'; }
         } else if (notJoinedCount > 0) {
-            if (statusEl) { statusEl.textContent = '❌ Join ' + notJoinedCount + ' more channel(s)'; statusEl.className = 'verify-status error'; }
+            if (statusEl) { statusEl.textContent = '❌ আপনি এখনো ' + notJoinedCount + ' টি চ্যানেলে জয়েন করেননি।'; statusEl.className = 'verify-status error'; }
         }
     } finally { isCheckingChannel = false; }
 }
@@ -2566,7 +2654,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (!snap.exists()) {
                 appState.user = {
                     id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
-                    balance: 0, adBalance: 0, referralBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
+                    balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
                     taskHistory: {}, referredUsers: {}, verifiedChannels: {},
                     totalCommission: 0, commissionHistory: {}, referredBy: null, dailyBonusDate: '',
                     lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
@@ -2586,6 +2674,12 @@ window.addEventListener('DOMContentLoaded', () => {
                             await userRef.update({ referredBy: String(refBy) });
                             await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', username: tgUser.username || '', joinedAt: Date.now() });
                             await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                            
+                            // 🎁 REFERRAL BONUS AWARD
+                            const refBonusAmount = Number(appState.config.refBonus || 5);
+                            if (refBonusAmount > 0) {
+                                await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
+                            }
                         }
                     }
                 }
@@ -2598,6 +2692,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 appState.user.balance = Number(appState.user.balance || 0);
                 appState.user.adBalance = Number(appState.user.adBalance || 0);
                 appState.user.referralBalance = Number(appState.user.referralBalance || 0);
+                appState.user.referralBonusBalance = Number(appState.user.referralBonusBalance || 0); // Added safety
                 appState.user.activePackageCount = Number(appState.user.activePackageCount || 0);
                 if (!appState.user.referredUsers) appState.user.referredUsers = {};
                 if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
@@ -2752,11 +2847,6 @@ function loadPkgHistory() {
     if (!items.length) { c.innerHTML = '<div class="empty-state"><p>No package claims</p></div>'; return; }
     c.innerHTML = items.map(it => `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon" style="background:rgba(0,184,148,.15);color:#00b894;"><i class="fas fa-box-open"></i></div><div class="history-info"><h5>${esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`).join('');
 }
-
-/* Channel verification helpers */
-function getCurrentChannelLinks() { return channelLinks || []; }
-async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
-
 </script>
 </body>
 </html>
