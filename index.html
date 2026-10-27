@@ -862,13 +862,15 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
-const BOT_USERNAME = "TaskHubBD24Bot";
-const SUPPORT_LINK = "https://t.me/NexEarn2Support";
+// ❌ আগের হার্ডকোডগুলো মুছে ফেলুন এবং এগুলো বসান:
+let BOT_TOKEN = ""; 
+let ADMIN_TELEGRAM_ID = ""; 
+let SUPPORT_LINK = ""; 
+let GEMINI_API_KEY = ""; 
 
-const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
-const ADMIN_TELEGRAM_ID = "6624254778";
-const GEMINI_API_KEY = "AQ.Ab8RN6KdSJWIQkYhpTPHGkTdYvaLAg_K2PFn9_TGwfUOpuwTCg"; 
+// এগুলো পাবলিক, কোডে থাকতে পারে
+const BOT_USERNAME = "TaskHubBD24Bot";
+const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";  
 
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
@@ -1052,6 +1054,7 @@ async function handleAutoBotReply(tKey, text) {
     if (meta.adminOnline === true || meta.adminTyping === true) return;
 
     if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") return;
+    if (!BOT_TOKEN || !ADMIN_TELEGRAM_ID) return;
 
     const currentCommRate = REF_COMMISSION_RATE || 2; 
     const refBonus = appState.config.refBonus || 5; 
@@ -2386,7 +2389,6 @@ async function updateTextElements() {
     if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
     await calculateValidReferrals();
     updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts(); updateBonusClaimButton();
-    updatePendingConversionUI();
 }
 
 function updatePendingConversionUI() {
@@ -3021,7 +3023,6 @@ window.addEventListener('DOMContentLoaded', () => {
 function startPeriodicRecheck() {
     stopPeriodicRecheck();
     startCooldownTicker(); startTaskExpiryTicker();
-    startPendingConversionTimer();
     lastActiveInterval = setInterval(updateLastActive, LAST_ACTIVE_INTERVAL_MS);
     referralRefreshInterval = setInterval(async () => {
         if (!isOnline || !isBooted || document.hidden) return;
@@ -3044,7 +3045,6 @@ function stopPeriodicRecheck() {
     if (lastActiveInterval) { clearInterval(lastActiveInterval); lastActiveInterval = null; }
     if (cooldownTimerInterval) { clearInterval(cooldownTimerInterval); cooldownTimerInterval = null; }
     stopTaskExpiryTicker();
-    stopPendingConversionTimer();
 }
 function updateNetworkStatus() {
     isOnline = navigator.onLine;
@@ -3099,6 +3099,33 @@ function loadPkgHistory() {
 /* Channel verification helpers */
 function getCurrentChannelLinks() { return channelLinks || []; }
 async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
+// ইউজার প্যানেলের </script> ট্যাগের ঠিক উপরে এটি পেস্ট করুন:
+db.ref('config').on('value', snap => {
+    if (!snap.exists()) return;
+    const newConfig = snap.val();
+    
+    // ফায়ারবেস থেকে সিক্রেট লোড করা
+    if (newConfig.botToken) BOT_TOKEN = String(newConfig.botToken).trim();
+    if (newConfig.adminTelegramId) ADMIN_TELEGRAM_ID = String(newConfig.adminTelegramId).trim();
+    if (newConfig.supportLink) SUPPORT_LINK = String(newConfig.supportLink).trim();
+    if (newConfig.geminiApiKey) GEMINI_API_KEY = String(newConfig.geminiApiKey).trim();
+
+    // বাকি কনফিগ আপডেট
+    appState.config = newConfig;
+    if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
+    if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
+    REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
+    if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
+    
+    if (isBooted) { 
+        updateTextElements(); 
+        renderNewTasks(); 
+        if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); 
+        if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage(); 
+        if (document.getElementById('page-home').classList.contains('active')) loadPackages(); 
+        if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage(); 
+    }
+});
 </script>
 </body>
 </html>
