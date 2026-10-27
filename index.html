@@ -14,7 +14,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 <style>
-/* ... (আগের সব CSS একই আছে) ... */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;}
@@ -969,6 +968,7 @@ async function checkChannelMembership(userId, chatId) {
     
     const formatted = formatChatIdForApi(chatId);
     let result = 'unknown';
+    
     try {
         const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=' + encodeURIComponent(formatted) + '&user_id=' + encodeURIComponent(userId);
         const res = await fetchWithTimeout(url, {}, 10000);
@@ -979,10 +979,24 @@ async function checkChannelMembership(userId, chatId) {
             if (st === 'member' || st === 'administrator' || st === 'creator') result = 'joined';
             else result = 'not_joined';
         } else if (data && !data.ok) {
-            if (data.error_code === 403 || (data.description && data.description.toLowerCase().includes('administrator'))) result = 'error_bot';
-            else result = 'not_joined';
+            if (data.error_code === 403 || (data.description && data.description.toLowerCase().includes('administrator'))) {
+                console.error("Bot is not an admin in", chatId);
+                result = 'error_bot';
+            } else if (data.error_code === 400) {
+                if (data.description && data.description.toLowerCase().includes('chat not found')) {
+                    console.error("Channel not found:", chatId);
+                    result = 'error_chat_id';
+                } else {
+                    result = 'not_joined'; // Generally means 'user not found' (not joined)
+                }
+            } else {
+                result = 'not_joined'; // Default to not joined to avoid blocking users
+            }
         }
-    } catch(e) { result = 'error_network'; }
+    } catch(e) {
+        console.warn('[CHANNEL CHECK] API error:', e.message);
+        result = 'error_network';
+    }
     
     CHANNEL_CHECK_CACHE.set(cacheKey, { result, timestamp: Date.now() });
     return result;
@@ -2848,10 +2862,6 @@ function loadPkgHistory() {
     if (!items.length) { c.innerHTML = '<div class="empty-state"><p>No package claims</p></div>'; return; }
     c.innerHTML = items.map(it => `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon" style="background:rgba(0,184,148,.15);color:#00b894;"><i class="fas fa-box-open"></i></div><div class="history-info"><h5>${esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`).join('');
 }
-
-/* Channel verification helpers */
-function getCurrentChannelLinks() { return channelLinks || []; }
-async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
 </script>
 </body>
 </html>
