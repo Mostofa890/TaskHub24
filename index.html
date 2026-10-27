@@ -840,6 +840,7 @@ const tg = window.Telegram ? window.Telegram.WebApp : null;
 
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const CHANNEL_CHECK_API = "";
+const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k"; // 👈 এখানে আপনার বট টোকেন বসান    
 const BOT_USERNAME = "TaskHubBD24Bot";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
@@ -2486,11 +2487,48 @@ async function checkAndUpdateStatus() {
         const buttons = document.querySelectorAll('.channel-btn');
         const statusEl = document.getElementById('verifyStatus');
         if (!userId) return;
-        let allJoined = true, hasUnknown = false, anyNotJoined = false;
-        for (const btn of buttons) { const result = await checkChannelMembership(userId, btn.dataset.chatId); if (result === 'joined') btn.classList.add('joined'); else if (result === 'not_joined') { btn.classList.remove('joined'); allJoined = false; anyNotJoined = true; } else { btn.classList.remove('joined'); hasUnknown = true; } }
-        if (allJoined && !hasUnknown && buttons.length > 0) { if (statusEl) { statusEl.textContent = '✅ All joined!'; statusEl.className = 'verify-status success'; } if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; } await markVerified(); setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800); }
-        else if (anyNotJoined) { const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length; if (statusEl) { statusEl.textContent = '❌ Join ' + remaining + ' more'; statusEl.className = 'verify-status error'; } }
-    } finally { isCheckingChannel = false; }
+
+        // যদি অ্যাডমিন প্যানেল থেকে কোনো চ্যানেল সেট করা না থাকে, তবে সরাসরি ঢুকতে দেবে
+        if (buttons.length === 0) {
+            if (statusEl) { statusEl.textContent = '✅ Verified'; statusEl.className = 'verify-status success'; }
+            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
+            await markVerified(); 
+            setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800); 
+            return;
+        }
+
+        let allJoined = true, anyNotJoined = false, hasUnknown = false;
+        
+        for (const btn of buttons) { 
+            const result = await checkChannelMembership(userId, btn.dataset.chatId); 
+            if (result === 'joined') {
+                btn.classList.add('joined'); 
+            } else if (result === 'not_joined') { 
+                btn.classList.remove('joined'); 
+                allJoined = false; 
+                anyNotJoined = true; 
+            } else { 
+                btn.classList.remove('joined'); 
+                allJoined = false;
+                hasUnknown = true; 
+            } 
+        }
+        
+        if (allJoined && !hasUnknown) { 
+            if (statusEl) { statusEl.textContent = '✅ All joined!'; statusEl.className = 'verify-status success'; } 
+            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; } 
+            await markVerified(); 
+            setTimeout(() => { document.getElementById('joinModal').classList.remove('active'); showAppAfterVerify(); }, 800); 
+        }
+        else if (anyNotJoined) { 
+            const remaining = buttons.length - document.querySelectorAll('.channel-btn.joined').length; 
+            if (statusEl) { statusEl.textContent = '❌ Join ' + remaining + ' more channel(s) to continue'; statusEl.className = 'verify-status error'; } 
+        } else if (hasUnknown) {
+            if (statusEl) { statusEl.textContent = '⏳ Checking... (Make sure bot is Admin)'; statusEl.className = 'verify-status loading'; } 
+        }
+    } finally { 
+        isCheckingChannel = false; 
+    }
 }
 async function showAppAfterVerify() {
     if (!isOnline) return;
@@ -2871,13 +2909,30 @@ async function needsVerification() {
 async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
 async function checkChannelMembership(userId, chatId) {
     try {
-        // আপনার যদি চ্যানেল চেক করার API থাকে, তবে এখানে URL বসাবেন।
-        if (!CHANNEL_CHECK_API) return 'unknown'; 
-        const res = await fetch(`${CHANNEL_CHECK_API}?chat_id=${chatId}&user_id=${userId}`);
+        if (!BOT_TOKEN || BOT_TOKEN.length < 20) {
+            console.error("Bot token is missing or invalid.");
+            return 'unknown';
+        }
+
+        let formattedChatId = String(chatId).trim();
+        if (!formattedChatId.startsWith('@') && !formattedChatId.startsWith('-')) {
+            formattedChatId = '@' + formattedChatId;
+        }
+
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getChatMember?chat_id=${formattedChatId}&user_id=${userId}`);
         const data = await res.json();
-        if (data && data.ok && (data.result.status === 'member' || data.result.status === 'administrator' || data.result.status === 'creator')) return 'joined';
+        
+        if (data.ok) {
+            const status = data.result.status;
+            if (status === 'member' || status === 'administrator' || status === 'creator') {
+                return 'joined';
+            }
+        }
         return 'not_joined';
-    } catch(e) { return 'unknown'; }
+    } catch (e) {
+        console.error("Channel check error:", e);
+        return 'unknown'; 
+    }
 }
 </script>
 </body>
