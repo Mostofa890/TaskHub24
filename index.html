@@ -830,7 +830,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <div class="chat-head-avatar"><i class="fas fa-headset"></i></div>
                 <div>
                     <div class="chat-head-title">Support Chat</div>
-                    <div class="chat-head-sub"><span class="dot-online"></span> <span>Usually replies fast</span></div>
+                    <div class="chat-head-sub">
+                <span class="dot-online" id="supportStatusDot" style="background:#fbbf24; box-shadow:0 0 8px #fbbf24;"></span> 
+                <span>Usually replies fast</span>
+                <span id="supportStatusName" style="font-weight:700; margin-left:4px; color:#fbbf24;">• Bot Active</span>
+                </div>
                 </div>
             </div>
             <button class="chat-close" onclick="closeChatModal()"><i class="fas fa-times"></i></button>
@@ -2565,6 +2569,7 @@ function startChatListeners() {
     const tKey = getChatThreadKey();
     const chatRef = db.ref('chats/' + tKey);
 
+    // ১. মেসেজ লিসেনার
     if (chatMessagesListener) chatRef.child('messages').off('value', chatMessagesListener);
     chatMessagesListener = chatRef.child('messages').orderByChild('timestamp').on('value', snap => {
         const messages = [];
@@ -2573,10 +2578,19 @@ function startChatListeners() {
         if (document.getElementById('chatOverlay').classList.contains('active')) markChatAsRead();
     });
 
+    // ২. আনরিড ব্যাজ লিসেনার
     if (chatUnreadListener) chatRef.child('meta').off('value', chatUnreadListener);
-    chatUnreadListener = chatRef.child('meta').on('value', snap => { const m = snap.val() || {}; const unread = Number(m.unreadForUser || 0); const badge = document.getElementById('chatFabBadge'); if (badge) { if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; } else badge.style.display = 'none'; } });
+    chatUnreadListener = chatRef.child('meta').on('value', snap => { 
+        const m = snap.val() || {}; 
+        const unread = Number(m.unreadForUser || 0); 
+        const badge = document.getElementById('chatFabBadge'); 
+        if (badge) { 
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; } 
+            else badge.style.display = 'none'; 
+        } 
+    });
 
-    // টাইপিং ইন্ডিকেটর লিসেনার
+    // ৩. টাইপিং ইন্ডিকেটর লিসেনার
     if (chatTypingListener) chatRef.child('meta/adminTyping').off('value', chatTypingListener);
     chatTypingListener = chatRef.child('meta/adminTyping').on('value', snap => {
         const isTyping = snap.val() === true;
@@ -2584,6 +2598,35 @@ function startChatListeners() {
         if (indicator) {
             if (isTyping) { indicator.classList.add('show'); scrollChatToBottom(); } 
             else { indicator.classList.remove('show'); }
+        }
+    });
+
+    // ৪. এডমিন/বট অনলাইন স্ট্যাটাস আপডেট লজিক (নতুন যোগ করা)
+    db.ref('chats/' + tKey + '/meta/adminOnline').on('value', snap => {
+        const isOnline = snap.val() === true;
+        const nameEl = document.getElementById('supportStatusName');
+        const dotEl = document.getElementById('supportStatusDot');
+        
+        if (isOnline) {
+            // এডমিন অনলাইনে থাকলে
+            if (nameEl) {
+                nameEl.textContent = '• Admin Active';
+                nameEl.style.color = '#34d399'; // সবুজ রঙ
+            }
+            if (dotEl) { 
+                dotEl.style.background = '#34d399'; 
+                dotEl.style.boxShadow = '0 0 8px #34d399'; 
+            }
+        } else {
+            // এডমিন অফলাইনে থাকলে (বট একটিভ)
+            if (nameEl) {
+                nameEl.textContent = '• Bot Active';
+                nameEl.style.color = '#fbbf24'; // হলুদ রঙ
+            }
+            if (dotEl) { 
+                dotEl.style.background = '#fbbf24'; 
+                dotEl.style.boxShadow = '0 0 8px #fbbf24'; 
+            }
         }
     });
 }
@@ -2668,17 +2711,15 @@ function initUserChatSystem() { const fab = document.getElementById('chatFab'); 
 
 // অটো বট রিপ্লাই ফাংশন
 async function handleAutoBotReply(tKey, text) {
-    // চেক করুন অ্যাডমিন কি ম্যানুয়ালি রিপ্লাই দিয়েছে বা টাইপ করছে
     const metaSnap = await db.ref('chats/' + tKey + '/meta').once('value');
     const meta = metaSnap.val() || {};
     
-    // যদি অ্যাডমিন ম্যানুয়ালি মেসেজ দিয়ে থাকে (বট নয়) অথবা অ্যাডমিন টাইপ করছে, তবে বট রিপ্লাই দেবে না
-    if ((meta.lastMessageFrom === 'admin' && meta.lastAdminId !== 'bot') || meta.adminTyping === true) {
+    // 👇 এডমিন অনলাইনে থাকলে বা টাইপ করলে বট রিপ্লাই দেবে না 👇
+    if (meta.adminOnline === true || meta.adminTyping === true) {
         return; 
     }
 
     let reply = null;
-    
     if (text.match(/(hi|hello|hey|হ্যালো|হাই|সালাম)/i)) {
         reply = "হ্যালো! আমি অটোমেটেড বট। আপনার কী সমস্যা হয়েছে জানান, আমি সমাধান দেওয়ার চেষ্টা করব। (এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন)";
     } 
@@ -2707,7 +2748,12 @@ async function handleAutoBotReply(tKey, text) {
     if (reply) {
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(true);
         setTimeout(async () => {
+            // মেসেজ পাঠানোর আগে আবারো চেক করি অ্যাডমিন অনলাইনে এসেছে কিনা
+            const freshMeta = (await db.ref('chats/' + tKey + '/meta').once('value')).val() || {};
             await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
+            
+            if (freshMeta.adminOnline === true) return; // এডমিন অনলাইনে এলে বট মেসেজ পাঠাবে না
+
             await db.ref('chats/' + tKey + '/messages').push({
                 from: 'admin', adminId: 'bot', adminName: 'Auto Bot',
                 text: reply, type: 'text', timestamp: Date.now(), read: false
@@ -2722,7 +2768,6 @@ async function handleAutoBotReply(tKey, text) {
         }, 2000);
     }
 }
-
 // ওয়েলকাম মেসেজ ফাংশন
 async function sendWelcomeMessageIfNew() {
     const tKey = getChatThreadKey();
