@@ -372,115 +372,63 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .share-close-btn{width:100%;padding:12px;border-radius:12px;border:1.5px solid #e5e7eb;background:#f9fafb;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;}
 .packages-container{padding:0 20px 20px}
 .pkg-grid{display:grid;grid-template-columns:1fr;gap:14px}
-.pkg-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:20px;padding:18px;position:relative;overflow:hidden;box-shadow:0 8px 24px rgba(108,92,231,.08);transition:all .25s}
-.pkg-card.active-pkg{border-color:#00b894;background:linear-gradient(135deg,#f0fff9,#e6fff5)}
-.pkg-card.expired-pkg{border-color:#ef4444;background:linear-gradient(135deg,#fef2f2,#fee2e2)}
-.pkg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,#6C5CE7,#A29BFE,#00cec9)}
-.pkg-card.active-pkg::before{background:linear-gradient(90deg,#00b894,#00cec9)}
+
+/* === PREMIUM PACKAGE CARD DESIGN === */
+.pkg-card{background:linear-gradient(135deg,#ffffff,#f8faff);border:2px solid #e0e7ff;border-radius:24px;padding:20px;position:relative;overflow:hidden;box-shadow:0 12px 30px rgba(99,102,241,.08);transition:all .3s ease;}
+.pkg-card::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#6366f1,#ec4899,#06b6d4)}
+.pkg-card.active-pkg{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:#86efac}
+.pkg-card.active-pkg::before{background:linear-gradient(90deg,#22c55e,#10b981)}
+.pkg-card.expired-pkg{background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:#fca5a5}
 .pkg-card.expired-pkg::before{background:linear-gradient(90deg,#ef4444,#f87171)}
-.pkg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
-.pkg-title{font-size:1.1rem;font-weight:900;color:#1a1a2e;display:flex;align-items:center;gap:8px}
-.pkg-title-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-.pkg-badge{font-size:.65rem;font-weight:800;padding:4px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.pkg-inactive-overlay{position:absolute;inset:0;background:rgba(255,255,255,0.4);backdrop-filter:blur(5px);z-index:10;display:flex;align-items:center;justify-content:center;flex-direction:column;}
+.pkg-inactive-overlay span{background:#ef4444;color:#fff;padding:8px 20px;border-radius:30px;font-weight:900;font-size:0.85rem;box-shadow:0 4px 15px rgba(239,68,68,.4);text-transform:uppercase;letter-spacing:1px;}
+.pkg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:16px}
+.pkg-title{font-size:1.15rem;font-weight:900;color:#1a1a2e;display:flex;align-items:center;gap:10px}
+.pkg-title-icon{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;box-shadow:0 6px 16px rgba(108,92,231,.35)}
+.pkg-badge{font-size:.65rem;font-weight:800;padding:5px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
 .pkg-badge.active{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
 .pkg-badge.available{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff}
 .pkg-badge.expired{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff}
-.pkg-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-.pkg-stat{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:10px 6px;text-align:center}
-.pkg-stat .val{font-weight:900;font-size:.95rem;line-height:1.1}
+.pkg-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.pkg-stat{background:#fff;border:1.5px solid #e5e7eb;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.02)}
+.pkg-stat .val{font-weight:900;font-size:1.05rem;line-height:1.1}
 .pkg-stat .lbl{font-size:.6rem;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-top:4px;letter-spacing:.05em}
 .pkg-stat.price .val{color:#f39c12}
 .pkg-stat.daily .val{color:#00b894}
 .pkg-stat.duration .val{color:#6C5CE7}
-.pkg-meta{font-size:.72rem;color:#64748b;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pkg-meta{font-size:.75rem;color:#64748b;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .pkg-meta span{display:inline-flex;align-items:center;gap:5px}
-.pkg-buy-btn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:all .2s}
+.pkg-buy-btn{width:100%;padding:15px;border-radius:14px;border:none;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;transition:all .2s}
 .pkg-buy-btn.upgrade{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;box-shadow:0 8px 20px rgba(108,92,231,.35)}
 .pkg-buy-btn.active-btn{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35);cursor:pointer}
 .pkg-buy-btn:disabled{opacity:.6;cursor:not-allowed}
-.pkg-confirm-overlay{display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:20px}
-.pkg-confirm-overlay.active{display:flex}
-.pkg-confirm-box{background:#fff;border-radius:22px;padding:24px;max-width:380px;width:100%;text-align:center}
-.pkg-confirm-box .pci-icon{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;background:linear-gradient(135deg,#4338ca,#6366f1);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.8rem;box-shadow:0 10px 26px rgba(67,56,202,.4)}
-.pkg-confirm-box h3{font-size:1.15rem;font-weight:900;margin-bottom:6px;color:#1a1a2e}
-.pkg-confirm-box .pci-sub{font-size:.82rem;color:#64748b;margin-bottom:16px;font-weight:600}
-.pkg-confirm-box .pci-info{background:#f8fafc;padding:14px;border-radius:12px;margin-bottom:16px;text-align:left}
-.pkg-confirm-box .pci-row{display:flex;justify-content:space-between;padding:6px 0;font-size:.82rem;font-weight:700;color:#475569}
-.pkg-confirm-box .pci-row .val{font-weight:900;color:#6C5CE7}
-.pkg-confirm-box .pci-row.total{border-top:2px dashed #e5e7eb;margin-top:6px;padding-top:10px;font-size:.95rem}
-.pkg-confirm-box .pci-row.total .val{color:#00b894;font-size:1.05rem}
-.pkg-confirm-box .pci-actions{display:flex;gap:10px}
-.pkg-confirm-box .pci-btn{flex:1;padding:14px;border-radius:12px;border:none;font-weight:900;font-size:.88rem;cursor:pointer;font-family:inherit}
-.pkg-confirm-box .pci-btn.cancel{background:#f1f5f9;color:#64748b}
-.pkg-confirm-box .pci-btn.confirm{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.35)}
-.pkg-details-card{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;border-radius:20px;padding:20px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,184,148,.35)}
-.pkg-details-card::before{content:'';position:absolute;width:150px;height:150px;background:rgba(255,255,255,.15);border-radius:50%;top:-60px;right:-40px}
-.pkg-details-card .pd-label{font-size:.7rem;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
-.pkg-details-card .pd-title{font-size:1.5rem;font-weight:900;margin:6px 0;position:relative;z-index:1}
-.pkg-details-card .pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;position:relative;z-index:1}
-.pkg-details-card .pd-item{background:rgba(255,255,255,.2);padding:10px 12px;border-radius:12px;backdrop-filter:blur(10px)}
-.pkg-details-card .pd-item .num{font-size:1.15rem;font-weight:900}
-.pkg-details-card .pd-item .lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;opacity:.9;margin-top:2px}
-.pkg-claim-btn{width:100%;padding:16px;border-radius:14px;border:none;font-weight:900;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:inherit;background:#fff;color:#00b894;margin-top:16px;box-shadow:0 10px 24px rgba(0,0,0,.15);position:relative;z-index:1}
-.pkg-claim-btn:disabled{background:rgba(255,255,255,.35);color:rgba(255,255,255,.8);cursor:not-allowed}
-.deposit-provider-card{background:linear-gradient(135deg,#fff,#f8fafc);border:2px solid #e5e7eb;border-radius:18px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;}
-.deposit-provider-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px}
-.deposit-provider-card.bkash::before{background:linear-gradient(180deg,#e2136e,#f472b6)}
-.deposit-provider-card.nagad::before{background:linear-gradient(180deg,#ec1c24,#f87171)}
-.deposit-provider-card.rocket::before{background:linear-gradient(180deg,#8b2f8e,#c084fc)}
-.deposit-provider-card.upay::before{background:linear-gradient(180deg,#f59e0b,#fbbf24)}
-.deposit-provider-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
-.deposit-provider-name{font-weight:900;font-size:1.05rem;display:flex;align-items:center;gap:10px}
-.deposit-provider-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;font-weight:900;flex-shrink:0}
-.deposit-provider-icon.bkash{background:linear-gradient(135deg,#e2136e,#f472b6)}
-.deposit-provider-icon.nagad{background:linear-gradient(135deg,#ec1c24,#f87171)}
-.deposit-provider-icon.rocket{background:linear-gradient(135deg,#8b2f8e,#c084fc)}
-.deposit-provider-icon.upay{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
-.deposit-min-badge{font-size:.68rem;font-weight:800;background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;padding:5px 12px;border-radius:20px;white-space:nowrap}
-.deposit-step-box{background:#fff;border-radius:18px;padding:20px;margin:0 20px 16px;border:1.5px solid #e5e7eb}
-.deposit-step-title{font-size:1rem;font-weight:900;color:#1a1a2e;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.deposit-type-selector{display:flex;gap:10px;margin-bottom:14px;}
-.deposit-type-btn{flex:1;padding:12px;border-radius:12px;border:2px solid #e5e7eb;background:#fff;font-weight:800;font-size:0.9rem;color:#64748b;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
-.deposit-type-btn.active{border-color:#6C5CE7;background:#f5f3ff;color:#6C5CE7;}
-.deposit-form-group{margin-bottom:14px;}
-.deposit-form-group label{font-size:.75rem;font-weight:800;color:#475569;display:block;margin-bottom:6px}
-.deposit-form-group input,.deposit-form-group select{width:100%;padding:14px;border:1.5px solid #e5e7eb;border-radius:12px;font-size:.95rem;font-family:inherit;outline:none;background:#f8fafc;font-weight:600;}
-.deposit-note-box{font-size:.75rem;color:#92400e;font-weight:700;background:#fef3c7;padding:12px 14px;border-radius:10px;border-left:3px solid #f59e0b;margin-bottom:14px;line-height:1.5}
-.deposit-submit-btn{width:100%;padding:15px;border-radius:12px;border:none;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:900;font-size:.95rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit}
-.deposit-history-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1.5px solid #e5e7eb;border-left:4px solid #f59e0b;border-radius:12px;padding:12px 14px;margin-bottom:10px;}
-.deposit-history-item.approved{border-left-color:#10b981;}
-.deposit-history-item.rejected{border-left-color:#ef4444;}
-.dhi-left{flex:1;min-width:0;}
-.dhi-amount{font-weight:900;font-size:.95rem;color:#1a1a2e;}
-.dhi-meta{font-size:.68rem;color:#64748b;font-weight:700;margin-top:3px;}
-.dhi-badge{font-size:.62rem;font-weight:900;padding:4px 10px;border-radius:20px;text-transform:uppercase;white-space:nowrap;}
-.dhi-badge.pending{background:#fef3c7;color:#92400e;}
-.dhi-badge.approved{background:#d1fae5;color:#065f46;}
-.dhi-badge.rejected{background:#fee2e2;color:#991b1b;}
-.claim-hero{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:22px;border-radius:22px;margin:0 20px 16px;position:relative;overflow:hidden;box-shadow:0 14px 32px rgba(0,184,148,.35)}
-.claim-hero::before{content:'';position:absolute;width:180px;height:180px;background:rgba(255,255,255,.12);border-radius:50%;top:-80px;right:-50px}
-.claim-hero .ch-label{font-size:.72rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
-.claim-hero .ch-amt{font-size:2.4rem;font-weight:900;margin:6px 0;text-shadow:0 3px 12px rgba(0,0,0,.2);position:relative;z-index:1}
-.claim-hero .ch-info{font-size:.72rem;font-weight:700;background:rgba(0,0,0,.15);padding:8px 14px;border-radius:10px;display:inline-block;position:relative;z-index:1}
-.claim-pkg-item{background:#fff;border:1.5px solid #e5e7eb;border-radius:16px;padding:14px;margin:0 20px 12px;border-left:5px solid #6C5CE7}
-.claim-pkg-item.ready{border-left-color:#00b894;background:linear-gradient(135deg,#f0fff9,#fff)}
-.claim-pkg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
-.claim-pkg-name{font-weight:900;font-size:.95rem;color:#1a1a2e}
-.claim-pkg-daily{font-size:.72rem;color:#64748b;font-weight:700;margin-top:3px}
-.claim-pkg-badge{font-size:.62rem;font-weight:900;padding:4px 10px;border-radius:20px;text-transform:uppercase}
-.claim-pkg-badge.ready{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
-.claim-pkg-badge.wait{background:#fef3c7;color:#92400e}
-.claim-pkg-badge.expired{background:#fee2e2;color:#991b1b}
-.claim-btn-single{width:100%;padding:12px;border-radius:10px;border:none;font-weight:800;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
-.claim-btn-single.ready{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff}
-.claim-btn-single.wait{background:#f1f5f9;color:#64748b;cursor:not-allowed}
-.claim-btn-single.expired{background:#fee2e2;color:#991b1b;cursor:not-allowed}
-.claim-history-item{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;border-left:4px solid #00b894;box-shadow:0 2px 8px rgba(0,0,0,0.03);}
-.chi-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-.chi-info{flex:1;min-width:0;}
-.chi-info h5{font-size:.85rem;font-weight:800;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.chi-info p{font-size:.68rem;color:#64748b;font-weight:700;margin-top:2px;}
-.chi-amount{font-weight:900;font-size:.95rem;color:#00b894;white-space:nowrap;}
+
+/* === PREMIUM CLAIM CARD DESIGN === */
+.claim-hero{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:24px;border-radius:24px;margin:0 20px 20px;position:relative;overflow:hidden;box-shadow:0 16px 35px rgba(0,184,148,.35)}
+.claim-hero::before{content:'';position:absolute;width:200px;height:200px;background:rgba(255,255,255,.15);border-radius:50%;top:-90px;right:-60px}
+.claim-hero .ch-label{font-size:.75rem;font-weight:900;letter-spacing:1.2px;text-transform:uppercase;opacity:.9;position:relative;z-index:1}
+.claim-hero .ch-amt{font-size:2.6rem;font-weight:900;margin:6px 0;text-shadow:0 4px 15px rgba(0,0,0,.2);position:relative;z-index:1}
+.claim-hero .ch-info{font-size:.75rem;font-weight:700;background:rgba(0,0,0,.15);padding:8px 14px;border-radius:10px;display:inline-block;position:relative;z-index:1}
+
+.claim-card-v2{background:linear-gradient(135deg,#ffffff,#f8fafc);border:2px solid #e2e8f0;border-radius:20px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(0,0,0,.04);}
+.claim-card-v2.ready{border-color:#10b981;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);}
+.claim-card-v2 .cc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.claim-card-v2 .cc-title{font-size:1.05rem;font-weight:900;color:#1e293b;display:flex;align-items:center;gap:8px;}
+.claim-card-v2 .cc-badge{font-size:.65rem;font-weight:900;padding:4px 10px;border-radius:20px;background:#e0e7ff;color:#4338ca;}
+.claim-card-v2.ready .cc-badge{background:#d1fae5;color:#065f46;}
+.claim-card-v2 .cc-stats{display:flex;gap:10px;margin-bottom:16px;}
+.claim-card-v2 .cc-stat{flex:1;background:#fff;padding:10px;border-radius:12px;text-align:center;border:1px solid #f1f5f9;}
+.claim-card-v2 .cc-stat .val{font-size:1rem;font-weight:900;color:#4338ca;}
+.claim-card-v2 .cc-stat .lbl{font-size:.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-top:2px;}
+.cc-btn-claim{width:100%;padding:14px;border-radius:12px;border:none;font-weight:900;font-size:1rem;cursor:pointer;background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 8px 20px rgba(16,185,129,.4);display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;}
+.cc-btn-claim:active{transform:scale(.98);}
+
+/* ক্লেইম কুলডাউন ওভারলে (ব্লার) */
+.claim-cooldown-overlay{position:absolute;inset:0;background:rgba(255,100,100,0.15);backdrop-filter:blur(4px);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:20px;border:2px dashed rgba(239,68,68,.4);}
+.claim-cooldown-overlay .cd-timer{font-size:2rem;font-weight:900;color:#dc2626;font-variant-numeric:tabular-nums;text-shadow:0 2px 10px rgba(255,255,255,.8);}
+.claim-cooldown-overlay .cd-text{font-size:.85rem;font-weight:800;color:#991b1b;margin-bottom:4px;}
+
+/* === চ্যাট সিস্টেম === */
 .chat-fab{position:fixed;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 10px 26px rgba(108,92,231,.5);z-index:9997;display:flex;align-items:center;justify-content:center;}
 .chat-fab .chat-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:900;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #fff}
 .chat-overlay{position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;}
@@ -501,8 +449,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-msg .msg-img{max-width:100%;border-radius:8px;margin-top:4px;display:block;cursor:pointer}
 .chat-empty{text-align:center;padding:40px 20px;color:var(--text-light);font-size:.85rem;font-weight:600}
 .chat-empty i{font-size:2.5rem;display:block;margin-bottom:10px;color:var(--border)}
-
-/* === চ্যাট ইনপুট ফিক্স === */
 .chat-input-wrap{padding:10px 12px;border-top:1px solid var(--border);background:#fff;display:flex;gap:6px;align-items:center;width:100%;box-sizing:border-box;flex-shrink:0;}
 .chat-input{flex:1;min-width:0;padding:12px 16px;border:1.5px solid var(--border);border-radius:24px;font-size:.88rem;outline:none;font-family:inherit;background:#f8fafc;box-sizing:border-box;}
 .chat-send,.chat-attach{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
@@ -511,8 +457,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-light);flex-shrink:0;}
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
-
-/* === টাইপিং ইন্ডিকেটর === */
 .typing-indicator{align-self:flex-start;background:#fff;padding:8px 14px;border-radius:16px;border-bottom-left-radius:4px;border:1px solid var(--border);display:none;gap:6px;align-items:center;font-size:.75rem;color:var(--text-light);font-weight:600;margin-top:4px;}
 .typing-indicator.show{display:flex;}
 .typing-dots{display:flex;gap:3px;margin-left:4px;}
@@ -520,9 +464,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .typing-dots span:nth-child(1){animation-delay:-0.32s;}
 .typing-dots span:nth-child(2){animation-delay:-0.16s;}
 @keyframes typing{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-
-.pkg-countdown-live{display:inline-flex;align-items:center;gap:5px;background:rgba(243,156,18,.12);color:#d97706;padding:6px 12px;border-radius:20px;font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:8px;}
-.pkg-countdown-live i{font-size:.68rem;}
 @media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
 </style>
 </head>
@@ -666,7 +607,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <div class="ch-amt" style="font-size: 1.8rem; margin: 6px 0 0;"><span id="totalPackageIncome">0.00</span> <small style="font-size:1rem;">TK</small></div>
             </div>
         </div>
-        <div id="claimPackagesList">
+        <div id="claimPackagesList" style="padding:0 20px;">
             <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages yet</p></div>
         </div>
     </div>
@@ -1192,30 +1133,41 @@ async function loadPackages() {
         const list = [];
         snap.forEach(x => { const p = { id: x.key, ...x.val() }; allPackagesCache[x.key] = p; list.push(p); });
         list.sort((a, b) => (a.price || 0) - (b.price || 0));
-        const activeList = list.filter(p => p.status === 'active');
-        if (activeList.length === 0) {
+        
+        // Show all packages (active + inactive + expired)
+        const displayList = list;
+        if (displayList.length === 0) {
             const emptyHtml = '<div class="empty-state"><i class="fas fa-box-open"></i><p>No packages</p></div>';
             if (grid) grid.innerHTML = emptyHtml;
             if (homeGrid) homeGrid.innerHTML = emptyHtml;
             return;
         }
         let html = '';
-        activeList.forEach(p => {
+        displayList.forEach(p => {
             const userPkg = (appState.userPackages || {})[p.id];
             const now = Date.now();
             const isActive = userPkg && userPkg.expiresAt > now && userPkg.status !== 'expired';
             const isExpired = userPkg && userPkg.expiresAt <= now;
+            const isInactive = p.status === 'inactive';
+            
             let badgeText = 'Available', badgeClass = 'available';
             if (isActive) { badgeText = 'একটিভ'; badgeClass = 'active'; }
             else if (isExpired) { badgeText = 'Expired'; badgeClass = 'expired'; }
+            
             let btnHtml;
-            if (isActive) {
+            if (isInactive) {
+                btnHtml = `<button class="pkg-buy-btn upgrade" disabled style="opacity:0.5;background:#94a3b8;box-shadow:none;"><i class="fas fa-ban"></i> Not Available</button>`;
+            } else if (isActive) {
                 btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${esc(p.id)}')"><i class="fas fa-check-circle"></i> বিস্তারিত</button>`;
             } else {
                 btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${esc(p.id)}')"><i class="fas fa-rocket"></i> কিনুন — ${Number(p.price || 0).toFixed(2)} ৳</button>`;
             }
+            
             const cardExtra = isActive ? 'active-pkg' : (isExpired ? 'expired-pkg' : '');
-            html += `<div class="pkg-card ${cardExtra}">
+            const inactiveOverlay = isInactive ? `<div class="pkg-inactive-overlay"><span><i class="fas fa-ban"></i> Package Inactive</span></div>` : '';
+            
+            html += `<div class="pkg-card ${cardExtra}" style="${isInactive ? 'opacity:0.85;' : ''}">
+                ${inactiveOverlay}
                 <div class="pkg-head">
                     <div class="pkg-title"><div class="pkg-title-icon"><i class="fas fa-box"></i></div>${esc(p.name)}</div>
                     <span class="pkg-badge ${badgeClass}">${badgeText}</span>
@@ -1244,6 +1196,7 @@ async function loadPackages() {
 function openBuyConfirm(pkgId) {
     const pkg = allPackagesCache[pkgId];
     if (!pkg) { toast('❌ Not found'); return; }
+    if (pkg.status === 'inactive') { toast('❌ This package is currently inactive.'); return; }
     const adBal = Number(appState.user.adBalance || 0);
     const price = Number(pkg.price || 0);
     selectedPkgForBuy = pkgId;
@@ -1369,6 +1322,7 @@ async function claimPackageIncomeById(upId) {
             return cur;
         });
         if (!result.committed) { toast('⏳ Wait'); return; }
+        
         const claimId = 'ch_' + now;
         const userRef = db.ref('users/' + appState.user.id);
         await userRef.transaction(cur => {
@@ -1379,6 +1333,13 @@ async function claimPackageIncomeById(upId) {
             cur.claimHistory[claimId] = { amount: daily, timestamp: now, packageName: up.packageName || 'Package', packageId: up.packageId || '' };
             return cur;
         });
+
+        // Fix: Update local state immediately for "Today Claimed" to reflect instantly
+        if (!appState.user.claimHistory) appState.user.claimHistory = {};
+        appState.user.claimHistory[claimId] = { amount: daily, timestamp: now, packageName: up.packageName || 'Package', packageId: up.packageId || '' };
+        appState.user.balance = Number(appState.user.balance || 0) + daily;
+        appState.user.totalEarned = Number(appState.user.totalEarned || 0) + daily;
+
         await updateTextElements();
         loadClaimPage(); loadPackages();
         closePkgDetails();
@@ -1436,6 +1397,7 @@ function loadClaimPage() {
     if (totalEl) totalEl.textContent = todayClaimed.toFixed(2);
     if (totalPkgIncomeEl) totalPkgIncomeEl.textContent = totalActiveIncome.toFixed(2);
     if (infoEl) infoEl.textContent = activeUps.length === 0 ? 'No active packages' : `${activeUps.length} active package${activeUps.length > 1 ? 's' : ''}`;
+    
     if (activeUps.length === 0) {
         listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages</p></div>';
         return;
@@ -1447,26 +1409,31 @@ function loadClaimPage() {
         const remainMs = Math.max(0, (u.expiresAt || 0) - now);
         const remainDays = Math.ceil(remainMs / (24 * 60 * 60 * 1000));
         const nextClaimMs = lastClaim > 0 ? Math.max(0, (lastClaim + PACKAGE_CLAIM_COOLDOWN_MS) - now) : 0;
-        let countdownHtml = '';
+        
+        let cooldownOverlay = '';
         if (!canClaim && nextClaimMs > 0) {
-            countdownHtml = `<div class="pkg-countdown-live" data-claim-live="${esc(u._upId || '')}" style="width:100%;"><i class="fas fa-hourglass-half"></i> Next claim in <strong>${fmtHHMMSS(nextClaimMs)}</strong></div>`;
+            cooldownOverlay = `
+            <div class="claim-cooldown-overlay">
+                <div class="cd-text">⏳ পরবর্তী ক্লেইম</div>
+                <div class="cd-timer" data-claim-live="${esc(u._upId || '')}">${fmtHHMMSS(nextClaimMs)}</div>
+            </div>`;
         }
-        html += `<div class="claim-pkg-item ${canClaim ? 'ready' : ''}">
-            <div class="claim-pkg-head">
-                <div>
-                    <div class="claim-pkg-name">${esc(u.packageName || 'Package')}</div>
-                    <div class="claim-pkg-daily">💰 ${Number(u.dailyIncome || 0).toFixed(2)} ৳/day • ${remainDays}d left</div>
-                </div>
-                <span class="claim-pkg-badge ${canClaim ? 'ready' : 'wait'}">${canClaim ? '✅ Ready' : '⏳ Wait'}</span>
+        
+        html += `<div class="claim-card-v2 ${canClaim ? 'ready' : ''}">
+            ${cooldownOverlay}
+            <div class="cc-header">
+                <div class="cc-title"><i class="fas fa-box" style="color:#6C5CE7;"></i> ${esc(u.packageName || 'Package')}</div>
+                <span class="cc-badge">${canClaim ? '✅ Ready' : '⏳ Wait'}</span>
             </div>
-            ${countdownHtml}
-            <button class="claim-btn-single ${canClaim ? 'ready' : 'wait'}" onclick="claimPackageIncomeById('${esc(u._upId || '')}')" ${canClaim ? '' : 'disabled'} style="margin-top:8px;">
-                <i class="fas ${canClaim ? 'fa-hand-holding-usd' : 'fa-hourglass-half'}"></i>
-                ${canClaim ? `Claim ${Number(u.dailyIncome || 0).toFixed(2)} ৳` : 'Wait'}
-            </button>
+            <div class="cc-stats">
+                <div class="cc-stat"><div class="val">${Number(u.dailyIncome || 0).toFixed(2)}</div><div class="lbl">Daily ৳</div></div>
+                <div class="cc-stat"><div class="val">${remainDays} Days</div><div class="lbl">Remaining</div></div>
+            </div>
+            ${canClaim ? `<button class="cc-btn-claim" onclick="claimPackageIncomeById('${esc(u._upId || '')}')"><i class="fas fa-hand-holding-usd"></i> Claim ${Number(u.dailyIncome || 0).toFixed(2)} ৳</button>` : ''}
         </div>`;
     });
     listEl.innerHTML = html;
+    
     if (liveCountdownInterval) clearInterval(liveCountdownInterval);
     liveCountdownInterval = setInterval(() => {
         if (!isBooted) return;
@@ -1476,8 +1443,11 @@ function loadClaimPage() {
             if (!up) return;
             const lastClaim = Number(up.lastClaimAt || 0);
             const nextMs = lastClaim > 0 ? Math.max(0, (lastClaim + PACKAGE_CLAIM_COOLDOWN_MS) - Date.now()) : 0;
-            if (nextMs > 0) el.innerHTML = `<i class="fas fa-hourglass-half"></i> Next claim in <strong>${fmtHHMMSS(nextMs)}</strong>`;
-            else loadClaimPage();
+            if (nextMs > 0) {
+                el.textContent = fmtHHMMSS(nextMs);
+            } else {
+                loadClaimPage();
+            }
         });
     }, 1000);
 }
@@ -2889,9 +2859,26 @@ async function calculateValidReferrals() {
 
 /* Channel verification stubs (kept for compatibility) */
 function getCurrentChannelLinks() { return channelLinks || []; }
-async function needsVerification() { return false; }
+async function needsVerification() {
+    const links = getCurrentChannelLinks() || [];
+    if (links.length === 0) return false;
+    for (const link of links) {
+        const status = await checkChannelMembership(tgUser.id, link.chatId);
+        if (status !== 'joined') return true;
+    }
+    return false;
+}
 async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
-async function checkChannelMembership(userId, chatId) { return 'unknown'; }
+async function checkChannelMembership(userId, chatId) {
+    try {
+        // আপনার যদি চ্যানেল চেক করার API থাকে, তবে এখানে URL বসাবেন।
+        if (!CHANNEL_CHECK_API) return 'unknown'; 
+        const res = await fetch(`${CHANNEL_CHECK_API}?chat_id=${chatId}&user_id=${userId}`);
+        const data = await res.json();
+        if (data && data.ok && (data.result.status === 'member' || data.result.status === 'administrator' || data.result.status === 'creator')) return 'joined';
+        return 'not_joined';
+    } catch(e) { return 'unknown'; }
+}
 </script>
 </body>
 </html>
