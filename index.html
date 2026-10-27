@@ -485,15 +485,15 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-fab .chat-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:900;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #fff}
 .chat-overlay{position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;}
 .chat-overlay.active{display:flex}
-.chat-panel{background:#fff;width:100%;max-width:480px;height:85vh;border-radius:24px 24px 0 0;display:flex;flex-direction:column;}
-.chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;border-radius:24px 24px 0 0}
+.chat-panel{background:#fff;width:100%;max-width:480px;height:85vh;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;}
+.chat-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:linear-gradient(135deg,#4c1d95,#6d28d9);color:#fff;border-radius:24px 24px 0 0;flex-shrink:0;}
 .chat-head-info{display:flex;align-items:center;gap:12px}
 .chat-head-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#fbbf24,#ec4899);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.1rem}
 .chat-head-title{font-size:.95rem;font-weight:800}
 .chat-head-sub{font-size:.7rem;opacity:.85;display:flex;align-items:center;gap:5px}
 .chat-head-sub .dot-online{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 8px #34d399;}
 .chat-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem}
-.chat-body{flex:1;overflow-y:auto;padding:16px 14px;background:#f8fafc;display:flex;flex-direction:column;gap:10px}
+.chat-body{flex:1;overflow-y:auto;padding:16px 14px;background:#f8fafc;display:flex;flex-direction:column;gap:10px;min-height:0;}
 .chat-msg{max-width:78%;padding:10px 14px;border-radius:16px;font-size:.88rem;line-height:1.5;word-wrap:break-word;}
 .chat-msg.from-user{align-self:flex-end;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border-bottom-right-radius:4px}
 .chat-msg.from-admin{align-self:flex-start;background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
@@ -501,13 +501,26 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .chat-msg .msg-img{max-width:100%;border-radius:8px;margin-top:4px;display:block;cursor:pointer}
 .chat-empty{text-align:center;padding:40px 20px;color:var(--text-light);font-size:.85rem;font-weight:600}
 .chat-empty i{font-size:2.5rem;display:block;margin-bottom:10px;color:var(--border)}
-.chat-input-wrap{padding:12px 14px;border-top:1px solid var(--border);background:#fff;display:flex;gap:8px;align-items:center}
-.chat-input{flex:1;padding:12px 16px;border:1.5px solid var(--border);border-radius:24px;font-size:.88rem;outline:none;font-family:inherit;background:#f8fafc;}
-.chat-send{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-.chat-attach{width:44px;height:44px;border-radius:50%;background:#f1f5f9;color:var(--text-light);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-.chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-light)}
+
+/* === চ্যাট ইনপুট ফিক্স === */
+.chat-input-wrap{padding:10px 12px;border-top:1px solid var(--border);background:#fff;display:flex;gap:6px;align-items:center;width:100%;box-sizing:border-box;flex-shrink:0;}
+.chat-input{flex:1;min-width:0;padding:12px 16px;border:1.5px solid var(--border);border-radius:24px;font-size:.88rem;outline:none;font-family:inherit;background:#f8fafc;box-sizing:border-box;}
+.chat-send,.chat-attach{width:42px;height:42px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.chat-send{background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;}
+.chat-attach{background:#f1f5f9;color:var(--text-light);}
+.chat-file-preview{background:#f1f5f9;padding:8px 12px;border-radius:10px;font-size:.72rem;display:flex;align-items:center;gap:8px;margin:0 14px;font-weight:700;color:var(--text-light);flex-shrink:0;}
 .chat-file-preview i{color:var(--primary)}
 .chat-file-preview .remove{color:var(--danger);cursor:pointer;margin-left:auto;font-size:.9rem}
+
+/* === টাইপিং ইন্ডিকেটর === */
+.typing-indicator{align-self:flex-start;background:#fff;padding:8px 14px;border-radius:16px;border-bottom-left-radius:4px;border:1px solid var(--border);display:none;gap:6px;align-items:center;font-size:.75rem;color:var(--text-light);font-weight:600;margin-top:4px;}
+.typing-indicator.show{display:flex;}
+.typing-dots{display:flex;gap:3px;margin-left:4px;}
+.typing-dots span{width:5px;height:5px;background:#94a3b8;border-radius:50%;animation:typing 1.4s infinite ease-in-out both;}
+.typing-dots span:nth-child(1){animation-delay:-0.32s;}
+.typing-dots span:nth-child(2){animation-delay:-0.16s;}
+@keyframes typing{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
 .pkg-countdown-live{display:inline-flex;align-items:center;gap:5px;background:rgba(243,156,18,.12);color:#d97706;padding:6px 12px;border-radius:20px;font-size:.72rem;font-weight:800;font-variant-numeric:tabular-nums;margin-bottom:8px;}
 .pkg-countdown-live i{font-size:.68rem;}
 @media (max-width:400px){.legal-body{padding:20px 18px 24px;}.legal-header{padding:18px 18px;}.menu-popup{width:190px;}}
@@ -824,6 +837,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         </div>
         <div class="chat-body" id="chatBody">
             <div class="chat-empty"><i class="fas fa-comment-dots"></i>No messages yet. Say hi! 👋</div>
+            <!-- টাইপিং ইন্ডিকেটর -->
+            <div class="typing-indicator" id="typingIndicator">
+                <span id="typingName">Admin</span> is typing
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
         </div>
         <div class="chat-file-preview" id="chatFilePreview" style="display:none;"></div>
         <div class="chat-input-wrap">
@@ -929,7 +947,7 @@ let allReferralDataCache = { all: [], qualified: [] };
 let isUserAdmin = false;
 let adminSliderShowTimer = null, adminSliderHideTimer = null, adminSliderLoopTimer = null;
 let allPackagesCache = {}, userPackagesListener = null, selectedPkgForBuy = null;
-let chatMessagesListener = null, chatUnreadListener = null, chatSelectedFile = null;
+let chatMessagesListener = null, chatUnreadListener = null, chatTypingListener = null, chatSelectedFile = null;
 
 let currentDepositStep = 1;
 let depositSelectedMethod = '';
@@ -1738,8 +1756,64 @@ document.addEventListener('click', function(e) {
    === LEGAL & ADMIN
    ========================================================= */
 const LEGAL_CONTENT = {
-    privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><hr><p style="text-align:center;font-weight:800;color:#4c1d95;">© 2025 Earn Wallet</p>`,
-    disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><div class="danger-box">🚫 Fraud করলে account ban</div><hr><p style="text-align:center;font-weight:800;color:#4c1d95;">© 2025 Earn Wallet</p>`
+    privacy: `
+        <span class="last-updated">📅 Last Updated: October 2026</span>
+        <h1>📄 PRIVACY POLICY</h1>
+        <p><strong>Earn Wallet / Task HUB</strong> এ আপনাকে স্বাগতম। আমরা আপনার প্রাইভেসিকে অত্যন্ত গুরুত্ব দিই। এই পলিসিতে আমরা কীভাবে আপনার তথ্য সংগ্রহ, ব্যবহার এবং সুরক্ষিত রাখি তা ব্যাখ্যা করা হলো।</p>
+        
+        <h2>১. আমরা কী কী তথ্য সংগ্রহ করি?</h2>
+        <ul>
+            <li><strong>টেলিগ্রাম অ্যাকাউন্টের তথ্য:</strong> আপনার নাম, ইউজারনেম, প্রোফাইল ছবি এবং টেলিগ্রাম ইউজার আইডি।</li>
+            <li><strong>ট্রানজেকশন তথ্য:</strong> ডিপোজিট বা উইথড্র করার সময় আপনার দেওয়া পেমেন্ট মেথড (বিকাশ/নগদ), অ্যাকাউন্ট নাম্বার এবং ট্রানজেকশন আইডি (TrxID)।</li>
+            <li><strong>টাস্ক তথ্য:</strong> আপনি যে সমস্ত টাস্ক সাবমিট করেন তার স্ক্রিনশট, অডিও বা টেক্সট।</li>
+            <li><strong>ডিভাইস তথ্য:</strong> অ্যাকাউন্টের নিরাপত্তা এবং মাল্টিপল অ্যাকাউন্ট প্রতিরোধের জন্য ডিভাইস আইডি।</li>
+        </ul>
+
+        <h2>২. আমরা কীভাবে তথ্য ব্যবহার করি?</h2>
+        <p>আপনার তথ্য শুধুমাত্র নিচের কাজে ব্যবহার করা হয়:</p>
+        <ul>
+            <li>আপনার অ্যাকাউন্ট ভেরিফাই করতে এবং টাস্ক/প্যাকেজ সিস্টেম পরিচালনা করতে।</li>
+            <li>ডিপোজিট এবং উইথড্র রিকোয়েস্ট প্রসেস করতে।</li>
+            <li>প্রতারণা, ফেক টাস্ক বা মাল্টিপল অ্যাকাউন্ট শনাক্ত করে প্ল্যাটফর্মের নিরাপত্তা বজায় রাখতে।</li>
+            <li>আপনার সমস্যা সমাধানের জন্য সাপোর্ট চ্যাটে যোগাযোগ করতে।</li>
+        </ul>
+
+        <h2>৩. তথ্যের গোপনীয়তা ও সুরক্ষা</h2>
+        <p>আমরা Firebase (Google) ডেটাবেস ব্যবহার করি যা অত্যন্ত সুরক্ষিত। আপনার ব্যক্তিগত তথ্য বা পেমেন্ট ডিটেইলস কোনো থার্ড-পার্টি কোম্পানি বা বিজ্ঞাপনদাতার কাছে বিক্রি করা হয় না।</p>
+
+        <h2>৪. কুকিজ এবং থার্ড-পার্টি লিংক</h2>
+        <p>আমাদের অ্যাপে থার্ড-পার্টি ওয়েবসাইট বা টেলিগ্রাম চ্যানেলের লিংক থাকতে পারে। সেই লিংকে গেলে তাদের নিজস্ব প্রাইভেসি পলিসি প্রযোজ্য হবে, যার জন্য আমরা দায়ী নই।</p>
+
+        <h2>৫. আপনার অধিকার</h2>
+        <p>আপনি যেকোনো সময় আমাদের সাপোর্টে যোগাযোগ করে আপনার অ্যাকাউন্ট এবং ডেটা ডিলিট করার অনুরোধ করতে পারেন।</p>
+        <hr>
+        <p style="text-align:center;font-weight:800;color:#4c1d95;">© 2025 Earn Wallet</p>
+    `,
+    disclaimer: `
+        <span class="last-updated">📅 Last Updated: October 2026</span>
+        <h1>⚠️ DISCLAIMER (দাবিত্যাগ)</h1>
+        
+        <h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2>
+        <p><strong>Task HUB / Earn Wallet</strong> একটি মাইক্রো-টাস্ক এবং রিওয়ার্ড প্ল্যাটফর্ম। এখানে ইউজাররা ছোট ছোট কাজ (যেমন: স্ক্রিনশট দেওয়া, সার্ভে করা) করে বা প্যাকেজ কিনে ইনকাম করতে পারেন।</p>
+
+        <h2>২. ইনকামের নিশ্চয়তা</h2>
+        <p>এই প্ল্যাটফর্মে ইনকাম কোনো নির্দিষ্ট গ্যারান্টি বা ফিক্সড বেতন নয়। আপনার ইনকাম নির্ভর করবে আপনি কতগুলো সঠিক টাস্ক করছেন এবং কতগুলো প্যাকেজ একটিভ করেছেন তার উপর।</p>
+
+        <div class="danger-box">
+            🚫 <strong>কঠোর সতর্কতা:</strong> কোনো প্রকার প্রতারণা (Fake Task Submit), মাল্টিপল অ্যাকাউন্ট তৈরি, বা বট ব্যবহার করে টাকা আয়ের চেষ্টা করলে আপনার অ্যাকাউন্ট স্থায়ীভাবে ব্যান করা হবে এবং আপনার সব ব্যালেন্স বাজেয়াপ্ত করা হবে।
+        </div>
+
+        <h2>৩. তৃতীয় পক্ষের দায়</h2>
+        <p>আমরা বিকাশ, নগদ, রকেট বা টেলিগ্রামের সাথে সরাসরি সম্পৃক্ত নই। কোনো নেটওয়ার্ক সমস্যা বা পেমেন্ট গেটওয়ে ডাউন থাকার কারণে ট্রানজেকশনে দেরি হলে তার দায় প্ল্যাটফর্ম বহন করবে না।</p>
+
+        <h2>৪. অ্যাকাউন্ট বন্ধ করার অধিকার</h2>
+        <p>প্ল্যাটফর্মের শর্ত ভঙ্গ করলে, ভুয়া ডিপোজিট রিকোয়েস্ট দিলে বা অসদুপায় অবলম্বন করলে অ্যাডমিন প্যানেল থেকে যেকোনো সময় অ্যাকাউন্ট ব্লক বা ব্যান করার অধিকার কর্তৃপক্ষ সংরক্ষণ করে।</p>
+
+        <h2>৫. রুলস পরিবর্তনের অধিকার</h2>
+        <p>ভবিষ্যতে অ্যাপের সিস্টেম, রিওয়ার্ড রেট বা নিয়মাবলী পরিবর্তন করার সম্পূর্ণ অধিকার কর্তৃপক্ষের রয়েছে।</p>
+        <hr>
+        <p style="text-align:center;font-weight:800;color:#4c1d95;">© 2025 Earn Wallet</p>
+    `
 };
 function openLegalModal(type) {
     const modal = document.getElementById('legalModal');
@@ -2459,28 +2533,74 @@ async function showAppAfterVerify() {
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
 /* =========================================================
-   === CHAT SYSTEM
+   === CHAT SYSTEM (UPDATED WITH BOT & TYPING)
    ========================================================= */
 function getChatThreadKey() { return 'user_' + String(tgUser.id); }
-function openChatModal() { document.getElementById('chatOverlay').classList.add('active'); document.body.style.overflow = 'hidden'; scrollChatToBottom(); startChatListeners(); markChatAsRead(); }
-function closeChatModal() { document.getElementById('chatOverlay').classList.remove('active'); document.body.style.overflow = ''; }
+
+function openChatModal() { 
+    document.getElementById('chatOverlay').classList.add('active'); 
+    document.body.style.overflow = 'hidden'; 
+    startChatListeners(); 
+    markChatAsRead(); 
+    sendWelcomeMessageIfNew(); // ওয়েলকাম মেসেজ ফাংশন কল
+    setTimeout(scrollChatToBottom, 300);
+}
+
+function closeChatModal() { 
+    document.getElementById('chatOverlay').classList.remove('active'); 
+    document.body.style.overflow = ''; 
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) indicator.classList.remove('show');
+}
+
 function scrollChatToBottom() { const b = document.getElementById('chatBody'); if (b) b.scrollTop = b.scrollHeight; }
+
 function markChatAsRead() {
     const tKey = getChatThreadKey();
     const ref = db.ref('chats/' + tKey + '/messages');
     ref.once('value').then(snap => { const updates = {}; snap.forEach(c => { const m = c.val(); if (m.from === 'admin' && !m.read) updates[c.key + '/read'] = true; }); if (Object.keys(updates).length) fireAsync(ref.update(updates)); fireAsync(db.ref('chats/' + tKey + '/meta/unreadForUser').set(0)); }).catch(() => {});
 }
+
 function startChatListeners() {
     const tKey = getChatThreadKey();
-    if (chatMessagesListener) db.ref('chats/' + tKey + '/messages').off('value', chatMessagesListener);
-    chatMessagesListener = db.ref('chats/' + tKey + '/messages').orderByChild('timestamp').on('value', snap => { const messages = []; snap.forEach(c => { const m = c.val(); m.id = c.key; messages.push(m); }); renderChatMessages(messages); if (document.getElementById('chatOverlay').classList.contains('active')) markChatAsRead(); });
-    if (chatUnreadListener) db.ref('chats/' + tKey + '/meta').off('value', chatUnreadListener);
-    chatUnreadListener = db.ref('chats/' + tKey + '/meta').on('value', snap => { const m = snap.val() || {}; const unread = Number(m.unreadForUser || 0); const badge = document.getElementById('chatFabBadge'); if (badge) { if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; } else badge.style.display = 'none'; } });
+    const chatRef = db.ref('chats/' + tKey);
+
+    if (chatMessagesListener) chatRef.child('messages').off('value', chatMessagesListener);
+    chatMessagesListener = chatRef.child('messages').orderByChild('timestamp').on('value', snap => {
+        const messages = [];
+        snap.forEach(c => { const m = c.val(); m.id = c.key; messages.push(m); });
+        renderChatMessages(messages);
+        if (document.getElementById('chatOverlay').classList.contains('active')) markChatAsRead();
+    });
+
+    if (chatUnreadListener) chatRef.child('meta').off('value', chatUnreadListener);
+    chatUnreadListener = chatRef.child('meta').on('value', snap => { const m = snap.val() || {}; const unread = Number(m.unreadForUser || 0); const badge = document.getElementById('chatFabBadge'); if (badge) { if (unread > 0) { badge.textContent = unread; badge.style.display = 'flex'; } else badge.style.display = 'none'; } });
+
+    // টাইপিং ইন্ডিকেটর লিসেনার
+    if (chatTypingListener) chatRef.child('meta/adminTyping').off('value', chatTypingListener);
+    chatTypingListener = chatRef.child('meta/adminTyping').on('value', snap => {
+        const isTyping = snap.val() === true;
+        const indicator = document.getElementById('typingIndicator');
+        if (indicator) {
+            if (isTyping) { indicator.classList.add('show'); scrollChatToBottom(); } 
+            else { indicator.classList.remove('show'); }
+        }
+    });
 }
+
 function renderChatMessages(messages) {
     const body = document.getElementById('chatBody');
     if (!body) return;
-    if (!messages || !messages.length) { body.innerHTML = '<div class="chat-empty"><i class="fas fa-comment-dots"></i>No messages</div>'; return; }
+    
+    // টাইপিং ইন্ডিকেটর এলিমেন্টটি রিমুভ না করে শুধু মেসেজ রেন্ডার করব
+    const typingEl = document.getElementById('typingIndicator');
+    
+    if (!messages || !messages.length) { 
+        body.innerHTML = '<div class="chat-empty"><i class="fas fa-comment-dots"></i>No messages</div>'; 
+        if(typingEl) body.appendChild(typingEl);
+        return; 
+    }
+    
     messages.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
     let html = '';
     messages.forEach(m => {
@@ -2492,11 +2612,15 @@ function renderChatMessages(messages) {
         else content = esc(m.text || '');
         html += `<div class="chat-msg ${cls}">${content}<span class="msg-time">${time}</span></div>`;
     });
+    
     body.innerHTML = html;
+    if(typingEl) body.appendChild(typingEl);
     scrollChatToBottom();
 }
+
 function handleChatFileSelect(input) { const f = input.files && input.files[0]; if (!f) return; if (!f.type.startsWith('image/')) { toast('❌ Image only'); return; } if (f.size > 5 * 1024 * 1024) { toast('❌ Max 5MB'); return; } chatSelectedFile = f; const wrap = document.getElementById('chatFilePreview'); wrap.style.display = 'flex'; wrap.innerHTML = `<i class="fas fa-image"></i> <span>${esc(f.name)}</span> <i class="fas fa-times remove" onclick="clearChatFile()"></i>`; }
 function clearChatFile() { chatSelectedFile = null; document.getElementById('chatFileInput').value = ''; document.getElementById('chatFilePreview').style.display = 'none'; }
+
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const btn = document.getElementById('chatSendBtn');
@@ -2509,15 +2633,106 @@ async function sendChatMessage() {
         let fileUrl = null;
         if (chatSelectedFile) { try { fileUrl = await uploadToImgBB(chatSelectedFile); } catch (err) { toast('❌ Upload failed'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; return; } }
         const msgData = { from: 'user', userId: String(tgUser.id), userName: tgUser.first_name || 'User', text: text || '', type: chatSelectedFile ? 'image' : 'text', fileUrl, timestamp: Date.now(), read: false };
-        fireAsync(db.ref('chats/' + tKey + '/meta').update({ userId: String(tgUser.id), userName: tgUser.first_name || 'User', lastMessageAt: Date.now(), lastMessagePreview: (text || (fileUrl ? '📷' : '')).substring(0, 60), lastMessageFrom: 'user', unreadForUser: 0 }));
+        fireAsync(db.ref('chats/' + tKey + '/meta').update({ userId: String(tgUser.id), userName: tgUser.first_name || 'User', lastMessageAt: Date.now(), lastMessagePreview: (text || (fileUrl ? '📷' : '')).substring(0, 60), lastMessageFrom: 'user', unreadForUser: 0, userTyping: false }));
         fireAsync(db.ref('adminNotifications').push({ type: 'chat', fromUserId: String(tgUser.id), fromUserName: tgUser.first_name || 'User', fromUsername: tgUser.username || '', preview: (text || (chatSelectedFile ? '📷 Image' : '')).substring(0, 120), chatKey: tKey, timestamp: Date.now(), read: false }));
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         input.value = '';
         clearChatFile();
+
+        // অটো বট রিপ্লাই
+        if (text && !fileUrl) {
+            setTimeout(() => handleAutoBotReply(tKey, text.toLowerCase()), 1000);
+        }
+
     } catch (e) { toast('❌ ' + (e.message || 'Failed')); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
 }
+
 function initUserChatSystem() { const fab = document.getElementById('chatFab'); if (fab) fab.style.display = 'flex'; startChatListeners(); }
+
+// অটো বট রিপ্লাই ফাংশন
+async function handleAutoBotReply(tKey, text) {
+    let reply = null;
+    
+    if (text.match(/(hi|hello|hey|হ্যালো|হাই|সালাম)/i)) {
+        reply = "হ্যালো! আমি অটোমেটেড বট। আপনার কী সমস্যা হয়েছে জানান, আমি সমাধান দেওয়ার চেষ্টা করব। (এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন)";
+    } 
+    else if (text.match(/(admin|এডমিন|talk to admin)/i)) {
+        reply = "এডমিনের সাথে কথা বলতে কিছুক্ষণ সময় অপেক্ষা করুন। এডমিন অনলাইনে আসলে আপনাকে রিপ্লে করবে। অনুগ্রহ করে আপনার সমস্যাটি বিস্তারিত লিখে রাখুন।";
+    }
+    else if (text.match(/(deposit|ডিপোজিট|টাকা অ্যাড|balance add)/i)) {
+        reply = "ডিপোজিট করতে 'Deposit' ট্যাবে যান। সেখানে বিকাশ/নগদ নাম্বার দেওয়া আছে। Send Money করে Transaction ID সাবমিট করুন। এডমিন অ্যাপ্রুভ করলে Deposit Balance এ টাকা যোগ হবে।";
+    }
+    else if (text.match(/(withdraw|উত্তোলন|উইথড্র|টাকা তুলবো)/i)) {
+        reply = "উইথড্র করতে 'Withdraw' ট্যাবে যান। তবে উইথড্র করার জন্য নির্দিষ্ট সংখ্যক অ্যাক্টিভ রেফারেল থাকতে হবে।";
+    }
+    else if (text.match(/(package|প্যাকেজ|কিনবো)/i)) {
+        reply = "প্যাকেজ কিনতে 'Investment Packages' সেকশনে যান। Deposit Balance দিয়ে প্যাকেজ কিনতে পারবেন।";
+    }
+    else if (text.match(/(task|টাস্ক|কাজ)/i)) {
+        reply = "টাস্ক করতে 'Tasks' ট্যাবে যান। ফাইল/লেখা সাবমিট করুন। এডমিন অ্যাপ্রুভ করলে টাকা Deposit Balance এ যোগ হবে এবং ২৪ ঘন্টা পর Withdrawable এ যাবে।";
+    }
+    else if (text.match(/(refer|রেফার|বন্ধু)/i)) {
+        reply = "রেফার করতে 'Referral' ট্যাবে যান এবং আপনার লিংক কপি করে বন্ধুদের শেয়ার করুন।";
+    }
+    else {
+        reply = "আপনার প্রশ্নটি আমি বুঝতে পারিনি। দয়া করে নির্দিষ্টভাবে লিখুন (ডিপোজিট, উইথড্র, টাস্ক)। অথবা এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।";
+    }
+
+    if (reply) {
+        await db.ref('chats/' + tKey + '/meta/adminTyping').set(true);
+        setTimeout(async () => {
+            await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
+            await db.ref('chats/' + tKey + '/messages').push({
+                from: 'admin', adminId: 'bot', adminName: 'Auto Bot',
+                text: reply, type: 'text', timestamp: Date.now(), read: false
+            });
+            await db.ref('chats/' + tKey + '/meta').update({
+                lastMessageAt: Date.now(),
+                lastMessagePreview: reply.substring(0, 60),
+                lastMessageFrom: 'admin',
+                unreadForUser: 1
+            });
+        }, 2000);
+    }
+}
+
+// ওয়েলকাম মেসেজ ফাংশন
+async function sendWelcomeMessageIfNew() {
+    const tKey = getChatThreadKey();
+    const snap = await db.ref('chats/' + tKey + '/messages').once('value');
+    if (!snap.exists() || snap.numChildren() === 0) {
+        const welcomeMsg = {
+            from: 'admin', adminId: 'bot', adminName: 'Auto Bot',
+            text: "👋 স্বাগতম! Task HUB সাপোর্টে আপনাকে welcomes। আপনার কী সমস্যা হয়েছে বা কী জানতে চান, দয়া করে লিখুন। আমি আপনার সমস্যা সমাধান করার চেষ্টা করব। (এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন)",
+            type: 'text', timestamp: Date.now(), read: false
+        };
+        await db.ref('chats/' + tKey + '/messages').push(welcomeMsg);
+        await db.ref('chats/' + tKey + '/meta').update({
+            lastMessageAt: Date.now(), lastMessagePreview: "স্বাগতম!", lastMessageFrom: 'admin', unreadForUser: 1
+        });
+    }
+}
+
+// ইউজার টাইপিং ডিটেক্ট
+let userTypingTimeout = null;
+document.addEventListener('DOMContentLoaded', () => {
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+        chatInput.addEventListener('input', () => {
+            const tKey = getChatThreadKey();
+            if (!tKey) return;
+            if (chatInput.value.length > 0) {
+                db.ref('chats/' + tKey + '/meta/userTyping').set(true);
+            }
+            clearTimeout(userTypingTimeout);
+            userTypingTimeout = setTimeout(() => {
+                db.ref('chats/' + tKey + '/meta/userTyping').set(false);
+            }, 1500);
+        });
+    }
+});
+
 
 /* =========================================================
    === MAINTAIN + BAN + REFERRALS
