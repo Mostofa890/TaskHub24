@@ -2632,14 +2632,30 @@ async function sendChatMessage() {
         const tKey = getChatThreadKey();
         let fileUrl = null;
         if (chatSelectedFile) { try { fileUrl = await uploadToImgBB(chatSelectedFile); } catch (err) { toast('❌ Upload failed'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; return; } }
+        
         const msgData = { from: 'user', userId: String(tgUser.id), userName: tgUser.first_name || 'User', text: text || '', type: chatSelectedFile ? 'image' : 'text', fileUrl, timestamp: Date.now(), read: false };
+        
         fireAsync(db.ref('chats/' + tKey + '/meta').update({ userId: String(tgUser.id), userName: tgUser.first_name || 'User', lastMessageAt: Date.now(), lastMessagePreview: (text || (fileUrl ? '📷' : '')).substring(0, 60), lastMessageFrom: 'user', unreadForUser: 0, userTyping: false }));
         fireAsync(db.ref('adminNotifications').push({ type: 'chat', fromUserId: String(tgUser.id), fromUserName: tgUser.first_name || 'User', fromUsername: tgUser.username || '', preview: (text || (chatSelectedFile ? '📷 Image' : '')).substring(0, 120), chatKey: tKey, timestamp: Date.now(), read: false }));
+        
         await db.ref('chats/' + tKey + '/messages').push(msgData);
+        
+        // 👇 এডমিনকে টেলিগ্রাম মেসেজ পাঠানো (শুধু টেক্সট মেসেজের জন্য) 👇
+        if (text && !fileUrl) {
+            const ADMIN_TELEGRAM_ID = "6624254778"; // এখানে আপনার এডমিনের আইডি দিন
+            const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
+            const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: ADMIN_TELEGRAM_ID, text: tgMsg, parse_mode: 'Markdown' })
+            }).catch(()=>{});
+        }
+
         input.value = '';
         clearChatFile();
 
-        // অটো বট রিপ্লাই
+        // বট অটো রিপ্লাই কল
         if (text && !fileUrl) {
             setTimeout(() => handleAutoBotReply(tKey, text.toLowerCase()), 1000);
         }
@@ -2652,6 +2668,15 @@ function initUserChatSystem() { const fab = document.getElementById('chatFab'); 
 
 // অটো বট রিপ্লাই ফাংশন
 async function handleAutoBotReply(tKey, text) {
+    // চেক করুন অ্যাডমিন কি ম্যানুয়ালি রিপ্লাই দিয়েছে বা টাইপ করছে
+    const metaSnap = await db.ref('chats/' + tKey + '/meta').once('value');
+    const meta = metaSnap.val() || {};
+    
+    // যদি অ্যাডমিন ম্যানুয়ালি মেসেজ দিয়ে থাকে (বট নয়) অথবা অ্যাডমিন টাইপ করছে, তবে বট রিপ্লাই দেবে না
+    if ((meta.lastMessageFrom === 'admin' && meta.lastAdminId !== 'bot') || meta.adminTyping === true) {
+        return; 
+    }
+
     let reply = null;
     
     if (text.match(/(hi|hello|hey|হ্যালো|হাই|সালাম)/i)) {
@@ -2691,6 +2716,7 @@ async function handleAutoBotReply(tKey, text) {
                 lastMessageAt: Date.now(),
                 lastMessagePreview: reply.substring(0, 60),
                 lastMessageFrom: 'admin',
+                lastAdminId: 'bot',
                 unreadForUser: 1
             });
         }, 2000);
