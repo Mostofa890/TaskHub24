@@ -987,10 +987,10 @@ async function checkChannelMembership(userId, chatId) {
                     console.error("Channel not found:", chatId);
                     result = 'error_chat_id';
                 } else {
-                    result = 'not_joined'; // Generally means 'user not found' (not joined)
+                    result = 'not_joined'; 
                 }
             } else {
-                result = 'not_joined'; // Default to not joined to avoid blocking users
+                result = 'not_joined'; 
             }
         }
     } catch(e) {
@@ -1411,14 +1411,22 @@ async function confirmBuyPackage() {
         const now = Date.now();
         const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
         const upId = 'up_' + now + '_' + appState.user.id;
-        await db.ref('userPackages/' + upId).set({
+        
+        const newUpData = {
             userId: String(appState.user.id), userName: appState.user.name || 'User',
             packageId: selectedPkgForBuy, packageName: pkg.name || 'Package',
             dailyIncome: Number(pkg.dailyIncome || 0), price: price,
             duration: Number(pkg.duration || 0), purchasedAt: now, expiresAt: expiresAt,
             lastClaimAt: 0, totalEarned: 0, claimCount: 0, status: 'active'
-        });
+        };
+
+        await db.ref('userPackages/' + upId).set(newUpData);
+        
+        // 👇 লোকাল স্টেট আপডেট করা হচ্ছে যাতে সাথে সাথেই UI তে দেখা যায়
+        if (!appState.userPackages) appState.userPackages = {};
+        appState.userPackages[selectedPkgForBuy] = { ...newUpData, _upId: upId };
         appState.user.adBalance = Number(appState.user.adBalance || 0) - price;
+
         if (appState.user.referredBy && REF_COMMISSION_RATE > 0) {
             const commissionAmount = (price * REF_COMMISSION_RATE) / 100;
             await creditReferrerCommission(commissionAmount, price, 'Package Purchase');
@@ -1528,6 +1536,23 @@ async function claimPackageIncomeById(upId) {
 async function loadUserPackages() {
     if (!tgUser || !tgUser.id) return;
     if (!appState.userPackages) appState.userPackages = {};
+    
+    // Fetch once immediately to populate cache
+    try {
+        const snap = await db.ref('userPackages').orderByChild('userId').equalTo(String(tgUser.id)).once('value');
+        const map = {};
+        const now = Date.now();
+        let activeCount = 0;
+        snap.forEach(child => {
+            const v = child.val();
+            map[v.packageId] = { ...v, _upId: child.key };
+            if (v.expiresAt > now && v.status !== 'expired') activeCount++;
+        });
+        appState.userPackages = map;
+        appState.user.activePackageCount = activeCount;
+        await updateTextElements(); // update UI immediately
+    } catch(e) { console.error("Package init load error", e); }
+
     if (userPackagesListener) db.ref('userPackages').off('value', userPackagesListener);
     userPackagesListener = db.ref('userPackages').orderByChild('userId').equalTo(String(tgUser.id)).on('value', snap => {
         const map = {};
@@ -2396,6 +2421,10 @@ async function showAppAfterVerify() {
     startAdminSlider();
     invalidateChannelCache();
     
+    // Force Chat FAB to show
+    const fab = document.getElementById('chatFab');
+    if (fab) fab.style.display = 'flex';
+
     try { initUserChatSystem(); } catch(e) {}
     try { await loadUserPackages(); } catch(e) {}
     try { await loadPackages(); } catch(e) {}
@@ -2553,7 +2582,11 @@ async function sendChatMessage() {
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
 }
 
-function initUserChatSystem() { const fab = document.getElementById('chatFab'); if (fab) fab.style.display = 'flex'; startChatListeners(); }
+function initUserChatSystem() { 
+    const fab = document.getElementById('chatFab'); 
+    if (fab) fab.style.display = 'flex'; 
+    startChatListeners(); 
+}
 
 async function sendWelcomeMessageIfNew() {
     const tKey = getChatThreadKey();
@@ -2768,6 +2801,11 @@ window.addEventListener('DOMContentLoaded', () => {
                                 startPeriodicRecheck();
                                 updateLastActive();
                                 startAdminSlider();
+                                
+                                // Force Chat FAB to show
+                                const fab = document.getElementById('chatFab');
+                                if (fab) fab.style.display = 'flex';
+
                                 try { initUserChatSystem(); } catch(e) {}
                                 try { await loadUserPackages(); } catch(e) {}
                                 try { await loadPackages(); } catch(e) {}
@@ -2862,6 +2900,10 @@ function loadPkgHistory() {
     if (!items.length) { c.innerHTML = '<div class="empty-state"><p>No package claims</p></div>'; return; }
     c.innerHTML = items.map(it => `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon" style="background:rgba(0,184,148,.15);color:#00b894;"><i class="fas fa-box-open"></i></div><div class="history-info"><h5>${esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`).join('');
 }
+
+/* Channel verification helpers */
+function getCurrentChannelLinks() { return channelLinks || []; }
+async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
 </script>
 </body>
 </html>
