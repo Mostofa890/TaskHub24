@@ -389,6 +389,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .claim-cooldown-overlay{position:absolute;inset:0;background:rgba(255,100,100,0.15);backdrop-filter:blur(4px);z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:20px;border:2px dashed rgba(239,68,68,.4);}
 .claim-cooldown-overlay .cd-timer{font-size:2rem;font-weight:900;color:#dc2626;font-variant-numeric:tabular-nums;text-shadow:0 2px 10px rgba(255,255,255,.8);}
 .claim-cooldown-overlay .cd-text{font-size:.85rem;font-weight:800;color:#991b1b;margin-bottom:4px;}
+.claim-history-item{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;background:#fff;border-radius:14px;margin-bottom:10px;border-left:4px solid #10b981;}
+.chi-icon{width:40px;height:40px;border-radius:50%;background:rgba(0,184,148,0.1);color:#00b894;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.chi-info h5{font-size:0.88rem;font-weight:700;}
+.chi-info p{font-size:0.7rem;color:#999;}
+.chi-amount{font-weight:800;font-size:0.95rem;color:#00b894;}
 .chat-fab{position:fixed;bottom:100px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#6C5CE7,#8b5cf6);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 10px 26px rgba(108,92,231,.5);z-index:9997;display:flex;align-items:center;justify-content:center;}
 .chat-fab .chat-badge{position:absolute;top:-4px;right:-4px;background:#ef4444;color:#fff;font-size:.65rem;font-weight:900;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;border:2px solid #fff}
 .chat-overlay{position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,.6);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;}
@@ -858,7 +863,7 @@ const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
 const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
-const BOT_USERNAME = "@TaskHubBD24Bot";
+const BOT_USERNAME = "TaskHubBD24Bot";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
 const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
@@ -875,6 +880,7 @@ const VERIFY_DEBOUNCE_MS = 5000;
 const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 const PACKAGE_CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const CONVERSION_MS = 24 * 60 * 60 * 1000;
+const PENDING_CONVERSION_CHECK_MS = 30 * 1000;
 
 const CHANNEL_CHECK_CACHE = new Map();
 const CHANNEL_CHECK_CACHE_TTL = 5000; 
@@ -907,7 +913,7 @@ let isRechecking = false, isCheckingChannel = false, lastVerifyCheckTime = 0;
 let cooldownTimerInterval = null, taskExpiryTickerInterval = null;
 let lastActiveInterval = null;
 let liveCountdownInterval = null;
-let pendingConversionTimer = null;
+let pendingConversionInterval = null;
 
 let taskState = { taskId: null, task: null, type: 'text', submitting: false };
 let userSubmissionsCache = {};
@@ -938,6 +944,31 @@ function safeUrl(url) { const s = String(url || '').trim(); if (!s) return ''; i
 function safeInt(v, def) { const n = Number(v); return isNaN(n) || !isFinite(n) ? def : n; }
 function tryHaptic(type) { try { if (tg && tg.HapticFeedback) { if (type === 'success') tg.HapticFeedback.notificationOccurred('success'); else if (type === 'error') tg.HapticFeedback.notificationOccurred('error'); else tg.HapticFeedback.impactOccurred('light'); } } catch(e) {} }
 function fireAsync(promise) { if (promise && typeof promise.catch === 'function') promise.catch(() => {}); }
+
+/* ✅ FIX: fmtHHMMSS — used in claim cooldown display, was missing */
+function fmtHHMMSS(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+/* ✅ FIX: getDeviceId — used in referral device-tracking, was missing */
+function getDeviceId() {
+    try {
+        const KEY = 'nexearn_device_id';
+        let id = localStorage.getItem(KEY);
+        if (!id) {
+            id = 'dev_' + Date.now() + '_' + Math.random().toString(36).substring(2, 12);
+            localStorage.setItem(KEY, id);
+        }
+        return id;
+    } catch(e) {
+        // localStorage blocked fallback
+        return 'dev_' + (tgUser && tgUser.id ? tgUser.id : 'guest');
+    }
+}
 
 function updateLastActive() { if (!tgUser || !tgUser.id || !isOnline) return; fireAsync(db.ref('users/' + tgUser.id + '/lastActive').set(Date.now())); }
 function getRefLink() { return 'https://t.me/' + BOT_USERNAME + '?start=' + tgUser.id; }
@@ -1062,17 +1093,17 @@ async function handleAutoBotReply(tKey, text) {
 
     [অ্যাপের সিস্টেমসমূহ]
     ১. ডিপোজিট: Deposit ট্যাব থেকে বিকাশ/নগদে Send Money বা Cash Out করে TrxID দিতে হবে।
-    ২. প্যাকেজ: Deposit Balance দিয়ে প্যাকেজ কিনতে হয়। প্যাকেজ কিনলে প্রতিদিন ইনকাম দেয়।
+    ২. প্যাকেজ: Deposit Balance দিয়ে প্যাকেজ কিনতে হয়। প্যাকেজ কিনলে প্রতিদিন ইনকাম দেয়।
     ৩. ক্লেইম: Claim ট্যাব থেকে প্রতিদিন প্যাকেজের ইনকাম ক্লেইম করতে হয়। 
     ৪. টাস্ক: Tasks ট্যাব থেকে কাজ সাবমিট করতে হয়।
     ৫. উইথড্র: Withdraw করতে ${reqRefs} জন একটিভ রেফারেল লাগবে। উইথড্র লিমিট ${wdMin} থেকে ${wdMax} টাকা এবং ফি ${wdFee}%।
     ৬. রেফারেল: বন্ধুকে রেফার করলে সে জয়েন করলে বোনাস ${refBonus} টাকা। বন্ধু প্যাকেজ কিনলে তুমি ${currentCommRate}% কমিশন পাবেন।
-    ৭. রেফারেল কাউন্ট না বাড়ার কারণ: একটি ডিভাইস থেকে কেবল একবারই রেফারেল গ্রহণ করা যায়। যদি আপনার বন্ধুর ফোনের ডিভাইস আইডি দিয়ে আগে থেকেই অ্যাকাউন্ট থাকে, তবে তাকে নতুন করে রেফার করা যাবে না।
-    ৮. রেফারেল বোনাস ক্লেইম: রেফার করে জয়েন করালে যে বোনাস আসে তা বোনাস কার্ডে জমা হয়। ক্লেইম করতে ১০০ টাকা হতে হবে এবং আপনার রেফার করা সবাইকে প্যাকেজ কিনতে হবে (একটিভ হতে হবে)। যেমন ২ জন রেফার করলে ২ জনকেই প্যাকেজ কিনতে হবে।
+    ৭. রেফারেল কাউন্ট না বাড়ার কারণ: একটি ডিভাইস থেকে কেবল একবারই রেফারেল গ্রহণ করা যায়।
+    ৮. রেফারেল বোনাস ক্লেইম: রেফার করে জয়েন করালে যে বোনাস আসে তা বোনাস কার্ডে জমা হয়। ক্লেইম করতে ১০০ টাকা হতে হবে এবং আপনার রেফার করা সবাইকে প্যাকেজ কিনতে হবে।
 
     [কঠোর আচরণবিধি]
     ১. গ্রিটিংস: "hi", "hello", "হ্যালো", "সালাম" দিলে বলবে: "হ্যালো! আমি ZARA বলছি। কিভাবে আপনাকে সহযোগিতা করতে পারি? অ্যাপস বিষয়ে কোনো তথ্য জানার থাকলে আমাকে বলতে পারেন, অথবা এডমিনের সাথে কথা বলতে চাইলে 'এডমিন' লিখুন।"
-    ২. গালিগালাজ: ইউজার গালি দিলে বা রাগ করলে তুমি কখনোই রাগ করবে না। শান্ত থেকে বলবে: "দুঃখিত, অনুগ্রহ করে সুন্দর ভাষায় কথা বলুন। আপনার সমস্যাটি বললে আমি সমাধান করার চেষ্টা করব। অথবা এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।"
+    ২. গালিগালাজ: ইউজার গালি দিলে বা রাগ করলে তুমি কখনোই রাগ করবে না। শান্ত থেকে বলবে: "দুঃখিত, অনুগ্রহ করে সুন্দর ভাষায় কথা বলুন। আপনার সমস্যাটি বললে আমি সমাধান করার চেষ্টা করব।"
     ৩. সন্দেহ: ইউজার যদি বলে "অ্যাপ ফেক", "টাকা দিবে না" তবে তার ডেটা মিলিয়ে দেখিয়ে বলবে: "আপনার অ্যাকাউন্টে বর্তমানে ${uBalance} টাকা আছে। নিশ্চিন্ত থাকুন, এডমিন অ্যাপ্রুভ করলেই টাকা পাবেন।"
     ৪. অপ্রাসঙ্গিক প্রশ্ন: বলবে: "আমি ZARA, Task HUB অ্যাপের সাপোর্ট বট। আমি শুধুমাত্র অ্যাপের সাপোর্ট সম্পর্কিত প্রশ্নের উত্তর দিতে পারি।"
     
@@ -1241,7 +1272,7 @@ function updateBonusClaimButton() {
         reason = 'কোনো রেফারেল নেই।';
     } else if (activeRefs < totalRefs) {
         canClaim = false;
-        reason = `আপনার ${totalRefs} জন রেফারেলের মধ্যে ${activeRefs} জন একটিভ। সবগুলো রেফারেল (${totalRefs} জন) প্যাকেজ কিনলেই ক্লেইম করতে পারবেন।`;
+        reason = `আপনার ${totalRefs} জন রেফারেলের মধ্যে ${activeRefs} জন একটিভ। সবগুলো রেফারেল প্যাকেজ কিনলেই ক্লেইম করতে পারবেন।`;
     }
 
     if (canClaim) {
@@ -1309,6 +1340,39 @@ async function claimReferralBonus() {
         }
     } catch (e) { toast('❌ ' + e.message); }
     finally { updateBonusClaimButton(); }
+}
+
+/* ✅ FIX: missing function loadMyReferrals (used in switchTab) */
+async function loadMyReferrals() {
+    await calculateValidReferrals();
+    renderReferralList();
+}
+
+/* ✅ FIX: missing function loadCommissionHistory (used in switchTab and renderReferralList) */
+function loadCommissionHistory() {
+    const container = document.getElementById('commissionHistoryList');
+    if (!container) return;
+    const hist = appState.user.commissionHistory || {};
+    const items = Object.entries(hist).map(([id, v]) => ({ id, ...v })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    if (items.length === 0) {
+        container.innerHTML = '<div class="empty-state"><i class="fas fa-coins"></i><p>এখনো কমিশন পাইনি</p></div>';
+        return;
+    }
+    let html = '';
+    items.slice(0, 20).forEach(it => {
+        const initial = (it.fromName || 'U').charAt(0).toUpperCase();
+        html += `<div class="comm-item">
+            <div class="comm-item-left">
+                <div class="comm-item-avatar">${esc(initial)}</div>
+                <div class="comm-item-info">
+                    <h5>${esc(it.fromName || 'User')}</h5>
+                    <p>${esc(it.source || 'Package Purchase')} • ${shortDate(it.timestamp)}</p>
+                </div>
+            </div>
+            <div class="comm-item-amt">+${Number(it.commission || 0).toFixed(2)} ৳<small>${Number(it.rate || 0)}%</small></div>
+        </div>`;
+    });
+    container.innerHTML = html;
 }
 
 /* =========================================================
@@ -1422,7 +1486,6 @@ async function confirmBuyPackage() {
 
         await db.ref('userPackages/' + upId).set(newUpData);
         
-        // 👇 লোকাল স্টেট আপডেট করা হচ্ছে যাতে সাথে সাথেই UI তে দেখা যায়
         if (!appState.userPackages) appState.userPackages = {};
         appState.userPackages[selectedPkgForBuy] = { ...newUpData, _upId: upId };
         appState.user.adBalance = Number(appState.user.adBalance || 0) - price;
@@ -1537,7 +1600,6 @@ async function loadUserPackages() {
     if (!tgUser || !tgUser.id) return;
     if (!appState.userPackages) appState.userPackages = {};
     
-    // Fetch once immediately to populate cache
     try {
         const snap = await db.ref('userPackages').orderByChild('userId').equalTo(String(tgUser.id)).once('value');
         const map = {};
@@ -1550,7 +1612,7 @@ async function loadUserPackages() {
         });
         appState.userPackages = map;
         appState.user.activePackageCount = activeCount;
-        await updateTextElements(); // update UI immediately
+        await updateTextElements();
     } catch(e) { console.error("Package init load error", e); }
 
     if (userPackagesListener) db.ref('userPackages').off('value', userPackagesListener);
@@ -2096,6 +2158,7 @@ async function submitGenericTask() {
 }
 function closeTaskSubmit() { document.getElementById('taskSubmitModal').classList.remove('active'); document.getElementById('app').classList.remove('blurred'); taskState = { taskId: null, task: null, type: 'text', submitting: false }; }
 function cancelTaskSubmit() { closeTaskSubmit(); toast('❌ Cancelled'); }
+function openTaskLink(url) { if (!url) return; if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank'); }
 
 function switchTasksInnerTab(which) {
     const btnAvail = document.getElementById('tabBtnAvailable');
@@ -2178,7 +2241,17 @@ async function requestWithdraw() {
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => { if (!cur) return cur; if (Number(cur.balance || 0) < amount) return; cur.balance = Number(cur.balance || 0) - amount; return cur; });
         if (!result.committed) { toast('❌ Insufficient'); return; }
-        await db.ref('withdrawals/WD' + Date.now()).set({ userId: appState.user.id, userName: appState.user.name || 'User', method, account, amount, fee, netAmount: amount - fee, level: level.level || 1, status: 'pending', timestamp: Date.now() });
+        // ✅ FIX: added countedAtRequest flag for admin panel sync
+        await db.ref('withdrawals/WD' + Date.now()).set({ 
+            userId: appState.user.id, 
+            userName: appState.user.name || 'User', 
+            method, account, amount, fee, 
+            netAmount: amount - fee, 
+            level: level.level || 1, 
+            status: 'pending', 
+            countedAtRequest: false,
+            timestamp: Date.now() 
+        });
         appState.user.balance = Number(appState.user.balance || 0) - amount;
         document.getElementById('wd-account').value = '';
         document.getElementById('wd-amount').value = '';
@@ -2313,7 +2386,58 @@ async function updateTextElements() {
     if (appState.config.withdrawLevels && Array.isArray(appState.config.withdrawLevels) && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
     await calculateValidReferrals();
     updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts(); updateBonusClaimButton();
+    updatePendingConversionUI();
 }
+
+function updatePendingConversionUI() {
+    const wrap = document.getElementById('depositCountdown');
+    const timeEl = document.getElementById('depositCountdownTime');
+    const amtEl = document.getElementById('depositPendingAmt');
+    if (!wrap || !timeEl || !amtEl) return;
+    const pending = appState.user.pendingConversions || {};
+    const items = Object.entries(pending).filter(([id, p]) => Number(p.amount || 0) > 0);
+    if (!items.length) { wrap.style.display = 'none'; return; }
+    let totalAmt = 0, earliest = Infinity;
+    items.forEach(([id, p]) => { totalAmt += Number(p.amount || 0); const rem = (Number(p.timestamp || 0) + CONVERSION_MS) - Date.now(); if (rem < earliest) earliest = rem; });
+    wrap.style.display = 'block';
+    amtEl.textContent = totalAmt.toFixed(2);
+    if (earliest > 0) timeEl.textContent = fmtHHMMSS(earliest);
+    else timeEl.textContent = '00:00:00';
+}
+
+/* ✅ FIX: startPendingConversionTimer — was missing */
+function startPendingConversionTimer() {
+    if (pendingConversionInterval) return;
+    pendingConversionInterval = setInterval(async () => {
+        if (!isBooted || !isOnline) return;
+        const pending = appState.user.pendingConversions || {};
+        const now = Date.now();
+        const expired = Object.entries(pending).filter(([id, p]) => now - (Number(p.timestamp) || 0) >= CONVERSION_MS);
+        if (!expired.length) { updatePendingConversionUI(); return; }
+        for (const [id, p] of expired) {
+            const amt = Number(p.amount || 0);
+            if (amt <= 0) continue;
+            try {
+                const userRef = db.ref('users/' + tgUser.id);
+                const res = await userRef.transaction(cur => {
+                    if (!cur) return cur;
+                    if (!cur.pendingConversions || !cur.pendingConversions[id]) return cur;
+                    const item = cur.pendingConversions[id];
+                    if (Date.now() - Number(item.timestamp || 0) < CONVERSION_MS) return cur;
+                    cur.balance = Number(cur.balance || 0) + Number(item.amount || 0);
+                    delete cur.pendingConversions[id];
+                    return cur;
+                });
+                if (res.committed) toast(`✅ ${amt.toFixed(2)}৳ withdrawable এ যোগ হয়েছে!`);
+            } catch(e) { console.warn('[CONVERSION]', e); }
+        }
+        updatePendingConversionUI();
+    }, PENDING_CONVERSION_CHECK_MS);
+}
+function stopPendingConversionTimer() {
+    if (pendingConversionInterval) { clearInterval(pendingConversionInterval); pendingConversionInterval = null; }
+}
+
 function setLoading(isLoading) {
     const loader = document.getElementById('loader'), app = document.getElementById('app');
     if (!loader || !app) return;
@@ -2421,7 +2545,6 @@ async function showAppAfterVerify() {
     startAdminSlider();
     invalidateChannelCache();
     
-    // Force Chat FAB to show
     const fab = document.getElementById('chatFab');
     if (fab) fab.style.display = 'flex';
 
@@ -2431,8 +2554,72 @@ async function showAppAfterVerify() {
     try { await loadClaimPage(); } catch(e) {}
     try { renderDepositPage(); } catch(e) {}
     try { await updateTextElements(); } catch(e) {}
+    try { loadLeaderboard(); } catch(e) {}
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
+
+/* ✅ FIX: missing functions used in onclick handlers */
+function openSupport() {
+    const link = appState.config.supportLink || SUPPORT_LINK;
+    openLink(link);
+}
+function openTutorial() {
+    const link = appState.config.tutorialLink || '';
+    if (!link) { toast('❌ Tutorial not available'); return; }
+    openLink(link);
+}
+function handleBecomeAdmin() {
+    const enabled = appState.config.becomeAdminEnabled === true;
+    if (!enabled) { toast('❌ Admin recruitment is currently closed'); return; }
+    const link = appState.config.becomeAdminLink || '';
+    if (!link) { toast('❌ Application link not set'); return; }
+    openLink(link);
+}
+function toggleMenuPopup(e) {
+    if (e) e.stopPropagation();
+    const m = document.getElementById('menuPopup');
+    if (!m) return;
+    m.classList.toggle('show');
+}
+function closeMenuPopup() { const m = document.getElementById('menuPopup'); if (m) m.classList.remove('show'); }
+
+/* Admin slider auto-show logic */
+function startAdminSlider() {
+    stopAdminSlider();
+    const el = document.getElementById('adminSlider');
+    if (!el) return;
+    if (appState.config.becomeAdminEnabled !== true) { el.classList.remove('show'); return; }
+    const loop = () => {
+        el.classList.add('show');
+        adminSliderShowTimer = setTimeout(() => {
+            el.classList.remove('show');
+        }, 6000);
+    };
+    adminSliderLoopTimer = setTimeout(loop, 3000);
+    adminSliderHideTimer = setInterval(loop, 45000);
+}
+function stopAdminSlider() {
+    if (adminSliderShowTimer) { clearTimeout(adminSliderShowTimer); adminSliderShowTimer = null; }
+    if (adminSliderHideTimer) { clearInterval(adminSliderHideTimer); adminSliderHideTimer = null; }
+    if (adminSliderLoopTimer) { clearTimeout(adminSliderLoopTimer); adminSliderLoopTimer = null; }
+    const el = document.getElementById('adminSlider');
+    if (el) el.classList.remove('show');
+}
+
+/* Legal modals */
+const LEGAL_CONTENT = {
+    privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম।</p><div class="danger-box"><strong>⚠️ গুরুত্বপূর্ণ:</strong> Firebase Realtime Database-এ সংরক্ষিত ডেটা এনক্রিপ্টেড নয়।</div><h2>২. যোগাযোগ</h2><ul><li>Telegram: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
+    disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2><p>Earn Wallet একটি মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
+};
+function openLegalModal(type) {
+    const m = document.getElementById('legalModal');
+    const t = document.getElementById('legalModalTitle');
+    const b = document.getElementById('legalModalBody');
+    if (type === 'privacy') { t.innerHTML = '<i class="fas fa-shield-halved"></i> Privacy Policy'; b.innerHTML = LEGAL_CONTENT.privacy; }
+    else { t.innerHTML = '<i class="fas fa-triangle-exclamation"></i> Disclaimer'; b.innerHTML = LEGAL_CONTENT.disclaimer; }
+    m.classList.add('active');
+}
+function closeLegalModal() { document.getElementById('legalModal').classList.remove('active'); }
 
 /* =========================================================
    === CHAT SYSTEM
@@ -2630,6 +2817,14 @@ window.addEventListener('DOMContentLoaded', () => {
     if (legalModal) legalModal.addEventListener('click', function(e) { if (e.target === this) closeLegalModal(); });
     const shareModal = document.getElementById('shareModal');
     if (shareModal) shareModal.addEventListener('click', function(e) { if (e.target === this) closeShareModal(); });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(e) {
+        const m = document.getElementById('menuPopup');
+        if (m && m.classList.contains('show') && !m.contains(e.target) && !e.target.closest('.dots-btn')) {
+            m.classList.remove('show');
+        }
+    });
 
     if (!tgUser || !tgUser.id) {
         setTimeout(() => {
@@ -2707,7 +2902,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     totalCommission: 0, commissionHistory: {}, referredBy: null, dailyBonusDate: '',
                     lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
                     withdrawCount: 0, taskStatuses: {}, taskCooldowns: {},
-                    claimHistory: {}, pendingConversions: {}
+                    claimHistory: {}, pendingConversions: {},
+                    _refBonusGiven: false
                 };
                 await userRef.set(appState.user);
                 let refBy = null;
@@ -2719,11 +2915,11 @@ window.addEventListener('DOMContentLoaded', () => {
                     if (!deviceSnap.exists()) {
                         const refSnap = await db.ref('users/' + refBy).once('value');
                         if (refSnap.exists()) {
-                            await userRef.update({ referredBy: String(refBy) });
+                            await userRef.update({ referredBy: String(refBy), _refBonusGiven: true });
                             await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', username: tgUser.username || '', joinedAt: Date.now() });
                             await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
                             
-                            // 🎁 REFERRAL BONUS AWARD
+                            // 🎁 REFERRAL BONUS AWARD (with flag protection)
                             const refBonusAmount = Number(appState.config.refBonus || 5);
                             if (refBonusAmount > 0) {
                                 await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
@@ -2802,7 +2998,6 @@ window.addEventListener('DOMContentLoaded', () => {
                                 updateLastActive();
                                 startAdminSlider();
                                 
-                                // Force Chat FAB to show
                                 const fab = document.getElementById('chatFab');
                                 if (fab) fab.style.display = 'flex';
 
