@@ -14,6 +14,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 <style>
+/* ... (আগের সব CSS একই আছে) ... */
 :root{--primary:#6C5CE7;--secondary:#A29BFE;--bg:#F0F3F8;--surface:#FFF;--text:#2D3436;--danger:#ff4757;--success:#00b894;--warning:#f39c12;--border:#e1e1e1;--text-light:#6b7280;}
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-highlight-color:transparent;}
@@ -160,19 +161,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .nav i.active{color:#fff;transform:translateY(-5px);text-shadow:0 0 15px #fff;}
 .toast{position:fixed;top:40px;left:50%;transform:translateX(-50%);background:#2d3436;color:#fff;padding:12px 25px;border-radius:30px;font-size:.9rem;opacity:0;transition:.3s;z-index:10000;font-weight:600;max-width:90%;text-align:center;pointer-events:none;}
 .toast.show{opacity:1;top:50px;}
-.bonus-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:12000;padding:18px;background:rgba(0,0,0,.18);backdrop-filter:blur(10px);}
-.bonus-overlay.show{display:flex;}
-.bonus-card{width:100%;max-width:420px;border-radius:26px;overflow:hidden;background:linear-gradient(135deg,#111827,#1f2937);box-shadow:0 25px 60px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);}
-.bonus-body{position:relative;padding:22px 20px 18px;color:#e5e7eb;text-align:center;}
-.bonus-badge{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);padding:7px 12px;border-radius:999px;font-weight:700;font-size:.8rem;margin-bottom:14px;}
-.bonus-title{font-size:1.25rem;font-weight:800;margin-bottom:6px;color:#fff;}
-.bonus-sub{font-size:.85rem;opacity:.85;margin-bottom:16px;}
-.bonus-amt{font-size:2.3rem;font-weight:900;color:#facc15;margin-bottom:14px;}
-.bonus-actions{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
-.bonus-btn{width:100%;border:none;border-radius:16px;padding:14px;font-weight:800;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
-.bonus-btn:disabled{opacity:0.7;cursor:not-allowed;}
-.bonus-claim{background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;}
-.bonus-close{background:rgba(255,255,255,.08);color:#e5e7eb;border:1px solid rgba(255,255,255,.12);}
 .admin-slider{position:fixed;top:-160px;left:50%;transform:translateX(-50%);width:94%;max-width:460px;z-index:1500;transition:top 0.55s cubic-bezier(0.4, 0, 0.2, 1);pointer-events:none;background:linear-gradient(135deg,#1e1b4b 0%,#312e81 45%,#6C5CE7 100%);border-radius:20px;padding:13px 15px;display:flex;align-items:center;gap:12px;}
 .admin-slider.show{top:14px;pointer-events:auto;}
 .as-icon{position:relative;width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f6b04a,#e84393);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.15rem;flex-shrink:0;}
@@ -200,17 +188,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 #maintenanceOverlay p,#bannedOverlay p,#offlineOverlay p{color:rgba(255,255,255,0.7);max-width:400px;margin:8px 0 16px;}
 .offline-indicator{display:none;background:rgba(243,156,18,0.2);color:var(--warning);padding:4px 12px;border-radius:20px;font-size:0.7rem;font-weight:700;margin-left:10px;}
 .offline-indicator.show{display:inline-block;}
-#adErrorPopup{display:none;position:fixed;inset:0;z-index:7000;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
-#adErrorPopup.active{display:flex;}
-#adErrorPopup .box{background:var(--surface);max-width:360px;width:100%;padding:28px 24px;border-radius:20px;text-align:center;}
-#adErrorPopup .box h3{font-size:18px;font-weight:700;margin-bottom:6px;}
-#adErrorPopup .box p{font-size:14px;color:var(--text-light);margin-bottom:16px;}
-#adLoadingOverlay{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;}
-#adLoadingOverlay.active{display:flex;}
-.ad-loading-card{background:linear-gradient(145deg,#1a1f2e,#131724);border-radius:24px;padding:28px 24px;text-align:center;max-width:320px;width:100%;}
-.ad-loading-spinner{width:56px;height:56px;border-radius:50%;border:4px solid rgba(255,255,255,0.1);border-top-color:var(--primary);margin:0 auto 16px;animation:spin 1s linear infinite;}
-.ad-loading-title{color:#fff;font-weight:800;font-size:1rem;margin-bottom:6px;}
-.ad-loading-sub{color:rgba(255,255,255,0.6);font-size:0.8rem;}
 .ref-user-item{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#f9f9ff,#f2f4ff);padding:12px 15px;border-radius:14px;margin-bottom:10px;border:1px solid rgba(108,92,231,0.1);}
 .ref-user-item.active-package-ref{background:linear-gradient(135deg,#f0fff9,#e6fff5);border-color:rgba(0,184,148,.25);}
 .ref-user-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
@@ -225,11 +202,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .history-info h5{font-size:0.88rem;font-weight:700;}
 .history-info p{font-size:0.7rem;color:#999;}
 .history-amount{font-weight:800;font-size:0.95rem;color:var(--success);}
-.stat-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px;}
-.stat-mini{background:linear-gradient(135deg,#f7f3ff,#e3d6ff);padding:12px;border-radius:12px;text-align:center;}
-.stat-mini .num{font-size:1.4rem;font-weight:900;color:var(--primary);}
-.stat-mini .lbl{font-size:0.68rem;font-weight:700;color:#666;text-transform:uppercase;}
-.stat-mini .num.green{color:var(--success);}
 .commission-hero{background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;padding:18px;border-radius:16px;margin-bottom:15px;text-align:center;}
 .commission-hero .comm-label{font-size:.75rem;font-weight:700;opacity:.9;text-transform:uppercase;}
 .commission-hero .comm-amt{font-size:2rem;font-weight:900;margin:4px 0;}
@@ -294,9 +266,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .th-card-meta .row{display:flex;align-items:center;gap:8px;}
 .th-card-meta .row i{width:16px;color:#9ca3af;}
 .th-card-meta .row .reward{color:#00b894;font-weight:800;}
-.th-reason-box{margin-top:10px;padding:10px 12px;background:#FFF5F5;border-left:3px solid #ff4757;border-radius:8px;font-size:0.78rem;color:#721C24;font-weight:600;}
-.th-resubmit-btn{margin-top:12px;width:100%;padding:11px;border-radius:12px;background:linear-gradient(135deg,#6C5CE7,#A29BFE);color:#fff;font-weight:800;font-size:0.85rem;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
-.th-locked-note{margin-top:12px;padding:10px 12px;border-radius:10px;background:#F1F5F9;color:#64748b;font-size:0.76rem;font-weight:700;text-align:center;}
 .menu-popup{display:none;position:fixed;top:70px;right:16px;z-index:11000;width:200px;background:#fff;border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.25);overflow:hidden;}
 .menu-popup.show{display:block;}
 .menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;font-weight:700;font-size:.85rem;cursor:pointer;border-bottom:1px solid #f1f5f9;}
@@ -455,6 +424,19 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .typing-dots span:nth-child(1){animation-delay:-0.32s;}
 .typing-dots span:nth-child(2){animation-delay:-0.16s;}
 @keyframes typing{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+
+/* নতুন যোগ করা প্যাকেজ ডিটেইলস মডাল CSS */
+.pkg-details-card{background:linear-gradient(135deg,#ffffff,#f8faff);border-radius:24px;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.2);text-align:center;position:relative;overflow:hidden;}
+.pkg-details-card::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#00b894,#00cec9);}
+.pd-label{font-size:.75rem;font-weight:900;color:#64748b;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.pd-title{font-size:1.6rem;font-weight:900;color:#1e293b;margin-bottom:20px;}
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.pd-item{background:#f1f5f9;padding:14px;border-radius:16px;border:1px solid #e2e8f0;}
+.pd-item .num{font-size:1.3rem;font-weight:900;color:#6C5CE7;}
+.pd-item .lbl{font-size:.7rem;font-weight:800;color:#94a3b8;text-transform:uppercase;margin-top:4px;}
+.pkg-claim-btn{width:100%;padding:16px;border-radius:16px;border:none;font-weight:900;font-size:1.05rem;cursor:pointer;background:linear-gradient(135deg,#00b894,#00cec9);color:#fff;box-shadow:0 8px 20px rgba(0,184,148,.4);display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s;}
+.pkg-claim-btn:disabled{background:linear-gradient(135deg,#94a3b8,#cbd5e1);box-shadow:none;cursor:not-allowed;}
+
 .deposit-step-box{background:#fff;border-radius:20px;padding:20px;margin:0 20px 15px;box-shadow:0 8px 20px rgba(0,0,0,.04);}
 .deposit-step-title{font-size:1rem;font-weight:800;color:#1a1a2e;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
 .deposit-provider-card{background:#fff;border:2px solid #e5e7eb;border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;}
@@ -560,6 +542,11 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
         <div class="task-content" id="taskContentArea"></div>
         <div class="task-actions"><button class="task-btn task-btn-cancel" onclick="cancelTaskSubmit()"><i class="fas fa-times"></i> বাতিল</button><button class="task-btn task-btn-submit" id="taskSubmitActionBtn" onclick="submitGenericTask()"><i class="fas fa-paper-plane"></i> জমা দিন</button></div>
     </div>
+</div>
+
+<!-- প্যাকেজ ডিটেইলস মডাল - নতুন যোগ করা হয়েছে -->
+<div id="pkgDetailsModal" style="display:none;position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,0.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 0;">
+    <div id="pkgDetailsBody" style="max-width:480px;margin:20px auto; padding: 0 15px;"></div>
 </div>
 
 <div class="pkg-confirm-overlay" id="pkgConfirmOverlay" onclick="if(event.target===this)closePkgConfirm()">
@@ -872,9 +859,6 @@ const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
 const BOT_USERNAME = "TaskHubBD24Bot";
 const SUPPORT_LINK = "https://t.me/NexEarn2Support";
 
-/* =========================================================
-   === BOT CONFIG (Updated - Channel Check + Chat Notification)
-   ========================================================= */
 const BOT_TOKEN = "8921657661:AAHBaKSCD-jEHCgbEcYRQRiaD_Yx1vLHm9k";
 const ADMIN_TELEGRAM_ID = "6624254778";
 
@@ -888,9 +872,9 @@ const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 const PACKAGE_CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const CONVERSION_MS = 24 * 60 * 60 * 1000;
 
-// চ্যানেল চেক ক্যাশ - API rate limit এড়ানোর জন্য
+// ক্যাশ মেমরি - প্রতিবার ফ্রেশ চেক এর জন্য
 const CHANNEL_CHECK_CACHE = new Map();
-const CHANNEL_CHECK_CACHE_TTL = 30000; // 30s
+const CHANNEL_CHECK_CACHE_TTL = 5000; 
 
 let REF_COMMISSION_RATE = 2;
 let withdrawLevels = [];
@@ -965,7 +949,7 @@ function shareViaMessenger() { window.open('https://www.facebook.com/dialog/send
 function shareViaFacebook() { shareViaMessenger(); }
 
 /* =========================================================
-   === ✅ UPDATED CHANNEL CHECK SYSTEM (Telegram Bot API)
+   === চ্যানেল চেক সিস্টেম (Strict Update)
    ========================================================= */
 function formatChatIdForApi(chatId) {
     if (!chatId) return '';
@@ -997,31 +981,22 @@ async function checkChannelMembership(userId, chatId) {
             const st = data.result.status;
             if (st === 'member' || st === 'administrator' || st === 'creator') {
                 result = 'joined';
-            } else if (st === 'left' || st === 'kicked' || st === 'restricted') {
-                result = 'not_joined';
             } else {
                 result = 'not_joined';
             }
-        } else if (data && data.error_code === 400) {
-            const desc = String(data.description || '').toLowerCase();
-            if (desc.includes('user not found') || desc.includes('participant') || desc.includes('user_id_invalid')) {
-                result = 'not_joined';
+        } else if (data && !data.ok) {
+            // 400 Bad Request (User not found) -> Not joined
+            // 403 Forbidden (Bot not admin) -> Error
+            if (data.error_code === 403 || (data.description && data.description.toLowerCase().includes('administrator'))) {
+                console.error("Bot is not an admin in", chatId);
+                result = 'error_bot';
             } else {
-                result = 'unknown';
+                result = 'not_joined';
             }
-        } else if (data && data.error_code === 403) {
-            // Bot not admin in channel - config issue
-            console.warn('[CHANNEL CHECK] Bot is not admin in channel:', chatId, data.description);
-            result = 'unknown';
-        } else if (data && data.error_code === 404) {
-            console.warn('[CHANNEL CHECK] Channel not found:', chatId);
-            result = 'unknown';
-        } else {
-            result = 'unknown';
         }
     } catch(e) {
         console.warn('[CHANNEL CHECK] API error:', e.message);
-        result = 'unknown';
+        result = 'error_network';
     }
     
     CHANNEL_CHECK_CACHE.set(cacheKey, { result, timestamp: Date.now() });
@@ -1041,18 +1016,14 @@ async function needsVerification() {
         links.map(link => checkChannelMembership(tgUser.id, link.chatId))
     );
     
-    // Only block if explicitly NOT joined (not 'unknown')
-    if (results.some(r => r === 'not_joined')) return true;
+    // যদি কোনো একটি চ্যানেলে জয়েন করা না থাকে বা চেক করতে সমস্যা হয়, তবে ভেরিফিকেশন লাগবে
+    if (results.some(r => r !== 'joined')) return true;
     
-    // If all unknown - allow (API issue, don't lock users out)
-    if (results.every(r => r === 'unknown')) {
-        console.warn('[CHANNEL CHECK] All checks returned unknown - verify bot admin permissions');
-    }
     return false;
 }
 
 /* =========================================================
-   === PENDING CONVERSION (24h → Withdrawable) — FIXED
+   === PENDING CONVERSION
    ========================================================= */
 function startPendingConversionTimer() {
     if (pendingConversionTimer) return;
@@ -1129,7 +1100,7 @@ async function pushPendingConversion(amount, source) {
 }
 
 /* =========================================================
-   === REFERRAL COMMISSION (প্যাকেজ কিনলে ট্রিগার)
+   === REFERRAL COMMISSION
    ========================================================= */
 async function creditReferrerCommission(commissionAmount, originalEarned, source) {
     try {
@@ -1381,6 +1352,7 @@ async function confirmBuyPackage() {
         closePkgConfirm(); tryHaptic('success');
     } catch (e) { toast('❌ ' + e.message); btn.disabled = false; }
 }
+
 function openPackageDetails(pkgId) {
     const pkg = allPackagesCache[pkgId];
     const up = (appState.userPackages || {})[pkgId];
@@ -1394,6 +1366,7 @@ function openPackageDetails(pkgId) {
     const lastClaim = Number(up.lastClaimAt || 0);
     const canClaim = !isExpired && (lastClaim === 0 || (now - lastClaim) >= PACKAGE_CLAIM_COOLDOWN_MS);
     const price = Number(pkg.price || 0);
+    
     let claimBtnHtml;
     if (!isExpired) {
         const remainClaimMs = lastClaim > 0 ? Math.max(0, PACKAGE_CLAIM_COOLDOWN_MS - (now - lastClaim)) : 0;
@@ -1404,8 +1377,8 @@ function openPackageDetails(pkgId) {
     } else {
         claimBtnHtml = `<button class="pkg-claim-btn" disabled style="background:#ef4444;color:#fff;"><i class="fas fa-times-circle"></i> Expired</button>`;
     }
+    
     const html = `
-        <div class="sec-head"><i class="fas fa-box-open"></i> Details</div>
         <div class="pkg-details-card">
             <div class="pd-label">🎯 ACTIVE PACKAGE</div>
             <div class="pd-title">${esc(pkg.name)}</div>
@@ -1416,14 +1389,22 @@ function openPackageDetails(pkgId) {
                 <div class="pd-item"><div class="num">${remainDays}d</div><div class="lbl">Days Left</div></div>
             </div>
             ${claimBtnHtml}
-            <button onclick="closePkgDetails()" style="width:100%;padding:12px;border-radius:12px;border:none;background:rgba(255,255,255,.25);color:#fff;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:10px;">Close</button>
+            <button onclick="closePkgDetails()" style="width:100%;padding:12px;border-radius:12px;border:none;background:#f1f5f9;color:#64748b;font-weight:800;font-size:.85rem;cursor:pointer;margin-top:10px;">Close</button>
         </div>
     `;
-    let modal = document.getElementById('pkgDetailsModal');
-    if (!modal) { modal = document.createElement('div'); modal.id = 'pkgDetailsModal'; modal.style.cssText = 'position:fixed;inset:0;z-index:12000;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);overflow-y:auto;padding:20px 0;'; modal.innerHTML = '<div id="pkgDetailsBody" style="max-width:480px;margin:20px auto;"></div>'; document.body.appendChild(modal); } else { modal.style.display = 'block'; }
-    document.getElementById('pkgDetailsBody').innerHTML = html;
+    
+    const modal = document.getElementById('pkgDetailsModal');
+    const body = document.getElementById('pkgDetailsBody');
+    if (modal && body) {
+        body.innerHTML = html;
+        modal.style.display = 'block';
+    }
 }
-function closePkgDetails() { const m = document.getElementById('pkgDetailsModal'); if (m) m.style.display = 'none'; }
+function closePkgDetails() { 
+    const m = document.getElementById('pkgDetailsModal'); 
+    if (m) m.style.display = 'none'; 
+}
+
 async function claimPackageIncomeById(upId) {
     if (!upId) return;
     try {
@@ -2047,6 +2028,9 @@ window.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('online', () => location.reload(), { once: true });
             return;
         }
+        
+        invalidateChannelCache(); // প্রতিবার নতুন করে চেক করার জন্য ক্যাশ ক্লিয়ার
+        
         setLoading(true);
         updateNetworkStatus();
         document.getElementById('u-name').innerText = tgUser.first_name || 'User';
@@ -2057,7 +2041,7 @@ window.addEventListener('DOMContentLoaded', () => {
             if (document.hidden) { stopPeriodicRecheck(); stopAdminSlider(); closeMenuPopup(); }
             else {
                 updateLastActive();
-                invalidateChannelCache(); // চ্যানেল স্ট্যাটাস রিফ্রেশ
+                invalidateChannelCache(); 
                 if (isBooted && isOnline && !document.getElementById('joinModal').classList.contains('active') && document.getElementById('app').style.display !== 'none') {
                     startPeriodicRecheck(); startAdminSlider();
                     if (channelVerified) {
@@ -2155,9 +2139,27 @@ window.addEventListener('DOMContentLoaded', () => {
                         if (checkBan()) { setLoading(false); return; }
                         setupUserSubmissionsListener();
                         await fetchTaskStatuses();
+                        
+                        // কনফিগ লোড হওয়া পর্যন্ত অপেক্ষা করা হচ্ছে
+                        await new Promise(resolve => {
+                            if (channelLinks && channelLinks.length > 0) resolve();
+                            else {
+                                let checkCount = 0;
+                                const int = setInterval(() => {
+                                    checkCount++;
+                                    if ((channelLinks && channelLinks.length > 0) || checkCount > 30) { // 3 seconds max wait
+                                        clearInterval(int);
+                                        resolve();
+                                    }
+                                }, 100);
+                            }
+                        });
+
                         let verifyResult = 'error';
                         try { verifyResult = await Promise.race([needsVerification().catch(() => 'error'), new Promise(resolve => setTimeout(() => resolve('timeout'), 8000))]); } catch(e) { verifyResult = 'error'; }
-                        const needs = (verifyResult === true);
+                        
+                        const needs = (verifyResult === true || verifyResult === 'error' || verifyResult === 'timeout');
+                        
                         if (needs) {
                             document.getElementById('loader').style.display = 'none';
                             document.getElementById('joinModal').classList.add('active');
@@ -2206,7 +2208,16 @@ function startPeriodicRecheck() {
         if (checkMaintenance()) return;
         if (!channelVerified) return;
         isRechecking = true;
-        try { const needs = await needsVerification(); if (needs) { channelVerified = false; fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false)); document.getElementById('app').style.display = 'none'; document.getElementById('joinModal').classList.add('active'); renderChannelButtons(); } } catch(e) {} finally { isRechecking = false; }
+        try { 
+            const needs = await needsVerification(); 
+            if (needs) { 
+                channelVerified = false; 
+                fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false)); 
+                document.getElementById('app').style.display = 'none'; 
+                document.getElementById('joinModal').classList.add('active'); 
+                renderChannelButtons(); 
+            } 
+        } catch(e) {} finally { isRechecking = false; }
     }, CHANNEL_RECHECK_INTERVAL);
 }
 function stopPeriodicRecheck() {
@@ -2606,13 +2617,13 @@ async function checkAndUpdateStatus() {
         const statusEl = document.getElementById('verifyStatus');
         if (!userId || buttons.length === 0) return;
         
-        let joinedCount = 0, notJoinedCount = 0, unknownCount = 0;
+        let joinedCount = 0, notJoinedCount = 0, errorCount = 0;
         
         for (const btn of buttons) {
             const result = await checkChannelMembership(userId, btn.dataset.chatId);
             if (result === 'joined') { btn.classList.add('joined'); joinedCount++; }
             else if (result === 'not_joined') { btn.classList.remove('joined'); notJoinedCount++; }
-            else { btn.classList.remove('joined'); unknownCount++; }
+            else { btn.classList.remove('joined'); errorCount++; }
         }
         
         const total = buttons.length;
@@ -2625,10 +2636,10 @@ async function checkAndUpdateStatus() {
                 document.getElementById('joinModal').classList.remove('active');
                 showAppAfterVerify();
             }, 800);
+        } else if (errorCount > 0) {
+            if (statusEl) { statusEl.textContent = '⚠️ Verification error. Ask admin to add bot as Admin.'; statusEl.className = 'verify-status error'; }
         } else if (notJoinedCount > 0) {
             if (statusEl) { statusEl.textContent = '❌ Join ' + notJoinedCount + ' more channel(s)'; statusEl.className = 'verify-status error'; }
-        } else if (unknownCount === total) {
-            if (statusEl) { statusEl.textContent = '⚠️ Verifying... (Bot needs admin access)'; statusEl.className = 'verify-status loading'; }
         }
     } finally { isCheckingChannel = false; }
 }
@@ -2775,7 +2786,6 @@ async function sendChatMessage() {
         
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         
-        // এডমিনকে টেলিগ্রাম মেসেজ পাঠানো (শুধু টেক্সট মেসেজের জন্য)
         if (text && !fileUrl) {
             const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
@@ -2853,7 +2863,7 @@ async function handleAutoBotReply(tKey, text) {
     }
 }
 
-// ওয়েলকাম মেসেজ (টাইপো ফিক্স সহ)
+// ওয়েলকাম মেসেজ
 async function sendWelcomeMessageIfNew() {
     const tKey = getChatThreadKey();
     const snap = await db.ref('chats/' + tKey + '/messages').once('value');
