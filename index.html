@@ -2809,7 +2809,7 @@ async function sendChatMessage() {
 
 function initUserChatSystem() { const fab = document.getElementById('chatFab'); if (fab) fab.style.display = 'flex'; startChatListeners(); }
 
-// AI ব্যবহার করে অটো রিপ্লাই ফাংশন (নাম: ZARA, গালিগালাজ হ্যান্ডলিং ও অ্যাপ ফিচার সহ)
+// AI (ZARA) ব্যবহার করে অটো রিপ্লাই ফাংশন (ইউজারের লাইভ ডেটা রিড করার সিস্টেম সহ)
 async function handleAutoBotReply(tKey, text) {
     const metaSnap = await db.ref('chats/' + tKey + '/meta').once('value');
     const meta = metaSnap.val() || {};
@@ -2817,62 +2817,90 @@ async function handleAutoBotReply(tKey, text) {
     // এডমিন অনলাইনে থাকলে বা টাইপ করলে বট রিপ্লাই দেবে না
     if (meta.adminOnline === true || meta.adminTyping === true) return;
 
-    // AI-কে ZARA হিসেবে এবং অ্যাপের ফিচার ও নিয়মাবলী শেখানো হচ্ছে
+    // 👇 অ্যাডমিন প্যানেল থেকে লাইভ ডেটা কালেক্ট করা হচ্ছে 👇
+    const currentCommRate = REF_COMMISSION_RATE || 2; 
+    const refBonus = appState.config.refBonus || 5; 
+    const level1 = withdrawLevels[0] || {}; 
+    const reqRefs = level1.requiredRefs || 5; 
+    const wdFee = level1.fee || 5; 
+    const wdMin = level1.minAmount || 10; 
+    const wdMax = level1.maxAmount || 500; 
+
+    // 🧠 ইউজারের বর্তমান একাউন্টের লাইভ ডাটা সংগ্রহ করা হচ্ছে (Context Injection)
+    const userName = appState.user.name || 'User';
+    const uBalance = Number(appState.user.balance || 0).toFixed(2);
+    const uAdBalance = Number(appState.user.adBalance || 0).toFixed(2);
+    const uRefBalance = Number(appState.user.referralBalance || 0).toFixed(2);
+    const uActivePkgs = Number(appState.user.activePackageCount || 0);
+    
+    // রেফারেল কাউন্ট
+    const uTotalRefs = Object.keys(appState.user.referredUsers || {}).length;
+    const uActiveRefs = validReferralCount; // গ্লোবাল ভেরিয়েবল থেকে
+    
+    // একটিভ প্যাকেজের নাম
+    const activePkgNames = Object.values(appState.userPackages || {})
+        .filter(p => p.expiresAt > Date.now() && p.status !== 'expired')
+        .map(p => p.packageName).join(', ') || 'কোনো একটিভ প্যাকেজ নেই';
+
+    // পেন্ডিং টাস্ক
+    let pendingTasksCount = 0;
+    Object.values(userSubmissionsCache).forEach(subs => {
+        if (subs[0] && subs[0].status === 'pending') pendingTasksCount++;
+    });
+
+    // 👇 AI-এর প্রম্পটে ইউজারের লাইভ ডেটা এবং অ্যাপের সব ফিচার দিয়ে দেওয়া হচ্ছে 👇
     const systemPrompt = `তুমি "Task HUB" নামের একটি টেলিগ্রাম আর্নিং অ্যাপের অত্যন্ত ভদ্র, বুদ্ধিমান এবং সুন্দর ব্যবহারের সাপোর্ট বট। তোমার নাম "ZARA"। 
-    তোমার কাজ হলো ইউজারদের শুধুমাত্র অ্যাপের ভেতরের ফিচারগুলো সম্পর্কে সাহায্য করা। 
-    
-    অ্যাপের ফিচারসমূহ:
-    ১. ডিপোজিট (Deposit): "Deposit" ট্যাব থেকে বিকাশ/নগদ/রকেট-এ Send Money বা Cash Out করে TrxID সাবমিট করতে হবে। এডমিন অ্যাপ্রুভ করলে Deposit Balance এ টাকা যোগ হবে।
-    ২. প্যাকেজ (Packages): "Investment Packages" থেকে Deposit Balance দিয়ে প্যাকেজ কিনতে পারবে। এরপর প্রতিদিন ইনকাম ক্লেইম করতে পারবে।
-    ৩. ক্লেইম (Claim): Daily Income Claim ট্যাব থেকে প্রতিদিন প্যাকেজের ইনকাম ক্লেইম করা যায়।
-    ৪. টাস্ক (Tasks): Tasks ট্যাব থেকে কাজ করে স্ক্রিনশট/লেখা/অডিও সাবমিট করতে হবে। এডমিন অ্যাপ্রুভ করলে Deposit Balance এ টাকা যোগ হবে। 
-    ৫. উইথড্র (Withdraw): "Withdraw" ট্যাবে টাকা তোলা যায়। তবে এর জন্য নির্দিষ্ট সংখ্যক অ্যাক্টিভ রেফারেল (যারা প্যাকেজ কিনেছে) থাকতে হবে।
-    ৬. ২৪ ঘণ্টা কনভার্সন: ইনকাম বা টাস্কের টাকা Deposit Balance থেকে Withdrawable এ কনভার্ট হতে ২৪ ঘণ্টা সময় লাগে।
-    ৭. এডমিন সাপোর্ট: ইউজার যদি এডমিনের সাথে কথা বলতে চায়, তাকে বলবে "এডমিন" লিখতে।
-    
+    তোমার কাজ হলো নিচে দেওয়া ইউজারের লাইভ ডেটা এবং অ্যাপের সিস্টেম দেখে তার প্রশ্নের সঠিক উত্তর দেওয়া।
+
+    [ইউজারের বর্তমান একাউন্ট তথ্য - এই ডেটা দেখে তার সমস্যার সমাধান দেবে]
+    ইউজারের নাম: ${userName}
+    Withdrawable ব্যালেন্স: ${uBalance} টাকা
+    Deposit ব্যালেন্স: ${uAdBalance} টাকা
+    Referral ইনকাম: ${uRefBalance} টাকা
+    একটিভ প্যাকেজ সংখ্যা: ${uActivePkgs} টি (${activePkgNames})
+    মোট রেফারেল: ${uTotalRefs} জন (এর মধ্যে একটিভ/প্যাকেজ কিনেছে: ${uActiveRefs} জন)
+    পেন্ডিং টাস্ক সাবমিশন: ${pendingTasksCount} টি
+
+    অ্যাপের সিস্টেম এবং ফিচারসমূহ:
+    ১. ডিপোজিট: Deposit Balance বাড়াতে হবে Deposit ট্যাব থেকে।
+    ২. প্যাকেজ: Deposit Balance দিয়ে প্যাকেজ কিনলে Active Package বাড়ে এবং দৈনিক ইনকাম পাওয়া যায়।
+    ৩. ক্লেইম: Claim ট্যাবে প্রতিদিন প্যাকেজের ইনকাম Withdrawable ব্যালেন্সে নেওয়া যায়।
+    ৪. উইথড্র: Withdraw করার জন্য ${reqRefs} জন একটিভ রেফারেল লাগবে (রেফার করা ব্যক্তি প্যাকেজ কিনলে তবেই একটিভ হবে)। উইথড্র লিমিট ${wdMin} থেকে ${wdMax} টাকা এবং ফি ${wdFee}%।
+    ৫. রেফারেল: প্রতি রেফারেল থেকে ${currentCommRate}% কমিশন পাওয়া যায়। তবে ডিভাইস রেস্ট্রিকশনের কারণে একই ফোন থেকে একাধিকবার বা আগে থেকে রেফার থাকলে নতুন রেফার কাউন্ট হবে না।
+    ৬. এই অ্যাপে কোনো ২৪ ঘণ্টা কনভার্শন সিস্টেম নেই।
+
     কঠোর আচরণবিধি:
-    - শুরুতে ইউজারকে সালাম বা হ্যালো বললে তুমি বলবে: "হ্যালো! আমি ZARA বলছি। আপনার কী সমস্যা হয়েছে জানান, আমি সমাধান দেওয়ার চেষ্টা করব। (এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন)"
-    - যদি ইউজার কোনো গালিগালাজ, খারাপ ভাষা বা অশ্লীল কথা বলে, তবে তুমি রাগ করবে না। বিনয়ের সাথে কড়া ভাষায় বলবে: "দুঃখিত, অ্যাপে খারাপ ভাষা ব্যবহার করা নিষেধ। আপনার সমস্যা থাকলে সুন্দরভাবে বলুন, আমি সাহায্য করব। অথবা এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।"
-    - যদি ইউজার অ্যাপের বাইরের কোনো অপ্রাসঙ্গিক প্রশ্ন করে (যেমন: রাজনীতি, সাধারণ জ্ঞান), তবে ভদ্রভাবে বলবে: "আমি ZARA, Task HUB অ্যাপের সাপোর্ট বট। আমি শুধুমাত্র অ্যাপের সাপোর্ট সম্পর্কিত প্রশ্নের উত্তর দিতে পারি।"
-    - সবসময় সংক্ষেপে এবং বাংলায় উত্তর দেবে। ইউজার ইংরেজিতে লিখলে ইংরেজিতে উত্তর দেবে।
+    ১. গ্রিটিংস: "হাই", "হ্যালো", "সালাম" দিলে বলবে: "হ্যালো! আমি ZARA বলছি। কিভাবে আপনাকে সহযোগিতা করতে পারি? অ্যাপস বিষয়ে কোনো তথ্য জানার থাকলে আমাকে বলতে পারেন, অথবা এডমিনের সাথে কথা বলতে চাইলে 'এডমিন' লিখুন।"
+    ২. ইউজারের ডেটা এনালাইসিস: ইউজার যদি বলে "আমি উইথড্র করতে পারছি না", তুমি তার ডেটা চেক করে দেখবে তার ${reqRefs} জন রেফারেল আছে কিনা বা ব্যালেন্স ঠিক আছে কিনা। কম থাকলে বুঝিয়ে দেবে।
+    ৩. এডমিন সাপোর্ট: "এডমিন" লিখলে বলবে এডমিনের জন্য অপেক্ষা করতে।
+    ৪. গালিগালাজ: খারাপ ভাষা ব্যবহার করলে বিনয়ের সাথে কড়া ভাষায় শাসিয়ে দেবে।
     
     ইউজারের মেসেজ: "${text}"`;
 
     try {
-        // টাইপিং ইন্ডিকেটর অন করা
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(true);
 
-        // Google Gemini API তে রিকোয়েস্ট পাঠানো
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: systemPrompt }]
-                }],
-                // AI-কে কন্ট্রোল করার জন্য সেটিংস
-                generationConfig: {
-                    temperature: 0.6, 
-                    maxOutputTokens: 200 // উত্তর বেশি বড় হবে না
-                }
+                contents: [{ parts: [{ text: systemPrompt }] }],
+                generationConfig: { temperature: 0.6, maxOutputTokens: 300 }
             })
         });
 
         const data = await response.json();
         let reply = "দুঃখিত, এই মুহূর্তে আমি উত্তর দিতে পারছি না। অনুগ্রহ করে এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।";
 
-        // AI থেকে রিপ্লাই রিসিভ করা
         if (data.candidates && data.candidates[0].content.parts[0].text) {
             reply = data.candidates[0].content.parts[0].text.trim();
         }
 
-        // মেসেজ পাঠানোর আগে আবার চেক করা এডমিন অনলাইনে এসেছে কিনা
         const freshMeta = (await db.ref('chats/' + tKey + '/meta').once('value')).val() || {};
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
         
         if (freshMeta.adminOnline === true) return; 
 
-        // ডাটাবেসে AI (ZARA) এর রিপ্লাই পাঠানো
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
             text: reply, type: 'text', timestamp: Date.now(), read: false
@@ -2889,7 +2917,6 @@ async function handleAutoBotReply(tKey, text) {
         console.error("AI Reply Error:", error);
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
         
-        // কোনো এরর হলে ফলব্যাক মেসেজ
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
             text: "দুঃখিত, সিস্টেমে একটি সমস্যা হয়েছে। আপনার সমস্যাটি এডমিনকে জানাতে চাইলে 'এডমিন' লিখুন।",
