@@ -165,18 +165,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .as-title{color:#fff;font-weight:800;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .as-sub{color:rgba(255,255,255,.72);font-size:0.7rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .as-btn{background:linear-gradient(135deg,#f6b04a,#e84393);color:#fff;border:none;padding:9px 15px;border-radius:12px;font-weight:800;font-size:0.76rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;}
-#joinModal{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);align-items:center;justify-content:center;padding:20px;}
-#joinModal.active{display:flex;}
-#joinModal .box{background:var(--surface);max-width:400px;width:100%;padding:32px 24px;border-radius:24px;text-align:center;max-height:90vh;overflow-y:auto;}
-#joinModal .box h2{font-size:22px;font-weight:800;margin-bottom:6px;}
-#joinModal .box p{font-size:14px;color:var(--text-light);margin-bottom:20px;}
-#joinModal .channel-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;border:2px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);font-size:15px;font-weight:600;cursor:pointer;margin-bottom:10px;text-decoration:none;}
-#joinModal .channel-btn.joined{border-color:var(--success);background:rgba(16,185,129,0.05);}
-#joinModal .channel-btn.joined::after{content:' ✅';color:var(--success);}
-.verify-status{margin-top:12px;font-size:13px;font-weight:600;min-height:24px;}
-.verify-status.success{color:var(--success);}
-.verify-status.error{color:var(--danger);}
-.verify-status.loading{color:var(--warning);}
 #maintenanceOverlay,#bannedOverlay,#offlineOverlay{display:none;position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,0.85);backdrop-filter:blur(12px);align-items:center;justify-content:center;flex-direction:column;color:white;text-align:center;padding:30px;}
 #maintenanceOverlay.active,#bannedOverlay.active,#offlineOverlay.active{display:flex;}
 #maintenanceOverlay .icon,#offlineOverlay .icon{font-size:64px;color:var(--warning);margin-bottom:16px;}
@@ -531,8 +519,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 <div id="bannedOverlay"><div class="icon"><i class="fas fa-ban"></i></div><h2>🚫 Account Banned</h2><p id="banReason">Suspended.</p><button class="btn-main" onclick="openSupport()" style="max-width:280px;margin:0 auto;"><i class="fas fa-headset"></i> Contact Support</button></div>
 <div id="offlineOverlay"><div class="icon"><i class="fas fa-wifi-slash"></i></div><h2>No Internet Connection</h2><p>Check your internet and try again.</p></div>
 
-<div id="joinModal"><div class="box"><div class="icon">📢</div><h2>Join Our Channels</h2><p>Please join all Telegram channels below to access the dashboard.</p><div id="channelLinks"></div><div class="verify-status" id="verifyStatus"></div></div></div>
-
 <div id="taskSubmitModal">
     <div class="task-shell">
         <div class="task-head"><span class="task-head-icon" id="taskHeadIcon">📋</span><h2 id="taskSubmitTitle">Task</h2><p id="taskSubmitCategory">Category</p></div>
@@ -825,7 +811,7 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
             const loader = document.getElementById('loader');
             if (loader && loader.style.display !== 'none') {
                 loader.style.display = 'none';
-                const blocked = ['maintenanceOverlay','bannedOverlay','offlineOverlay','joinModal'].some(function(id){
+                const blocked = ['maintenanceOverlay','bannedOverlay','offlineOverlay'].some(function(id){
                     const o = document.getElementById(id);
                     return o && o.classList.contains('active');
                 });
@@ -863,19 +849,15 @@ const BOT_USERNAME = "TaskHubBD24Bot";
 let BOT_TOKEN = ""; 
 let ADMIN_TELEGRAM_ID = ""; 
 let SUPPORT_LINK = ""; 
+let GEMINI_API_KEY = "";
 
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
 const REFERRAL_BONUS_CLAIM_MIN = 100;
 const HISTORY_LIMIT = 25;
 const REFERRAL_REFRESH_INTERVAL = 15000;
-const CHANNEL_RECHECK_INTERVAL = 60000;
-const VERIFY_DEBOUNCE_MS = 5000;
 const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 const PACKAGE_CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000;
-
-const CHANNEL_CHECK_CACHE = new Map();
-const CHANNEL_CHECK_CACHE_TTL = 5000; 
 
 let REF_COMMISSION_RATE = 2;
 let withdrawLevels = [];
@@ -895,13 +877,11 @@ let appState = {
 
 let isBooted = false;
 let tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
-let channelVerified = false, channelLinks = [];
-let verifyInterval = null;
 let isOnline = navigator.onLine;
 let maintenanceTimer = null;
 let validReferralCount = 0;
 let periodicRecheckInterval = null, referralRefreshInterval = null;
-let isRechecking = false, isCheckingChannel = false, lastVerifyCheckTime = 0;
+let isRechecking = false;
 let cooldownTimerInterval = null, taskExpiryTickerInterval = null;
 let lastActiveInterval = null;
 let liveCountdownInterval = null;
@@ -965,68 +945,6 @@ function shareViaWhatsApp() { window.open('https://wa.me/?text=' + encodeURIComp
 function shareViaTelegram() { const url = 'https://t.me/share/url?url=' + encodeURIComponent(getRefLink()) + '&text=' + encodeURIComponent('🎉 Join!'); if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 function shareViaMessenger() { window.open('https://www.facebook.com/dialog/send?link=' + encodeURIComponent(getRefLink()) + '&app_id=1234567890&redirect_uri=' + encodeURIComponent(getRefLink()), '_blank'); }
 function shareViaFacebook() { shareViaMessenger(); }
-
-/* =========================================================
-   === CHANNEL CHECK SYSTEM (FIXED)
-   ========================================================= */
-function formatChatIdForApi(chatId) {
-    if (!chatId) return '';
-    const s = String(chatId).trim();
-    if (s.startsWith('-100')) return s; 
-    if (s.startsWith('@')) return s;
-    return '@' + s;
-}
-
-async function checkChannelMembership(userId, chatId) {
-    if (!userId || !chatId) return 'unknown';
-    if (!BOT_TOKEN) return 'unknown'; 
-    
-    const cacheKey = String(userId) + ':' + String(chatId);
-    const cached = CHANNEL_CHECK_CACHE.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp) < CHANNEL_CHECK_CACHE_TTL) return cached.result;
-    
-    const formatted = formatChatIdForApi(chatId);
-    let result = 'unknown';
-    
-    try {
-        const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/getChatMember?chat_id=' + encodeURIComponent(formatted) + '&user_id=' + encodeURIComponent(userId);
-        const res = await fetchWithTimeout(url, {}, 10000);
-        const data = await res.json();
-        
-        if (data && data.ok && data.result) {
-            const st = data.result.status;
-            if (st === 'member' || st === 'administrator' || st === 'creator') result = 'joined';
-            else result = 'not_joined';
-        } else if (data && !data.ok) {
-            if (data.error_code === 403 || (data.description && data.description.toLowerCase().includes('administrator'))) {
-                result = 'error_bot';
-            } else if (data.error_code === 400) {
-                if (data.description && data.description.toLowerCase().includes('chat not found')) {
-                    result = 'error_chat_id';
-                } else {
-                    result = 'not_joined'; 
-                }
-            } else {
-                result = 'not_joined'; 
-            }
-        }
-    } catch(e) {
-        result = 'error_network';
-    }
-    
-    CHANNEL_CHECK_CACHE.set(cacheKey, { result, timestamp: Date.now() });
-    return result;
-}
-
-function invalidateChannelCache() { CHANNEL_CHECK_CACHE.clear(); }
-
-async function needsVerification() {
-    const links = getCurrentChannelLinks() || [];
-    if (links.length === 0) return false;
-    const results = await Promise.all(links.map(link => checkChannelMembership(tgUser.id, link.chatId)));
-    if (results.some(r => r !== 'joined')) return true;
-    return false;
-}
 
 /* =========================================================
    === AI (ZARA) - OpenRouter Smart Reply (No Google API Needed)
@@ -1135,6 +1053,7 @@ async function handleAutoBotReply(tKey, text) {
         });
     }
 }
+
 /* =========================================================
    === REFERRAL COMMISSION
    ========================================================= */
@@ -2347,8 +2266,6 @@ async function calculateValidReferrals() {
         return count;
     } catch(e) { validReferralCount = 0; return 0; }
 }
-function getCurrentChannelLinks() { return channelLinks || []; }
-async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
 
 /* =========================================================
    === UPDATE UI & LEADERBOARD
@@ -2383,7 +2300,7 @@ function setLoading(isLoading) {
     if (!loader || !app) return;
     if (!navigator.onLine) { loader.style.display = 'none'; app.style.display = 'none'; const off = document.getElementById('offlineOverlay'); if (off) off.classList.add('active'); return; }
     if (isLoading) { loader.style.display = 'flex'; app.style.display = 'none'; }
-    else { loader.style.display = 'none'; const blocked = ['maintenanceOverlay', 'bannedOverlay', 'offlineOverlay', 'joinModal'].some(id => { const o = document.getElementById(id); return o && o.classList.contains('active'); }); app.style.display = blocked ? 'none' : 'block'; }
+    else { loader.style.display = 'none'; const blocked = ['maintenanceOverlay', 'bannedOverlay', 'offlineOverlay'].some(id => { const o = document.getElementById(id); return o && o.classList.contains('active'); }); app.style.display = blocked ? 'none' : 'block'; }
 }
 async function loadLeaderboard() {
     if (!isOnline) return;
@@ -2407,108 +2324,6 @@ async function loadLeaderboard() {
     });
     document.getElementById('podium-area').innerHTML = p2 + p1 + p3;
     document.getElementById('leader-list-area').innerHTML = listHtml || '<p style="text-align:center;color:#999;padding:20px;">No users</p>';
-}
-function renderChannelButtons() {
-    const container = document.getElementById('channelLinks');
-    if (!container) return;
-    container.innerHTML = '';
-    const links = getCurrentChannelLinks() || [];
-    if (links.length === 0) {
-        const statusEl = document.getElementById('verifyStatus');
-        if (statusEl) { statusEl.textContent = '⚠️ No channels configured'; statusEl.className = 'verify-status error'; }
-        return;
-    }
-    links.forEach(link => {
-        const btn = document.createElement('a');
-        btn.className = 'channel-btn';
-        btn.dataset.chatId = link.chatId;
-        
-        let url = String(link.chatId).trim();
-        if (url.startsWith('-100')) {
-            url = 'https://t.me/c/' + url.replace('-100', '');
-        } else if (url.startsWith('@')) {
-            url = 'https://t.me/' + url;
-        } else {
-            url = 'https://t.me/' + url;
-        }
-        btn.href = url;
-        
-        btn.innerHTML = '<i class="fa-brands fa-telegram"></i> ' + esc(link.label);
-        
-        btn.onclick = (e) => { 
-            e.preventDefault(); 
-            openLink(url); 
-            setTimeout(checkAndUpdateStatus, 2500); 
-        };
-        container.appendChild(btn);
-    });
-    const statusEl = document.getElementById('verifyStatus');
-    if (statusEl) { statusEl.textContent = '⏳ Checking...'; statusEl.className = 'verify-status loading'; }
-    if (verifyInterval) clearInterval(verifyInterval);
-    verifyInterval = setInterval(checkAndUpdateStatus, 3000);
-    setTimeout(checkAndUpdateStatus, 2000);
-}
-async function checkAndUpdateStatus() {
-    if (isCheckingChannel) return;
-    isCheckingChannel = true;
-    try {
-        const userId = tgUser.id;
-        const buttons = document.querySelectorAll('.channel-btn');
-        const statusEl = document.getElementById('verifyStatus');
-        if (!userId || buttons.length === 0) return;
-        
-        let joinedCount = 0, notJoinedCount = 0, errorBotAdmin = 0, errorChatId = 0;
-        
-        for (const btn of buttons) {
-            const result = await checkChannelMembership(userId, btn.dataset.chatId);
-            if (result === 'joined') { btn.classList.add('joined'); joinedCount++; }
-            else if (result === 'not_joined') { btn.classList.remove('joined'); notJoinedCount++; }
-            else if (result === 'error_bot') { errorBotAdmin++; }
-            else { errorChatId++; }
-        }
-        
-        const total = buttons.length;
-        
-        if (joinedCount === total && total > 0) {
-            if (statusEl) { statusEl.textContent = '✅ All joined!'; statusEl.className = 'verify-status success'; }
-            if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; }
-            await markVerified();
-            setTimeout(() => {
-                document.getElementById('joinModal').classList.remove('active');
-                showAppAfterVerify();
-            }, 800);
-        } else if (errorBotAdmin > 0) {
-            if (statusEl) { statusEl.innerHTML = '❌ <b>বট চ্যানেলে অ্যাডমিন নেই!</b> দয়া করে চ্যানেল সেটিংস থেকে <b>@TaskHubBD24Bot</b> কে অ্যাডমিন বানান।'; statusEl.className = 'verify-status error'; }
-        } else if (errorChatId > 0) {
-            if (statusEl) { statusEl.innerHTML = '❌ <b>চ্যানেল আইডি ভুল!</b> Firebase-এ <b>@username</b> বা <b>-100...</b> ফরম্যাটে চ্যানেল আইডি দিন।'; statusEl.className = 'verify-status error'; }
-        } else if (notJoinedCount > 0) {
-            if (statusEl) { statusEl.textContent = '❌ আপনি এখনো ' + notJoinedCount + ' টি চ্যানেলে জয়েন করেননি।'; statusEl.className = 'verify-status error'; }
-        }
-    } finally { isCheckingChannel = false; }
-}
-async function showAppAfterVerify() {
-    if (!isOnline) return;
-    if (checkMaintenance()) return;
-    if (checkBan()) return;
-    channelVerified = true;
-    document.getElementById('app').style.display = 'block';
-    setLoading(false);
-    if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
-    startPeriodicRecheck();
-    updateLastActive();
-    startAdminSlider();
-    invalidateChannelCache();
-    
-    const fab = document.getElementById('chatFab');
-    if (fab) fab.style.display = 'flex';
-
-    try { initUserChatSystem(); } catch(e) {}
-    try { await loadUserPackages(); } catch(e) {}
-    try { await loadPackages(); } catch(e) {}
-    try { await loadClaimPage(); } catch(e) {}
-    try { renderDepositPage(); } catch(e) {}
-    try { await updateTextElements(); } catch(e) {}
-    try { loadLeaderboard(); } catch(e) {}
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
@@ -2801,7 +2616,6 @@ window.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('online', () => location.reload(), { once: true });
             return;
         }
-        invalidateChannelCache();
         setLoading(true);
         updateNetworkStatus();
         
@@ -2817,26 +2631,13 @@ window.addEventListener('DOMContentLoaded', () => {
             }
             else {
                 updateLastActive();
-                invalidateChannelCache(); 
-                
-                // ✅ ইউজার অ্যাপে ফিরে আসলে সাথে সাথে চ্যানেল চেক করবে
-                if (document.getElementById('joinModal').classList.contains('active')) {
-                    checkAndUpdateStatus(); 
-                } 
-                else if (isBooted && isOnline && document.getElementById('app').style.display !== 'none') {
+                if (isBooted && isOnline && document.getElementById('app').style.display !== 'none') {
                     startPeriodicRecheck(); startAdminSlider();
-                    if (channelVerified) {
-                        const now = Date.now();
-                        if (now - lastVerifyCheckTime > VERIFY_DEBOUNCE_MS) {
-                            lastVerifyCheckTime = now;
-                            needsVerification().then(needs => { if (needs) { channelVerified = false; fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false)); document.getElementById('app').style.display = 'none'; document.getElementById('joinModal').classList.add('active'); renderChannelButtons(); } }).catch(() => {});
-                        }
-                    }
                 }
             }
         });
 
-        window.addEventListener('beforeunload', () => { updateLastActive(); stopPeriodicRecheck(); stopAdminSlider(); if (verifyInterval) { clearInterval(verifyInterval); verifyInterval = null; } if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; } if (liveCountdownInterval) { clearInterval(liveCountdownInterval); liveCountdownInterval = null; } });
+        window.addEventListener('beforeunload', () => { updateLastActive(); stopPeriodicRecheck(); stopAdminSlider(); if (maintenanceTimer) { clearInterval(maintenanceTimer); maintenanceTimer = null; } if (liveCountdownInterval) { clearInterval(liveCountdownInterval); liveCountdownInterval = null; } });
 
         let configDebounce = null;
         db.ref('config').on('value', snap => {
@@ -2849,9 +2650,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 if (appState.config.botToken) BOT_TOKEN = String(appState.config.botToken).trim();
                 if (appState.config.adminTelegramId) ADMIN_TELEGRAM_ID = String(appState.config.adminTelegramId).trim();
                 if (appState.config.supportLink) SUPPORT_LINK = String(appState.config.supportLink).trim();
+                if (appState.config.geminiApiKey) GEMINI_API_KEY = String(appState.config.geminiApiKey).trim();
 
                 if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
-                if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
                 REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
                 if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
                 if (isBooted) { updateTextElements(); renderNewTasks(); if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage(); if (document.getElementById('page-home').classList.contains('active')) loadPackages(); if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage(); }
@@ -2866,7 +2667,7 @@ window.addEventListener('DOMContentLoaded', () => {
                     balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
                     taskHistory: {}, referredUsers: {}, verifiedChannels: {},
                     totalCommission: 0, commissionHistory: {}, referredBy: null, dailyBonusDate: '',
-                    lastActive: Date.now(), channelVerified: false, isBanned: false, banReason: '',
+                    lastActive: Date.now(), channelVerified: true, isBanned: false, banReason: '',
                     withdrawCount: 0, taskStatuses: {}, taskCooldowns: {},
                     claimHistory: {}, pendingConversions: {},
                     _refBonusGiven: false
@@ -2932,46 +2733,26 @@ window.addEventListener('DOMContentLoaded', () => {
                         setupUserSubmissionsListener();
                         await fetchTaskStatuses();
                         
-                        await new Promise(resolve => {
-                            if (channelLinks && channelLinks.length > 0) resolve();
-                            else {
-                                let checkCount = 0;
-                                const int = setInterval(() => {
-                                    checkCount++;
-                                    if ((channelLinks && channelLinks.length > 0) || checkCount > 30) { clearInterval(int); resolve(); }
-                                }, 100);
-                            }
-                        });
+                        // ✅ সরাসরি অ্যাপ ওপেন হবে, কোনো চ্যানেল চেক হবে না
+                        if (isOnline) {
+                            document.getElementById('app').style.display = 'block';
+                            setLoading(false);
+                            if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
+                            startPeriodicRecheck();
+                            updateLastActive();
+                            startAdminSlider();
+                            
+                            const fab = document.getElementById('chatFab');
+                            if (fab) fab.style.display = 'flex';
 
-                        let verifyResult = 'error';
-                        try { verifyResult = await Promise.race([needsVerification().catch(() => 'error'), new Promise(resolve => setTimeout(() => resolve('timeout'), 8000))]); } catch(e) { verifyResult = 'error'; }
-                        
-                        const needs = (verifyResult === true || verifyResult === 'error' || verifyResult === 'timeout');
-                        
-                        if (needs) {
-                            document.getElementById('loader').style.display = 'none';
-                            document.getElementById('joinModal').classList.add('active');
-                            renderChannelButtons();
-                        } else {
-                            channelVerified = true;
-                            if (channelLinks && channelLinks.length > 0) fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true));
-                            if (isOnline) {
-                                document.getElementById('app').style.display = 'block';
-                                setLoading(false);
-                                if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
-                                startPeriodicRecheck();
-                                updateLastActive();
-                                startAdminSlider();
-                                
-                                const fab = document.getElementById('chatFab');
-                                if (fab) fab.style.display = 'flex';
-
-                                try { initUserChatSystem(); } catch(e) {}
-                                try { await loadUserPackages(); } catch(e) {}
-                                try { await loadPackages(); } catch(e) {}
-                                try { await loadClaimPage(); } catch(e) {}
-                                try { renderDepositPage(); } catch(e) {}
-                            } else { document.getElementById('loader').style.display = 'none'; document.getElementById('offlineOverlay').classList.add('active'); }
+                            try { initUserChatSystem(); } catch(e) {}
+                            try { await loadUserPackages(); } catch(e) {}
+                            try { await loadPackages(); } catch(e) {}
+                            try { await loadClaimPage(); } catch(e) {}
+                            try { renderDepositPage(); } catch(e) {}
+                        } else { 
+                            document.getElementById('loader').style.display = 'none'; 
+                            document.getElementById('offlineOverlay').classList.add('active'); 
                         }
                     })();
                 }
@@ -2991,16 +2772,6 @@ function startPeriodicRecheck() {
         if (!isOnline || !isBooted || document.hidden) return;
         try { await calculateValidReferrals(); updateRefTabCounts(); if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo(); } catch(e) {}
     }, REFERRAL_REFRESH_INTERVAL);
-    periodicRecheckInterval = setInterval(async () => {
-        if (isRechecking || !isOnline || !isBooted) return;
-        if (document.getElementById('joinModal').classList.contains('active')) return;
-        if (document.getElementById('app').style.display === 'none') return;
-        if (appState.user.isBanned) return;
-        if (checkMaintenance()) return;
-        if (!channelVerified) return;
-        isRechecking = true;
-        try { const needs = await needsVerification(); if (needs) { channelVerified = false; fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(false)); document.getElementById('app').style.display = 'none'; document.getElementById('joinModal').classList.add('active'); renderChannelButtons(); } } catch(e) {} finally { isRechecking = false; }
-    }, CHANNEL_RECHECK_INTERVAL);
 }
 function stopPeriodicRecheck() {
     if (periodicRecheckInterval) { clearInterval(periodicRecheckInterval); periodicRecheckInterval = null; }
@@ -3013,9 +2784,9 @@ function updateNetworkStatus() {
     isOnline = navigator.onLine;
     const off = document.getElementById('offlineOverlay'), ind = document.getElementById('offlineIndicator'), lo = document.getElementById('loader'), app = document.getElementById('app');
     if (!isOnline) { if (off) off.classList.add('active'); if (ind) ind.classList.add('show'); if (lo) lo.style.display = 'none'; if (app) app.style.display = 'none'; stopPeriodicRecheck(); }
-    else { if (off) off.classList.remove('active'); if (ind) ind.classList.remove('show'); if (app && isBooted && !document.getElementById('joinModal').classList.contains('active')) { app.style.display = 'block'; if (lo) lo.style.display = 'none'; } }
+    else { if (off) off.classList.remove('active'); if (ind) ind.classList.remove('show'); if (app && isBooted) { app.style.display = 'block'; if (lo) lo.style.display = 'none'; } }
 }
-window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); invalidateChannelCache(); if (!isBooted) setTimeout(() => location.reload(), 800); });
+window.addEventListener('online', () => { updateNetworkStatus(); toast('🔄 Reconnected!'); if (!isBooted) setTimeout(() => location.reload(), 800); });
 window.addEventListener('offline', () => { updateNetworkStatus(); toast('⚠️ No internet!'); });
 
 /* =========================================================
@@ -3058,10 +2829,6 @@ function loadPkgHistory() {
     if (!items.length) { c.innerHTML = '<div class="empty-state"><p>No package claims</p></div>'; return; }
     c.innerHTML = items.map(it => `<div class="history-item"><div style="display:flex;align-items:center;gap:12px;"><div class="history-icon" style="background:rgba(0,184,148,.15);color:#00b894;"><i class="fas fa-box-open"></i></div><div class="history-info"><h5>${esc(it.packageName||'Package')}</h5><p>${shortDate(it.timestamp)}</p></div></div><div class="history-amount">+${Number(it.amount||0).toFixed(2)} ৳</div></div>`).join('');
 }
-
-/* Channel verification helpers */
-function getCurrentChannelLinks() { return channelLinks || []; }
-async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
 </script>
 </body>
 </html>
