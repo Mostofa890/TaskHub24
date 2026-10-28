@@ -2501,12 +2501,20 @@ async function sendChatMessage() {
     const text = input.value.trim();
     if (!text && !chatSelectedFile) return;
     if (!isOnline) { toast('No internet!'); return; }
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    
     try {
         const tKey = getChatThreadKey();
         let fileUrl = null;
-        if (chatSelectedFile) { try { fileUrl = await uploadToImgBB(chatSelectedFile); } catch (err) { toast('❌ Upload failed'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; return; } }
         
+        if (chatSelectedFile) { 
+            try { fileUrl = await uploadToImgBB(chatSelectedFile); } 
+            catch (err) { toast('❌ Upload failed'); btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; return; } 
+        }
+        
+        // ১. ফায়ারবেসে মেসেজ সেভ করা
         const msgData = { from: 'user', userId: String(tgUser.id), userName: tgUser.first_name || 'User', text: text || '', type: chatSelectedFile ? 'image' : 'text', fileUrl, timestamp: Date.now(), read: false };
         
         fireAsync(db.ref('chats/' + tKey + '/meta').update({ userId: String(tgUser.id), userName: tgUser.first_name || 'User', lastMessageAt: Date.now(), lastMessagePreview: (text || (fileUrl ? '📷' : '')).substring(0, 60), lastMessageFrom: 'user', unreadForUser: 0, userTyping: false }));
@@ -2514,7 +2522,7 @@ async function sendChatMessage() {
         
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         
-        // ✅ নতুন ফিক্স: সরাসরি ফায়ারবেস থেকে টোকেন ও আইডি নিয়ে নোটিফিকেশন পাঠানো
+        // ২. এডমিনকে টেলিগ্রাম নোটিফিকেশন পাঠানো (সরাসরি ফায়ারবেস থেকে টোকেন নিয়ে)
         if (text && !fileUrl) {
             try {
                 const configSnap = await db.ref('config').once('value');
@@ -2524,31 +2532,38 @@ async function sendChatMessage() {
 
                 if (tgBotToken && tgAdminId) {
                     const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
-                    fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`, {
+                    
+                    const tgRes = await fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ chat_id: tgAdminId, text: tgMsg, parse_mode: 'Markdown' })
-                    }).catch(()=>{});
+                    });
+                    
+                    const tgData = await tgRes.json();
+                    if (!tgData.ok) console.error("Telegram Notify Error:", tgData.description);
                 } else {
                     console.warn("Bot Token or Admin ID missing in Firebase Config.");
                 }
-            } catch(e) { console.error("Notification Error:", e); }
+            } catch(e) { 
+                console.error("Notification Fetch Error:", e); 
+            }
         }
 
         input.value = '';
         clearChatFile();
 
+        // ৩. অটো বট রিপ্লাই (যদি এডমিন অনলাইনে না থাকে)
         if (text && !fileUrl) {
             setTimeout(() => handleAutoBotReply(tKey, text.toLowerCase()), 1000);
         }
 
-    } catch (e) { toast('❌ ' + (e.message || 'Failed')); }
-    finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
-}
-function initUserChatSystem() { 
-    const fab = document.getElementById('chatFab'); 
-    if (fab) fab.style.display = 'flex'; 
-    startChatListeners(); 
+    } catch (e) { 
+        toast('❌ ' + (e.message || 'Failed')); 
+    }
+    finally { 
+        btn.disabled = false; 
+        btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; 
+    }
 }
 
 async function sendWelcomeMessageIfNew() {
