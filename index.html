@@ -947,16 +947,16 @@ function shareViaMessenger() { window.open('https://www.facebook.com/dialog/send
 function shareViaFacebook() { shareViaMessenger(); }
 
 /* =========================================================
-   === AI (ZARA) - OpenRouter Smart Reply (No Google API Needed)
+   === AI (ZARA) - Groq Smart Reply (Fast & Free)
    ========================================================= */
 async function handleAutoBotReply(tKey, text) {
     const metaSnap = await db.ref('chats/' + tKey + '/meta').once('value');
     const meta = metaSnap.val() || {};
     if (meta.adminOnline === true || meta.adminTyping === true) return;
 
-    // OpenRouter API Key চেক
+    // Groq API Key চেক (ফায়ারবেস থেকে লোড হওয়া GEMINI_API_KEY ভেরিয়েবলটিই ব্যবহার করছি)
     if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") {
-        console.warn("OpenRouter API Key is missing.");
+        console.warn("Groq API Key is missing.");
         return;
     }
 
@@ -1003,16 +1003,15 @@ async function handleAutoBotReply(tKey, text) {
         // টাইপিং ইন্ডিকেটর অন করা
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(true);
 
-        // OpenRouter API-তে রিকোয়েস্ট পাঠানো
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        // Groq API-তে রিকোয়েস্ট পাঠানো
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${GEMINI_API_KEY}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                // এখানে 'openrouter/free' ব্যবহার করা হলো, যা অটোমেটিক ফ্রি মডেল সিলেক্ট করবে
-                model: 'openrouter/free', 
+                model: 'llama-3.3-70b-versatile', 
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: text }
@@ -1026,7 +1025,7 @@ async function handleAutoBotReply(tKey, text) {
         let reply = "";
         
         if (data.error) {
-            console.error("OpenRouter Error:", data.error);
+            console.error("Groq Error:", data.error);
             reply = "দয়া করে একটু অপেক্ষা করুন। আপনার সমস্যাটি এডমিনের কাছে পাঠানো হয়েছে, তিনিই শীঘ্রই সমাধান করবেন। (এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন)";
         } else if (data.choices && data.choices[0] && data.choices[0].message) {
             reply = data.choices[0].message.content.trim();
@@ -1048,7 +1047,7 @@ async function handleAutoBotReply(tKey, text) {
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
-            text: "⚠️ নেটওয়ার্ক সমস্যা। এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।",
+            text: "দয়া করে অপেক্ষা করুন। এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।",
             type: 'text', timestamp: Date.now(), read: false
         });
     }
