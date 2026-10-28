@@ -2514,15 +2514,25 @@ async function sendChatMessage() {
         
         await db.ref('chats/' + tKey + '/messages').push(msgData);
         
+        // ✅ নতুন ফিক্স: সরাসরি ফায়ারবেস থেকে টোকেন ও আইডি নিয়ে নোটিফিকেশন পাঠানো
         if (text && !fileUrl) {
-            const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
-            if (BOT_TOKEN && ADMIN_TELEGRAM_ID) {
-                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: ADMIN_TELEGRAM_ID, text: tgMsg, parse_mode: 'Markdown' })
-                }).catch(()=>{});
-            }
+            try {
+                const configSnap = await db.ref('config').once('value');
+                const cfg = configSnap.val() || {};
+                const tgBotToken = cfg.botToken || BOT_TOKEN;
+                const tgAdminId = cfg.adminTelegramId || ADMIN_TELEGRAM_ID;
+
+                if (tgBotToken && tgAdminId) {
+                    const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
+                    fetch(`https://api.telegram.org/bot${tgBotToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: tgAdminId, text: tgMsg, parse_mode: 'Markdown' })
+                    }).catch(()=>{});
+                } else {
+                    console.warn("Bot Token or Admin ID missing in Firebase Config.");
+                }
+            } catch(e) { console.error("Notification Error:", e); }
         }
 
         input.value = '';
@@ -2535,7 +2545,6 @@ async function sendChatMessage() {
     } catch (e) { toast('❌ ' + (e.message || 'Failed')); }
     finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i>'; }
 }
-
 function initUserChatSystem() { 
     const fab = document.getElementById('chatFab'); 
     if (fab) fab.style.display = 'flex'; 
