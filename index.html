@@ -1120,17 +1120,75 @@ async function handleAutoBotReply(tKey, text) {
 
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
-            text: reply, type: 'text', timestamp: Date.now(), read: false
-        });
+/* =========================================================
+   === AI (ZARA) - Rule Based Auto Reply (No API Needed)
+   ========================================================= */
+async function handleAutoBotReply(tKey, text) {
+    const metaSnap = await db.ref('chats/' + tKey + '/meta').once('value');
+    const meta = metaSnap.val() || {};
+    if (meta.adminOnline === true || meta.adminTyping === true) return;
+
+    const lowerText = text.toLowerCase().trim();
+    let reply = "";
+
+    // ইউজারের ব্যালেন্স ডাটা বের করা
+    const uBalance = Number(appState.user.balance || 0).toFixed(2);
+    const uAdBalance = Number(appState.user.adBalance || 0).toFixed(2);
+    const uRefBalance = Number(appState.user.referralBalance || 0).toFixed(2);
+    const uActivePkgs = Number(appState.user.activePackageCount || 0);
+    const uTotalRefs = Object.keys(appState.user.referredUsers || {}).length;
+
+    // কন্ডিশন চেক করে রিপ্লাই তৈরি করা
+    if (lowerText.includes('admin') || lowerText.includes('এডমিন') || lowerText.includes('এডমিনের') || lowerText.includes('এ্যাডমিন')) {
+        reply = "🚨 আপনি এডমিনের সাথে কথা বলতে চেয়েছেন। অনুগ্রহ করে একটু অপেক্ষা করুন, এডমিন শীঘ্রই আপনার মেসেজটি দেখে রিপ্লাই দিবেন।";
+    } 
+    else if (lowerText.includes('hi') || lowerText.includes('hello') || lowerText.includes('হ্যালো') || lowerText.includes('সালাম') || lowerText.includes('assalamu') || lowerText.includes('salam')) {
+        reply = "হ্যালো! আমি ZARA বলছি। কিভাবে আপনাকে সহযোগিতা করতে পারি? অ্যাপস বিষয়ে কোনো তথ্য জানার থাকলে আমাকে বলতে পারেন, অথবা এডমিনের সাথে কথা বলতে চাইলে 'এডমিন' লিখুন।";
+    } 
+    else if (lowerText.includes('balance') || lowerText.includes('ব্যালেন্স') || lowerText.includes('টাকা')) {
+        reply = `আপনার বর্তমান ব্যালেন্স তথ্য:\n\n💵 Withdrawable: ${uBalance} টাকা\n🏦 Deposit Balance: ${uAdBalance} টাকা\n🎁 Referral Income: ${uRefBalance} টাকা\n📦 Active Packages: ${uActivePkgs} টি`;
+    } 
+    else if (lowerText.includes('withdraw') || lowerText.includes('উইথড্র') || lowerText.includes('তুলব')) {
+        const level1 = withdrawLevels[0] || {};
+        const reqRefs = level1.requiredRefs || 5;
+        reply = `💸 Withdraw করতে আপনার কমপক্ষে ${reqRefs} জন একটিভ রেফারেল (যারা প্যাকেজ কিনেছে) থাকতে হবে। উইথড্র লিমিট ${level1.minAmount || 10} থেকে ${level1.maxAmount || 500} টাকা।`;
+    }
+    else if (lowerText.includes('ref') || lowerText.includes('রেফার') || lowerText.includes('বন্ধু')) {
+        reply = `👥 আপনার মোট রেফারেল: ${uTotalRefs} জন। বন্ধুকে রেফার করলে সে জয়েন করলে বোনাস পাবেন। তবে মনে রাখবেন, বন্ধুকে রেফার করলে এবং সে প্যাকেজ কিনলে আপনি কমিশন পাবেন।`;
+    }
+    else if (lowerText.includes('deposit') || lowerText.includes('ডিপোজিট') || lowerText.includes('টাকা ঢুকাব')) {
+        reply = "🏦 টাকা ডিপোজিট করতে 'Deposit' ট্যাবে যান। সেখানে বিকাশ, নগদ বা রকেট নাম্বার দেওয়া আছে। সেন্ড মানি বা ক্যাশ আউট করে TrxID সাবমিট করলে এডমিন অ্যাপ্রুভ করলে আপনার Deposit Balance এ টাকা যোগ হবে।";
+    }
+    else if (lowerText.includes('package') || lowerText.includes('প্যাকেজ')) {
+        reply = "📦 প্যাকেজ কিনতে Deposit Balance ব্যবহার করতে হবে। প্যাকেজ কিনলে প্রতিদিন ইনকাম পাবেন, যা Claim ট্যাব থেকে ক্লেইম করতে পারবেন।";
+    }
+    else if (lowerText.includes('fake') || lowerText.includes('ফেক') || lowerText.includes('স্ক্যাম') || lowerText.includes('প্রতারক')) {
+        reply = `❌ আমরা কোনো ফেক অ্যাপ নই। আপনার অ্যাকাউন্টে বর্তমানে ${uBalance} টাকা আছে। নিশ্চিন্ত থাকুন, এডমিন অ্যাপ্রুভ করলেই টাকা পাবেন।`;
+    }
+    else if (lowerText.includes('gali') || lowerText.includes('faltu') || lowerText.includes('bad')) {
+        reply = "দুঃখিত, অনুগ্রহ করে সুন্দর ভাষায় কথা বলুন। আপনার সমস্যাটি বললে আমি সমাধান করার চেষ্টা করব। অথবা এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।";
+    }
+    else {
+        // কোনো ম্যাচ না পাওয়া গেলে
+        reply = "আমি ZARA, Task HUB অ্যাপের সাপোর্ট বট। আমি শুধুমাত্র অ্যাপের সাপোর্ট সম্পর্কিত প্রশ্নের উত্তর দিতে পারি। আপনার সমস্যাটি বুঝতে পারিনি, দয়া করে বিস্তারিত লিখুন অথবা এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।";
+    }
+
+    // রিপ্লাই পাঠানো
+    try {
+        await db.ref('chats/' + tKey + '/meta/adminTyping').set(true);
         
-    } catch (error) {
-        console.error("AI Fetch Error:", error);
+        // একটু ডিলে দিয়ে পাঠানো হচ্ছে যাতে ইউজারের কাছে ন্যাচারাল মনে হয়
+        await new Promise(r => setTimeout(r, 1000)); 
+        
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
+
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
-            text: "⚠️ নেটওয়ার্ক বা সিস্টেম এরর।",
-            type: 'text', timestamp: Date.now(), read: false
+            text: reply, type: 'text', timestamp: Date.now(), read: false
         });
+    } catch (e) {
+        console.error("Auto reply error:", e);
+        await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
     }
 }
 
