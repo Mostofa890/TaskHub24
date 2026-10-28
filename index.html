@@ -69,8 +69,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
 .balance-stats .stat-box{text-align:center;flex:1;}
 .balance-stats .stat-box h4{font-size:.9rem;color:#3b2b6b;font-weight:900;}
 .balance-stats .stat-box p{font-size:.62rem;color:rgba(59,43,107,.75);font-weight:700;margin-top:2px;}
-.deposit-countdown-live{margin-top:8px;background:rgba(0,0,0,.08);padding:5px 8px;border-radius:8px;font-size:.6rem;font-weight:800;color:#7c2d12;text-align:center;font-variant-numeric:tabular-nums;}
-.deposit-countdown-live .dc-time{font-size:.78rem;color:#c2410c;display:block;margin-top:2px;}
 .sec-head{font-size:1.1rem;font-weight:800;margin:25px 0 15px;color:var(--text);display:flex;align-items:center;gap:10px;padding:0 20px;position:relative;}
 .sec-head i{color:var(--primary);font-size:1.2rem;}
 .task-list{display:flex;flex-direction:column;gap:14px;padding:0 20px 30px;}
@@ -576,10 +574,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
                 <div class="bi-icon">🏦</div>
                 <div class="bi-label">Deposit Balance</div>
                 <div class="bi-amount"><span id="u-adbal">0.00</span> ৳</div>
-                <div id="depositCountdown" class="deposit-countdown-live" style="display:none;">
-                    <i class="fas fa-clock"></i> <span id="depositCountdownTime" class="dc-time">00:00:00</span>
-                    <span style="font-size:.55rem;opacity:.8;"><span id="depositPendingAmt">0.00</span>৳ converting</span>
-                </div>
             </div>
             <div class="balance-item withdrawable">
                 <div class="bi-icon">💵</div>
@@ -862,15 +856,14 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-// ❌ আগের হার্ডকোডগুলো মুছে ফেলুন এবং এগুলো বসান:
+const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";
+const BOT_USERNAME = "TaskHubBD24Bot";
+
+// ✅ ফায়ারবেস থেকে লোড হবে
 let BOT_TOKEN = ""; 
 let ADMIN_TELEGRAM_ID = ""; 
 let SUPPORT_LINK = ""; 
 let GEMINI_API_KEY = ""; 
-
-// এগুলো পাবলিক, কোডে থাকতে পারে
-const BOT_USERNAME = "TaskHubBD24Bot";
-const IMGBB_API_KEY = "bc5a5bca9a50833046600a2cc94de6c6";  
 
 const TASK_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const REFERRAL_CLAIM_MIN = 10;
@@ -881,8 +874,6 @@ const CHANNEL_RECHECK_INTERVAL = 60000;
 const VERIFY_DEBOUNCE_MS = 5000;
 const LAST_ACTIVE_INTERVAL_MS = 3 * 60 * 1000;
 const PACKAGE_CLAIM_COOLDOWN_MS = 24 * 60 * 60 * 1000;
-const CONVERSION_MS = 24 * 60 * 60 * 1000;
-const PENDING_CONVERSION_CHECK_MS = 30 * 1000;
 
 const CHANNEL_CHECK_CACHE = new Map();
 const CHANNEL_CHECK_CACHE_TTL = 5000; 
@@ -915,7 +906,6 @@ let isRechecking = false, isCheckingChannel = false, lastVerifyCheckTime = 0;
 let cooldownTimerInterval = null, taskExpiryTickerInterval = null;
 let lastActiveInterval = null;
 let liveCountdownInterval = null;
-let pendingConversionInterval = null;
 
 let taskState = { taskId: null, task: null, type: 'text', submitting: false };
 let userSubmissionsCache = {};
@@ -946,8 +936,6 @@ function safeUrl(url) { const s = String(url || '').trim(); if (!s) return ''; i
 function safeInt(v, def) { const n = Number(v); return isNaN(n) || !isFinite(n) ? def : n; }
 function tryHaptic(type) { try { if (tg && tg.HapticFeedback) { if (type === 'success') tg.HapticFeedback.notificationOccurred('success'); else if (type === 'error') tg.HapticFeedback.notificationOccurred('error'); else tg.HapticFeedback.impactOccurred('light'); } } catch(e) {} }
 function fireAsync(promise) { if (promise && typeof promise.catch === 'function') promise.catch(() => {}); }
-
-/* ✅ FIX: fmtHHMMSS — used in claim cooldown display, was missing */
 function fmtHHMMSS(ms) {
     const totalSec = Math.max(0, Math.floor(ms / 1000));
     const h = Math.floor(totalSec / 3600);
@@ -955,8 +943,6 @@ function fmtHHMMSS(ms) {
     const s = totalSec % 60;
     return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
 }
-
-/* ✅ FIX: getDeviceId — used in referral device-tracking, was missing */
 function getDeviceId() {
     try {
         const KEY = 'nexearn_device_id';
@@ -967,7 +953,6 @@ function getDeviceId() {
         }
         return id;
     } catch(e) {
-        // localStorage blocked fallback
         return 'dev_' + (tgUser && tgUser.id ? tgUser.id : 'guest');
     }
 }
@@ -988,13 +973,15 @@ function shareViaFacebook() { shareViaMessenger(); }
 function formatChatIdForApi(chatId) {
     if (!chatId) return '';
     const s = String(chatId).trim();
-    if (/^-?\d+$/.test(s)) return s;
+    if (s.startsWith('-100')) return s; 
     if (s.startsWith('@')) return s;
     return '@' + s;
 }
 
 async function checkChannelMembership(userId, chatId) {
     if (!userId || !chatId) return 'unknown';
+    if (!BOT_TOKEN) return 'unknown'; 
+    
     const cacheKey = String(userId) + ':' + String(chatId);
     const cached = CHANNEL_CHECK_CACHE.get(cacheKey);
     if (cached && (Date.now() - cached.timestamp) < CHANNEL_CHECK_CACHE_TTL) return cached.result;
@@ -1013,11 +1000,9 @@ async function checkChannelMembership(userId, chatId) {
             else result = 'not_joined';
         } else if (data && !data.ok) {
             if (data.error_code === 403 || (data.description && data.description.toLowerCase().includes('administrator'))) {
-                console.error("Bot is not an admin in", chatId);
                 result = 'error_bot';
             } else if (data.error_code === 400) {
                 if (data.description && data.description.toLowerCase().includes('chat not found')) {
-                    console.error("Channel not found:", chatId);
                     result = 'error_chat_id';
                 } else {
                     result = 'not_joined'; 
@@ -1027,7 +1012,6 @@ async function checkChannelMembership(userId, chatId) {
             }
         }
     } catch(e) {
-        console.warn('[CHANNEL CHECK] API error:', e.message);
         result = 'error_network';
     }
     
@@ -1054,7 +1038,7 @@ async function handleAutoBotReply(tKey, text) {
     if (meta.adminOnline === true || meta.adminTyping === true) return;
 
     if (!GEMINI_API_KEY || GEMINI_API_KEY.trim() === "") return;
-    if (!BOT_TOKEN || !ADMIN_TELEGRAM_ID) return;
+    if (!BOT_TOKEN || !ADMIN_TELEGRAM_ID) return; 
 
     const currentCommRate = REF_COMMISSION_RATE || 2; 
     const refBonus = appState.config.refBonus || 5; 
@@ -1126,7 +1110,7 @@ async function handleAutoBotReply(tKey, text) {
 
         const data = await response.json();
         let reply = "";
-        if (data.error) reply = "❌ API Error: " + data.error.message;
+        if (data.error) reply = "দুঃখিত, আমার সিস্টেমে একটি সমস্যা হচ্ছে। এডমিনের সাথে কথা বলতে 'এডমিন' লিখুন।";
         else if (data.candidates && data.candidates[0].content.parts[0].text) reply = data.candidates[0].content.parts[0].text.trim();
         else reply = "দুঃখিত, আমি এই মুহূর্তে উত্তর তৈরি করতে পারছি না।";
 
@@ -1144,7 +1128,7 @@ async function handleAutoBotReply(tKey, text) {
         await db.ref('chats/' + tKey + '/meta/adminTyping').set(false);
         await db.ref('chats/' + tKey + '/messages').push({
             from: 'admin', adminId: 'bot', adminName: 'ZARA AI',
-            text: "⚠️ নেটওয়ার্ক বা সিস্টেম এরর: " + error.message,
+            text: "⚠️ নেটওয়ার্ক বা সিস্টেম এরর।",
             type: 'text', timestamp: Date.now(), read: false
         });
     }
@@ -1345,13 +1329,11 @@ async function claimReferralBonus() {
     finally { updateBonusClaimButton(); }
 }
 
-/* ✅ FIX: missing function loadMyReferrals (used in switchTab) */
 async function loadMyReferrals() {
     await calculateValidReferrals();
     renderReferralList();
 }
 
-/* ✅ FIX: missing function loadCommissionHistory (used in switchTab and renderReferralList) */
 function loadCommissionHistory() {
     const container = document.getElementById('commissionHistoryList');
     if (!container) return;
@@ -1382,7 +1364,6 @@ function loadCommissionHistory() {
    === PACKAGES
    ========================================================= */
 async function loadPackages() {
-    const grid = document.getElementById('packagesGrid');
     const homeGrid = document.getElementById('homePackagesGrid');
     if (homeGrid) homeGrid.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
     try {
@@ -1436,6 +1417,7 @@ async function loadPackages() {
         if (homeGrid) homeGrid.innerHTML = '<div class="empty-state" style="color:red;"><p>Network Error: Failed to load packages</p></div>';
     }
 }
+
 function openBuyConfirm(pkgId) {
     const pkg = allPackagesCache[pkgId];
     if (!pkg) { toast('❌ Not found'); return; }
@@ -1457,7 +1439,9 @@ function openBuyConfirm(pkgId) {
     else { btn.disabled = false; btn.textContent = 'কিনুন'; }
     document.getElementById('pkgConfirmOverlay').classList.add('active');
 }
+
 function closePkgConfirm() { document.getElementById('pkgConfirmOverlay').classList.remove('active'); selectedPkgForBuy = null; }
+
 async function confirmBuyPackage() {
     if (!selectedPkgForBuy) return;
     const pkg = allPackagesCache[selectedPkgForBuy];
@@ -1599,6 +1583,7 @@ async function claimPackageIncomeById(upId) {
         tryHaptic('success');
     } catch (e) { toast('❌ ' + e.message); }
 }
+
 async function loadUserPackages() {
     if (!tgUser || !tgUser.id) return;
     if (!appState.userPackages) appState.userPackages = {};
@@ -1648,6 +1633,7 @@ function switchClaimTab(which) {
     if (which === 'history') { a.classList.remove('active'); b.classList.add('active'); pa.classList.remove('active'); pb.classList.add('active'); loadClaimHistory(); }
     else { b.classList.remove('active'); a.classList.add('active'); pb.classList.remove('active'); pa.classList.add('active'); loadClaimPage(); }
 }
+
 function loadClaimPage() {
     const listEl = document.getElementById('claimPackagesList');
     const totalEl = document.getElementById('claimTotalAmount');
@@ -1720,6 +1706,7 @@ function loadClaimPage() {
         });
     }, 1000);
 }
+
 function loadClaimHistory() {
     const container = document.getElementById('claimHistoryList');
     if (!container) return;
@@ -2244,7 +2231,6 @@ async function requestWithdraw() {
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => { if (!cur) return cur; if (Number(cur.balance || 0) < amount) return; cur.balance = Number(cur.balance || 0) - amount; return cur; });
         if (!result.committed) { toast('❌ Insufficient'); return; }
-        // ✅ FIX: added countedAtRequest flag for admin panel sync
         await db.ref('withdrawals/WD' + Date.now()).set({ 
             userId: appState.user.id, 
             userName: appState.user.name || 'User', 
@@ -2391,55 +2377,6 @@ async function updateTextElements() {
     updateWithdrawInfo(); updateRefClaimButton(); updateRefTabCounts(); updateBonusClaimButton();
 }
 
-function updatePendingConversionUI() {
-    const wrap = document.getElementById('depositCountdown');
-    const timeEl = document.getElementById('depositCountdownTime');
-    const amtEl = document.getElementById('depositPendingAmt');
-    if (!wrap || !timeEl || !amtEl) return;
-    const pending = appState.user.pendingConversions || {};
-    const items = Object.entries(pending).filter(([id, p]) => Number(p.amount || 0) > 0);
-    if (!items.length) { wrap.style.display = 'none'; return; }
-    let totalAmt = 0, earliest = Infinity;
-    items.forEach(([id, p]) => { totalAmt += Number(p.amount || 0); const rem = (Number(p.timestamp || 0) + CONVERSION_MS) - Date.now(); if (rem < earliest) earliest = rem; });
-    wrap.style.display = 'block';
-    amtEl.textContent = totalAmt.toFixed(2);
-    if (earliest > 0) timeEl.textContent = fmtHHMMSS(earliest);
-    else timeEl.textContent = '00:00:00';
-}
-
-/* ✅ FIX: startPendingConversionTimer — was missing */
-function startPendingConversionTimer() {
-    if (pendingConversionInterval) return;
-    pendingConversionInterval = setInterval(async () => {
-        if (!isBooted || !isOnline) return;
-        const pending = appState.user.pendingConversions || {};
-        const now = Date.now();
-        const expired = Object.entries(pending).filter(([id, p]) => now - (Number(p.timestamp) || 0) >= CONVERSION_MS);
-        if (!expired.length) { updatePendingConversionUI(); return; }
-        for (const [id, p] of expired) {
-            const amt = Number(p.amount || 0);
-            if (amt <= 0) continue;
-            try {
-                const userRef = db.ref('users/' + tgUser.id);
-                const res = await userRef.transaction(cur => {
-                    if (!cur) return cur;
-                    if (!cur.pendingConversions || !cur.pendingConversions[id]) return cur;
-                    const item = cur.pendingConversions[id];
-                    if (Date.now() - Number(item.timestamp || 0) < CONVERSION_MS) return cur;
-                    cur.balance = Number(cur.balance || 0) + Number(item.amount || 0);
-                    delete cur.pendingConversions[id];
-                    return cur;
-                });
-                if (res.committed) toast(`✅ ${amt.toFixed(2)}৳ withdrawable এ যোগ হয়েছে!`);
-            } catch(e) { console.warn('[CONVERSION]', e); }
-        }
-        updatePendingConversionUI();
-    }, PENDING_CONVERSION_CHECK_MS);
-}
-function stopPendingConversionTimer() {
-    if (pendingConversionInterval) { clearInterval(pendingConversionInterval); pendingConversionInterval = null; }
-}
-
 function setLoading(isLoading) {
     const loader = document.getElementById('loader'), app = document.getElementById('app');
     if (!loader || !app) return;
@@ -2560,10 +2497,9 @@ async function showAppAfterVerify() {
 }
 function openLink(url) { if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank'); }
 
-/* ✅ FIX: missing functions used in onclick handlers */
 function openSupport() {
     const link = appState.config.supportLink || SUPPORT_LINK;
-    openLink(link);
+    openLink(link || "https://t.me/NexEarn2Support");
 }
 function openTutorial() {
     const link = appState.config.tutorialLink || '';
@@ -2585,7 +2521,6 @@ function toggleMenuPopup(e) {
 }
 function closeMenuPopup() { const m = document.getElementById('menuPopup'); if (m) m.classList.remove('show'); }
 
-/* Admin slider auto-show logic */
 function startAdminSlider() {
     stopAdminSlider();
     const el = document.getElementById('adminSlider');
@@ -2608,7 +2543,6 @@ function stopAdminSlider() {
     if (el) el.classList.remove('show');
 }
 
-/* Legal modals */
 const LEGAL_CONTENT = {
     privacy: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>📄 PRIVACY POLICY</h1><h2>১. ভূমিকা</h2><p><strong>Earn Wallet / NexEarn</strong> একটি Telegram-ভিত্তিক মাইক্রো-টাস্ক ও রিওয়ার্ড প্ল্যাটফর্ম।</p><div class="danger-box"><strong>⚠️ গুরুত্বপূর্ণ:</strong> Firebase Realtime Database-এ সংরক্ষিত ডেটা এনক্রিপ্টেড নয়।</div><h2>২. যোগাযোগ</h2><ul><li>Telegram: <a href="https://t.me/NexEarn2Support" target="_blank">Support</a></li></ul><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`,
     disclaimer: `<span class="last-updated">📅 Last Updated: Sep/23/2026</span><h1>⚠️ DISCLAIMER</h1><h2>১. প্ল্যাটফর্মের উদ্দেশ্য</h2><p>Earn Wallet একটি মাইক্রো-টাস্ক প্ল্যাটফর্ম।</p><div class="danger-box">🚫 Fraud করলে account ban, balance বাতিল</div><p style="text-align:center; font-weight:800; color:#4c1d95;">© 2025 Earn Wallet</p>`
@@ -2753,11 +2687,13 @@ async function sendChatMessage() {
         
         if (text && !fileUrl) {
             const tgMsg = `💬 *New Message from ${tgUser.first_name || 'User'}*\n\n"${text}"\n\n👉 Open Admin Panel to reply.`;
-            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: ADMIN_TELEGRAM_ID, text: tgMsg, parse_mode: 'Markdown' })
-            }).catch(()=>{});
+            if (BOT_TOKEN && ADMIN_TELEGRAM_ID) {
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: ADMIN_TELEGRAM_ID, text: tgMsg, parse_mode: 'Markdown' })
+                }).catch(()=>{});
+            }
         }
 
         input.value = '';
@@ -2820,7 +2756,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const shareModal = document.getElementById('shareModal');
     if (shareModal) shareModal.addEventListener('click', function(e) { if (e.target === this) closeShareModal(); });
     
-    // Close menu when clicking outside
     document.addEventListener('click', function(e) {
         const m = document.getElementById('menuPopup');
         if (m && m.classList.contains('show') && !m.contains(e.target) && !e.target.closest('.dots-btn')) {
@@ -2886,6 +2821,12 @@ window.addEventListener('DOMContentLoaded', () => {
             if (configDebounce) clearTimeout(configDebounce);
             configDebounce = setTimeout(() => {
                 appState.config = newConfig;
+                
+                if (appState.config.botToken) BOT_TOKEN = String(appState.config.botToken).trim();
+                if (appState.config.adminTelegramId) ADMIN_TELEGRAM_ID = String(appState.config.adminTelegramId).trim();
+                if (appState.config.supportLink) SUPPORT_LINK = String(appState.config.supportLink).trim();
+                if (appState.config.geminiApiKey) GEMINI_API_KEY = String(appState.config.geminiApiKey).trim();
+
                 if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
                 if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
                 REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
@@ -2921,7 +2862,6 @@ window.addEventListener('DOMContentLoaded', () => {
                             await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', username: tgUser.username || '', joinedAt: Date.now() });
                             await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
                             
-                            // 🎁 REFERRAL BONUS AWARD (with flag protection)
                             const refBonusAmount = Number(appState.config.refBonus || 5);
                             if (refBonusAmount > 0) {
                                 await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
@@ -3099,33 +3039,6 @@ function loadPkgHistory() {
 /* Channel verification helpers */
 function getCurrentChannelLinks() { return channelLinks || []; }
 async function markVerified() { fireAsync(db.ref('users/' + tgUser.id + '/channelVerified').set(true)); }
-// ইউজার প্যানেলের </script> ট্যাগের ঠিক উপরে এটি পেস্ট করুন:
-db.ref('config').on('value', snap => {
-    if (!snap.exists()) return;
-    const newConfig = snap.val();
-    
-    // ফায়ারবেস থেকে সিক্রেট লোড করা
-    if (newConfig.botToken) BOT_TOKEN = String(newConfig.botToken).trim();
-    if (newConfig.adminTelegramId) ADMIN_TELEGRAM_ID = String(newConfig.adminTelegramId).trim();
-    if (newConfig.supportLink) SUPPORT_LINK = String(newConfig.supportLink).trim();
-    if (newConfig.geminiApiKey) GEMINI_API_KEY = String(newConfig.geminiApiKey).trim();
-
-    // বাকি কনফিগ আপডেট
-    appState.config = newConfig;
-    if (!appState.config.botUsername) appState.config.botUsername = BOT_USERNAME;
-    if (appState.config.channelLinks) channelLinks = appState.config.channelLinks;
-    REF_COMMISSION_RATE = Number(appState.config.refCommissionRate || 2);
-    if (appState.config.withdrawLevels && appState.config.withdrawLevels.length > 0) withdrawLevels = appState.config.withdrawLevels;
-    
-    if (isBooted) { 
-        updateTextElements(); 
-        renderNewTasks(); 
-        if (document.getElementById('page-referral').classList.contains('active')) renderReferralList(); 
-        if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage(); 
-        if (document.getElementById('page-home').classList.contains('active')) loadPackages(); 
-        if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage(); 
-    }
-});
 </script>
 </body>
 </html>
