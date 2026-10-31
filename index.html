@@ -490,7 +490,6 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     50% { box-shadow: 0 4px 22px rgba(0,184,148,.75); }
 }
 
-/* ===== NEW: COIN TRANSFER ANIMATION ===== */
 /* ===== NEW BASKET ANIMATION ===== */
 .basket-wrap {
     background: linear-gradient(135deg, #fef9c3, #fef3c7);
@@ -622,6 +621,32 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     pointer-events: none;
     transition: transform 1.1s cubic-bezier(.3,0,.3,1), opacity 1.1s ease;
     will-change: transform, opacity;
+}
+    /* ===== NEW ACTIVE OVERLAY & BASKET ===== */
+.pkg-active-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 24px;
+    padding: 20px;
+    transition: all 0.3s ease;
+}
+.pkg-active-overlay .basket-wrap {
+    background: linear-gradient(135deg, #fef9c3, #fef3c7);
+    border-radius: 16px;
+    padding: 15px 10px;
+    border: 1.5px dashed #fbbf24;
+    text-align: center;
+    position: relative;
+    width: 90%;
+    max-width: 220px;
+    box-shadow: 0 8px 20px rgba(243,156,18,.15);
 }
 </style>
 </head>
@@ -1463,45 +1488,50 @@ async function loadPackages() {
             else if (isExpired) { badgeText = 'Expired'; badgeClass = 'expired'; }
 
             const upKey = esc(userPkg && userPkg._upId ? userPkg._upId : '');
-            
-            // ✅ নতুন ঝুড়ি এনিমেশন ও একটিভ লেখা
-            let topContentHtml = '';
-            if (isActive) {
-                const statusHtml = isReady
-                    ? `<button class="coin-claim-btn" onclick="claimWithAnimation('${upKey}', event)"><i class="fas fa-hand-holding-usd"></i> ক্লেইম ${Number(p.dailyIncome || 0).toFixed(2)} ৳</button>`
-                    : `<div class="pkg-active-banner"><i class="fas fa-circle-check"></i> একটিভ</div>`;
 
-                topContentHtml = `
-                    <div class="basket-wrap" data-coin-track="${upKey}">
-                        <div class="basket-container">
-                            <div class="falling-coin" style="left: 20%; animation-delay: 0s;">🪙</div>
-                            <div class="falling-coin" style="left: 50%; animation-delay: 0.5s;">🪙</div>
-                            <div class="falling-coin" style="left: 80%; animation-delay: 1s;">🪙</div>
-                            <div class="basket-rim"></div>
-                            <div class="basket-body">
-                                <div class="basket-fill" id="fill_${upKey}" style="height:${isReady ? 100 : 0}%;"></div>
+            // ✅ Blur overlay logic (শুধুমাত্র একটিভ এবং ক্লেইম রেডি না হলে দেখাবে)
+            let overlayHtml = '';
+            if (isActive && !isReady) {
+                overlayHtml = `
+                    <div class="pkg-active-overlay">
+                        <div class="basket-wrap" data-coin-track="${upKey}">
+                            <div class="basket-container">
+                                <div class="falling-coin" style="left: 20%; animation-delay: 0s;">🪙</div>
+                                <div class="falling-coin" style="left: 50%; animation-delay: 0.5s;">🪙</div>
+                                <div class="falling-coin" style="left: 80%; animation-delay: 1s;">🪙</div>
+                                <div class="basket-rim"></div>
+                                <div class="basket-body">
+                                    <div class="basket-fill" id="fill_${upKey}" style="height: 0%;"></div>
+                                </div>
+                            </div>
+                            <div class="coin-info-row" style="margin-top: 15px; margin-bottom: 0;">
+                                <span class="ca-amount" id="ca_${upKey}">+0.00 ৳</span>
+                                <span class="ca-label" id="cal_${upKey}">⏳ জমা হচ্ছে</span>
                             </div>
                         </div>
-                        <div class="coin-info-row">
-                            <span class="ca-amount" id="ca_${upKey}">+${isReady ? Number(p.dailyIncome || 0).toFixed(2) : '0.00'} ৳</span>
-                            <span class="ca-label" id="cal_${upKey}">${isReady ? '✅ সম্পূর্ণ' : '⏳ জমা হচ্ছে'}</span>
-                        </div>
+                        <div class="pkg-active-banner" style="margin-bottom: 0; width: 90%; max-width: 220px;"><i class="fas fa-circle-check"></i> একটিভ</div>
                     </div>
-                    ${statusHtml}
                 `;
             }
 
+            // ✅ Button logic (একটিভ এবং ক্লেইম রেডি হলে ক্লেইম বাটন দেখাবে)
             let btnHtml;
-            if (isInactive) btnHtml = `<button class="pkg-buy-btn upgrade" disabled style="opacity:0.5;background:#94a3b8;box-shadow:none;"><i class="fas fa-ban"></i> Not Available</button>`;
-            else if (isActive) btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${esc(p.id)}')"><i class="fas fa-check-circle"></i> বিস্তারিত</button>`;
-            else btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${esc(p.id)}')"><i class="fas fa-rocket"></i> কিনুন — ${Number(p.price || 0).toFixed(2)} ৳</button>`;
+            if (isInactive) {
+                btnHtml = `<button class="pkg-buy-btn upgrade" disabled style="opacity:0.5;background:#94a3b8;box-shadow:none;"><i class="fas fa-ban"></i> Not Available</button>`;
+            } else if (isActive && isReady) {
+                btnHtml = `<button class="coin-claim-btn" onclick="claimWithAnimation('${upKey}', event)" style="margin-bottom:0;"><i class="fas fa-hand-holding-usd"></i> ক্লেইম ${Number(p.dailyIncome || 0).toFixed(2)} ৳</button>`;
+            } else if (isActive && !isReady) {
+                btnHtml = `<button class="pkg-buy-btn active-btn" onclick="openPackageDetails('${esc(p.id)}')"><i class="fas fa-check-circle"></i> বিস্তারিত</button>`;
+            } else {
+                btnHtml = `<button class="pkg-buy-btn upgrade" onclick="openBuyConfirm('${esc(p.id)}')"><i class="fas fa-rocket"></i> কিনুন — ${Number(p.price || 0).toFixed(2)} ৳</button>`;
+            }
 
             const cardExtra = isActive ? 'active-pkg' : (isExpired ? 'expired-pkg' : '');
             const inactiveOverlay = isInactive ? `<div class="pkg-inactive-overlay"><span><i class="fas fa-ban"></i> Package Inactive</span></div>` : '';
 
             html += `<div class="pkg-card ${cardExtra}" style="${isInactive ? 'opacity:0.85;' : ''}">
                 ${inactiveOverlay}
-                ${topContentHtml}
+                ${overlayHtml}
                 <div class="pkg-head">
                     <div class="pkg-title"><div class="pkg-title-icon"><i class="fas fa-box"></i></div>${esc(p.name)}</div>
                     ${!isActive ? `<span class="pkg-badge ${badgeClass}">${badgeText}</span>` : ''}
@@ -1577,12 +1607,14 @@ function coinAnimTick() {
         const calEl = document.getElementById('cal_' + upId);
         if (calEl) calEl.textContent = progress >= 1 ? '✅ সম্পূর্ণ' : '⏳ জমা হচ্ছে';
 
-        // ঝুড়ি ফুল হয়ে গেলে কয়েন পড়া বন্ধ হবে
+        // ঝুড়ি ফুল হয়ে গেলে (২৪ ঘণ্টা শেষ হলে) কয়েন পড়া বন্ধ হবে এবং ব্লার হাইড হয়ে ক্লেইম বাটন আসবে
         const coins = track.querySelectorAll('.falling-coin');
         if (progress >= 1) {
             coins.forEach(c => c.style.display = 'none');
             const card = track.closest('.pkg-card');
-            if (card && !card.querySelector('.coin-claim-btn')) needsRerender = true;
+            if (card && card.querySelector('.pkg-active-overlay')) {
+                needsRerender = true; // এটি ব্লার সরিয়ে ক্লেইম বাটন এনে দেবে
+            }
         } else {
             coins.forEach(c => c.style.display = 'block');
         }
