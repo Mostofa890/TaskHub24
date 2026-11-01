@@ -3042,101 +3042,132 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const userRef = db.ref('users/' + tgUser.id);
         userRef.once('value').then(async snap => {
-            if (!snap.exists()) {
-                appState.user = {
-                    id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
-                    balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
-                    taskHistory: {}, referredUsers: {}, verifiedChannels: {},
-                    totalCommission: 0, commissionHistory: {}, referredBy: null, dailyBonusDate: '',
-                    lastActive: Date.now(), channelVerified: true, isBanned: false, banReason: '',
-                    withdrawCount: 0, taskStatuses: {}, taskCooldowns: {},
-                    claimHistory: {}, pendingConversions: {},
-                    _refBonusGiven: false
-                };
-                await userRef.set(appState.user);
-                let refBy = null;
-                if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
-                if (!refBy) { const urlParams = new URLSearchParams(window.location.search); refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref'); }
-                if (refBy && String(refBy) !== String(tgUser.id)) {
-                    const deviceId = getDeviceId();
-                    const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
-                    if (!deviceSnap.exists()) {
-                        const refSnap = await db.ref('users/' + refBy).once('value');
-                        if (refSnap.exists()) {
-                            await userRef.update({ referredBy: String(refBy), _refBonusGiven: true });
-                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ name: tgUser.first_name || 'User', username: tgUser.username || '', joinedAt: Date.now() });
-                            await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
-                            
-                            const refBonusAmount = Number(appState.config.refBonus || 5);
-                            if (refBonusAmount > 0) {
-                                await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
-                            }
-                        }
+    let isNewUser = false;
+    if (!snap.exists()) {
+        isNewUser = true;
+        appState.user = {
+            id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
+            balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
+            taskHistory: {}, withdrawCount: 0, referredUsers: {}, verifiedChannels: {},
+            totalCommission: 0, commissionHistory: {}, referredBy: null,
+            dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {},
+            claimHistory: {}, pendingConversions: {},
+            _refBonusGiven: false
+        };
+        await userRef.set(appState.user);
+    }
+
+    // ✅ FIX: রেফারেল চেকিং এখন `!snap.exists()` এর বাইরে, যাতে পুরনো ইউজাররাও রেফারেল লিংক কাজ করে।
+    let refBy = null;
+    if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
+    if (!refBy) { 
+        const urlParams = new URLSearchParams(window.location.search); 
+        refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref'); 
+    }
+    
+    if (refBy && String(refBy) !== String(tgUser.id)) {
+        // চেক করি ইউজার আগে থেকেই রেফারড কিনা
+        const currentUserData = snap.exists() ? snap.val() : appState.user;
+        
+        if (!currentUserData.referredBy) { // যদি আগে রেফার না হয়ে থাকে
+            const deviceId = getDeviceId();
+            const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
+            
+            if (!deviceSnap.exists()) { // যদি ডিভাইসটি আগে রেফার না করা থাকে
+                const refSnap = await db.ref('users/' + refBy).once('value');
+                if (refSnap.exists()) {
+                    // নিজের ডেটাতে referredBy আপডেট করা
+                    await userRef.update({ referredBy: String(refBy), _refBonusGiven: true });
+                    
+                    // রেফারারের ডেটাতে নতুন ইউজারের নাম যোগ করা
+                    await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ 
+                        name: tgUser.first_name || 'User', 
+                        username: tgUser.username || '', 
+                        joinedAt: Date.now() 
+                    });
+                    
+                    // ডিভাইস ট্র্যাকিং ডেটা সেভ করা
+                    await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                    
+                    // রেফারারকে বোনাস দেওয়া
+                    const refBonusAmount = Number(appState.config.refBonus || 5);
+                    if (refBonusAmount > 0) {
+                        await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
                     }
                 }
+            } else {
+                console.log("This device was already used for a referral.");
             }
+        }
+    }
 
-            let uiDebounce = null;
-            userRef.on('value', liveSnap => {
-                if (!liveSnap.exists()) return;
-                appState.user = liveSnap.val();
-                appState.user.balance = Number(appState.user.balance || 0);
-                appState.user.adBalance = Number(appState.user.adBalance || 0);
-                appState.user.referralBalance = Number(appState.user.referralBalance || 0);
-                appState.user.referralBonusBalance = Number(appState.user.referralBonusBalance || 0);
-                appState.user.activePackageCount = Number(appState.user.activePackageCount || 0);
-                if (!appState.user.referredUsers) appState.user.referredUsers = {};
-                if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
-                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
-                if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
-                if (!appState.user.claimHistory) appState.user.claimHistory = {};
-                if (!appState.user.pendingConversions) appState.user.pendingConversions = {};
+    let uiDebounce = null;
+    userRef.on('value', liveSnap => {
+        if (!liveSnap.exists()) return;
+        appState.user = liveSnap.val();
+        appState.user.balance = Number(appState.user.balance || 0);
+        appState.user.adBalance = Number(appState.user.adBalance || 0);
+        appState.user.referralBalance = Number(appState.user.referralBalance || 0);
+        appState.user.referralBonusBalance = Number(appState.user.referralBonusBalance || 0);
+        appState.user.activePackageCount = Number(appState.user.activePackageCount || 0);
+        if (!appState.user.referredUsers) appState.user.referredUsers = {};
+        if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
+        if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+        if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+        if (!appState.user.claimHistory) appState.user.claimHistory = {};
+        if (!appState.user.pendingConversions) appState.user.pendingConversions = {};
 
-                if (appState.user.isBanned) { document.getElementById('bannedOverlay').classList.add('active'); document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.'; document.getElementById('app').style.display = 'none'; document.getElementById('loader').style.display = 'none'; return; }
-                else { document.getElementById('bannedOverlay').classList.remove('active'); }
+        if (appState.user.isBanned) { 
+            document.getElementById('bannedOverlay').classList.add('active'); 
+            document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.'; 
+            document.getElementById('app').style.display = 'none'; 
+            document.getElementById('loader').style.display = 'none'; 
+            return; 
+        }
+        else { document.getElementById('bannedOverlay').classList.remove('active'); }
 
-                if (uiDebounce) clearTimeout(uiDebounce);
-                uiDebounce = setTimeout(async () => {
-                    await updateTextElements();
-                    renderNewTasks();
-                    if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
-                    if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
-                    if (document.getElementById('page-home').classList.contains('active')) loadPackages();
-                    if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
-                    if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
-                }, 150);
+        if (uiDebounce) clearTimeout(uiDebounce);
+        uiDebounce = setTimeout(async () => {
+            await updateTextElements();
+            renderNewTasks();
+            if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+            if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+            if (document.getElementById('page-home').classList.contains('active')) loadPackages();
+            if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
+            if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
+        }, 150);
 
-                if (!isBooted) {
-                    isBooted = true;
-                    (async () => {
-                        if (checkMaintenance()) { setLoading(false); return; }
-                        if (checkBan()) { setLoading(false); return; }
-                        setupUserSubmissionsListener();
-                        await fetchTaskStatuses();
-                        
-                        if (isOnline) {
-                            document.getElementById('app').style.display = 'block';
-                            setLoading(false);
-                            if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
-                            startPeriodicRecheck();
-                            updateLastActive();
-                            startAdminSlider();
-                            
-                            const fab = document.getElementById('chatFab');
-                            if (fab) fab.style.display = 'flex';
+        if (!isBooted) {
+            isBooted = true;
+            (async () => {
+                if (checkMaintenance()) { setLoading(false); return; }
+                if (checkBan()) { setLoading(false); return; }
+                setupUserSubmissionsListener();
+                await fetchTaskStatuses();
+                
+                if (isOnline) {
+                    document.getElementById('app').style.display = 'block';
+                    setLoading(false);
+                    if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
+                    startPeriodicRecheck();
+                    updateLastActive();
+                    startAdminSlider();
+                    
+                    const fab = document.getElementById('chatFab');
+                    if (fab) fab.style.display = 'flex';
 
-                            try { initUserChatSystem(); } catch(e) {}
-                            try { await loadUserPackages(); } catch(e) {}
-                            try { await loadPackages(); } catch(e) {}
-                            try { await loadClaimPage(); } catch(e) {}
-                            try { renderDepositPage(); } catch(e) {}
-                        } else { 
-                            document.getElementById('loader').style.display = 'none'; 
-                            document.getElementById('offlineOverlay').classList.add('active'); 
-                        }
-                    })();
+                    try { initUserChatSystem(); } catch(e) {}
+                    try { await loadUserPackages(); } catch(e) {}
+                    try { await loadPackages(); } catch(e) {}
+                    try { await loadClaimPage(); } catch(e) {}
+                    try { renderDepositPage(); } catch(e) {}
+                } else { 
+                    document.getElementById('loader').style.display = 'none'; 
+                    document.getElementById('offlineOverlay').classList.add('active'); 
                 }
-            });
+            })();
+        }
+    });
         }).catch(err => { console.error(err); toast('❌ Failed'); setLoading(false); document.getElementById('loader').style.display = 'none'; });
     }
 });
