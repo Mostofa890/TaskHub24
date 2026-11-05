@@ -1453,6 +1453,9 @@ function loadCommissionHistory() {
     container.innerHTML = html;
 }
 
+/* =========================================================
+   === PACKAGES (WITH COIN ANIMATION & PURCHASE FIX)
+   ========================================================= */
 async function loadPackages() {
     const homeGrid = document.getElementById('homePackagesGrid');
     if (homeGrid) homeGrid.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
@@ -1489,7 +1492,6 @@ async function loadPackages() {
 
             const upKey = esc(userPkg && userPkg._upId ? userPkg._upId : '');
 
-            // ✅ Blur overlay logic (শুধুমাত্র একটিভ এবং ক্লেইম রেডি না হলে দেখাবে)
             let overlayHtml = '';
             if (isActive && !isReady) {
                 overlayHtml = `
@@ -1514,7 +1516,6 @@ async function loadPackages() {
                 `;
             }
 
-            // ✅ Button logic (একটিভ এবং ক্লেইম রেডি হলে ক্লেইম বাটন দেখাবে)
             let btnHtml;
             if (isInactive) {
                 btnHtml = `<button class="pkg-buy-btn upgrade" disabled style="opacity:0.5;background:#94a3b8;box-shadow:none;"><i class="fas fa-ban"></i> Not Available</button>`;
@@ -1596,24 +1597,21 @@ function coinAnimTick() {
         const daily = Number(up.dailyIncome || 0);
         const accumulated = daily * progress;
 
-        // কয়েন ক্যালকুলেশন আপডেট
         const caEl = document.getElementById('ca_' + upId);
         if (caEl) caEl.textContent = '+' + accumulated.toFixed(2) + ' ৳';
         
-        // ঝুড়ি ভরার এফেক্ট
         const fillEl = document.getElementById('fill_' + upId);
         if (fillEl) fillEl.style.height = (progress * 100).toFixed(1) + '%';
         
         const calEl = document.getElementById('cal_' + upId);
         if (calEl) calEl.textContent = progress >= 1 ? '✅ সম্পূর্ণ' : '⏳ জমা হচ্ছে';
 
-        // ঝুড়ি ফুল হয়ে গেলে (২৪ ঘণ্টা শেষ হলে) কয়েন পড়া বন্ধ হবে এবং ব্লার হাইড হয়ে ক্লেইম বাটন আসবে
         const coins = track.querySelectorAll('.falling-coin');
         if (progress >= 1) {
             coins.forEach(c => c.style.display = 'none');
             const card = track.closest('.pkg-card');
             if (card && card.querySelector('.pkg-active-overlay')) {
-                needsRerender = true; // এটি ব্লার সরিয়ে ক্লেইম বাটন এনে দেবে
+                needsRerender = true;
             }
         } else {
             coins.forEach(c => c.style.display = 'block');
@@ -1717,44 +1715,81 @@ async function confirmBuyPackage() {
     if (!pkg) return;
     const price = Number(pkg.price || 0);
     if (Number(appState.user.adBalance || 0) < price) { toast('❌ Deposit Balance কম'); return; }
+    
     const btn = document.getElementById('pciConfirmBtn');
-    btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true; 
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
     try {
+        // ✅ STEP 1: Transaction দিয়ে ডিপোজিট ব্যালেন্স মাইনাস করা
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => {
             if (!cur) return cur;
-            if (Number(cur.adBalance || 0) < price) return;
+            if (Number(cur.adBalance || 0) < price) return; // টাকা কম থাকলে বাতিল
             cur.adBalance = Number(cur.adBalance || 0) - price;
             return cur;
         });
-        if (!result.committed) { toast('❌ Deposit Balance কম'); btn.disabled = false; return; }
+
+        if (!result.committed) { 
+            toast('❌ Deposit Balance কম!'); 
+            btn.disabled = false; 
+            btn.innerHTML = 'কিনুন';
+            return; 
+        }
+
+        // ✅ STEP 2: userPackages এ নতুন প্যাকেজ তৈরি
         const now = Date.now();
         const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
         const upId = 'up_' + now + '_' + appState.user.id;
         
         const newUpData = {
-            userId: String(appState.user.id), userName: appState.user.name || 'User',
-            packageId: selectedPkgForBuy, packageName: pkg.name || 'Package',
-            dailyIncome: Number(pkg.dailyIncome || 0), price: price,
-            duration: Number(pkg.duration || 0), purchasedAt: now, expiresAt: expiresAt,
-            lastClaimAt: 0, totalEarned: 0, claimCount: 0, status: 'active'
+            userId: String(appState.user.id), 
+            userName: appState.user.name || 'User',
+            packageId: selectedPkgForBuy, 
+            packageName: pkg.name || 'Package',
+            dailyIncome: Number(pkg.dailyIncome || 0), 
+            price: price,
+            duration: Number(pkg.duration || 0), 
+            purchasedAt: now, 
+            expiresAt: expiresAt,
+            lastClaimAt: 0, 
+            totalEarned: 0, 
+            claimCount: 0, 
+            status: 'active'
         };
 
         await db.ref('userPackages/' + upId).set(newUpData);
         
+        // ✅ STEP 3: activePackageCount বাড়ানো
+        await userRef.transaction(cur => {
+            if (!cur) return cur;
+            cur.activePackageCount = Number(cur.activePackageCount || 0) + 1;
+            return cur;
+        });
+
+        // ✅ STEP 4: লোকাল স্টেট আপডেট
         if (!appState.userPackages) appState.userPackages = {};
         appState.userPackages[selectedPkgForBuy] = { ...newUpData, _upId: upId };
         appState.user.adBalance = Number(appState.user.adBalance || 0) - price;
+        appState.user.activePackageCount = Number(appState.user.activePackageCount || 0) + 1;
 
+        // ✅ STEP 5: Referral Commission
         if (appState.user.referredBy && REF_COMMISSION_RATE > 0) {
             const commissionAmount = (price * REF_COMMISSION_RATE) / 100;
             await creditReferrerCommission(commissionAmount, price, 'Package Purchase');
         }
+
         await updateTextElements();
-        loadPackages(); loadClaimPage();
+        loadPackages(); 
+        loadClaimPage();
         toast('✅ প্যাকেজ কেনা সফল!');
-        closePkgConfirm(); tryHaptic('success');
-    } catch (e) { toast('❌ ' + e.message); btn.disabled = false; }
+        closePkgConfirm(); 
+        tryHaptic('success');
+    } catch (e) { 
+        toast('❌ ' + e.message); 
+        btn.disabled = false; 
+        btn.innerHTML = 'কিনুন';
+    }
 }
 
 function openPackageDetails(pkgId) {
@@ -1887,11 +1922,14 @@ async function loadUserPackages() {
             else if (v.expiresAt <= now && v.status === 'active') fireAsync(db.ref('userPackages/' + child.key).update({ status: 'expired' }));
         });
         appState.userPackages = map;
+        
+        // ✅ FIX: activePackageCount সেভ করা
         if (Number(appState.user.activePackageCount || 0) !== activeCount) {
             fireAsync(db.ref('users/' + tgUser.id + '/activePackageCount').set(activeCount));
             appState.user.activePackageCount = activeCount;
         }
-        loadPackages(); loadClaimPage();
+        loadPackages(); 
+        loadClaimPage();
     });
 }
     /* =========================================================
@@ -3042,133 +3080,133 @@ window.addEventListener('DOMContentLoaded', () => {
 
         const userRef = db.ref('users/' + tgUser.id);
         userRef.once('value').then(async snap => {
-    let isNewUser = false;
-    if (!snap.exists()) {
-        isNewUser = true;
-        appState.user = {
-            id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
-            balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
-            taskHistory: {}, withdrawCount: 0, referredUsers: {}, verifiedChannels: {},
-            totalCommission: 0, commissionHistory: {}, referredBy: null,
-            dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {},
-            claimHistory: {}, pendingConversions: {},
-            _refBonusGiven: false
-        };
-        await userRef.set(appState.user);
-    }
+            let isNewUser = false;
+            if (!snap.exists()) {
+                isNewUser = true;
+                appState.user = {
+                    id: tgUser.id, name: tgUser.first_name, photo: tgUser.photo_url || '',
+                    balance: 0, adBalance: 0, referralBalance: 0, referralBonusBalance: 0, totalEarned: 0, referrals: 0, activePackageCount: 0,
+                    taskHistory: {}, withdrawCount: 0, referredUsers: {}, verifiedChannels: {},
+                    totalCommission: 0, commissionHistory: {}, referredBy: null,
+                    dailyBonusDate: '', taskStatuses: {}, taskCooldowns: {},
+                    claimHistory: {}, pendingConversions: {},
+                    _refBonusGiven: false
+                };
+                await userRef.set(appState.user);
+            }
 
-    // ✅ FIX: রেফারেল চেকিং এখন `!snap.exists()` এর বাইরে, যাতে পুরনো ইউজাররাও রেফারেল লিংক কাজ করে।
-    let refBy = null;
-    if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
-    if (!refBy) { 
-        const urlParams = new URLSearchParams(window.location.search); 
-        refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref'); 
-    }
-    
-    if (refBy && String(refBy) !== String(tgUser.id)) {
-        // চেক করি ইউজার আগে থেকেই রেফারড কিনা
-        const currentUserData = snap.exists() ? snap.val() : appState.user;
-        
-        if (!currentUserData.referredBy) { // যদি আগে রেফার না হয়ে থাকে
-            const deviceId = getDeviceId();
-            const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
+            // ✅ FIX: রেফারেল চেকিং এখন `!snap.exists()` এর বাইরে, যাতে পুরনো ইউজাররাও রেফারেল লিংক কাজ করে।
+            let refBy = null;
+            if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
+            if (!refBy) { 
+                const urlParams = new URLSearchParams(window.location.search); 
+                refBy = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start') || urlParams.get('ref'); 
+            }
             
-            if (!deviceSnap.exists()) { // যদি ডিভাইসটি আগে রেফার না করা থাকে
-                const refSnap = await db.ref('users/' + refBy).once('value');
-                if (refSnap.exists()) {
-                    // নিজের ডেটাতে referredBy আপডেট করা
-                    await userRef.update({ referredBy: String(refBy), _refBonusGiven: true });
+            if (refBy && String(refBy) !== String(tgUser.id)) {
+                const currentUserData = snap.exists() ? snap.val() : appState.user;
+                
+                if (!currentUserData.referredBy) {
+                    const deviceId = getDeviceId();
+                    const deviceSnap = await db.ref('deviceReferrals/' + deviceId).once('value');
                     
-                    // রেফারারের ডেটাতে নতুন ইউজারের নাম যোগ করা
-                    await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ 
-                        name: tgUser.first_name || 'User', 
-                        username: tgUser.username || '', 
-                        joinedAt: Date.now() 
-                    });
-                    
-                    // ডিভাইস ট্র্যাকিং ডেটা সেভ করা
-                    await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
-                    
-                    // রেফারারকে বোনাস দেওয়া
-                    const refBonusAmount = Number(appState.config.refBonus || 5);
-                    if (refBonusAmount > 0) {
-                        await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
+                    if (!deviceSnap.exists()) {
+                        const refSnap = await db.ref('users/' + refBy).once('value');
+                        if (refSnap.exists()) {
+                            await userRef.update({ referredBy: String(refBy), _refBonusGiven: true });
+                            
+                            await db.ref('users/' + refBy + '/referredUsers/' + tgUser.id).set({ 
+                                name: tgUser.first_name || 'User', 
+                                username: tgUser.username || '', 
+                                joinedAt: Date.now() 
+                            });
+                            
+                            await db.ref('deviceReferrals/' + deviceId).set({ referrerId: refBy, referredId: tgUser.id, timestamp: Date.now() });
+                            
+                            const refBonusAmount = Number(appState.config.refBonus || 5);
+                            if (refBonusAmount > 0) {
+                                await db.ref('users/' + refBy + '/referralBonusBalance').transaction(cur => (cur || 0) + refBonusAmount);
+                            }
+                        }
+                    } else {
+                        console.log("This device was already used for a referral.");
                     }
                 }
-            } else {
-                console.log("This device was already used for a referral.");
             }
-        }
-    }
 
-    let uiDebounce = null;
-    userRef.on('value', liveSnap => {
-        if (!liveSnap.exists()) return;
-        appState.user = liveSnap.val();
-        appState.user.balance = Number(appState.user.balance || 0);
-        appState.user.adBalance = Number(appState.user.adBalance || 0);
-        appState.user.referralBalance = Number(appState.user.referralBalance || 0);
-        appState.user.referralBonusBalance = Number(appState.user.referralBonusBalance || 0);
-        appState.user.activePackageCount = Number(appState.user.activePackageCount || 0);
-        if (!appState.user.referredUsers) appState.user.referredUsers = {};
-        if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
-        if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
-        if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
-        if (!appState.user.claimHistory) appState.user.claimHistory = {};
-        if (!appState.user.pendingConversions) appState.user.pendingConversions = {};
+            let uiDebounce = null;
+            userRef.on('value', liveSnap => {
+                if (!liveSnap.exists()) return;
+                appState.user = liveSnap.val();
+                appState.user.balance = Number(appState.user.balance || 0);
+                appState.user.adBalance = Number(appState.user.adBalance || 0);
+                appState.user.referralBalance = Number(appState.user.referralBalance || 0);
+                appState.user.referralBonusBalance = Number(appState.user.referralBonusBalance || 0);
+                appState.user.activePackageCount = Number(appState.user.activePackageCount || 0);
+                if (!appState.user.referredUsers) appState.user.referredUsers = {};
+                if (!appState.user.commissionHistory) appState.user.commissionHistory = {};
+                if (!appState.user.taskStatuses) appState.user.taskStatuses = {};
+                if (!appState.user.taskCooldowns) appState.user.taskCooldowns = {};
+                if (!appState.user.claimHistory) appState.user.claimHistory = {};
+                if (!appState.user.pendingConversions) appState.user.pendingConversions = {};
 
-        if (appState.user.isBanned) { 
-            document.getElementById('bannedOverlay').classList.add('active'); 
-            document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.'; 
-            document.getElementById('app').style.display = 'none'; 
-            document.getElementById('loader').style.display = 'none'; 
-            return; 
-        }
-        else { document.getElementById('bannedOverlay').classList.remove('active'); }
-
-        if (uiDebounce) clearTimeout(uiDebounce);
-        uiDebounce = setTimeout(async () => {
-            await updateTextElements();
-            renderNewTasks();
-            if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
-            if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
-            if (document.getElementById('page-home').classList.contains('active')) loadPackages();
-            if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
-            if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
-        }, 150);
-
-        if (!isBooted) {
-            isBooted = true;
-            (async () => {
-                if (checkMaintenance()) { setLoading(false); return; }
-                if (checkBan()) { setLoading(false); return; }
-                setupUserSubmissionsListener();
-                await fetchTaskStatuses();
-                
-                if (isOnline) {
-                    document.getElementById('app').style.display = 'block';
-                    setLoading(false);
-                    if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
-                    startPeriodicRecheck();
-                    updateLastActive();
-                    startAdminSlider();
-                    
-                    const fab = document.getElementById('chatFab');
-                    if (fab) fab.style.display = 'flex';
-
-                    try { initUserChatSystem(); } catch(e) {}
-                    try { await loadUserPackages(); } catch(e) {}
-                    try { await loadPackages(); } catch(e) {}
-                    try { await loadClaimPage(); } catch(e) {}
-                    try { renderDepositPage(); } catch(e) {}
-                } else { 
+                if (appState.user.isBanned) { 
+                    document.getElementById('bannedOverlay').classList.add('active'); 
+                    document.getElementById('banReason').textContent = appState.user.banReason || 'Suspended.'; 
+                    document.getElementById('app').style.display = 'none'; 
                     document.getElementById('loader').style.display = 'none'; 
-                    document.getElementById('offlineOverlay').classList.add('active'); 
+                    return; 
                 }
-            })();
-        }
-    });
-        }).catch(err => { console.error(err); toast('❌ Failed'); setLoading(false); document.getElementById('loader').style.display = 'none'; });
+                else { document.getElementById('bannedOverlay').classList.remove('active'); }
+
+                if (uiDebounce) clearTimeout(uiDebounce);
+                uiDebounce = setTimeout(async () => {
+                    await updateTextElements();
+                    renderNewTasks();
+                    if (document.getElementById('page-referral').classList.contains('active')) renderReferralList();
+                    if (document.getElementById('page-withdraw').classList.contains('active')) updateWithdrawInfo();
+                    if (document.getElementById('page-home').classList.contains('active')) loadPackages();
+                    if (document.getElementById('page-claim').classList.contains('active')) loadClaimPage();
+                    if (document.getElementById('page-deposit').classList.contains('active')) renderDepositPage();
+                }, 150);
+
+                if (!isBooted) {
+                    isBooted = true;
+                    (async () => {
+                        if (checkMaintenance()) { setLoading(false); return; }
+                        if (checkBan()) { setLoading(false); return; }
+                        setupUserSubmissionsListener();
+                        await fetchTaskStatuses();
+                        
+                        if (isOnline) {
+                            document.getElementById('app').style.display = 'block';
+                            setLoading(false);
+                            if (window.__loaderFailsafe) { clearTimeout(window.__loaderFailsafe); window.__loaderFailsafe = null; }
+                            startPeriodicRecheck();
+                            updateLastActive();
+                            startAdminSlider();
+                            
+                            const fab = document.getElementById('chatFab');
+                            if (fab) fab.style.display = 'flex';
+
+                            try { initUserChatSystem(); } catch(e) {}
+                            try { await loadUserPackages(); } catch(e) {}
+                            try { await loadPackages(); } catch(e) {}
+                            try { await loadClaimPage(); } catch(e) {}
+                            try { renderDepositPage(); } catch(e) {}
+                        } else { 
+                            document.getElementById('loader').style.display = 'none'; 
+                            document.getElementById('offlineOverlay').classList.add('active'); 
+                        }
+                    })();
+                }
+            });
+        }).catch(err => { 
+            console.error(err); 
+            toast('❌ Failed to load user data'); 
+            setLoading(false); 
+            document.getElementById('loader').style.display = 'none'; 
+        });
     }
 });
 
