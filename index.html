@@ -799,6 +799,19 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     </div>
 </div>
 
+    <!-- NEW MISSED INCOME PAGE -->
+    <div id="page-missed" class="page-section">
+        <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-clock-rotate-left"></i> Missed Income (মিসড ইনকাম)</div>
+        <div class="claim-hero" style="padding: 24px 20px;">
+            <div class="ch-label">💸 TOTAL MISSED AMOUNT</div>
+            <div class="ch-amt"><span id="missedTotalAmount">0.00</span> <small style="font-size:1rem;">TK</small></div>
+            <div class="ch-info" id="missedInfoText">You have 0 missed days</div>
+        </div>
+        <div id="missedPackagesList" style="padding:0 20px 20px;">
+            <div class="empty-state" style="padding:40px 20px;"><i class="fas fa-hand-holding-usd"></i><p>No missed income available</p></div>
+        </div>
+    </div>
+
     <div id="page-deposit" class="page-section">
         <div class="sec-head" style="margin-bottom:14px;"><i class="fas fa-money-bill-wave"></i> Deposit Money</div>
         <div class="tasks-inner-tabs">
@@ -941,6 +954,8 @@ body{background:var(--bg);color:var(--text);padding-bottom:90px;-webkit-tap-high
     <i class="fas fa-home active nav-item" onclick="switchTab('home', this)"></i>
     <i class="fas fa-tasks nav-item" onclick="switchTab('tasks', this)"></i>
     <i class="fas fa-hand-holding-usd nav-item" onclick="switchTab('claim', this)"></i>
+    <!-- নতুন মিসড ইনকাম আইকন -->
+    <i class="fas fa-clock-rotate-left nav-item" onclick="switchTab('missed', this)"></i>
     <i class="fas fa-money-bill-wave nav-item" onclick="switchTab('deposit', this)"></i>
     <i class="fas fa-users nav-item" onclick="switchTab('referral', this)"></i>
     <i class="fas fa-wallet nav-item" onclick="switchTab('withdraw', this)"></i>
@@ -1454,6 +1469,133 @@ function loadCommissionHistory() {
 }
 
 /* =========================================================
+   === MISSED INCOME SYSTEM
+   ========================================================= */
+function loadMissedIncomePage() {
+    const listEl = document.getElementById('missedPackagesList');
+    const totalEl = document.getElementById('missedTotalAmount');
+    const infoEl = document.getElementById('missedInfoText');
+    if (!listEl) return;
+
+    const ups = appState.userPackages || {};
+    const now = Date.now();
+    let totalMissed = 0;
+    let missedItemsHtml = '';
+    let countItems = 0;
+
+    Object.values(ups).forEach(u => {
+        const daily = Number(u.dailyIncome || 0);
+        const duration = Number(u.duration || 0);
+        const purchasedAt = Number(u.purchasedAt || 0);
+        const expiresAt = Number(u.expiresAt || 0);
+        
+        if (daily <= 0 || duration <= 0 || now < purchasedAt) return;
+
+        const lastClaim = Number(u.lastClaimAt || 0);
+        
+        let daysElapsed = 0;
+        if (lastClaim > 0) {
+            const msSinceClaim = now - lastClaim;
+            daysElapsed = Math.floor(msSinceClaim / PACKAGE_CLAIM_COOLDOWN_MS);
+        } else {
+            const msSincePurchase = now - purchasedAt;
+            const fullDaysSincePurchase = Math.floor(msSincePurchase / PACKAGE_CLAIM_COOLDOWN_MS);
+            daysElapsed = Math.max(0, fullDaysSincePurchase - 1); 
+            if (msSincePurchase >= PACKAGE_CLAIM_COOLDOWN_MS) daysElapsed = Math.max(1, fullDaysSincePurchase);
+        }
+
+        const maxPossibleDays = Math.floor((now - purchasedAt) / PACKAGE_CLAIM_COOLDOWN_MS);
+        const finalMissedDays = Math.min(daysElapsed, duration);
+
+        if (finalMissedDays > 0) {
+            const missedAmount = finalMissedDays * daily;
+            totalMissed += missedAmount;
+            countItems++;
+
+            missedItemsHtml += `
+                <div class="claim-card-v2 ready" style="margin-bottom:14px;">
+                    <div class="cc-header">
+                        <div class="cc-title"><i class="fas fa-clock-rotate-left" style="color:#f39c12;"></i> ${esc(u.packageName || 'Package')}</div>
+                        <span class="cc-badge" style="background:#fef3c7;color:#92400e;">${finalMissedDays} Days Missed</span>
+                    </div>
+                    <div class="cc-stats">
+                        <div class="cc-stat"><div class="val" style="color:#f39c12;">${missedAmount.toFixed(2)} ৳</div><div class="lbl">Missed Amount</div></div>
+                        <div class="cc-stat"><div class="val">${daily.toFixed(2)}</div><div class="lbl">Per Day</div></div>
+                    </div>
+                    <button class="cc-btn-claim" onclick="claimMissedIncome('${esc(u._upId || '')}', ${finalMissedDays}, ${daily})" style="background:linear-gradient(135deg,#f39c12,#fbbf24);box-shadow:0 8px 20px rgba(243,156,18,.4);">
+                        <i class="fas fa-hand-holding-usd"></i> ক্লেইম ${missedAmount.toFixed(2)} ৳
+                    </button>
+                </div>
+            `;
+        }
+    });
+
+    if (totalEl) totalEl.textContent = totalMissed.toFixed(2);
+    if (infoEl) infoEl.textContent = countItems === 0 ? 'No missed income' : `${countItems} package(s) have missed income`;
+
+    if (countItems === 0) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-hand-holding-usd"></i><p>No missed income available</p></div>';
+    } else {
+        listEl.innerHTML = missedItemsHtml;
+    }
+}
+
+async function claimMissedIncome(upId, missedDays, dailyAmount) {
+    if (!upId || missedDays <= 0) return;
+    
+    const btn = event && event.currentTarget ? event.currentTarget : null;
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Claiming...'; }
+
+    try {
+        const totalAmountToAdd = missedDays * dailyAmount;
+
+        const userRef = db.ref('users/' + appState.user.id);
+        const result = await userRef.transaction(cur => {
+            if (!cur) return cur;
+            cur.balance = Number(cur.balance || 0) + totalAmountToAdd;
+            cur.totalEarned = Number(cur.totalEarned || 0) + totalAmountToAdd;
+            
+            const claimId = 'ch_missed_' + Date.now();
+            if (!cur.claimHistory) cur.claimHistory = {};
+            cur.claimHistory[claimId] = { 
+                amount: totalAmountToAdd, 
+                timestamp: Date.now(), 
+                packageName: 'Missed Income', 
+                packageId: upId,
+                type: 'missed'
+            };
+            return cur;
+        });
+
+        if (result.committed) {
+            const upRef = db.ref('userPackages/' + upId);
+            await upRef.transaction(cur => {
+                if (!cur) return cur;
+                cur.lastClaimAt = Date.now();
+                cur.totalEarned = Number(cur.totalEarned || 0) + totalAmountToAdd;
+                return cur;
+            });
+
+            appState.user.balance = Number(appState.user.balance || 0) + totalAmountToAdd;
+            appState.user.totalEarned = Number(appState.user.totalEarned || 0) + totalAmountToAdd;
+            
+            toast('✅ ' + totalAmountToAdd.toFixed(2) + ' ৳ Missed Income ক্লেইম সফল!');
+            tryHaptic('success');
+            
+            await updateTextElements();
+            loadMissedIncomePage();
+            loadClaimPage();
+        } else {
+            toast('❌ Claim failed');
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> ক্লেইম'; }
+        }
+    } catch (e) {
+        toast('❌ ' + e.message);
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-hand-holding-usd"></i> ক্লেইম'; }
+    }
+}
+
+/* =========================================================
    === PACKAGES (WITH COIN ANIMATION & PURCHASE FIX)
    ========================================================= */
 async function loadPackages() {
@@ -1721,11 +1863,10 @@ async function confirmBuyPackage() {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
     try {
-        // ✅ STEP 1: Transaction দিয়ে ডিপোজিট ব্যালেন্স মাইনাস করা
         const userRef = db.ref('users/' + appState.user.id);
         const result = await userRef.transaction(cur => {
             if (!cur) return cur;
-            if (Number(cur.adBalance || 0) < price) return; // টাকা কম থাকলে বাতিল
+            if (Number(cur.adBalance || 0) < price) return; 
             cur.adBalance = Number(cur.adBalance || 0) - price;
             return cur;
         });
@@ -1737,7 +1878,6 @@ async function confirmBuyPackage() {
             return; 
         }
 
-        // ✅ STEP 2: userPackages এ নতুন প্যাকেজ তৈরি
         const now = Date.now();
         const expiresAt = now + (Number(pkg.duration || 0) * 24 * 60 * 60 * 1000);
         const upId = 'up_' + now + '_' + appState.user.id;
@@ -1760,20 +1900,17 @@ async function confirmBuyPackage() {
 
         await db.ref('userPackages/' + upId).set(newUpData);
         
-        // ✅ STEP 3: activePackageCount বাড়ানো
         await userRef.transaction(cur => {
             if (!cur) return cur;
             cur.activePackageCount = Number(cur.activePackageCount || 0) + 1;
             return cur;
         });
 
-        // ✅ STEP 4: লোকাল স্টেট আপডেট
         if (!appState.userPackages) appState.userPackages = {};
         appState.userPackages[selectedPkgForBuy] = { ...newUpData, _upId: upId };
         appState.user.adBalance = Number(appState.user.adBalance || 0) - price;
         appState.user.activePackageCount = Number(appState.user.activePackageCount || 0) + 1;
 
-        // ✅ STEP 5: Referral Commission
         if (appState.user.referredBy && REF_COMMISSION_RATE > 0) {
             const commissionAmount = (price * REF_COMMISSION_RATE) / 100;
             await creditReferrerCommission(commissionAmount, price, 'Package Purchase');
@@ -1923,16 +2060,17 @@ async function loadUserPackages() {
         });
         appState.userPackages = map;
         
-        // ✅ FIX: activePackageCount সেভ করা
         if (Number(appState.user.activePackageCount || 0) !== activeCount) {
             fireAsync(db.ref('users/' + tgUser.id + '/activePackageCount').set(activeCount));
             appState.user.activePackageCount = activeCount;
         }
         loadPackages(); 
         loadClaimPage();
+        loadMissedIncomePage(); 
     });
 }
-    /* =========================================================
+
+/* =========================================================
    === CLAIM PAGE
    ========================================================= */
 function switchClaimTab(which) {
@@ -1949,13 +2087,16 @@ function loadClaimPage() {
     const infoEl = document.getElementById('claimInfoText');
     const totalPkgIncomeEl = document.getElementById('totalPackageIncome');
     if (!listEl) return;
+    
     const ups = appState.userPackages || {};
     const now = Date.now();
     const activeUps = Object.values(ups).filter(u => u.expiresAt > now && u.status !== 'expired');
+    
     let todayClaimed = 0;
     const todayDate = new Date().setHours(0, 0, 0, 0);
     const claimHist = appState.user.claimHistory || {};
     Object.values(claimHist).forEach(item => { if (item.timestamp >= todayDate) todayClaimed += Number(item.amount || 0); });
+    
     let totalActiveIncome = 0;
     activeUps.forEach(u => { totalActiveIncome += Number(u.dailyIncome || 0) * Number(u.duration || 0); });
     if (totalEl) totalEl.textContent = todayClaimed.toFixed(2);
@@ -1966,11 +2107,13 @@ function loadClaimPage() {
         listEl.innerHTML = '<div class="empty-state" style="padding:40px 20px;"><i class="fas fa-box-open"></i><p>No active packages</p></div>';
         return;
     }
+    
     let html = '';
     activeUps.forEach(u => {
         const lastClaim = Number(u.lastClaimAt || 0);
         const _cs = lastClaim > 0 ? lastClaim : Number(u.purchasedAt || 0);
         const canClaim = _cs === 0 ? true : (now - _cs) >= PACKAGE_CLAIM_COOLDOWN_MS;
+        
         const remainMs = Math.max(0, (u.expiresAt || 0) - now);
         const remainDays = Math.ceil(remainMs / (24 * 60 * 60 * 1000));
         const nextClaimMs = _cs > 0 ? Math.max(0, (_cs + PACKAGE_CLAIM_COOLDOWN_MS) - now) : 0;
@@ -1984,10 +2127,12 @@ function loadClaimPage() {
             </div>`;
         }
         
+        const pkgName = u.packageName || 'Package';
+        
         html += `<div class="claim-card-v2 ${canClaim ? 'ready' : ''}">
             ${cooldownOverlay}
             <div class="cc-header">
-                <div class="cc-title"><i class="fas fa-box" style="color:#6C5CE7;"></i> ${esc(u.packageName || 'Package')}</div>
+                <div class="cc-title"><i class="fas fa-box" style="color:#6C5CE7;"></i> ${esc(pkgName)}</div>
                 <span class="cc-badge">${canClaim ? '✅ Ready' : '⏳ Wait'}</span>
             </div>
             <div class="cc-stats">
@@ -3095,7 +3240,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 await userRef.set(appState.user);
             }
 
-            // ✅ FIX: রেফারেল চেকিং এখন `!snap.exists()` এর বাইরে, যাতে পুরনো ইউজাররাও রেফারেল লিংক কাজ করে।
             let refBy = null;
             if (tg && tg.initDataUnsafe) refBy = tg.initDataUnsafe.start_param || null;
             if (!refBy) { 
@@ -3257,6 +3401,7 @@ function switchTab(tabId, el) {
     if (tabId === 'history') { loadPkgHistory(); }
     if (tabId === 'home') { loadPackages(); }
     if (tabId === 'claim') { loadClaimPage(); }
+    if (tabId === 'missed') { loadMissedIncomePage(); }
     if (tabId === 'deposit') { renderDepositPage(); }
     tryHaptic('light');
 }
